@@ -2,7 +2,8 @@
   #:use-module (rde features)
   #:use-module (gnu services)
   #:use-module (srfi srfi-1)
-  #:use-module (ice-9 match))
+  #:use-module (ice-9 match)
+  #:use-module (ice-9 pretty-print))
 
 (define* (use-nested-configuration-modules
           #:key
@@ -11,6 +12,7 @@
   (use-modules (guix discovery)
                (guix modules))
 
+  (pretty-print (@@ (guile) %load-path))
   (define current-module-file
     (search-path %load-path
                  (module-name->file-name (module-name (current-module)))))
