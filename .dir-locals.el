@@ -7,7 +7,15 @@
  (scheme-mode
   .
   ((indent-tabs-mode . nil)
-   (eval . (put 'with-eval-after-load 'scheme-indent-function 1))
+
+   (eval . (make-local-variable 'geiser-guile-load-path))
+   (eval . (add-to-list 'geiser-guile-load-path
+                        (expand-file-name "src" default-directory)))
+   (eval . (add-to-list 'geiser-guile-load-path
+                        (expand-file-name "examples/src" default-directory)))
+
+   (eval . (set (make-local-variable 'geiser-guile-binary)
+                (expand-file-name ".bin/guix-repl" "~")))
 
    (eval . (put 'eval-when 'scheme-indent-function 1))
    (eval . (put 'call-with-prompt 'scheme-indent-function 1))
