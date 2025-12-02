@@ -12,6 +12,7 @@
   #:use-module (lotus-rde rde api defaults)
   #:use-module (guix gexp)
   #:use-module (guix build utils)
+  #:use-module (gnu system mapped-devices)
 
   #:export (build-mapped-device
             build-parent-dir-file-system-builder))
