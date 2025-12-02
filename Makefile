@@ -1,5 +1,9 @@
 # pipefail is not POSIX complaint
 
+
+CHANNELS_ENV=./env/guix/rde/env/guix/channels.scm
+CHANNEL_THIS_ENV=./examples/env/guix/rde-configs/env/guix/channels.scm
+
 GUIXTM=guix time-machine -C ./env/guix/rde/env/guix/channels.scm
 GUIX=$(GUIXTM) --
 EMACS=$(GUIX) shell emacs emacs-ox-html-stable-ids -- emacs
@@ -41,24 +45,50 @@ guix-update-pull:
 	guix pull --news;
 	guix pull --news --details
 
-guix-update-channel: guix-update-pull
-	echo ';; -*- mode: scheme; -*-' > ./env/guix/rde/env/guix/channels.scm
-	echo ';;; rde --- Reproducible development environment.' >> ./env/guix/rde/env/guix/channels.scm
-	echo ';;;' >> ./env/guix/rde/env/guix/channels.scm
-	echo ';;; SPDX-FileCopyrightText: 2024, 2025 Andrew Tropin <andrew@trop.in>' >> ./env/guix/rde/env/guix/channels.scm
-	echo ';;;' >> ./env/guix/rde/env/guix/channels.scm
-	echo ';;; SPDX-License-Identifier: GPL-3.0-or-later' >> ./env/guix/rde/env/guix/channels.scm
-	echo >> ./env/guix/rde/env/guix/channels.scm
-	echo '(define-module (rde env guix channels)' >> ./env/guix/rde/env/guix/channels.scm
-	echo '  #:use-module (guix channels)' >> ./env/guix/rde/env/guix/channels.scm
-	echo '  #:export (core-channels))' >> ./env/guix/rde/env/guix/channels.scm
-	echo >> ./env/guix/rde/env/guix/channels.scm
-	echo '(define core-channels' >> ./env/guix/rde/env/guix/channels.scm
-	guix describe --format=channels >> ./env/guix/rde/env/guix/channels.scm
-	echo ')' >> ./env/guix/rde/env/guix/channels.scm
-	echo >> ./env/guix/rde/env/guix/channels.scm
-	echo core-channels >> ./env/guix/rde/env/guix/channels.scm
-	guix style --whole-file ./env/guix/rde/env/guix/channels.scm
+guix-update-channels: guix-update-pull
+	echo ';; -*- mode: scheme; -*-' > $(CHANNELS_ENV)
+	echo ';;; rde --- Reproducible development environment.' >> $(CHANNELS_ENV)
+	echo ';;;' >> $(CHANNELS_ENV)
+	echo ';;; SPDX-FileCopyrightText: 2024, 2025 Andrew Tropin <andrew@trop.in>' >> $(CHANNELS_ENV)
+	echo ';;;' >> $(CHANNELS_ENV)
+	echo ';;; SPDX-License-Identifier: GPL-3.0-or-later' >> $(CHANNELS_ENV)
+	echo >> $(CHANNELS_ENV)
+	echo '(define-module (rde env guix channels)' >> $(CHANNELS_ENV)
+	echo '  #:use-module (guix channels)' >> $(CHANNELS_ENV)
+	echo '  #:export (core-channels))' >> $(CHANNELS_ENV)
+	echo >> $(CHANNELS_ENV)
+	echo '(define core-channels' >> $(CHANNELS_ENV)
+	guix describe --format=channels >> $(CHANNELS_ENV)
+	echo ')' >> $(CHANNELS_ENV)
+	echo >> $(CHANNELS_ENV)
+	echo core-channels >> $(CHANNELS_ENV)
+	guix style --whole-file $(CHANNELS_ENV)
+
+
+guix-update-this-channel:
+	echo ';; -*- mode: scheme; -*-' > $(CHANNEL_THIS_ENV)
+	echo ';;; rde --- Reproducible development environment.' >> $(CHANNEL_THIS_ENV)
+	echo ';;;' >> $(CHANNEL_THIS_ENV)
+	echo ';;; SPDX-FileCopyrightText: 2024, 2025 Andrew Tropin <andrew@trop.in>' >> $(CHANNEL_THIS_ENV)
+	echo ';;;' >> $(CHANNEL_THIS_ENV)
+	echo ';;; SPDX-License-Identifier: GPL-3.0-or-later' >> $(CHANNEL_THIS_ENV)
+	echo >> $(CHANNEL_THIS_ENV)
+	echo '(define-module (rde-configs env guix channels)' >> $(CHANNEL_THIS_ENV)
+	echo '#:use-module ((rde env guix channels) #:prefix rde:)' >> $(CHANNEL_THIS_ENV)
+	echo '#:use-module (guix channels)' >> $(CHANNEL_THIS_ENV)
+	echo '#:export (core-channels))' >> $(CHANNEL_THIS_ENV)
+	echo >> $(CHANNEL_THIS_ENV)
+	echo -n "(define core-channels (cons (channel (name 'lotus-rde) (url \"https://github.com/sharad/lotus-rde.git\") (branch \"master\") (commit \"" >> $(CHANNEL_THIS_ENV)
+	git rev-parse --default HEAD | tr -d '\n' >> $(CHANNEL_THIS_ENV)
+	echo '"))' >> $(CHANNEL_THIS_ENV)
+	echo ' ;; (introduction'  >> $(CHANNEL_THIS_ENV)
+	echo ' ;; (make-channel-introduction'  >> $(CHANNEL_THIS_ENV)
+	echo ' ;; "257cebd587b66e4d865b3537a9a88cccd7107c95"'  >> $(CHANNEL_THIS_ENV)
+	echo ' ;;  (openpgp-fingerprint'  >> $(CHANNEL_THIS_ENV)
+	echo ' ;;  "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0")))'  >> $(CHANNEL_THIS_ENV)
+	echo 'rde:core-channels)) core-channels' >> $(CHANNEL_THIS_ENV)
+	guix style --whole-file $(CHANNEL_THIS_ENV)
+
 
 ares:
 	${GUIX} shell ${DEV_ENV_LOAD_PATH} \
