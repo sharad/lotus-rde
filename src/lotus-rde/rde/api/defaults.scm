@@ -20,7 +20,10 @@
 
 
 
+(define %lotus-system-init #f)
+(define %lotus-use-nongnu  #t)
 
+(define nongnu-desktop?    %lotus-use-nongnu)
 
 
 
