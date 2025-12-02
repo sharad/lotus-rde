@@ -36,6 +36,30 @@ check:
 guix-pull:
 	make -C examples guix-pull
 
+guix-update-pull:
+	guix pull
+	guix pull --news;
+	guix pull --news --details
+
+guix-update-channel: guix-update-pull
+	echo ';; -*- mode: scheme; -*-' > ./env/guix/rde/env/guix/channels.scm
+	echo ';;; rde --- Reproducible development environment.' >> ./env/guix/rde/env/guix/channels.scm
+	echo ';;;' >> ./env/guix/rde/env/guix/channels.scm
+	echo ';;; SPDX-FileCopyrightText: 2024, 2025 Andrew Tropin <andrew@trop.in>' >> ./env/guix/rde/env/guix/channels.scm
+	echo ';;;' >> ./env/guix/rde/env/guix/channels.scm
+	echo ';;; SPDX-License-Identifier: GPL-3.0-or-later' >> ./env/guix/rde/env/guix/channels.scm
+	echo >> ./env/guix/rde/env/guix/channels.scm
+	echo '(define-module (rde env guix channels)' >> ./env/guix/rde/env/guix/channels.scm
+	echo '  #:use-module (guix channels)' >> ./env/guix/rde/env/guix/channels.scm
+	echo '  #:export (core-channels))' >> ./env/guix/rde/env/guix/channels.scm
+	echo >> ./env/guix/rde/env/guix/channels.scm
+	echo '(define core-channels' >> ./env/guix/rde/env/guix/channels.scm
+	guix describe --format=channels >> ./env/guix/rde/env/guix/channels.scm
+	echo ')' >> ./env/guix/rde/env/guix/channels.scm
+	echo >> ./env/guix/rde/env/guix/channels.scm
+	echo core-channels >> ./env/guix/rde/env/guix/channels.scm
+	guix style --whole-file ./env/guix/rde/env/guix/channels.scm
+
 ares:
 	${GUIX} shell ${DEV_ENV_LOAD_PATH} \
 	guile-next guile-ares-rs \

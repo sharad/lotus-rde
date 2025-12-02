@@ -9,17 +9,18 @@
   #:use-module ((rde env guix channels) #:prefix rde:)
   #:use-module (srfi srfi-1))
 
-(define core-channels-with-local-rde
+(define core-channels-with-local-lotus-rde
   (cons
    (channel
-    (name 'rde)
+    (name 'lotus-rde)
     ;; RDE source code with patches applied will be located here
-    (url (string-append "file://" (getenv "HOME") "/rde"))
-    (introduction
-     (make-channel-introduction
-      "257cebd587b66e4d865b3537a9a88cccd7107c95"
-      (openpgp-fingerprint
-       "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0"))))
+    (url (string-append "file://" (getenv "HOME") "../paradise/Projects/Data/misc/ghq/github.com/sharad/lotus-rde"))
+    ;; (introduction
+    ;;  (make-channel-introduction
+    ;;   "257cebd587b66e4d865b3537a9a88cccd7107c95"
+    ;;   (openpgp-fingerprint
+    ;;    "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0")))
+    )
    rde:core-channels))
 
-core-channels-with-local-rde
+core-channels-with-local-lotus-rde

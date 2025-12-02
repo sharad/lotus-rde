@@ -12,16 +12,16 @@
 (define core-channels
   (cons
    (channel
-    (name 'rde)
-    (url "https://git.sr.ht/~abcdw/rde")
-    (branch "master")
-    (commit
-     "f801b5f6a3df2aac8099c991f29277044317db68")
-    (introduction
-     (make-channel-introduction
-      "257cebd587b66e4d865b3537a9a88cccd7107c95"
-      (openpgp-fingerprint
-       "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0"))))
+    (name 'lotus-rde)
+    (url "https://github.com/sharad/lotus-rde.git")
+    (branch "master"))
+    ;; (commit
+    ;;  "f801b5f6a3df2aac8099c991f29277044317db68")
+    ;; (introduction
+    ;;  (make-channel-introduction
+    ;;   "257cebd587b66e4d865b3537a9a88cccd7107c95"
+    ;;   (openpgp-fingerprint
+    ;;    "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0")))
    rde:core-channels))
 
 core-channels
