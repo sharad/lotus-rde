@@ -11,6 +11,7 @@
   ;; #:use-module (gnu packages tex)
   #:use-module (guix gexp)
   #:use-module (guix build utils)
+  #:use-module (gnu services)
   #:use-module (gnu system uuid)
   #:use-module (lotus-rde rde api misc)
   #:export (build-mapped-device))
