@@ -16,7 +16,7 @@
   (define current-module-file
     (search-path %load-path
                  (module-name->file-name (module-name (current-module)))))
-
+  (pretty-print current-module-file)
   (define current-module-directory
     (dirname (and=> current-module-file canonicalize-path)))
 
