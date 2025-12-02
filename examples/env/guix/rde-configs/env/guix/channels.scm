@@ -14,7 +14,7 @@
 (define core-channels
   (cons (channel
           (name 'lotus-rde)
-          (url "https://github.com/sharad/lotus-rde.git")
+          (url "https://github.com/sharad/lotus-rde")
           (branch "master")
           (commit "64d941942b0363ec7b43c2b27eef4578f52d95a5"))
         ;; (introduction

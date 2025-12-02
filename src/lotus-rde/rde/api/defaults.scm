@@ -14,6 +14,7 @@
   #:use-module (gnu system uuid)
   #:use-module (gnu services)
   #:use-module (gnu services networking)
+  #:use-module (gnu bootloader grub)
   #:use-module (lotus-rde rde api misc)
   #:export (build-mapped-device))
 
