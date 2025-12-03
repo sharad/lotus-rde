@@ -13,6 +13,7 @@
                (guix modules))
 
   (pretty-print (@@ (guile) %load-path))
+  (pretty-print (module-name->file-name (module-name (current-module))))
   (define current-module-file
     (search-path %load-path
                  (module-name->file-name (module-name (current-module)))))

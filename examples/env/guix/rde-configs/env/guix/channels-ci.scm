@@ -14,7 +14,7 @@
    (channel
     (name 'lotus-rde)
     ;; RDE source code with patches applied will be located here
-    (url (string-append "file://" (getenv "HOME") "../paradise/Projects/Data/misc/ghq/github.com/sharad/lotus-rde"))
+    (url (string-append "file://" (getenv "HOME") "/../paradise/Projects/Data/misc/ghq/github.com/sharad/lotus-rde"))
     ;; (introduction
     ;;  (make-channel-introduction
     ;;   "257cebd587b66e4d865b3537a9a88cccd7107c95"
