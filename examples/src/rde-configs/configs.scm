@@ -12,12 +12,9 @@
   (use-modules (guix discovery)
                (guix modules))
 
-  (pretty-print (@@ (guile) %load-path))
-  (pretty-print (module-name->file-name (module-name (current-module))))
   (define current-module-file
     (search-path %load-path
                  (module-name->file-name (module-name (current-module)))))
-  (pretty-print current-module-file)
   (define current-module-directory
     (dirname (and=> current-module-file canonicalize-path)))
 
@@ -94,8 +91,7 @@
   (rde-config
    (features
     (append
-     %dell5480-features
-     %sharad-features))))
+     %dell5480-features)))) ;;  %sharad-features
 
 
 ;;; guilem-kuv500
@@ -103,10 +99,7 @@
 (define-public guilem-kuv500-config
   (rde-config
    (features
-    (append
-     %guile-kuv500-features
-     %sharad-features))))
-
+    (append %guilem-kuv500-features)))) ;; %sharad-features
 
 ;;; Dispatcher, which helps to return various values based on environment
 ;;; variable value.
