@@ -27,9 +27,9 @@
       (device "/data/system/var/lib")
       (type "none")
       (mount-point "/var/lib")
-      (flags '(bind-mount))
+      (flags '(bind-mount)))
       ;; (options "bind")
-      )
+
     (file-system
       (mount-point "/boot/efi")
       (type "vfat")
