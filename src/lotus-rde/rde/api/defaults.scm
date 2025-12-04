@@ -17,7 +17,7 @@
   #:use-module (gnu bootloader grub)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages shells)
-  #:use-module (lotus-rde rde api misc)
+  #:use-module (lotus-rde rde api utils)
   #:export (build-mapped-device))
 
 
