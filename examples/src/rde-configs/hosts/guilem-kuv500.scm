@@ -4,6 +4,7 @@
   #:use-module (rde features wm)
   #:use-module (gnu system file-systems)
   #:use-module (gnu system mapped-devices)
+  #:use-module (rde-configs default)
   #:use-module (ice-9 match))
 
 

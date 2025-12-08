@@ -1,5 +1,5 @@
 (define-module (lotus-rde rde api utils)
-  #:use-module (lotus-rde rde api defaults)
+  ;; #:use-module (lotus-rde rde api defaults)
   #:use-module (guix gexp)
   #:use-module (guix build utils)
   #:use-module (gnu system mapped-devices)

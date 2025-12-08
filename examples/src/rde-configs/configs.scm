@@ -27,12 +27,16 @@
   (define users-modules
     (scheme-modules
      src-directory
-     (string-append current-module-subdirectory users-subdirectory)))
+     (string-append current-module-subdirectory users-subdirectory)
+     #:warn (lambda (. args)
+              (map display  args))))
 
   (define hosts-modules
     (scheme-modules
      src-directory
-     (string-append current-module-subdirectory hosts-subdirectory)))
+     (string-append current-module-subdirectory hosts-subdirectory)
+     #:warn (lambda (. args)
+              (map display  args))))
 
   (map (lambda (x) (module-use! (current-module) x)) hosts-modules)
   (map (lambda (x) (module-use! (current-module) x)) users-modules))
