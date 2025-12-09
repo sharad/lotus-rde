@@ -7,16 +7,17 @@
  (scheme-mode
   .
   ((indent-tabs-mode . nil)
-
+   (eval . (set (make-local-variable 'dir-local-dir--internal)
+                (locate-dominating-file default-directory ".dir-locals.el")))
+   (eval . (set (make-local-variable 'projectile-project-root)
+                (locate-dominating-file default-directory ".dir-locals.el")))
    (eval . (make-local-variable 'geiser-guile-load-path))
    (eval . (add-to-list 'geiser-guile-load-path
-                        (expand-file-name "src" default-directory)))
+                        (expand-file-name "src" (locate-dominating-file default-directory ".dir-locals.el"))))
    (eval . (add-to-list 'geiser-guile-load-path
-                        (expand-file-name "examples/src" default-directory)))
-
+                        (expand-file-name "examples/src" (locate-dominating-file default-directory ".dir-locals.el"))))
    (eval . (set (make-local-variable 'geiser-guile-binary)
                 (expand-file-name ".bin/guix-repl" "~")))
-
    (eval . (put 'eval-when 'scheme-indent-function 1))
    (eval . (put 'call-with-prompt 'scheme-indent-function 1))
    (eval . (put 'test-assert 'scheme-indent-function 1))
