@@ -162,17 +162,17 @@
 
 
 (define guilem-kuv500-mapped-devices (append (list %lotus-mapped-device-guix-root      ;8M
-                                              %lotus-mapped-device-guix-boot      ;12M
-                                              %lotus-mapped-device-guix-gnu       ;35G
-                                              %lotus-mapped-device-guix-var       ;10M
-                                              %lotus-mapped-device-guix-var-cache ;8G
-                                              %lotus-mapped-device-guix-var-lib   ;30M
-                                              %lotus-mapped-device-guix-var-log   ;300M
-                                              %lotus-mapped-device-guix-var-guix  ;350M
-                                              %lotus-mapped-device-guix-var-tmp   ;1G
-                                              %lotus-mapped-device-guix-swap      ;1G
-                                              %lotus-mapped-device-sys-tmp        ;20G
-                                              %lotus-mapped-device-house-home)
+                                                   %lotus-mapped-device-guix-boot      ;12M
+                                                   %lotus-mapped-device-guix-gnu       ;35G
+                                                   %lotus-mapped-device-guix-var       ;10M
+                                                   %lotus-mapped-device-guix-var-cache ;8G
+                                                   %lotus-mapped-device-guix-var-lib   ;30M
+                                                   %lotus-mapped-device-guix-var-log   ;300M
+                                                   %lotus-mapped-device-guix-var-guix  ;350M
+                                                   %lotus-mapped-device-guix-var-tmp   ;1G
+                                                   %lotus-mapped-device-guix-swap      ;1G
+                                                   %lotus-mapped-device-sys-tmp        ;20G
+                                                   %lotus-mapped-device-house-home)
                                       %local-udev-lvm-mapped-devices))
 
 
