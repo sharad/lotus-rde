@@ -8,6 +8,104 @@
   #:use-module (ice-9 match))
 
 
+
+
+
+(define* (lotus-lvm-dev-fs-builders serial-id #:key (prefix "vds") (suffix-seq 01) (separator "X"))
+
+  ;; (display "serial-id ~a~%" serial-id)
+
+  (define (get-string s)
+    (cond ((string? s) s)
+          ((procedure? s)
+           (s))
+          (else (error (format #t "Wrong value ~a~%" s)))))
+
+  (define (get-number n)
+    (cond ((number? n) n)
+          ((procedure? n)
+           (n))
+          (else (error (format #t "Wrong value ~a~%" n)))))
+
+  (define (get-serial-id serial-id prefix)
+    (string-append (get-string prefix)
+                   (get-string serial-id)))
+
+  (define (get-group group suffix-seq)
+    (let ((suffix-seq (get-number suffix-seq)))
+      (string-append group
+                     (if (> suffix-seq 0)
+                         (format #f "~2'0d" suffix-seq)
+                         ""))))
+  (define* (dev-builder group volume #:key (suffix-seq suffix-seq))
+    (mapped-device (source (string-append (get-serial-id serial-id
+                                                         prefix)
+                                          "X"
+                                          (get-group group
+                                                     suffix-seq)))
+                   (targets (list (string-append (get-serial-id serial-id
+                                                                prefix)
+                                                 "X"
+                                                 (string-join (list (get-group group
+                                                                               suffix-seq)
+                                                                    volume)
+                                                              "-"))))
+                   (type   lvm-device-mapping)))
+
+  (define* (fs-builder mount-point
+                              group
+                              volume
+                              #:key
+                              (suffix-seq suffix-seq)
+                              (type "ext4")
+                              (check? #t)
+                              (mount? #t)
+                              (flags  '())
+                              (options #f)
+                              (create-mount-point? #t)
+                              (needed-for-boot?    #t)
+                              (dependencies (list)))
+           (file-system (mount-point         mount-point)
+                        (device              (string-append "/dev/mapper/"
+                                                            (get-serial-id serial-id
+                                                                           prefix)
+                                                            "X" (string-join (list (get-group group
+                                                                                              suffix-seq)
+                                                                                   volume)
+                                                                             "-")))
+                        (type                type)
+                        (check?              check?)
+                        (mount?              mount?)
+                        (flags               flags)
+                        (options             options)
+                        (create-mount-point? create-mount-point?)
+                        (needed-for-boot?    needed-for-boot?)
+                        (dependencies        dependencies)))
+
+  (define (get-disk-name) (get-serial-id serial-id prefix))
+
+  (values dev-builder
+          fs-builder
+          get-disk-name))
+
+
+(define (build-mapped-device source disk-id vg lv)
+  (mapped-device (source source)
+                 (targets (list (string-append disk-id "X" (string-append vg "-" lv))))
+                 (type   lvm-device-mapping)))
+
+(define-values (lotus-build-mapped-device lotus-build-file-system lotus-get-disk-name)
+  (lotus-lvm-dev-fs-builders (lambda () %lotus-disk-serial-id)
+                             #:prefix (lambda () %lotus-disk-prefix)
+                             #:suffix-seq (lambda () %lotus-disk-suffix-seq)))
+
+(define-values (lotus-local-build-mapped-device lotus-local-build-file-system local-lotus-get-disk-name)
+  (lotus-lvm-dev-fs-builders (lambda () %local-disk-serial-id)
+                             #:prefix (lambda () %local-disk-prefix)
+                             #:suffix-seq 0))
+
+
+
 ;;; Hardware/host specifis features
 
 ;; TODO: Switch from UUIDs to partition labels For better
