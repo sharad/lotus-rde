@@ -12,6 +12,60 @@
 
 
 
+
+
+(define* (feature-file-database
+          #:key
+          (package findutils)
+          (schedule "0 4 * * *")
+          (excluded-directories '("/tmp" "/var/tmp" "/gnu/store" "/run")))
+  (feature
+   (name 'file-database)
+   (values
+    (rde-system-services
+     (list
+      (service package-database-service-type)
+      (service file-database-service-type
+               (file-database-configuration
+                (package              findutils)
+                (schedule             schedule)
+                (excluded-directories excluded-directories))))))))
+
+;; https://guix.gnu.org/es/blog/2020/improve-internationalization-support-for-the-guix-data-service/
+;; https://guix.gnu.org/en/blog/2020/introduction-to-the-guix-data-service-the-missing-blog-post/
+;; https://data.guix.gnu.org/README
+;; https://guix.gnu.org/manual/en/html_node/Guix-Services.html
+;; https://guix.gnu.org/manual/en/guix.html#Debugging-Build-Failures
+;; https://guix.gnu.org/manual/en/html_node/Continuous-Integration.html
+;; https://guix.gnu.org/manual/en/html_node/Base-Services.html
+
+
+(define* (feature-guix-publish
+          #:key
+          (advertise #t)
+          (port 3000)
+          (host "0.0.0.0")
+          (compression '(("lzip" 7) ("gzip" 9)))
+          (cache "/var/cache/guix/publish")
+          (cache-bypass-threshold (* 100 1024 1024))
+          (ttl (* 1 24 60 60)))
+
+  (feature
+   (name 'guix-publish)
+   (values
+    (rde-system-services
+     (list
+      (service guix-publish-service-type
+               (guix-publish-configuration
+                (advertise?             advertise)
+                (port                   port)
+                (host                   host)
+                (compression            compression)
+                (cache                  cache)
+                (cache-bypass-threshold cache-bypass-threshold)
+                (ttl                    ttl))))))))
+
+
 ;; Vixie cron schedular
 (define updatedb-job
   ;; Run 'updatedb' at 3AM every day.  Here we write the
@@ -34,37 +88,21 @@
   #~(job '(next-minute-from (next-hour '(12 19)) '(15))
          (string-append #$idutils "/bin/mkid src")
          #:user "s"))
-
 
-(define %lotus-file-serach-services (list (service file-database-service-type
-                                                   (file-database-configuration
-                                                     (package              findutils)
-                                                     (schedule             %default-file-database-update-schedule)
-                                                     (excluded-directories %default-file-database-excluded-directories)))
-                                          (service package-database-service-type)))
-
-;; https://guix.gnu.org/es/blog/2020/improve-internationalization-support-for-the-guix-data-service/
-;; https://guix.gnu.org/en/blog/2020/introduction-to-the-guix-data-service-the-missing-blog-post/
-;; https://data.guix.gnu.org/README
-;; https://guix.gnu.org/manual/en/html_node/Guix-Services.html
-;; https://guix.gnu.org/manual/en/guix.html#Debugging-Build-Failures
-;; https://guix.gnu.org/manual/en/html_node/Continuous-Integration.html
-;; https://guix.gnu.org/manual/en/html_node/Base-Services.html
-(define %lotus-publish-services (list (service guix-publish-service-type
-                                               (guix-publish-configuration (advertise?             %lotus-guix-publish-advertise)
-                                                                           (port                   %lotus-guix-publish-port)
-                                                                           (host                   %lotus-guix-publish-host)
-                                                                           (compression            %lotus-guix-publish-compression)
-                                                                           (cache                  %lotus-guix-publish-cache)
-                                                                           (cache-bypass-threshold %lotus-guix-publish-cache-bypass-threshold)
-                                                                           (ttl                    %lotus-guix-publish-ttl)))))
-
+(define* (feature-mcron
+          #:key
+          (jobs (list garbage-collector-job
+                 ;; idutils-job
+                 updatedb-job)))
 
-;; https ://guix.gnu.org/manual/en/html_node/Scheduled-Job-Execution.html
-(define %lotus-mcron-services (list (service mcron-service-type
-                                             (mcron-configuration (jobs (list garbage-collector-job
-                                                                              ;; idutils-job
-                                                                              updatedb-job))))))
+  (feature
+   (name 'mcron)
+   (values
+    (rde-system-services
+     (list
+      (service mcron-service-type
+               (mcron-configuration
+                (jobs jobs))))))))
 
 
 ;; https://guix.gnu.org/manual/en/html_node/Unattended-Upgrades.html
@@ -87,17 +125,31 @@
 (define %lotus-gnome-keyring-services (list (service gnome-keyring-service-type)))
 
 
-;; https://git.sr.ht/~boeg/home/tree/master/.config/guix/system/config.scm
-;; https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/services/desktop.scm#n1209
-(define %lotus-privilege-services (list (simple-service 'lotus-privilege
-                                                        privileged-program-service-type
-                                                        (map (lambda (program)
-                                                               (privileged-program (program program)
-                                                                                   (setuid? #t)))
-                                                             (list (file-append ecryptfs-utils "/sbin/mount.ecryptfs_private")
-                                                                   (file-append ecryptfs-utils "/sbin/umount.ecryptfs_private")
-                                                                   (file-append xtrlock "/bin/xtrlock")
-                                                                   (file-append firejail "/bin/firejail"))))))
+(define* (feature-privileged-programs
+          #:key
+          (programs '()))
+
+  (feature
+   (name 'privileged-programs)
+   (values
+    (rde-system-services
+     (list
+      (simple-service
+       'privileged-programs
+       privileged-program-service-type
+       programs))))))
+
+;; ;; https://git.sr.ht/~boeg/home/tree/master/.config/guix/system/config.scm
+;; ;; https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/services/desktop.scm#n1209
+;; (define %lotus-privilege-services (list (simple-service 'lotus-privilege
+;;                                                         privileged-program-service-type
+;;                                                         (map (lambda (program)
+;;                                                                (privileged-program (program program)
+;;                                                                                    (setuid? #t)))
+;;                                                              (list (file-append ecryptfs-utils "/sbin/mount.ecryptfs_private")
+;;                                                                    (file-append ecryptfs-utils "/sbin/umount.ecryptfs_private")
+;;                                                                    (file-append xtrlock "/bin/xtrlock")
+;;                                                                    (file-append firejail "/bin/firejail"))))))
 
 
 ;; TODO
@@ -107,35 +159,54 @@
 ;;                 (list dmenu i3-wm i3lock i3status))
 
 
-(define %lotus-bitlbee-configuration (bitlbee-configuration
-                                      (plugins (if %lotus-bitlbee-service-use-default? '() (if nongnu-desktop?
-                                                                                               (list skype4pidgin)
-                                                                                               '())))
-                                      (bitlbee (if %lotus-bitlbee-service-use-default? bitlbee bitlbee-purple))))
+(define* (feature-bitlbee
+          #:key
+          (plugins '()))
 
-(define %lotus-bitlbee-services (list (service bitlbee-service-type
-                                               %lotus-bitlbee-configuration)))
+  ;; (service bitlbee-service-type
+  ;;          (bitlbee-configuration
+  ;;           (plugins (if %lotus-bitlbee-service-use-default? '() (if nongnu-desktop?
+  ;;                                                                    (list skype4pidgin)
+  ;;                                                                    '())))
+  ;;           (bitlbee (if %lotus-bitlbee-service-use-default? bitlbee bitlbee-purple))))
+
+  (feature
+   (name 'bitlbee)
+   (values
+    (rde-system-services
+     (list
+      (service bitlbee-service-type
+               (bitlbee-configuration
+                (plugins plugins))))))))
+
 
 
-;; https://guix.gnu.org/manual/en/html_node/Mail-Services.html
-(define %lotus-mail-aliases-services (list (service mail-aliases-service-type
-                                                    '(("postmaster" "bob")
-                                                      ("bob"        "bob@example.com" "bob@example2.com")))))
+(define* (feature-mail-aliases
+          #:key
+          (aliases '(("postmaster" "bob")
+                     ("bob"        "bob@example.com" "bob@example2.com"))))
+  ;; https://guix.gnu.org/manual/en/html_node/Mail-Services.html
+  (feature
+   (name 'mail-aliases)
+   (values
+    (rde-system-services
+     (list
+      (service mail-aliases-service-type aliases)
+      (service dovecot-service-type
+               (dovecot-configuration
+                (mail-location "maildir:~/.maildir")
+                (listen        '("127.0.0.1"))))
+      (service exim-service-type
+       (exim-configuration
+        (config-file #f))))))))
+
 
 
 (define %iio-sensor-proxy-services (list (service iio-sensor-proxy-service-type)))
-
 
-;; https://lists.nongnu.org/archive/html/help-guix/2016-08/msg00061.html
-;; https://wingolog.org/pub/alt-os-config.scm
-(define %lotus-dovecot-services (list (service dovecot-service-type
-                                               (dovecot-configuration
-                                                (mail-location "maildir:~/.maildir")
-                                                (listen        '("127.0.0.1"))))))
 
-(define %lotus-exim-services (list (service exim-service-type
-                                            (exim-configuration
-                                             (config-file #f)))))
+
+
 
 
 ;; https://notabug.org/thomassgn/guixsd-configuration/src/master/config.scm
@@ -151,40 +222,65 @@
                                                        (network-manager-configuration (dns %lotus-network-manager-dns)))))
 
 (define %lotus-avahi-services (list (service avahi-service-type)))
-
-(define %lotus-gpm-services  (list (service gpm-service-type)))
-
-;; https://unix.stackexchange.com/questions/617858/how-to-enable-bluetooth-in-guix
-(define %lotus-bluez-services (list (service bluetooth-service-type
-                                             (bluetooth-configuration
-                                               (auto-enable? #t)))))
 
 
-(define %lotus-audio-services (list (service mpd-service-type
-                                             (mpd-configuration
-                                              (auto-update? #t)
-                                              (user  (car %lotus-simple-users))
-                                              (group (car %lotus-simple-groups))
-                                              (log-file "/var/log/mpd.log")
-                                              (log-level "verbose")
-                                              (state-file (string-append %lotus-account-home-directory "/Music/.mpd/state-file"))
-                                              (sticker-file (string-append %lotus-account-home-directory "/Music/.mpd/sticker-file"))
-                                              (db-file   (string-append %lotus-account-home-directory "/Music/.mpd/db"))
-                                              (music-directory (string-append %lotus-account-home-directory "/Music"))
-                                              (playlist-directory (string-append %lotus-account-home-directory "/Music/.mpd/playlists"))
-                                              (outputs
-                                               (list (mpd-output (name "Pulseaudio Sound Server")
-                                                                 (type "pulse")
-                                                                 ;; (mixer-type 'null)
-                                                                 ;; (extra-options
-                                                                 ;;  `((encoder . "vorbis")
-                                                                 ;;    (port    . "8080")))
-                                                                 (enabled?   #t)
-                                                                 (always-on? #f)
-                                                                 (mixer-type "software"))
-                                                     (mpd-output (name "PipeWire Sound Server")
-                                                                 (type "pipewire")
-                                                                 (enabled?   #f))))))))
+
+
+
+(define %lotus-gpm-services  (list (service gpm-service-type)))
+
+
+(define* (feature-bluetooth
+          #:key (auto-enable? #t))
+  ;; https://unix.stackexchange.com/questions/617858/how-to-enable-bluetooth-in-guix
+  (feature
+   (name 'bluetooth)
+   (values
+    (rde-system-services
+     (list
+      (service bluetooth-service-type
+               (bluetooth-configuration
+                (auto-enable? auto-enable?))))))))
+
+
+(define* (feature-mpd
+          #:key
+          (music-dir "~/Music"))
+
+  (feature
+   (name 'mpd)
+   (values
+    (rde-system-services
+     (list
+      (service mpd-service-type
+               (mpd-configuration
+                (music-directory music-dir))))))))
+
+;; (define %lotus-audio-services (list (service mpd-service-type
+;;                                              (mpd-configuration
+;;                                               (auto-update? #t)
+;;                                               (user  (car %lotus-simple-users))
+;;                                               (group (car %lotus-simple-groups))
+;;                                               (log-file "/var/log/mpd.log")
+;;                                               (log-level "verbose")
+;;                                               (state-file (string-append %lotus-account-home-directory "/Music/.mpd/state-file"))
+;;                                               (sticker-file (string-append %lotus-account-home-directory "/Music/.mpd/sticker-file"))
+;;                                               (db-file   (string-append %lotus-account-home-directory "/Music/.mpd/db"))
+;;                                               (music-directory (string-append %lotus-account-home-directory "/Music"))
+;;                                               (playlist-directory (string-append %lotus-account-home-directory "/Music/.mpd/playlists"))
+;;                                               (outputs
+;;                                                (list (mpd-output (name "Pulseaudio Sound Server")
+;;                                                                  (type "pulse")
+;;                                                                  ;; (mixer-type 'null)
+;;                                                                  ;; (extra-options
+;;                                                                  ;;  `((encoder . "vorbis")
+;;                                                                  ;;    (port    . "8080")))
+;;                                                                  (enabled?   #t)
+;;                                                                  (always-on? #f)
+;;                                                                  (mixer-type "software"))
+;;                                                      (mpd-output (name "PipeWire Sound Server")
+;;                                                                  (type "pipewire")
+;;                                                                  (enabled?   #f))))))))
 
 
 ;; https://github.com/alezost/guix-config/blob/master/system-config/os-main.scm
@@ -418,25 +514,63 @@
     sudoers-extra-service)))
 
 
+
+(define my-features
+  (list
+   (feature-host-info
+    #:host-name "my-machine"
+    #:timezone "Asia/Kolkata")
+
+   ;; THIS replaces %desktop-services
+   (feature-base-services)
+   (feature-desktop-services)
+
+   ;; session stack
+   (feature-dbus)
+   (feature-polkit)
+   (feature-elogind)
+
+   ;; display stack
+   ;; (feature-wayland)
+
+   ;; your stuff
+   (feature-file-systems ...)
+   (feature-hidpi)))
+
+
 (define-public guilem-kuv500-features
-  (let-values (((rootfs sys-devices sys-fs) (devfs-system #:disk-serial-id "aaaa"
-                                                          #:fs-boot-efi-partition (uuid "0000-0000" 'fat32)))
-               ((home-devices home-fs) (devfs-system #:disk-serial-id)))
-    (list (feature-host-info #:host-name "guilem-kuv500"
+  (list (feature-host-info #:host-name "guilem-kuv500"
                              ;; ls `guix build tzdata`/share/zoneinfo
                              #:timezone "Asia/Kolkata")
           ;; Allows to declare specific bootloader configuration,
           ;; grub-efi-bootloader used by default
           ;; (feature-bootloader)
+        (let-values (((rootfs sys-devices sys-fs) (devfs-system #:disk-serial-id "aaaa"
+                                                                #:fs-boot-efi-partition (uuid "0000-0000" 'fat32)))
+                     ((home-devices home-fs) (devfs-system #:disk-serial-id)))
           (feature-file-systems #:mapped-devices (append sys-devices home-devices)
-                                #:file-systems (append sys-fs home-fs))
+                                #:file-systems (append sys-fs home-fs)))
           ;; (feature-kanshi #:extra-config `((profile laptop
           ;;                                           ((output eDP-1 enable)))
           ;;                                  (profile docked
           ;;                                           ((output eDP-1 enable)
           ;;                                            (output DP-2 scale 2)))))
           ;; (feature-hidpi)
-          guilem-kuv500-services)))
+        guilem-kuv500-services
 
+        (feature-base-services)
+        (feature-desktop-services)
+
+        ;; session stack
+        (feature-dbus)
+        (feature-polkit)
+        (feature-elogind)
+
+        ;; display stack
+        ;; (feature-wayland)
+
+        ;; your stuff
+        (feature-file-systems ...)
+        (feature-hidpi)))
 
 
