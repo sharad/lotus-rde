@@ -258,14 +258,14 @@
 
 (define* (devfs-system #:key
                        ;; lotus-lvm-dev-fs-builders
-                       disk-serial-id
-                       disk-prefix
-                       disk-suffix-seq
-                       guix-boot-mount?
-                       guix-boot-create-mount-point?
-                       fs-boot-efi-partition
-                       guix-bootefi-mount?
-                       guix-bootefi-needed-for-boot?)
+                       (disk-serial-id "CHANGEIT")
+                       (disk-prefix    "vds")
+                       (disk-suffix-seq 01)
+                       (guix-boot-mount? #f)
+                       (guix-boot-create-mount-point? #f)
+                       (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
+                       (guix-bootefi-mount? #f)
+                       (guix-bootefi-needed-for-boot? #f))
   (let-values* (((build-md build-fs) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
                                                                 #:prefix (lambda () disk-prefix)
                                                                 #:suffix-seq (lambda () disk-suffix-seq))))
@@ -424,10 +424,10 @@
 
 (define* (devfs-home #:key
                        ;; lotus-lvm-dev-fs-builders
-                     fs-root
-                     disk-serial-id
-                     disk-prefix
-                     disk-suffix-seq)
+                     (fs-root #f)
+                     (disk-serial-id "CHANGEIT")
+                     (disk-prefix "vds")
+                     (disk-suffix-seq 0))
   (let-values* (((build-md build-fs) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
                                                                 #:prefix (lambda () disk-prefix)
                                                                 #:suffix-seq (lambda () disk-suffix-seq))))
