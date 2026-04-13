@@ -30,15 +30,6 @@
                 (package              findutils)
                 (schedule             schedule)
                 (excluded-directories excluded-directories))))))))
-
-;; https://guix.gnu.org/es/blog/2020/improve-internationalization-support-for-the-guix-data-service/
-;; https://guix.gnu.org/en/blog/2020/introduction-to-the-guix-data-service-the-missing-blog-post/
-;; https://data.guix.gnu.org/README
-;; https://guix.gnu.org/manual/en/html_node/Guix-Services.html
-;; https://guix.gnu.org/manual/en/guix.html#Debugging-Build-Failures
-;; https://guix.gnu.org/manual/en/html_node/Continuous-Integration.html
-;; https://guix.gnu.org/manual/en/html_node/Base-Services.html
-
 
 (define* (feature-guix-publish
           #:key
@@ -66,43 +57,42 @@
                 (ttl                    ttl))))))))
 
 
-;; Vixie cron schedular
-(define updatedb-job
-  ;; Run 'updatedb' at 3AM every day.  Here we write the
-  ;; job's action as a Scheme procedure.
-  #~(job '(next-hour '(3))
-         (lambda ()
-           (execl (string-append #$findutils "/bin/updatedb")
-                  ;; "updatedb"
-                  "--prunepaths=`/tmp /var/tmp /gnu/store /run'"))))
-
-(define garbage-collector-job
-  ;; Collect garbage 5 minutes after midnight every day.
-  ;; The job's action is a shell command.
-  #~(job "5 0 * * *"            ;Vixie cron syntax
-         "guix gc -F 1G"))
-
-(define idutils-job
-  ;; Update the index database as user "charlie" at 12:15PM
-  ;; and 19:15PM.  This runs from the user's home directory.
-  #~(job '(next-minute-from (next-hour '(12 19)) '(15))
-         (string-append #$idutils "/bin/mkid src")
-         #:user "s"))
-
 (define* (feature-mcron
           #:key
-          (jobs (list garbage-collector-job
-                 ;; idutils-job
-                 updatedb-job)))
+          (jobs #f))
 
-  (feature
-   (name 'mcron)
-   (values
-    (rde-system-services
-     (list
-      (service mcron-service-type
-               (mcron-configuration
-                (jobs jobs))))))))
+  ;; Vixie cron schedular
+  (define updatedb-job
+    ;; Run 'updatedb' at 3AM every day.  Here we write the
+    ;; job's action as a Scheme procedure.
+    #~(job '(next-hour '(3))
+           (lambda ()
+             (execl (string-append #$findutils "/bin/updatedb")
+                    ;; "updatedb"
+                    "--prunepaths=`/tmp /var/tmp /gnu/store /run'"))))
+
+  (define garbage-collector-job
+    ;; Collect garbage 5 minutes after midnight every day.
+    ;; The job's action is a shell command.
+    #~(job "5 0 * * *"            ;Vixie cron syntax
+           "guix gc -F 1G"))
+
+  (define idutils-job
+    ;; Update the index database as user "charlie" at 12:15PM
+    ;; and 19:15PM.  This runs from the user's home directory.
+    #~(job '(next-minute-from (next-hour '(12 19)) '(15))
+           (string-append #$idutils "/bin/mkid src")
+           #:user "s"))
+
+  (let (jobs (or jobs (list updatedb-job garbage-collector-job idutils-job)))
+    (feature
+     (name 'mcron)
+     (values
+      (rde-system-services
+       (list
+        (service mcron-service-type
+                 (mcron-configuration
+                  (jobs jobs)))))))))
 
 
 ;; https://guix.gnu.org/manual/en/html_node/Unattended-Upgrades.html
@@ -127,8 +117,12 @@
 
 (define* (feature-privileged-programs
           #:key
-          (programs '()))
-
+          (paths (list (file-append ecryptfs-utils "/sbin/mount.ecryptfs_private")
+                       (file-append ecryptfs-utils "/sbin/umount.ecryptfs_private")
+                       (file-append xtrlock "/bin/xtrlock")
+                       (file-append firejail "/bin/firejail"))))
+  ;; https://git.sr.ht/~boeg/home/tree/master/.config/guix/system/config.scm
+  ;; https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/services/desktop.scm#n1209
   (feature
    (name 'privileged-programs)
    (values
@@ -137,19 +131,11 @@
       (simple-service
        'privileged-programs
        privileged-program-service-type
-       programs))))))
-
-;; ;; https://git.sr.ht/~boeg/home/tree/master/.config/guix/system/config.scm
-;; ;; https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/services/desktop.scm#n1209
-;; (define %lotus-privilege-services (list (simple-service 'lotus-privilege
-;;                                                         privileged-program-service-type
-;;                                                         (map (lambda (program)
-;;                                                                (privileged-program (program program)
-;;                                                                                    (setuid? #t)))
-;;                                                              (list (file-append ecryptfs-utils "/sbin/mount.ecryptfs_private")
-;;                                                                    (file-append ecryptfs-utils "/sbin/umount.ecryptfs_private")
-;;                                                                    (file-append xtrlock "/bin/xtrlock")
-;;                                                                    (file-append firejail "/bin/firejail"))))))
+       (map (lambda (path)
+              (privileged-program
+               (program path)
+               (setuid? #t)))
+            paths)))))))
 
 
 ;; TODO
@@ -169,7 +155,6 @@
   ;;                                                                    (list skype4pidgin)
   ;;                                                                    '())))
   ;;           (bitlbee (if %lotus-bitlbee-service-use-default? bitlbee bitlbee-purple))))
-
   (feature
    (name 'bitlbee)
    (values
@@ -181,7 +166,7 @@
 
 
 
-(define* (feature-mail-aliases
+(define* (feature-mail
           #:key
           (aliases '(("postmaster" "bob")
                      ("bob"        "bob@example.com" "bob@example2.com"))))
@@ -223,9 +208,6 @@
 
 (define %lotus-avahi-services (list (service avahi-service-type)))
 
-
-
-
 
 (define %lotus-gpm-services  (list (service gpm-service-type)))
 
@@ -283,19 +265,29 @@
 ;;                                                                  (enabled?   #f))))))))
 
 
-;; https://github.com/alezost/guix-config/blob/master/system-config/os-main.scm
-(define %lotus-mingetty-services (list (service mingetty-service-type
-                                                (mingetty-configuration (tty "tty1")))
-                                       (service mingetty-service-type
-                                                (mingetty-configuration (tty "tty2")))
-                                       (service mingetty-service-type
-                                                (mingetty-configuration (tty "tty3")))
-                                       (service mingetty-service-type
-                                                (mingetty-configuration (tty "tty4")))
-                                       (service mingetty-service-type
-                                                (mingetty-configuration (tty "tty5")))
-                                       (service mingetty-service-type
-                                                (mingetty-configuration (tty "tty6")))))
+(feature-custom-services
+ ;; https://github.com/alezost/guix-config/blob/master/system-config/os-main.scm
+ #:feature-name-prefix 'tty
+ #:system-services
+ (map
+  (lambda (tty)
+    (service mingetty-service-type
+             (mingetty-configuration (tty tty))))
+  '("tty1" "tty2" "tty3" "tty4" "tty5" "tty6")))
+
+;; ;; https://github.com/alezost/guix-config/blob/master/system-config/os-main.scm
+;; (define %lotus-mingetty-services (list (service mingetty-service-type
+;;                                                 (mingetty-configuration (tty "tty1")))
+;;                                        (service mingetty-service-type
+;;                                                 (mingetty-configuration (tty "tty2")))
+;;                                        (service mingetty-service-type
+;;                                                 (mingetty-configuration (tty "tty3")))
+;;                                        (service mingetty-service-type
+;;                                                 (mingetty-configuration (tty "tty4")))
+;;                                        (service mingetty-service-type
+;;                                                 (mingetty-configuration (tty "tty5")))
+;;                                        (service mingetty-service-type
+;;                                                 (mingetty-configuration (tty "tty6")))))
 
 
 (define %lotus-cups-services (list (service cups-service-type
