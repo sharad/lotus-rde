@@ -1,10 +1,9 @@
-
-(define %default-boot-targets '("/boot/efi"))
+(use-modules (nongnu packages linux))
+;; (define %default-boot-targets '("/boot/efi"))
 
 (define* (feature-bootloader
           #:key
-          (targets %default-boot-targets))
-
+          (targets '("/boot/efi")))
   (feature
    (name 'bootloader)
    (values
@@ -17,13 +16,12 @@
            (bootloader grub-efi-bootloader)
            (targets targets)))))))))
 
-(define %default-initrd-modules
-  '("dm-crypt" "dm-mod" "ext4"))
+;; (define %default-initrd-modules
+;;   '("dm-crypt" "dm-mod" "ext4"))
 
 (define* (feature-initrd
           #:key
-          (extra-modules %default-initrd-modules))
-
+          (extra-modules '()))
   (feature
    (name 'initrd)
    (values
@@ -38,17 +36,10 @@
                    #:extra-modules extra-modules
                    rest)))))))))
 
-
-(use-modules (nongnu packages linux))
-
-(define %default-kernel linux)
-(define %default-firmware (list linux-firmware))
-
 (define* (feature-kernel
           #:key
-          (kernel %default-kernel)
-          (firmware %default-firmware))
-
+          (kernel linux)
+          (firmware (list linux-firmware)))
   (feature
    (name 'kernel)
    (values
@@ -59,7 +50,6 @@
          (kernel kernel)
          (firmware firmware)))))))
 
-(use-modules (nongnu packages linux))
 
 (define (feature-nonguix)
   (feature
@@ -71,19 +61,4 @@
          (inherit os)
          (kernel linux)
          (firmware (list linux-firmware))))))))
-
-
-(use-modules (nongnu packages linux))
-
-(define (feature-nonguix-kernel)
-  (feature
-   (name 'nonguix-kernel)
-   (values
-    (rde-system-operating-system
-     (lambda (os)
-       (operating-system
-         (inherit os)
-         (kernel linux)
-         (firmware (list linux-firmware))))))))
-
 
