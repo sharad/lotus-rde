@@ -1,4 +1,4 @@
-(define-module (rde-configs hosts guilem-kuv500)
+(define-module (rde-configs hosts gx2-guix-vmware)
   #:use-module (rde features base)
   #:use-module (rde features system)
   #:use-module (rde features wm)
@@ -100,23 +100,22 @@
 
 
 
-(define guilem-kuv500-services
+(define gx2-guix-vmware-services
   (feature-custom-services
    #:feature-name-prefix 'guilem-kuv500-extra
    #:system-services
    (list)))
 
 
-(define-public guilem-kuv500-features
-  (list (feature-host-info #:host-name "guilem-kuv500"
-                             ;; ls `guix build tzdata`/share/zoneinfo
-                             #:timezone "Asia/Kolkata")
+(define-public gx2-guix-vmware-features
+  (list (feature-host-info #:host-name "gx2-guix-vmware"
+                           #:timezone "Asia/Kolkata")
           ;; Allows to declare specific bootloader configuration,
           ;; grub-efi-bootloader used by default
           ;; (feature-bootloader)
-        (let-values (((rootfs sys-devices sys-fs) (devfs-system #:disk-serial-id "aaaa"
-                                                                #:fs-boot-efi-partition (uuid "0000-0000" 'fat32)))
-                     ((home-devices home-fs) (devfs-system #:disk-serial-id "aaa")))
+        (let-values (((rootfs sys-devices sys-fs) (devfs-system #:disk-serial-id "vmware"
+                                                                #:fs-boot-efi-partition (uuid "4D78-999F" 'fat32)))
+                     ((home-devices home-fs) (devfs-system #:disk-serial-id "vmware")))
           (feature-file-systems #:mapped-devices (append sys-devices home-devices)
                                 #:file-systems (append sys-fs home-fs)))
         guilem-kuv500-services

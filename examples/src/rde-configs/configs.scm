@@ -87,7 +87,6 @@
 
 (define-public live-os
   (rde-config-operating-system live-config))
-
 
 ;;; dell5480
 
@@ -95,15 +94,30 @@
   (rde-config
    (features
     (append
-     %dell5480-features)))) ;;  %sharad-features
+     %dell5480-features))))
 
+(define-public dell5480-os
+  (rde-config-operating-system dell5480-config))
 
 ;;; guilem-kuv500
 
 (define-public guilem-kuv500-config
   (rde-config
    (features
-    (append %guilem-kuv500-features)))) ;; %sharad-features
+    (append %guilem-kuv500-features))))
+
+(define-public guilem-kuv500-os
+  (rde-config-operating-system guilem-kuv500-config))
+
+;;; guilem-kuv500
+
+(define-public gx2-guix-vmware-config
+  (rde-config
+   (features
+    (append %gx2-guix-vmware-features))))
+
+(define-public gx2-guix-vmware-os
+  (rde-config-operating-system gx2-guix-vmware-config))
 
 ;;; Dispatcher, which helps to return various values based on environment
 ;;; variable value.
@@ -114,7 +128,10 @@
       ("ixy-home" ixy-he)
       ("ixy-system" ixy-os)
       ("live-system" live-os)
-      (_ ixy-he))))
+      ("dell5480" dell5480-os)
+      ("guilem-kuv500" guilem-kuv500-os)
+      ("gx2-guix-vmware" gx2-guix-vmware-os)
+      (_ guilem-kuv500-os))))
 
 ;; (pretty-print-rde-config ixy-config)
 ;; (use-modules (gnu services)
