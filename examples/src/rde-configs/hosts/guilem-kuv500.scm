@@ -111,6 +111,10 @@
   (list (feature-host-info #:host-name "guilem-kuv500"
                              ;; ls `guix build tzdata`/share/zoneinfo
                              #:timezone "Asia/Kolkata")
+        (feature-kernel #:kernel linux
+                        #:initrd base-initrd
+                        #:firmware '())
+        (feature-bootloader #:bootloader-configuration '())
           ;; Allows to declare specific bootloader configuration,
           ;; grub-efi-bootloader used by default
           ;; (feature-bootloader)
@@ -118,7 +122,9 @@
                                                                 #:fs-boot-efi-partition (uuid "0000-0000" 'fat32)))
                      ((home-devices home-fs) (devfs-system #:disk-serial-id "aaa")))
           (feature-file-systems #:mapped-devices (append sys-devices home-devices)
-                                #:file-systems (append sys-fs home-fs)))
+                                #:file-systems (append sys-fs home-fs)
+                                #:swap-devices '()
+                                #:user-pam-file-systems '()))
         guilem-kuv500-services
 
         (feature-base-services)
