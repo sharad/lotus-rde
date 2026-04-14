@@ -40,7 +40,6 @@
           (cache "/var/cache/guix/publish")
           (cache-bypass-threshold (* 100 1024 1024))
           (ttl (* 1 24 60 60)))
-
   (feature
    (name 'guix-publish)
    (values

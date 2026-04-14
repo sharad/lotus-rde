@@ -1,0 +1,501 @@
+(define-module (lotus-rde base)
+  #:use-module (ice-9 match)
+  #:use-module (rde features base)
+  #:use-module (rde features system)
+  #:use-module (rde features wm)
+  #:use-module (lotus-rde api utils)
+  #:use-module (gnu system file-systems)
+  #:use-module (gnu system mapped-devices))
+
+
+
+
+(define* (feature-file-database-services
+          #:key
+          (package findutils)
+          (schedule "0 4 * * *")
+          (excluded-directories '("/tmp" "/var/tmp" "/gnu/store" "/run")))
+  (feature
+   (name 'file-database)
+   (values
+    (rde-system-services
+     (list
+      (service package-database-service-type)
+      (service file-database-service-type
+               (file-database-configuration
+                (package              findutils)
+                (schedule             schedule)
+                (excluded-directories excluded-directories))))))))
+
+(define* (feature-guix-publish-services
+          #:key
+          (advertise #t)
+          (port 3000)
+          (host "0.0.0.0")
+          (compression '(("lzip" 7) ("gzip" 9)))
+          (cache "/var/cache/guix/publish")
+          (cache-bypass-threshold (* 100 1024 1024))
+          (ttl (* 1 24 60 60)))
+  (feature
+   (name 'guix-publish)
+   (values
+    (rde-system-services
+     (list
+      (service guix-publish-service-type
+               (guix-publish-configuration
+                (advertise?             advertise)
+                (port                   port)
+                (host                   host)
+                (compression            compression)
+                (cache                  cache)
+                (cache-bypass-threshold cache-bypass-threshold)
+                (ttl                    ttl))))))))
+
+
+(define* (feature-schedular-services
+          #:key
+          (jobs #f))
+  ;; Vixie cron schedular
+  (define updatedb-job
+    ;; Run 'updatedb' at 3AM every day.  Here we write the
+    ;; job's action as a Scheme procedure.
+    #~(job '(next-hour '(3))
+           (lambda ()
+             (execl (string-append #$findutils "/bin/updatedb")
+                    ;; "updatedb"
+                    "--prunepaths=`/tmp /var/tmp /gnu/store /run'"))))
+
+  (define garbage-collector-job
+    ;; Collect garbage 5 minutes after midnight every day.
+    ;; The job's action is a shell command.
+    #~(job "5 0 * * *"            ;Vixie cron syntax
+           "guix gc -F 1G"))
+
+  (define idutils-job
+    ;; Update the index database as user "charlie" at 12:15PM
+    ;; and 19:15PM.  This runs from the user's home directory.
+    #~(job '(next-minute-from (next-hour '(12 19)) '(15))
+           (string-append #$idutils "/bin/mkid src")
+           #:user "s"))
+
+  (let (jobs (or jobs (list updatedb-job garbage-collector-job idutils-job)))
+    (feature
+     (name 'mcron)
+     (values
+      (rde-system-services
+       (list
+        (service mcron-service-type
+                 (mcron-configuration
+                  (jobs jobs)))))))))
+
+
+(define* (feature-unattended-upgrade-services
+          #:key
+          (operating-system-file (file-append "/run/current-system/etc/config/config.scm"))
+          (services-to-restart '(mcron))
+          (channels #~%default-channels)
+          (schedule "30 01 * * 0")
+          (system-expiration (* 3 30 24 3600))
+          (maximum-duration 3600)
+          (log-file "/var/log/unattended-upgrade.log"))
+  ;; https://guix.gnu.org/manual/en/html_node/Unattended-Upgrades.html
+  ;; How to mount /boot and that as rw?
+  ;; Check also these
+  ;; https://guix.gnu.org/manual/en/html_node/Service-Reference.html
+  (feature
+   (name 'unattended-upgrade)
+   (values
+    (rde-system-services
+     (list
+      (service unattended-upgrade-service-type
+               (unattended-upgrade-configuration
+                (operating-system-file operating-system-file)
+                (services-to-restart services-to-restart)
+                (channels channels)
+                (schedule schedule)
+                (system-expiration system-expiration)
+                (maximum-duration maximum-duration)
+                (log-file log-file))))))))
+
+
+(define* (feature-disk-services
+          #:key)
+  (feature
+   (name 'desktop)
+   (values
+    (rde-system-services
+     (service udisks-service-type)))))
+
+
+(define* (feature-privileged-programs-services
+          #:key
+          (paths (list (file-append ecryptfs-utils "/sbin/mount.ecryptfs_private")
+                       (file-append ecryptfs-utils "/sbin/umount.ecryptfs_private")
+                       (file-append xtrlock "/bin/xtrlock")
+                       (file-append firejail "/bin/firejail"))))
+  ;; https://git.sr.ht/~boeg/home/tree/master/.config/guix/system/config.scm
+  ;; https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/services/desktop.scm#n1209
+  (feature
+   (name 'privileged-programs)
+   (values
+    (rde-system-services
+     (list
+      (simple-service
+       'privileged-programs
+       privileged-program-service-type
+       (map (lambda (path)
+              (privileged-program
+               (program path)
+               (setuid? #t)))
+            paths)))))))
+
+
+;; TODO
+;; https://github.com/xavierm02/guix-config/blob/master/config.scm
+;; (simple-service 'i3-packages
+;;                 profile-service-type
+;;                 (list dmenu i3-wm i3lock i3status))
+
+
+(define* (feature-messaging-services
+          #:key
+          (plugins '()))
+  ;; (service bitlbee-service-type
+  ;;          (bitlbee-configuration
+  ;;           (plugins (if %lotus-bitlbee-service-use-default? '() (if nongnu-desktop?
+  ;;                                                                    (list skype4pidgin)
+  ;;                                                                    '())))
+  ;;           (bitlbee (if %lotus-bitlbee-service-use-default? bitlbee bitlbee-purple))))
+  (feature
+   (name 'bitlbee)
+   (values
+    (rde-system-services
+     (list
+      (service bitlbee-service-type
+               (bitlbee-configuration
+                (plugins plugins))))))))
+
+
+(define* (feature-mail-services
+          #:key
+          (aliases '(("postmaster" "bob")
+                     ("bob"        "bob@example.com" "bob@example2.com"))))
+  ;; https://guix.gnu.org/manual/en/html_node/Mail-Services.html
+  (feature
+   (name 'mail-aliases)
+   (values
+    (rde-system-services
+     (list
+      (service mail-aliases-service-type
+               aliases)
+      (service dovecot-service-type
+               (dovecot-configuration
+                (mail-location "maildir:~/.maildir")
+                (listen        '("127.0.0.1"))))
+      (service exim-service-type
+       (exim-configuration
+        (config-file #f))))))))
+
+
+(define* (feature-iio-sensor-proxy-services
+          #:key
+          (auto-enable? #t))
+  ;; https://guix.gnu.org/manual/en/html_node/Desktop-Services.html
+  (feature
+   (name 'iio-sensor-proxy)
+   (values
+    (rde-system-services
+     (list
+      (service iio-sensor-proxy-service-type
+               (iio-sensor-proxy-configuration
+                (auto-enable? auto-enable?))))))))
+
+
+(define* (feature-dnsmasq-services
+          #:key
+          (no-resolv? #t)
+          (local-service? #t))
+  ;; https://notabug.org/thomassgn/guixsd-configuration/src/master/config.scm
+  ;; https://guix.gnu.org/manual/en/html_node/Networking-Services.html
+  ;; https://jonathansblog.co.uk/using-dnsmasq-as-an-internal-dns-server-to-block-online-adverts
+  ;; https://stackoverflow.com/questions/48644841/multiple-addn-hosts-conf-in-dnsmasq
+  (feature
+   (name 'dnsmasq)
+   (values
+    (rde-system-services
+     (list
+      (service dnsmasq-service-type
+               (dnsmasq-configuration (no-resolv? no-resolv?)
+                                      (local-service? local-service?))))))))
+
+
+(define* (feature-network-manager-services
+          #:key
+          (vpn-plugins (list network-manager-fortisslvpn
+                             network-manager-openconnect))
+          (dns "dnsmasq"))
+  ;; https://guix.gnu.org/manual/en/html_node/Networking-Services.html
+  (feature
+   (name 'network-manager-vpn)
+   (values
+    (rde-system-services
+     (list
+      (service network-manager-service-type
+               (network-manager-configuration
+                (vpn-plugins vpn-plugins)
+                (dns dns))))))))
+
+(define* feature-dns-services
+  ;; https://guix.gnu.org/manual/en/html_node/Avahi-Services.html
+  (feature
+   (name 'avahi)
+   (values
+    (rde-system-services
+     (list
+      (service avahi-service-type))))))
+
+
+(define* feature-pointer-services
+  ;; https://guix.gnu.org/manual/en/html_node/GPM-Services.html
+  (feature
+   (name 'gpm)
+   (values
+    (rde-system-services
+     (list
+      (service gpm-service-type))))))
+
+
+(define* (feature-bluetooth-services
+          #:key (auto-enable? #t))
+  ;; https://unix.stackexchange.com/questions/617858/how-to-enable-bluetooth-in-guix
+  (feature
+   (name 'bluetooth)
+   (values
+    (rde-system-services
+     (list
+      (service bluetooth-service-type
+               (bluetooth-configuration
+                (auto-enable? auto-enable?))))))))
+
+
+(define* (feature-music-services
+          #:key
+          (music-dir "~/Music")
+          (auto-update? #t)
+          (user  #f)
+          (group #f)
+          (log-file "/var/log/mpd.log")
+          (log-level "verbose")
+          (state-file #f)
+          (sticker-file #f)
+          (db-file   #f)
+          (music-directory #f)
+          (playlist-directory #f)
+          (outputs
+           (list (mpd-output (name "Pulseaudio Sound Server")
+                             (type "pulse")
+                             ;; (mixer-type 'null)
+                             ;; (extra-options
+                             ;;  `((encoder . "vorbis")
+                             ;;    (port    . "8080")))
+                             (enabled?   #t)
+                             (always-on? #f)
+                             (mixer-type "software"))
+                 (mpd-output (name "PipeWire Sound Server")
+                             (type "pipewire")
+                             (enabled?   #f)))))
+  (feature
+   (name 'mpd)
+   (values
+    (rde-system-services
+     (list
+      (service mpd-service-type
+               (mpd-configuration
+                (auto-update? auto-update?)
+                (user  user)
+                (group group)
+                (log-file log-file)
+                (log-level log-level)
+                (state-file state-file)
+                (sticker-file sticker-file)
+                (db-file db-file)
+                (music-directory music-directory)
+                (playlist-directory playlist-directory)
+                (outputs outputs))))))))
+
+
+(define* (feature-terminal-services
+          #:key
+          (ttys '("tty1" "tty2" "tty3" "tty4" "tty5" "tty6"))))
+(feature-custom-services
+ ;; https://github.com/alezost/guix-config/blob/master/system-config/os-main.scm
+ #:feature-name-prefix 'tty
+ #:system-services
+ (map
+  (lambda (tty)
+    (service mingetty-service-type
+             (mingetty-configuration (tty tty))))
+  '("tty1" "tty2" "tty3" "tty4" "tty5" "tty6")))
+
+
+(define* (feature-printing-services
+          #:key
+          (web-interface? #t)
+          (default-paper-size "A4")
+          (extensions (list cups-filters
+                            hplip-minimal)))
+
+  ;; https://guix.gnu.org/manual/en/html_node/CUPS-Services.html
+  (feature
+   (name 'cups)
+   (values
+    (rde-system-services
+     (list
+      (service cups-service-type
+               (cups-configuration
+                (web-interface? web-interface?)
+                (default-paper-size default-paper-size)
+                (extensions extensions))))))))
+
+
+(define* (feature-polkit-services
+          #:key)
+  ;; https://github.com/alezost/guix-config/blob/master/system-config/os-main.scm
+  (feature
+   (name 'polkit)
+   (values
+    (rde-system-services
+     (list (service polkit-service-type))))))
+
+
+(define* (feature-krberos-services
+          #:key
+          (default-realm "EXAMPLE.COM")
+          (allow-weak-crypto? #t)
+          (realms '()))
+  (feature
+   (name 'krb5)
+   (values
+    (rde-system-services
+     (list
+      (service krb5-service-type
+               (krb5-configuration
+                (default-realm default-realm)
+                (allow-weak-crypto? allow-weak-crypto?)
+                (realms realms))))))))
+
+
+(define* (feature-container-sevices #:key)
+   ;; https://guix.gnu.org/manual/en/html_node/Container-Services.html
+  (feature
+   (name 'container)
+   (values
+    (rde-system-services
+     (list
+      (service containerd-service-type)
+      (service docker-service-type)
+      (service spice-vdagent-service-type))))))
+
+
+(define* (feature-security-services
+          #:key
+          (pcsc-lite pcsc-lite)
+          (usb-drivers (list ccid))
+          (fail2ban-jails (list (fail2ban-jail-configuration
+                                  (name "sshd")
+                                  (enabled? #t)))))
+  (feature
+   (name 'security)
+   (values
+    (rde-system-services
+     (list
+      (service pcscd-service-type
+               (pcscd-configuration (pcsc-lite pcsc-lite)
+                                    (usb-drivers (list ccid))))
+      (service fail2ban-service-type
+               (fail2ban-configuration
+                (extra-jails fail2ban-jails))))))))
+
+(define* (feature-audit-services
+          #:key
+          (audit audit)
+          (configuration-directory #f))
+  ;; https://guix.gnu.org/manual/en/html_node/Audit-Services.html
+  (feature
+   (name 'audit)
+   (values
+    (rde-system-services
+     (list
+      (service auditd-service-type
+               (auditd-configuration
+                (audit audit)
+                (configuration-directory configuration-directory))))))))
+
+
+(define* (feature-guix-service #:key
+          (discover? #t)
+          (build-accounts 10)
+          (authorize-key? #f)
+          (tmpdir (if %lotus-system-init #f "/tmp"))
+          (use-substitutes? #t)
+          (substitute-urls '())
+          (local-substitute-urls '())
+          (local-fixed-named-substitute-urls '())
+          (authorized-keys '())
+          (extra-options '()))
+
+  ;; https://gitlab.com/Efraim/guix-config/blob/master/macbook41_config.scm
+  ;; https://guix.gnu.org/manual/en/html_node/Base-Services.html
+  (feature
+   (name 'guix-service)
+   (values
+    (rde-system-services
+     (list
+      (service guix-service-type
+               (guix-configuration
+                (discover?        discover?)
+                (build-accounts   build-accounts)
+                (authorize-key?   authorize-key?)
+                ;; https://guix.gnu.org/manual/en/html_node/Base-Services.html
+                (tmpdir           tmpdir)
+                (use-substitutes? use-substitutes?)
+                (substitute-urls  substitute-urls)
+                (local-substitute-urls local-substitute-urls)
+                (local-fixed-named-substitute-urls local-fixed-named-substitute-urls)
+                ;; https://guix.gnu.org/manual/en/html_node/Getting-Substitutes-from-Other-Servers.html
+                (authorized-keys  authorized-keys)
+                (extra-options    extra-options))))))))
+
+
+(define* (feature-desktop-manager-service
+          #:key
+          (xorg-configuration (xorg-configuration
+                               (keyboard-layout %lotus-keyboard-layout)))
+          (allow-empty-password? #t)
+          (auto-login? #t)
+          (default-user #f))
+  ;; https://gitlab.com/Efraim/guix-config/blob/master/macbook41_config.scm)
+  ;; https://issues.guix.info/issue/35674
+  (feature
+   (name 'gdm-service)
+   (values
+    (rde-system-service
+     (list
+      (service gdm-service-type
+               (gdm-configuration
+                (xorg-configuration xorg-configuration)
+                (allow-empty-passwords? allow-empty-password?)
+                (auto-login? auto-login?)
+                (default-user %lotus-account-user-name))))))))
+
+(define* (feature-pulseaudio-service
+          #:key
+          (script-file (local-file "/etc/guix/default.pa")))
+  (feature (name 'pulseaudio)
+   (values
+    (rde-system-services
+     (list
+      (service pulseaudio-service-type
+               (pulseaudio-configuration
+                (script-file script-file))))))))
+
