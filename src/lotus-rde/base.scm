@@ -8,24 +8,30 @@
   #:use-module (gnu system mapped-devices))
 
 
-
+;; (get-value 'number-of-ttys cfg 6)
+;; (make-feature-values scaling-factor console-font)
 
 (define* (feature-file-database-services
           #:key
           (package findutils)
           (schedule "0 4 * * *")
           (excluded-directories '("/tmp" "/var/tmp" "/gnu/store" "/run")))
+  (define (get-home-packages values)
+    (list))
+
+  (define (get-system-packages values)
+   (list
+    (service package-database-service-type)
+    (service file-database-service-type
+             (file-database-configuration
+              (package              findutils)
+              (schedule             schedule)
+              (excluded-directories excluded-directories)))))
   (feature
    (name 'file-database)
-   (values
-    (rde-system-services
-     (list
-      (service package-database-service-type)
-      (service file-database-service-type
-               (file-database-configuration
-                (package              findutils)
-                (schedule             schedule)
-                (excluded-directories excluded-directories))))))))
+   (values `())
+   (home-services-getter get-home-packages)
+   (system-services-getter get-system-packages)))
 
 (define* (feature-guix-publish-services
           #:key
@@ -36,20 +42,24 @@
           (cache "/var/cache/guix/publish")
           (cache-bypass-threshold (* 100 1024 1024))
           (ttl (* 1 24 60 60)))
+  (define (get-home-packages config)
+    (list))
+
+  (define (get-system-packages config)
+    (list
+     (service guix-publish-service-type
+              (guix-publish-configuration
+               (advertise?             advertise)
+               (port                   port)
+               (host                   host)
+               (compression            compression)
+               (cache                  cache)
+               (cache-bypass-threshold cache-bypass-threshold)
+               (ttl                    ttl)))))
   (feature
    (name 'guix-publish)
-   (values
-    (rde-system-services
-     (list
-      (service guix-publish-service-type
-               (guix-publish-configuration
-                (advertise?             advertise)
-                (port                   port)
-                (host                   host)
-                (compression            compression)
-                (cache                  cache)
-                (cache-bypass-threshold cache-bypass-threshold)
-                (ttl                    ttl))))))))
+   (home-services-getter get-home-packages)
+   (system-services-getter get-system-packages)))
 
 
 (define* (feature-schedular-services
@@ -78,15 +88,22 @@
            (string-append #$idutils "/bin/mkid src")
            #:user "s"))
 
+  (define (get-home-packages config)
+    (list))
+
+  (define (get-system-packages config)
+    (let ((jobs (or jobs (list updatedb-job garbage-collector-job idutils-job))))
+      (list
+       (service mcron-service-type
+              (mcron-configuration
+               (jobs jobs))))))
+
   (let (jobs (or jobs (list updatedb-job garbage-collector-job idutils-job)))
     (feature
      (name 'mcron)
-     (values
-      (rde-system-services
-       (list
-        (service mcron-service-type
-                 (mcron-configuration
-                  (jobs jobs)))))))))
+     (values `())
+     (home-services-getter get-home-packages)
+     (system-services-getter get-system-packages))))
 
 
 (define* (feature-unattended-upgrade-services
@@ -98,24 +115,29 @@
           (system-expiration (* 3 30 24 3600))
           (maximum-duration 3600)
           (log-file "/var/log/unattended-upgrade.log"))
+  (define (get-home-packages config)
+    (list))
+
+  (define (get-system-packages config)
+    (list
+     (service unattended-upgrade-service-type
+              (unattended-upgrade-configuration
+               (operating-system-file operating-system-file)
+               (services-to-restart services-to-restart)
+               (channels channels)
+               (schedule schedule)
+               (system-expiration system-expiration)
+               (maximum-duration maximum-duration)
+               (log-file log-file)))))
   ;; https://guix.gnu.org/manual/en/html_node/Unattended-Upgrades.html
   ;; How to mount /boot and that as rw?
   ;; Check also these
   ;; https://guix.gnu.org/manual/en/html_node/Service-Reference.html
   (feature
    (name 'unattended-upgrade)
-   (values
-    (rde-system-services
-     (list
-      (service unattended-upgrade-service-type
-               (unattended-upgrade-configuration
-                (operating-system-file operating-system-file)
-                (services-to-restart services-to-restart)
-                (channels channels)
-                (schedule schedule)
-                (system-expiration system-expiration)
-                (maximum-duration maximum-duration)
-                (log-file log-file))))))))
+   (values `())
+   (home-services-getter get-home-packages)
+   (system-services-getter get-system-packages)))
 
 
 (define* (feature-disk-services
