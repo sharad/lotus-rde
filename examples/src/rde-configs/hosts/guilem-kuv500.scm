@@ -109,12 +109,28 @@
 
 (define-public guilem-kuv500-features
   (list (feature-host-info #:host-name "guilem-kuv500"
-                             ;; ls `guix build tzdata`/share/zoneinfo
-                             #:timezone "Asia/Kolkata")
-        (feature-kernel #:kernel linux
-                        #:initrd base-initrd
-                        #:firmware '())
-        (feature-bootloader #:bootloader-configuration '())
+                           ;; #:locale    (operating-system-locale bare-bone-os)
+                           ;; ls `guix build tzdata`/share/zoneinfo
+                           #:timezone "Asia/Kolkata")
+        (feature-kernel ;; #:kernel linux
+                        ;; #:initrd base-initrd
+                        #:firmware '()
+                        #:kernel-arguments (append (list "usbcore.autosuspend=-1"
+                                                         "libata.force=2:disable"
+                                                         "libata.noacpi=1"
+                                                         "libata.ignore_hpa=1"
+                                                         "--verbose"
+                                                         "nosplash"
+                                                         "debug")))
+                                                   ;; (if (and (pair? %lotus-swap-devices)
+                                                   ;;          (> (length %lotus-swap-devices) 0))
+                                                   ;;     (list (string-append "resume="
+                                                   ;;                          (swap-space-target (car %lotus-swap-devices))))
+                                                   ;;     '())
+        (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader      grub-bootloader)
+                                                                                 (targets         '())))
+                                                                                 ;; (keyboard-layout %lotus-keyboard-layout)
+                                                                                 ;; (menu-entries    %lotus-grub-ubuntu-menuentries)
           ;; Allows to declare specific bootloader configuration,
           ;; grub-efi-bootloader used by default
           ;; (feature-bootloader)
