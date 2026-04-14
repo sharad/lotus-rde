@@ -16,10 +16,10 @@
           (package findutils)
           (schedule "0 4 * * *")
           (excluded-directories '("/tmp" "/var/tmp" "/gnu/store" "/run")))
-  (define (get-home-packages values)
+  (define (get-home-services config)
     (list))
 
-  (define (get-system-packages values)
+  (define (get-system-packages config)
    (list
     (service package-database-service-type)
     (service file-database-service-type
@@ -30,8 +30,8 @@
   (feature
    (name 'file-database)
    (values `())
-   (home-services-getter get-home-packages)
-   (system-services-getter get-system-packages)))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 (define* (feature-guix-publish-services
           #:key
@@ -42,7 +42,7 @@
           (cache "/var/cache/guix/publish")
           (cache-bypass-threshold (* 100 1024 1024))
           (ttl (* 1 24 60 60)))
-  (define (get-home-packages config)
+  (define (get-home-services config)
     (list))
 
   (define (get-system-packages config)
@@ -58,8 +58,8 @@
                (ttl                    ttl)))))
   (feature
    (name 'guix-publish)
-   (home-services-getter get-home-packages)
-   (system-services-getter get-system-packages)))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-schedular-services
@@ -88,7 +88,7 @@
            (string-append #$idutils "/bin/mkid src")
            #:user "s"))
 
-  (define (get-home-packages config)
+  (define (get-home-services config)
     (list))
 
   (define (get-system-packages config)
@@ -102,8 +102,8 @@
     (feature
      (name 'mcron)
      (values `())
-     (home-services-getter get-home-packages)
-     (system-services-getter get-system-packages))))
+     (home-services-getter get-home-services)
+     (system-services-getter get-system-services))))
 
 
 (define* (feature-unattended-upgrade-services
@@ -115,7 +115,7 @@
           (system-expiration (* 3 30 24 3600))
           (maximum-duration 3600)
           (log-file "/var/log/unattended-upgrade.log"))
-  (define (get-home-packages config)
+  (define (get-home-services config)
     (list))
 
   (define (get-system-packages config)
@@ -136,17 +136,25 @@
   (feature
    (name 'unattended-upgrade)
    (values `())
-   (home-services-getter get-home-packages)
-   (system-services-getter get-system-packages)))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-disk-services
           #:key)
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list))
+
   (feature
    (name 'desktop)
    (values
     (rde-system-services
-     (service udisks-service-type)))))
+     (service udisks-service-type)))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-privileged-programs-services
@@ -157,6 +165,12 @@
                        (file-append firejail "/bin/firejail"))))
   ;; https://git.sr.ht/~boeg/home/tree/master/.config/guix/system/config.scm
   ;; https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/services/desktop.scm#n1209
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list))
+
   (feature
    (name 'privileged-programs)
    (values
@@ -169,7 +183,9 @@
               (privileged-program
                (program path)
                (setuid? #t)))
-            paths)))))))
+            paths)))))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 ;; TODO
@@ -188,6 +204,12 @@
   ;;                                                                    (list skype4pidgin)
   ;;                                                                    '())))
   ;;           (bitlbee (if %lotus-bitlbee-service-use-default? bitlbee bitlbee-purple))))
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list))
+
   (feature
    (name 'bitlbee)
    (values
@@ -195,7 +217,9 @@
      (list
       (service bitlbee-service-type
                (bitlbee-configuration
-                (plugins plugins))))))))
+                (plugins plugins))))))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-mail-services
@@ -203,6 +227,12 @@
           (aliases '(("postmaster" "bob")
                      ("bob"        "bob@example.com" "bob@example2.com"))))
   ;; https://guix.gnu.org/manual/en/html_node/Mail-Services.html
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list))
+
   (feature
    (name 'mail-aliases)
    (values
@@ -216,13 +246,21 @@
                 (listen        '("127.0.0.1"))))
       (service exim-service-type
        (exim-configuration
-        (config-file #f))))))))
+        (config-file #f))))))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-iio-sensor-proxy-services
           #:key
           (auto-enable? #t))
   ;; https://guix.gnu.org/manual/en/html_node/Desktop-Services.html
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list))
+
   (feature
    (name 'iio-sensor-proxy)
    (values
@@ -230,7 +268,9 @@
      (list
       (service iio-sensor-proxy-service-type
                (iio-sensor-proxy-configuration
-                (auto-enable? auto-enable?))))))))
+                (auto-enable? auto-enable?))))))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-dnsmasq-services
@@ -241,6 +281,12 @@
   ;; https://guix.gnu.org/manual/en/html_node/Networking-Services.html
   ;; https://jonathansblog.co.uk/using-dnsmasq-as-an-internal-dns-server-to-block-online-adverts
   ;; https://stackoverflow.com/questions/48644841/multiple-addn-hosts-conf-in-dnsmasq
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list))
+
   (feature
    (name 'dnsmasq)
    (values
@@ -248,7 +294,9 @@
      (list
       (service dnsmasq-service-type
                (dnsmasq-configuration (no-resolv? no-resolv?)
-                                      (local-service? local-service?))))))))
+                                      (local-service? local-service?))))))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-network-manager-services
@@ -257,6 +305,12 @@
                              network-manager-openconnect))
           (dns "dnsmasq"))
   ;; https://guix.gnu.org/manual/en/html_node/Networking-Services.html
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list))
+
   (feature
    (name 'network-manager-vpn)
    (values
@@ -265,31 +319,55 @@
       (service network-manager-service-type
                (network-manager-configuration
                 (vpn-plugins vpn-plugins)
-                (dns dns))))))))
+                (dns dns))))))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 (define* feature-dns-services
   ;; https://guix.gnu.org/manual/en/html_node/Avahi-Services.html
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list))
+
   (feature
    (name 'avahi)
    (values
     (rde-system-services
      (list
-      (service avahi-service-type))))))
+      (service avahi-service-type))))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* feature-pointer-services
   ;; https://guix.gnu.org/manual/en/html_node/GPM-Services.html
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list))
+
   (feature
    (name 'gpm)
    (values
     (rde-system-services
      (list
-      (service gpm-service-type))))))
+      (service gpm-service-type))))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-bluetooth-services
           #:key (auto-enable? #t))
   ;; https://unix.stackexchange.com/questions/617858/how-to-enable-bluetooth-in-guix
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list))
+
   (feature
    (name 'bluetooth)
    (values
@@ -297,7 +375,9 @@
      (list
       (service bluetooth-service-type
                (bluetooth-configuration
-                (auto-enable? auto-enable?))))))))
+                (auto-enable? auto-enable?))))))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-music-services
@@ -326,6 +406,12 @@
                  (mpd-output (name "PipeWire Sound Server")
                              (type "pipewire")
                              (enabled?   #f)))))
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list))
+
   (feature
    (name 'mpd)
    (values
@@ -343,21 +429,9 @@
                 (db-file db-file)
                 (music-directory music-directory)
                 (playlist-directory playlist-directory)
-                (outputs outputs))))))))
-
-
-(define* (feature-terminal-services
-          #:key
-          (ttys '("tty1" "tty2" "tty3" "tty4" "tty5" "tty6"))))
-(feature-custom-services
- ;; https://github.com/alezost/guix-config/blob/master/system-config/os-main.scm
- #:feature-name-prefix 'tty
- #:system-services
- (map
-  (lambda (tty)
-    (service mingetty-service-type
-             (mingetty-configuration (tty tty))))
-  '("tty1" "tty2" "tty3" "tty4" "tty5" "tty6")))
+                (outputs outputs))))))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-printing-services
@@ -368,26 +442,38 @@
                             hplip-minimal)))
 
   ;; https://guix.gnu.org/manual/en/html_node/CUPS-Services.html
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list
+     (service cups-service-type
+              (cups-configuration
+               (web-interface? web-interface?)
+               (default-paper-size default-paper-size)
+               (extensions extensions)))))
+
   (feature
    (name 'cups)
-   (values
-    (rde-system-services
-     (list
-      (service cups-service-type
-               (cups-configuration
-                (web-interface? web-interface?)
-                (default-paper-size default-paper-size)
-                (extensions extensions))))))))
+   (values `())
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-polkit-services
           #:key)
   ;; https://github.com/alezost/guix-config/blob/master/system-config/os-main.scm
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list (service polkit-service-type)))
+
   (feature
    (name 'polkit)
-   (values
-    (rde-system-services
-     (list (service polkit-service-type))))))
+   (values `())
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-krberos-services
@@ -395,28 +481,40 @@
           (default-realm "EXAMPLE.COM")
           (allow-weak-crypto? #t)
           (realms '()))
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list
+     (service krb5-service-type
+              (krb5-configuration
+               (default-realm default-realm)
+               (allow-weak-crypto? allow-weak-crypto?)
+               (realms realms)))))
+
   (feature
    (name 'krb5)
-   (values
-    (rde-system-services
-     (list
-      (service krb5-service-type
-               (krb5-configuration
-                (default-realm default-realm)
-                (allow-weak-crypto? allow-weak-crypto?)
-                (realms realms))))))))
+   (values `())
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-container-sevices #:key)
    ;; https://guix.gnu.org/manual/en/html_node/Container-Services.html
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list
+     (service containerd-service-type)
+     (service docker-service-type)
+     (service spice-vdagent-service-type)))
+
   (feature
    (name 'container)
-   (values
-    (rde-system-services
-     (list
-      (service containerd-service-type)
-      (service docker-service-type)
-      (service spice-vdagent-service-type))))))
+   (values `())
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-security-services
@@ -426,32 +524,44 @@
           (fail2ban-jails (list (fail2ban-jail-configuration
                                   (name "sshd")
                                   (enabled? #t)))))
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list
+     (service pcscd-service-type
+              (pcscd-configuration (pcsc-lite pcsc-lite)
+                                   (usb-drivers (list ccid))))
+     (service fail2ban-service-type
+              (fail2ban-configuration
+               (extra-jails fail2ban-jails)))))
+
   (feature
    (name 'security)
-   (values
-    (rde-system-services
-     (list
-      (service pcscd-service-type
-               (pcscd-configuration (pcsc-lite pcsc-lite)
-                                    (usb-drivers (list ccid))))
-      (service fail2ban-service-type
-               (fail2ban-configuration
-                (extra-jails fail2ban-jails))))))))
+   (values `())
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 (define* (feature-audit-services
           #:key
           (audit audit)
           (configuration-directory #f))
   ;; https://guix.gnu.org/manual/en/html_node/Audit-Services.html
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list
+     (service auditd-service-type
+              (auditd-configuration
+               (audit audit)
+               (configuration-directory configuration-directory)))))
+
   (feature
    (name 'audit)
-   (values
-    (rde-system-services
-     (list
-      (service auditd-service-type
-               (auditd-configuration
-                (audit audit)
-                (configuration-directory configuration-directory))))))))
+   (values `())
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-guix-service #:key
@@ -465,28 +575,33 @@
           (local-fixed-named-substitute-urls '())
           (authorized-keys '())
           (extra-options '()))
-
   ;; https://gitlab.com/Efraim/guix-config/blob/master/macbook41_config.scm
   ;; https://guix.gnu.org/manual/en/html_node/Base-Services.html
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list
+     (service guix-service-type
+              (guix-configuration
+               (discover?        discover?)
+               (build-accounts   build-accounts)
+               (authorize-key?   authorize-key?)
+               ;; https://guix.gnu.org/manual/en/html_node/Base-Services.html
+               (tmpdir           tmpdir)
+               (use-substitutes? use-substitutes?)
+               (substitute-urls  substitute-urls)
+               (local-substitute-urls local-substitute-urls)
+               (local-fixed-named-substitute-urls local-fixed-named-substitute-urls)
+               ;; https://guix.gnu.org/manual/en/html_node/Getting-Substitutes-from-Other-Servers.html
+               (authorized-keys  authorized-keys)
+               (extra-options    extra-options)))))
+
   (feature
    (name 'guix-service)
-   (values
-    (rde-system-services
-     (list
-      (service guix-service-type
-               (guix-configuration
-                (discover?        discover?)
-                (build-accounts   build-accounts)
-                (authorize-key?   authorize-key?)
-                ;; https://guix.gnu.org/manual/en/html_node/Base-Services.html
-                (tmpdir           tmpdir)
-                (use-substitutes? use-substitutes?)
-                (substitute-urls  substitute-urls)
-                (local-substitute-urls local-substitute-urls)
-                (local-fixed-named-substitute-urls local-fixed-named-substitute-urls)
-                ;; https://guix.gnu.org/manual/en/html_node/Getting-Substitutes-from-Other-Servers.html
-                (authorized-keys  authorized-keys)
-                (extra-options    extra-options))))))))
+   (values `())
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 (define* (feature-desktop-manager-service
@@ -498,26 +613,39 @@
           (default-user #f))
   ;; https://gitlab.com/Efraim/guix-config/blob/master/macbook41_config.scm)
   ;; https://issues.guix.info/issue/35674
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list
+     (service gdm-service-type
+              (gdm-configuration
+               (xorg-configuration xorg-configuration)
+               (allow-empty-passwords? allow-empty-password?)
+               (auto-login? auto-login?)
+               (default-user %lotus-account-user-name)))))
+
   (feature
    (name 'gdm-service)
-   (values
-    (rde-system-service
-     (list
-      (service gdm-service-type
-               (gdm-configuration
-                (xorg-configuration xorg-configuration)
-                (allow-empty-passwords? allow-empty-password?)
-                (auto-login? auto-login?)
-                (default-user %lotus-account-user-name))))))))
+   (values `())
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 (define* (feature-pulseaudio-service
           #:key
           (script-file (local-file "/etc/guix/default.pa")))
-  (feature (name 'pulseaudio)
-   (values
-    (rde-system-services
-     (list
-      (service pulseaudio-service-type
-               (pulseaudio-configuration
-                (script-file script-file))))))))
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-packages config)
+    (list
+     (service pulseaudio-service-type
+              (pulseaudio-configuration
+               (script-file script-file)))))
+
+  (feature
+   (name 'pulseaudio)
+   (values `())
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
