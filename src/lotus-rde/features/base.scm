@@ -32,10 +32,10 @@
           (schedule "0 4 * * *")
           (excluded-directories '("/tmp" "/var/tmp" "/gnu/store" "/run")))
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-   (list
+   (cons*
     (service package-database-service-type)
     (service file-database-service-type
              (file-database-configuration
@@ -58,10 +58,10 @@
           (cache-bypass-threshold (* 100 1024 1024))
           (ttl (* 1 24 60 60)))
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list
+    (cons*
      (service guix-publish-service-type
               (guix-publish-configuration
                (advertise?             advertise)
@@ -104,16 +104,16 @@
            #:user "s"))
 
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
     (let ((jobs (or jobs (list updatedb-job garbage-collector-job idutils-job))))
-      (list
+      (cons*
        (service mcron-service-type
               (mcron-configuration
                (jobs jobs))))))
 
-  (let (jobs (or jobs (list updatedb-job garbage-collector-job idutils-job)))
+  (let ((jobs (or jobs (list updatedb-job garbage-collector-job idutils-job))))
     (feature
      (name 'mcron)
      (values `())
@@ -131,10 +131,10 @@
           (maximum-duration 3600)
           (log-file "/var/log/unattended-upgrade.log"))
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list
+    (cons*
      (service unattended-upgrade-service-type
               (unattended-upgrade-configuration
                (operating-system-file operating-system-file)
@@ -158,16 +158,15 @@
 (define* (feature-disk-services
           #:key)
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list))
+    (cons*
+     (service udisks-service-type)))
 
   (feature
    (name 'desktop)
-   (values
-    (rde-system-services
-     (service udisks-service-type)))
+   (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
@@ -181,24 +180,22 @@
   ;; https://git.sr.ht/~boeg/home/tree/master/.config/guix/system/config.scm
   ;; https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/services/desktop.scm#n1209
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list))
+    (cons*
+     (simple-service
+      'privileged-programs
+      privileged-program-service-type
+      (map (lambda (path)
+             (privileged-program
+              (program path)
+              (setuid? #t)))
+           paths))))
 
   (feature
    (name 'privileged-programs)
-   (values
-    (rde-system-services
-     (list
-      (simple-service
-       'privileged-programs
-       privileged-program-service-type
-       (map (lambda (path)
-              (privileged-program
-               (program path)
-               (setuid? #t)))
-            paths)))))
+   (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
@@ -220,19 +217,17 @@
   ;;                                                                    '())))
   ;;           (bitlbee (if %lotus-bitlbee-service-use-default? bitlbee bitlbee-purple))))
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list))
+    (cons*
+     (service bitlbee-service-type
+              (bitlbee-configuration
+               (plugins plugins)))))
 
   (feature
    (name 'bitlbee)
-   (values
-    (rde-system-services
-     (list
-      (service bitlbee-service-type
-               (bitlbee-configuration
-                (plugins plugins))))))
+   (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
@@ -243,25 +238,23 @@
                      ("bob"        "bob@example.com" "bob@example2.com"))))
   ;; https://guix.gnu.org/manual/en/html_node/Mail-Services.html
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list))
+    (cons*
+     (service mail-aliases-service-type
+              aliases)
+     (service dovecot-service-type
+              (dovecot-configuration
+               (mail-location "maildir:~/.maildir")
+               (listen        '("127.0.0.1"))))
+     (service exim-service-type
+              (exim-configuration
+               (config-file #f)))))
 
   (feature
    (name 'mail-aliases)
-   (values
-    (rde-system-services
-     (list
-      (service mail-aliases-service-type
-               aliases)
-      (service dovecot-service-type
-               (dovecot-configuration
-                (mail-location "maildir:~/.maildir")
-                (listen        '("127.0.0.1"))))
-      (service exim-service-type
-       (exim-configuration
-        (config-file #f))))))
+   (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
@@ -271,19 +264,17 @@
           (auto-enable? #t))
   ;; https://guix.gnu.org/manual/en/html_node/Desktop-Services.html
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list))
+    (cons*
+     (service iio-sensor-proxy-service-type
+              (iio-sensor-proxy-configuration
+               (auto-enable? auto-enable?)))))
 
   (feature
    (name 'iio-sensor-proxy)
-   (values
-    (rde-system-services
-     (list
-      (service iio-sensor-proxy-service-type
-               (iio-sensor-proxy-configuration
-                (auto-enable? auto-enable?))))))
+   (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
@@ -297,19 +288,17 @@
   ;; https://jonathansblog.co.uk/using-dnsmasq-as-an-internal-dns-server-to-block-online-adverts
   ;; https://stackoverflow.com/questions/48644841/multiple-addn-hosts-conf-in-dnsmasq
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list))
+    (cons*
+     (service dnsmasq-service-type
+              (dnsmasq-configuration (no-resolv? no-resolv?)
+                                     (local-service? local-service?)))))
 
   (feature
    (name 'dnsmasq)
-   (values
-    (rde-system-services
-     (list
-      (service dnsmasq-service-type
-               (dnsmasq-configuration (no-resolv? no-resolv?)
-                                      (local-service? local-service?))))))
+   (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
@@ -321,37 +310,33 @@
           (dns "dnsmasq"))
   ;; https://guix.gnu.org/manual/en/html_node/Networking-Services.html
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list))
+    (cons*
+     (service network-manager-service-type
+              (network-manager-configuration
+               (vpn-plugins vpn-plugins)
+               (dns dns)))))
 
   (feature
    (name 'network-manager-vpn)
-   (values
-    (rde-system-services
-     (list
-      (service network-manager-service-type
-               (network-manager-configuration
-                (vpn-plugins vpn-plugins)
-                (dns dns))))))
+   (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
 (define* feature-dns-services
   ;; https://guix.gnu.org/manual/en/html_node/Avahi-Services.html
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list))
+    (cons*
+     (service avahi-service-type)))
 
   (feature
    (name 'avahi)
-   (values
-    (rde-system-services
-     (list
-      (service avahi-service-type))))
+   (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
@@ -359,17 +344,15 @@
 (define* feature-pointer-services
   ;; https://guix.gnu.org/manual/en/html_node/GPM-Services.html
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list))
+    (cons*
+     (service gpm-service-type)))
 
   (feature
    (name 'gpm)
-   (values
-    (rde-system-services
-     (list
-      (service gpm-service-type))))
+   (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
@@ -378,19 +361,17 @@
           #:key (auto-enable? #t))
   ;; https://unix.stackexchange.com/questions/617858/how-to-enable-bluetooth-in-guix
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list))
+    (cons*
+     (service bluetooth-service-type
+              (bluetooth-configuration
+               (auto-enable? auto-enable?)))))
 
   (feature
    (name 'bluetooth)
-   (values
-    (rde-system-services
-     (list
-      (service bluetooth-service-type
-               (bluetooth-configuration
-                (auto-enable? auto-enable?))))))
+   (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
@@ -422,29 +403,27 @@
                              (type "pipewire")
                              (enabled?   #f)))))
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list))
+    (cons*
+     (service mpd-service-type
+              (mpd-configuration
+               (auto-update? auto-update?)
+               (user  user)
+               (group group)
+               (log-file log-file)
+               (log-level log-level)
+               (state-file state-file)
+               (sticker-file sticker-file)
+               (db-file db-file)
+               (music-directory music-directory)
+               (playlist-directory playlist-directory)
+               (outputs outputs)))))
 
   (feature
    (name 'mpd)
-   (values
-    (rde-system-services
-     (list
-      (service mpd-service-type
-               (mpd-configuration
-                (auto-update? auto-update?)
-                (user  user)
-                (group group)
-                (log-file log-file)
-                (log-level log-level)
-                (state-file state-file)
-                (sticker-file sticker-file)
-                (db-file db-file)
-                (music-directory music-directory)
-                (playlist-directory playlist-directory)
-                (outputs outputs))))))
+   (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
@@ -458,10 +437,10 @@
 
   ;; https://guix.gnu.org/manual/en/html_node/CUPS-Services.html
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list
+    (cons*
      (service cups-service-type
               (cups-configuration
                (web-interface? web-interface?)
@@ -479,10 +458,10 @@
           #:key)
   ;; https://github.com/alezost/guix-config/blob/master/system-config/os-main.scm
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list (service polkit-service-type)))
+    (cons* (service polkit-service-type)))
 
   (feature
    (name 'polkit)
@@ -497,10 +476,10 @@
           (allow-weak-crypto? #t)
           (realms '()))
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list
+    (cons*
      (service krb5-service-type
               (krb5-configuration
                (default-realm default-realm)
@@ -517,10 +496,10 @@
 (define* (feature-container-sevices #:key)
    ;; https://guix.gnu.org/manual/en/html_node/Container-Services.html
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list
+    (cons*
      (service containerd-service-type)
      (service docker-service-type)
      (service spice-vdagent-service-type)))
@@ -540,10 +519,10 @@
                                   (name "sshd")
                                   (enabled? #t)))))
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list
+    (cons*
      (service pcscd-service-type
               (pcscd-configuration (pcsc-lite pcsc-lite)
                                    (usb-drivers (list ccid))))
@@ -563,10 +542,10 @@
           (configuration-directory #f))
   ;; https://guix.gnu.org/manual/en/html_node/Audit-Services.html
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list
+    (cons*
      (service auditd-service-type
               (auditd-configuration
                (audit audit)
@@ -594,10 +573,10 @@
   ;; https://gitlab.com/Efraim/guix-config/blob/master/macbook41_config.scm
   ;; https://guix.gnu.org/manual/en/html_node/Base-Services.html
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list
+    (cons*
      (service guix-service-type
               (guix-configuration
                (discover?        discover?)
@@ -630,10 +609,10 @@
   ;; https://gitlab.com/Efraim/guix-config/blob/master/macbook41_config.scm)
   ;; https://issues.guix.info/issue/35674
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list
+    (cons*
      (service gdm-service-type
               (gdm-configuration
                (xorg-configuration xorg-configuration)
@@ -651,10 +630,10 @@
           #:key
           (script-file (local-file "/etc/guix/default.pa")))
   (define (get-home-services config)
-    (list))
+    (cons*))
 
   (define (get-system-packages config)
-    (list
+    (cons*
      (service pulseaudio-service-type
               (pulseaudio-configuration
                (script-file script-file)))))
