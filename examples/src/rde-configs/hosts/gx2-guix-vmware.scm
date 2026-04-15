@@ -106,33 +106,40 @@
    #:system-services
    (list)))
 
-
-(define-public gx2-guix-vmware-features
-  (list (feature-host-info #:host-name "gx2-guix-vmware"
-                           #:timezone "Asia/Kolkata")
-          ;; Allows to declare specific bootloader configuration,
-          ;; grub-efi-bootloader used by default
-          ;; (feature-bootloader)
-        (let-values (((rootfs sys-devices sys-fs) (devfs-system #:disk-serial-id "vmware"
-                                                                #:fs-boot-efi-partition (uuid "4D78-999F" 'fat32)))
-                     ((home-devices home-fs) (devfs-system #:disk-serial-id "vmware")))
-          (feature-file-systems #:mapped-devices (append sys-devices home-devices)
-                                #:file-systems (append sys-fs home-fs)))
-        guilem-kuv500-services
-
-        (feature-base-services)
-        (feature-desktop-services)
-
-        ;; session stack
-        (feature-dbus)
-        (feature-polkit)
-        (feature-elogind)
-
-        ;; display stack
-        ;; (feature-wayland)
-
-        ;; your stuff
-        (feature-file-systems ...)
-        (feature-hidpi)))
+(define-public gx2-guix-vmware-features (define-lotus-machine-features "gx2-guix-vmware"
+                                          #:disk-serial-if-system "vmware"
+                                          #:disk-serial-if-home "vmware"
+                                          #:fs-boot-efi-partition (uuid "4D78-999F" 'fat32)
+                                          #:kernel linux-libre
+                                         ;; #:firmware (list linux-firmware)
+                                           #:kernel-arguments (append (list "usbcore.autosuspend=-1"
+                                                                       "libata.force=2:disable"
+                                                                       "libata.noacpi=1"
+                                                                       "libata.ignore_hpa=1"
+                                                                       "--verbose"
+                                                                       "nosplash"
+                                                                       "debug"))
+                                        ;; (if (and (pair? %lotus-swap-devices)
+                                        ;;          (> (length %lotus-swap-devices) 0))
+                                        ;;     (list (string-append "resume="
+                                        ;;                          (swap-space-target (car %lotus-swap-devices))))
+                                        ;;     '())
+                                           #:initrd (lambda (file-systems . rest)
+                                                      (apply base-initrd file-systems
+                                                             #:extra-modules '("virtio.ko"
+                                                                               "virtio_balloon.ko"
+                                                                               "virtio_ring.ko"
+                                                                               "virtio_blk.ko"
+                                                                               "virtio_pci.ko"
+                                                                               ;; https://issues.guix.gnu.org/31887
+                                                                               "mptbase.ko"
+                                                                               "mptscsih.ko"
+                                                                               "mptspi.ko"
+                                                                               "virtio_net.ko")
+                                                             rest))
+                                           #:custom-services (feature-custom-services
+                                                              #:feature-name-prefix 'guilem-kuv500-extra
+                                                              #:system-services
+                                                              (list))))
 
 

@@ -256,16 +256,16 @@
   fs-builder)
 
 
-(define* (devfs-system #:key
-                       ;; lotus-lvm-dev-fs-builders
-                       (disk-serial-id "CHANGEIT")
-                       (disk-prefix    "vds")
-                       (disk-suffix-seq 01)
-                       (guix-boot-mount? #f)
-                       (guix-boot-create-mount-point? #f)
-                       (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
-                       (guix-bootefi-mount? #f)
-                       (guix-bootefi-needed-for-boot? #f))
+(define* (lotus-devfs-system #:key
+                             ;; lotus-lvm-dev-fs-builders
+                             (disk-serial-id "CHANGEIT")
+                             (disk-prefix    "vds")
+                             (disk-suffix-seq 01)
+                             (guix-boot-mount? #f)
+                             (guix-boot-create-mount-point? #f)
+                             (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
+                             (guix-bootefi-mount? #f)
+                             (guix-bootefi-needed-for-boot? #f))
   (let-values* (((build-md build-fs) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
                                                                 #:prefix (lambda () disk-prefix)
                                                                 #:suffix-seq (lambda () disk-suffix-seq))))
@@ -420,14 +420,12 @@
                         fs-boot-efi)))
           (values fs-guix-root devices fs)))))
 
-
-
-(define* (devfs-home #:key
-                       ;; lotus-lvm-dev-fs-builders
-                     (fs-root #f)
-                     (disk-serial-id "CHANGEIT")
-                     (disk-prefix "vds")
-                     (disk-suffix-seq 0))
+(define* (lotus-devfs-home #:key
+                           ;; lotus-lvm-dev-fs-builders
+                           (fs-root #f)
+                           (disk-serial-id "CHANGEIT")
+                           (disk-prefix "vds")
+                           (disk-suffix-seq 0))
   (let-values* (((build-md build-fs) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
                                                                 #:prefix (lambda () disk-prefix)
                                                                 #:suffix-seq (lambda () disk-suffix-seq))))
@@ -445,4 +443,15 @@
         (let ((devices (list md-house-home))
               (fs (list fs-house-home)))
           (values devices fs)))))
+
+(define* (lotus-devfs-swap #:key
+                           ;; lotus-lvm-dev-fs-builders
+                           (fs-root #f)
+                           (disk-serial-id "CHANGEIT")
+                           (disk-prefix "vds")
+                           (disk-suffix-seq 0))
+  (let-values* (((build-md build-fs) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
+                                                                #:prefix (lambda () disk-prefix)
+                                                                #:suffix-seq (lambda () disk-suffix-seq))))
+               (build-md "guix" "swap")))
 

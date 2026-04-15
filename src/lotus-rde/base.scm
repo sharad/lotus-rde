@@ -670,14 +670,15 @@
    (system-services-getter get-system-services)))
 
 
-(define* define-machine (hostname #:key
-                         (disk-serial-if-system "aaa")
-                         (disk-serial-if-home "aaa")
-                         (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
-                         (kernel linux)
-                         (firmware '())
-                         (initrd base-initrd)
-                         (custom-services #f))
+(define* define-lotus-machine-features (hostname #:key
+                                        (disk-serial-if-system "aaa")
+                                        (disk-serial-if-home "aaa")
+                                        (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
+                                        (kernel linux)
+                                        (firmware '())
+                                        (kernel-arguments '())
+                                        (initrd base-initrd)
+                                        (custom-services #f))
   (list (feature-host-info #:host-name hostname
                            ;; #:locale    (operating-system-locale bare-bone-os)
                            ;; ls `guix build tzdata`/share/zoneinfo
@@ -685,18 +686,7 @@
         (feature-kernel #:kernel kernel
                         #:initrd initrd
                         #:firmware firmware
-                        #:kernel-arguments (append (list "usbcore.autosuspend=-1"
-                                                         "libata.force=2:disable"
-                                                         "libata.noacpi=1"
-                                                         "libata.ignore_hpa=1"
-                                                         "--verbose"
-                                                         "nosplash"
-                                                         "debug")))
-                                                   ;; (if (and (pair? %lotus-swap-devices)
-                                                   ;;          (> (length %lotus-swap-devices) 0))
-                                                   ;;     (list (string-append "resume="
-                                                   ;;                          (swap-space-target (car %lotus-swap-devices))))
-                                                   ;;     '())
+                        #:kernel-arguments kernel-arguments)
         (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader grub-bootloader)
                                                                                  (targets    '())))
                                                                                  ;; (keyboard-layout %lotus-keyboard-layout)
@@ -704,14 +694,15 @@
           ;; Allows to declare specific bootloader configuration,
           ;; grub-efi-bootloader used by default
           ;; (feature-bootloader)
-        (let-values (((rootfs sys-devices sys-fs) (devfs-system #:disk-serial-id disk-serial-if-system
-                                                                #:fs-boot-efi-partition fs-boot-efi-partition))
-                     ((home-devices home-fs) (devfs-system #:disk-serial-id disk-serial-if-home)))
+        (let-values (((rootfs sys-devices sys-fs) (lotus-devfs-system
+                                                   #:disk-serial-id disk-serial-if-system
+                                                   #:fs-boot-efi-partition fs-boot-efi-partition))
+                     ((home-devices home-fs) (lotus-devfs-system
+                                              #:disk-serial-id disk-serial-if-home)))
           (feature-file-systems #:mapped-devices (append sys-devices home-devices)
                                 #:file-systems (append sys-fs home-fs)
-                                #:swap-devices '()
+                                #:swap-devices (lotus-devfs-swap)
                                 #:user-pam-file-systems '()))
-        guilem-kuv500-services
 
         (feature-base-services)
         (feature-desktop-services)
