@@ -3,5 +3,5 @@
  (directory "src")
  (dependencies
   (channel
-   (name nonguix)
+   (name rde)
    (url "https://git.sr.ht/~abcdw/rde"))))
