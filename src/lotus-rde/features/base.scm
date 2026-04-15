@@ -325,7 +325,7 @@
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
-(define* feature-dns-services
+(define* (feature-dns-services)
   ;; https://guix.gnu.org/manual/en/html_node/Avahi-Services.html
   (define (get-home-services config)
     (cons*))
@@ -341,7 +341,7 @@
    (system-services-getter get-system-services)))
 
 
-(define* feature-pointer-services
+(define* (feature-pointer-services)
   ;; https://guix.gnu.org/manual/en/html_node/GPM-Services.html
   (define (get-home-services config)
     (cons*))
