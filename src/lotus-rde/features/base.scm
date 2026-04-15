@@ -680,6 +680,15 @@
                                 #:swap-devices (lotus-devfs-swap)
                                 #:user-pam-file-systems '()))
 
+        (feature-custom-services
+         #:feature-name-prefix 'openssh-server-extra
+         #:system-services
+         (list
+          ;; (service dhcp-client-service-type)
+          ;; (service cloud-init-service-type)
+          (service openssh-service-type)))
+
+
         (feature-base-services)
         (feature-desktop-services)
 
