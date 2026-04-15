@@ -1,4 +1,4 @@
-(define-module (lotus-rde base)
+(define-module (lotus-rde features base)
   #:use-module (ice-9 match)
   #:use-module (rde features)
   #:use-module (gnu packages base)
