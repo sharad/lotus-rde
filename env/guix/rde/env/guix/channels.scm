@@ -39,7 +39,7 @@
           (name 'lotus-rde)
           (url "https://github.com/sharad/lotus-rde.git")
           (branch "master")
-          (commit "a33018cc15165004edf64ba51c2266f753d62c7d"))
+          (commit "7d380eb884fdf6ae5fad73af7e33c9acbbde7119"))
         (channel
           (name 'lotus)
           (url "https://github.com/sharad/guix")
