@@ -5,7 +5,6 @@
   #:use-module (lotus-rde features base)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
-  #:use-module (rde-configs default)
   #:use-module (ice-9 match))
 
 

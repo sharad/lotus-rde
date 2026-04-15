@@ -3,7 +3,6 @@
   #:use-module (rde features system)
   #:use-module (rde features wm)
   #:use-module (lotus-rde features base)
-  #:use-module (rde-configs default)
   #:use-module (ice-9 match))
 
 
@@ -12,8 +11,6 @@
                                           #:disk-serial-if-system "vmware"
                                           #:disk-serial-if-home "vmware"
                                           #:fs-boot-efi-partition (uuid "4D78-999F" 'fat32)
-                                          #:kernel linux-libre
-                                          ;; #:firmware (list linux-firmware)
                                           #:kernel-arguments (append (list "usbcore.autosuspend=-1"
                                                                       "libata.force=2:disable"
                                                                       "libata.noacpi=1"
