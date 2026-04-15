@@ -4,4 +4,4 @@
  (dependencies
   (channel
    (name nonguix)
-   (url "https://git.sr.ht/~abcdw/rde")))
+   (url "https://git.sr.ht/~abcdw/rde"))))
