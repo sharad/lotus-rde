@@ -44,7 +44,7 @@ guix-update-pull:
 	guix pull --news;
 	guix pull --news --details
 
-guix-update-channels: guix-update-pull
+guix-update-channels-latest: guix-update-pull
 	echo ';; -*- mode: scheme; -*-' > $(CHANNELS_ENV)
 	echo ';;; rde --- Reproducible development environment.' >> $(CHANNELS_ENV)
 	echo ';;;' >> $(CHANNELS_ENV)
@@ -66,6 +66,9 @@ guix-update-channels: guix-update-pull
 
 guix-update-examples-channel:
 	make -C examples guix-update-channel
+
+guix-update-examples-channel-latest: guix-update-channels-latest
+	make guix-update-examples-channel
 
 ares:
 	${GUIX} shell ${DEV_ENV_LOAD_PATH} \
