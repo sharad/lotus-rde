@@ -65,6 +65,29 @@ guix-update-channel:
 	echo 'rde:core-channels)) core-channels' >> $(CHANNELS_FILE)
 	guix style --whole-file $(CHANNELS_FILE)
 
+
+ifneq ($(strip $(RDE_TARGET)),)
+
+rde/home/build: guix
+	${GUIX} home \
+	build ${CONFIGS}
+
+rde/home/reconfigure: guix
+	${GUIX} home \
+	reconfigure ${CONFIGS}
+
+rde/system/build: guix
+	${GUIX} system \
+	build ${CONFIGS}
+
+rde/system/reconfigure: guix
+	${GUIX} system \
+	reconfigure ${CONFIGS}
+
+endif
+
+
+
 ixy/home/build: guix
 	RDE_TARGET=ixy-home ${GUIX} home \
 	build ${CONFIGS}
