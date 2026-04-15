@@ -441,6 +441,239 @@ if [ -f $GUIX_PROFILE/etc/profile ]; then source $GUIX_PROFILE/etc/profile; fi
 
     (feature-base-services))))
 
+(define-public %sharad-features-notused-now
+  (append
+   ;; all-features-with-custom-kernel-and-substitutes
+   (list
+    (feature-additional-services)
+    (feature-user-info
+     #:user-name "s"
+     #:full-name "Sharad Pratap"
+     #:email ""
+     #:user-initial-password-hash
+     "$6$abc$3SAZZQGdvQgAscM2gupP1tC.SqnsaLSPoAnEOb2k6jXMhzQqS1kCSplAJ/vUy2rrnpHtt6frW2Ap5l/tIvDsz."
+     ;; (crypt "bob" "$6$abc")
+
+     ;; WARNING: This option can reduce the explorability by hiding
+     ;; some helpful messages and parts of the interface for the sake
+     ;; of minimalistic, less distractive and clean look.  Generally
+     ;; it's not recommended to use it.
+     #:emacs-advanced-user? #t)
+    (feature-gnupg
+     #:gpg-primary-key "74830A276C328EC2"
+     #:ssh-keys '(("58AAE5966479124A357F7D6B9D710EBA1C24E10E")))
+    (feature-security-token)
+    (feature-password-store
+     #:password-store-directory "/data/sharad/password-store"
+     #:remote-password-store-url "ssh://sharad@olorin.lan/~/state/password-store")
+
+    (feature-mail-settings
+     #:mail-directory-fn (const "/data/sharad/mail")
+     #:mail-accounts (list
+                      (mail-account
+                       (id 'work)
+                       (type 'migadu)
+                       (fqda "andrew@trop.in")
+                       (aliases '("admin@trop.in" "postmaster@trop.in"))
+                       (pass-cmd "pass show mail/work"))
+                      (mail-account
+                       (id 'personal)
+                       (type 'migadu)
+                       (fqda "mail@trop.in")
+                       (pass-cmd "pass show mail/personal")))
+     #:mailing-lists (list (mail-lst 'guile-devel "guile-devel@gnu.org"
+                                     '("https://yhetil.org/guile-devel/0"))
+                           (mail-lst 'guix-devel "guix-devel@gnu.org"
+                                     '("https://yhetil.org/guix-devel/0"))
+                           (mail-lst 'guix-bugs "guix-bugs@gnu.org"
+                                     '("https://yhetil.org/guix-bugs/0"))
+                           (mail-lst 'guix-patches "guix-patches@gnu.org"
+                                     '("https://yhetil.org/guix-patches/1"))))
+
+    (feature-irc-settings
+     #:irc-accounts (list
+                     (irc-account
+                      (id 'srht)
+                      (network "chat.sr.ht")
+                      (bouncer? #t)
+                      (nick "sharad"))
+                     (irc-account
+                      (id 'libera)
+                      (network "irc.libera.chat")
+                      (nick "sharad"))
+                     (irc-account
+                      (id 'oftc)
+                      (network "irc.oftc.net")
+                      (nick "sharad"))))
+
+    (feature-ssh-proxy  #:host "pinky-ygg" #:auto-start? #f)
+    (feature-ssh-tunnel #:host "pinky-ygg" #:name "pinky-web-server"
+                        #:auto-start? #t)
+
+    (feature-foot)
+    (feature-yggdrasil)
+    (feature-i2pd
+     #:outproxy 'http://acetone.i2p:3128
+     ;; 'purokishi.i2p
+     #:less-anonymous? #t)
+
+    (feature-personal-emacs-config)
+    (feature-emacs-keycast #:turn-on? #t)
+
+    (feature-emacs-tempel
+     #:default-templates? #t
+     #:templates
+     `(fundamental-mode
+       ,#~""
+       (t (format-time-string "%Y-%m-%d"))
+       (todo
+        (if (derived-mode-p 'lisp-data-mode 'clojure-mode 'scheme-mode)
+            ";;"
+            comment-start)
+        (if (string-suffix-p " " comment-start) "" " ")
+        "TODO"  ": [" user-full-name ", "
+        (format-time-string "%Y-%m-%d") "] ")
+       ;; TODO: Move to feature-guix
+       ;; ,((@ (rde gexp) slurp-file-like)
+       ;;   (file-append ((@ (guix packages) package-source)
+       ;;                 (@ (gnu packages package-management) guix))
+       ;;                "/etc/snippets/tempel/text-mode"))
+       ))
+    (feature-emacs-time)
+    (feature-emacs-spelling
+     #:spelling-program (@ (gnu packages hunspell) hunspell)
+     #:spelling-dictionaries
+     (list
+      (@ (gnu packages hunspell) hunspell-dict-en)
+      (@ (rde packages aspell) hunspell-dict-ru)))
+    (feature-emacs-git
+     #:project-directory "/data/sharad/work")
+    ;; https://plaindrops.de/blog/2020/GTDorgmode/
+    ;; https://www.labri.fr/perso/nrougier/GTD/index.html#org2d62325
+    (feature-emacs-org
+     #:org-directory "/data/sharad/work/sharad/private"
+     #:org-indent? #f
+     #:org-capture-templates
+     ;; https://libreddit.tiekoetter.com/r/orgmode/comments/gc76l3/org_capture_inside_notmuch/
+     `(("r" "Reply" entry (file+headline "" "Tasks")
+        "* TODO %:subject %?\nSCHEDULED: %t\n%U\n%a\n"
+        :immediate-finish t)
+       ("t" "Todo" entry (file+headline "" "Tasks") ;; org-default-notes-file
+        "* TODO %?\nSCHEDULED: %t\n%a\n")
+       ("p" "PhD Todo" entry
+        (file+headline "/data/sharad/work/sharad/private/phd.org" "Tasks")
+        "* TODO %?\nSCHEDULED: %t\n%a\n")))
+    (feature-emacs-org-roam
+     ;; TODO: Rewrite to states
+     #:org-roam-directory "/data/sharad/work/sharad/notes/notes")
+    (feature-emacs-org-dailies
+     #:encrypted? #t)
+
+    (feature-emacs-org-agenda
+     ;; Add efforts to agenda, it's a bit space hungry, so not included in
+     ;; feature by default yet.
+     #:org-agenda-prefix-format
+     '((agenda . " %i %-12:c%-6e%?-12t% s")
+       (todo . " %i %-12:c %-6e")
+       (tags . " %i %-12:c")
+       (search . " %i %-12:c"))
+     #:org-agenda-files '("/data/sharad/work/sharad/private/todo.org"
+                          "/data/sharad/work/sharad/private/phd.org"))
+    (feature-emacs-elfeed
+     #:elfeed-org-files '("/data/sharad/work/sharad/private/rss.org"))
+
+    (feature-android)
+    ;; (feature-javascript)
+    (feature-ocaml #:opam? #t)
+
+    (feature-emacs-piem
+     #:piem-inboxes '(("rde-devel"
+                       :url "https://lists.sr.ht/~sharad/rde-devel"
+                       :address "~sharad/rde-devel@lists.sr.ht"
+                       :coderepo ("~/work/sharad/rde/"
+                                  "~/work/sharad/emacs-arei/"
+                                  "~/work/sharad/guile-ares-rs/"))
+                      ("guix-devel"
+                       :url "https://yhetil.org/guile-devel/"
+                       :address "guile-devel@gnu.org"
+                       :coderepo "~/work/gnu/guile/")
+                      ("guix-patches"
+                       :url "https://yhetil.org/guix-patches/"
+                       :address "guix-patches@gnu.org"
+                       :coderepo "~/work/gnu/guix/")))
+    ;; TODO: move feature to general, move extra configuration to service.
+    (feature-notmuch
+     #:notmuch-queries
+     '((rde-all . "to:\"rde-devel\" or to:\"rde-discuss\" or tag:rde")
+       (rde-inbox . "query:rde-all and tag:inbox"))
+     #:extra-tag-updates-post
+     '("notmuch tag +guix-home +inbox -- 'thread:\"\
+{((subject:guix and subject:home) or (subject:service and subject:home) or \
+subject:/home:/) and tag:new}\"'"
+       "notmuch tag +rde +list -- 'to:.*rde.*@lists.sr.ht and tag:new}'")
+     #:notmuch-saved-searches
+     (append
+      ;; TODO: [Andrew Tropin, 2024-01-07] Archive replied emails automatically
+      '((:name "To Process"
+         :query "tag:todo or (tag:inbox and not tag:unread and not tag:replied)"
+         :key "t")
+        (:name "Drafts" :query "tag:draft" :key "d")
+        (:name "Watching" :query "thread:{tag:watch} and tag:unread" :key "w")
+        (:name "RDE Inbox"
+         :query "query:rde-inbox" :key "ir")
+        (:name "RDE All"
+         :query "query:rde-all" :key "pr")
+        (:name "Project Debugger: RDE Internship 2025"
+         :query "rde internship or tag:guile-debugger" :key "pd")
+        (:name "Project Suitbl"
+         :query "to: 2024-10-272@NLnet.nl or tag:suitbl" :key "ps")
+        (:name "Work Inbox (Unsorted)"
+         :query "(tag:work and tag:inbox) and not query:rde-all"
+         :key "iu")
+        (:name "Work Inbox"
+         :query "tag:work and tag:inbox"
+         :key "iw")
+        (:name "Personal Inbox"
+         :query "tag:personal and tag:inbox"
+         :key "ip")
+        (:name "Guix Home Inbox" :key "H" :query "tag:guix-home and tag:unread"))
+      ;; %rde-notmuch-saved-searches
+      '()))
+
+    (feature-sourcehut
+     #:user-name-fn (const "sharad"))
+    (feature-yt-dlp)
+
+    (feature-plantuml)
+    (feature-clojure)
+    (feature-libreoffice)
+
+    ;; TODO: Remove auctex dependency, which interjects in texinfo-mode.
+    (feature-emacs-citation
+     #:global-bibliography
+     (list "/data/sharad/work/sharad/notes/bibliography.bib"))
+
+    (feature-font-japanese)
+    (feature-emacs-gptel)
+    (feature-emacs-ellama)
+    (feature-emacs-cua)
+    (feature-difftastic
+     #:parse-error-limit 1000)
+    (feature-keyboard
+     ;; To get all available options, layouts and variants run:
+     ;; cat `guix build xkeyboard-config`/share/X11/xkb/rules/evdev.lst
+     ;; To get a list of symbols and actions:
+     ;; cat `guix build xorgproto`/include/X11/keysymdef.h
+     #:keyboard-layout
+     (keyboard-layout
+      "us,ru" "dvorak,"
+      #:options '("grp:shifts_toggle" "ctrl:nocaps"))))))
+
+
+
+
+
+
 (define-public %sharad-features
   (append
    ;; all-features-with-custom-kernel-and-substitutes
@@ -459,217 +692,4 @@ if [ -f $GUIX_PROFILE/etc/profile ]; then source $GUIX_PROFILE/etc/profile; fi
      ;; some helpful messages and parts of the interface for the sake
      ;; of minimalistic, less distractive and clean look.  Generally
      ;; it's not recommended to use it.
-     #:emacs-advanced-user? #t)
-    ;; (feature-gnupg
-    ;;  #:gpg-primary-key "74830A276C328EC2"
-    ;;  #:ssh-keys '(("58AAE5966479124A357F7D6B9D710EBA1C24E10E")))
-    ;; (feature-security-token)
-    ;; (feature-password-store
-    ;;  #:password-store-directory "/data/sharad/password-store"
-    ;;  #:remote-password-store-url "ssh://sharad@olorin.lan/~/state/password-store")
-
-    ;; (feature-mail-settings
-    ;;  #:mail-directory-fn (const "/data/sharad/mail")
-    ;;  #:mail-accounts (list
-    ;;                   (mail-account
-    ;;                    (id 'work)
-    ;;                    (type 'migadu)
-    ;;                    (fqda "andrew@trop.in")
-    ;;                    (aliases '("admin@trop.in" "postmaster@trop.in"))
-    ;;                    (pass-cmd "pass show mail/work"))
-    ;;                   (mail-account
-    ;;                    (id 'personal)
-    ;;                    (type 'migadu)
-    ;;                    (fqda "mail@trop.in")
-    ;;                    (pass-cmd "pass show mail/personal")))
-    ;;  #:mailing-lists (list (mail-lst 'guile-devel "guile-devel@gnu.org"
-    ;;                                  '("https://yhetil.org/guile-devel/0"))
-    ;;                        (mail-lst 'guix-devel "guix-devel@gnu.org"
-    ;;                                  '("https://yhetil.org/guix-devel/0"))
-    ;;                        (mail-lst 'guix-bugs "guix-bugs@gnu.org"
-    ;;                                  '("https://yhetil.org/guix-bugs/0"))
-    ;;                        (mail-lst 'guix-patches "guix-patches@gnu.org"
-    ;;                                  '("https://yhetil.org/guix-patches/1"))))
-
-    ;; (feature-irc-settings
-    ;;  #:irc-accounts (list
-    ;;                  (irc-account
-    ;;                   (id 'srht)
-    ;;                   (network "chat.sr.ht")
-    ;;                   (bouncer? #t)
-    ;;                   (nick "sharad"))
-    ;;                  (irc-account
-    ;;                   (id 'libera)
-    ;;                   (network "irc.libera.chat")
-    ;;                   (nick "sharad"))
-    ;;                  (irc-account
-    ;;                   (id 'oftc)
-    ;;                   (network "irc.oftc.net")
-    ;;                   (nick "sharad"))))
-
-    ;; (feature-ssh-proxy  #:host "pinky-ygg" #:auto-start? #f)
-    ;; (feature-ssh-tunnel #:host "pinky-ygg" #:name "pinky-web-server"
-    ;;                     #:auto-start? #t)
-
-;;     (feature-foot)
-;;     (feature-yggdrasil)
-;;     (feature-i2pd
-;;      #:outproxy 'http://acetone.i2p:3128
-;;      ;; 'purokishi.i2p
-;;      #:less-anonymous? #t)
-
-;;     (feature-personal-emacs-config)
-;;     (feature-emacs-keycast #:turn-on? #t)
-
-;;     (feature-emacs-tempel
-;;      #:default-templates? #t
-;;      #:templates
-;;      `(fundamental-mode
-;;        ,#~""
-;;        (t (format-time-string "%Y-%m-%d"))
-;;        (todo
-;;         (if (derived-mode-p 'lisp-data-mode 'clojure-mode 'scheme-mode)
-;;             ";;"
-;;             comment-start)
-;;         (if (string-suffix-p " " comment-start) "" " ")
-;;         "TODO"  ": [" user-full-name ", "
-;;         (format-time-string "%Y-%m-%d") "] ")
-;;        ;; TODO: Move to feature-guix
-;;        ;; ,((@ (rde gexp) slurp-file-like)
-;;        ;;   (file-append ((@ (guix packages) package-source)
-;;        ;;                 (@ (gnu packages package-management) guix))
-;;        ;;                "/etc/snippets/tempel/text-mode"))
-;;        ))
-;;     (feature-emacs-time)
-;;     (feature-emacs-spelling
-;;      #:spelling-program (@ (gnu packages hunspell) hunspell)
-;;      #:spelling-dictionaries
-;;      (list
-;;       (@ (gnu packages hunspell) hunspell-dict-en)
-;;       (@ (rde packages aspell) hunspell-dict-ru)))
-;;     (feature-emacs-git
-;;      #:project-directory "/data/sharad/work")
-;;     ;; https://plaindrops.de/blog/2020/GTDorgmode/
-;;     ;; https://www.labri.fr/perso/nrougier/GTD/index.html#org2d62325
-;;     (feature-emacs-org
-;;      #:org-directory "/data/sharad/work/sharad/private"
-;;      #:org-indent? #f
-;;      #:org-capture-templates
-;;      ;; https://libreddit.tiekoetter.com/r/orgmode/comments/gc76l3/org_capture_inside_notmuch/
-;;      `(("r" "Reply" entry (file+headline "" "Tasks")
-;;         "* TODO %:subject %?\nSCHEDULED: %t\n%U\n%a\n"
-;;         :immediate-finish t)
-;;        ("t" "Todo" entry (file+headline "" "Tasks") ;; org-default-notes-file
-;;         "* TODO %?\nSCHEDULED: %t\n%a\n")
-;;        ("p" "PhD Todo" entry
-;;         (file+headline "/data/sharad/work/sharad/private/phd.org" "Tasks")
-;;         "* TODO %?\nSCHEDULED: %t\n%a\n")))
-;;     (feature-emacs-org-roam
-;;      ;; TODO: Rewrite to states
-;;      #:org-roam-directory "/data/sharad/work/sharad/notes/notes")
-;;     (feature-emacs-org-dailies
-;;      #:encrypted? #t)
-
-;;     (feature-emacs-org-agenda
-;;      ;; Add efforts to agenda, it's a bit space hungry, so not included in
-;;      ;; feature by default yet.
-;;      #:org-agenda-prefix-format
-;;      '((agenda . " %i %-12:c%-6e%?-12t% s")
-;;        (todo . " %i %-12:c %-6e")
-;;        (tags . " %i %-12:c")
-;;        (search . " %i %-12:c"))
-;;      #:org-agenda-files '("/data/sharad/work/sharad/private/todo.org"
-;;                           "/data/sharad/work/sharad/private/phd.org"))
-;;     (feature-emacs-elfeed
-;;      #:elfeed-org-files '("/data/sharad/work/sharad/private/rss.org"))
-
-;;     (feature-android)
-;;     ;; (feature-javascript)
-;;     (feature-ocaml #:opam? #t)
-
-;;     (feature-emacs-piem
-;;      #:piem-inboxes '(("rde-devel"
-;;                        :url "https://lists.sr.ht/~sharad/rde-devel"
-;;                        :address "~sharad/rde-devel@lists.sr.ht"
-;;                        :coderepo ("~/work/sharad/rde/"
-;;                                   "~/work/sharad/emacs-arei/"
-;;                                   "~/work/sharad/guile-ares-rs/"))
-;;                       ("guix-devel"
-;;                        :url "https://yhetil.org/guile-devel/"
-;;                        :address "guile-devel@gnu.org"
-;;                        :coderepo "~/work/gnu/guile/")
-;;                       ("guix-patches"
-;;                        :url "https://yhetil.org/guix-patches/"
-;;                        :address "guix-patches@gnu.org"
-;;                        :coderepo "~/work/gnu/guix/")))
-;;     ;; TODO: move feature to general, move extra configuration to service.
-;;     (feature-notmuch
-;;      #:notmuch-queries
-;;      '((rde-all . "to:\"rde-devel\" or to:\"rde-discuss\" or tag:rde")
-;;        (rde-inbox . "query:rde-all and tag:inbox"))
-;;      #:extra-tag-updates-post
-;;      '("notmuch tag +guix-home +inbox -- 'thread:\"\
-;; {((subject:guix and subject:home) or (subject:service and subject:home) or \
-;; subject:/home:/) and tag:new}\"'"
-;;        "notmuch tag +rde +list -- 'to:.*rde.*@lists.sr.ht and tag:new}'")
-;;      #:notmuch-saved-searches
-;;      (append
-;;       ;; TODO: [Andrew Tropin, 2024-01-07] Archive replied emails automatically
-;;       '((:name "To Process"
-;;          :query "tag:todo or (tag:inbox and not tag:unread and not tag:replied)"
-;;          :key "t")
-;;         (:name "Drafts" :query "tag:draft" :key "d")
-;;         (:name "Watching" :query "thread:{tag:watch} and tag:unread" :key "w")
-;;         (:name "RDE Inbox"
-;;          :query "query:rde-inbox" :key "ir")
-;;         (:name "RDE All"
-;;          :query "query:rde-all" :key "pr")
-;;         (:name "Project Debugger: RDE Internship 2025"
-;;          :query "rde internship or tag:guile-debugger" :key "pd")
-;;         (:name "Project Suitbl"
-;;          :query "to: 2024-10-272@NLnet.nl or tag:suitbl" :key "ps")
-;;         (:name "Work Inbox (Unsorted)"
-;;          :query "(tag:work and tag:inbox) and not query:rde-all"
-;;          :key "iu")
-;;         (:name "Work Inbox"
-;;          :query "tag:work and tag:inbox"
-;;          :key "iw")
-;;         (:name "Personal Inbox"
-;;          :query "tag:personal and tag:inbox"
-;;          :key "ip")
-;;         (:name "Guix Home Inbox" :key "H" :query "tag:guix-home and tag:unread"))
-;;       ;; %rde-notmuch-saved-searches
-;;       '()))
-
-    ;; (feature-sourcehut
-    ;;  #:user-name-fn (const "sharad"))
-    ;; (feature-yt-dlp)
-
-    ;; (feature-plantuml)
-    ;; (feature-clojure)
-    ;; (feature-libreoffice)
-
-    ;; ;; TODO: Remove auctex dependency, which interjects in texinfo-mode.
-    ;; (feature-emacs-citation
-    ;;  #:global-bibliography
-    ;;  (list "/data/sharad/work/sharad/notes/bibliography.bib"))
-
-    ;; (feature-font-japanese)
-    ;; (feature-emacs-gptel)
-    ;; (feature-emacs-ellama)
-    ;; (feature-emacs-cua)
-    ;; (feature-difftastic
-    ;;  #:parse-error-limit 1000)
-
-    ;; (feature-keyboard
-    ;;  ;; To get all available options, layouts and variants run:
-    ;;  ;; cat `guix build xkeyboard-config`/share/X11/xkb/rules/evdev.lst
-    ;;  ;; To get a list of symbols and actions:
-    ;;  ;; cat `guix build xorgproto`/include/X11/keysymdef.h
-    ;;  #:keyboard-layout
-    ;;  (keyboard-layout
-    ;;   "us,ru" "dvorak,"
-    ;;   #:options '("grp:shifts_toggle" "ctrl:nocaps")))
-
-
-    )))
+     #:emacs-advanced-user? #t))))
