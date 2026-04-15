@@ -98,23 +98,21 @@
 ;;          (@swap . "/swap"))))
 
 
-
-
-(define guilem-kuv500-services
-  (feature-custom-services
-   #:feature-name-prefix 'guilem-kuv500-extra
-   #:system-services
-   (list)))
-
-
-(define-public guilem-kuv500-features
-  (list (feature-host-info #:host-name "guilem-kuv500"
+(define* define-machine (hostname #:key
+                         (disk-serial-if-system "aaa")
+                         (disk-serial-if-home "aaa")
+                         (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
+                         (kernel linux)
+                         (firmware '())
+                         (initrd base-initrd)
+                         (custom-services #f))
+  (list (feature-host-info #:host-name hostname
                            ;; #:locale    (operating-system-locale bare-bone-os)
                            ;; ls `guix build tzdata`/share/zoneinfo
                            #:timezone "Asia/Kolkata")
-        (feature-kernel ;; #:kernel linux
-                        ;; #:initrd base-initrd
-                        #:firmware '()
+        (feature-kernel #:kernel kernel
+                        #:initrd initrd
+                        #:firmware firmware
                         #:kernel-arguments (append (list "usbcore.autosuspend=-1"
                                                          "libata.force=2:disable"
                                                          "libata.noacpi=1"
@@ -127,16 +125,16 @@
                                                    ;;     (list (string-append "resume="
                                                    ;;                          (swap-space-target (car %lotus-swap-devices))))
                                                    ;;     '())
-        (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader      grub-bootloader)
-                                                                                 (targets         '())))
+        (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader grub-bootloader)
+                                                                                 (targets    '())))
                                                                                  ;; (keyboard-layout %lotus-keyboard-layout)
                                                                                  ;; (menu-entries    %lotus-grub-ubuntu-menuentries)
           ;; Allows to declare specific bootloader configuration,
           ;; grub-efi-bootloader used by default
           ;; (feature-bootloader)
-        (let-values (((rootfs sys-devices sys-fs) (devfs-system #:disk-serial-id "aaaa"
-                                                                #:fs-boot-efi-partition (uuid "0000-0000" 'fat32)))
-                     ((home-devices home-fs) (devfs-system #:disk-serial-id "aaa")))
+        (let-values (((rootfs sys-devices sys-fs) (devfs-system #:disk-serial-id disk-serial-if-system
+                                                                #:fs-boot-efi-partition fs-boot-efi-partition))
+                     ((home-devices home-fs) (devfs-system #:disk-serial-id disk-serial-if-home)))
           (feature-file-systems #:mapped-devices (append sys-devices home-devices)
                                 #:file-systems (append sys-fs home-fs)
                                 #:swap-devices '()
@@ -146,16 +144,67 @@
         (feature-base-services)
         (feature-desktop-services)
 
-        ;; session stack
-        (feature-dbus)
-        (feature-polkit)
-        (feature-elogind)
+        (feature-file-database-services)
+        ;; (feature-guix-publish-services)
+        (feature-schedular-services)
+        (feature-unattended-upgrade-services)
+        (feature-disk-services)
+        (feature-privileged-programs-services)
+        (feature-messaging-services)
+        (feature-mail-services)
+        (feature-iio-sensor-proxy-services)
+        (feature-network-manager-services)
 
-        ;; display stack
-        ;; (feature-wayland)
+        (feature-dns-services)
+        (feature-pointer-services)
+        (feature-bluetooth-services)
 
-        ;; your stuff
-        (feature-file-systems ...)
-        (feature-hidpi)))
+        ;; (feature-music-services)
+        ;; (feature-printing-services)
+        ;; (feature-polkit-services)
+        ;; (feature-krberos-services)
+        (feature-container-sevices)
+        (feature-security-services)
+        (feature-audit-services)
+        (feature-guix-services)
+        (feature-desktop-manager-service)
+        (feature-pulseaudio-service)))
+
+
+;; ;; session stack
+;; (feature-dbus)
+;; (feature-polkit)
+;; (feature-elogind)
+
+;; display stack
+;; (feature-wayland)
+
+;; your stuff
+;; (feature-hidpi)
+
+
+(define-public guilem-kuv500-features (define-machine "guilem-kuv500"
+                                        #:disk-serial-if-system "aaa"
+                                        #:disk-serial-if-home "aaa"
+                                        #:fs-boot-efi-partition (uuid "0000-0000" 'fat32)
+                                        #:kernel linux
+                                        #:firmware (list linux-firmware)
+                                        #:initrd (lambda (file-systems . rest)
+                                                   (apply base-initrd file-systems
+                                                          #:extra-modules '("virtio.ko"
+                                                                            "virtio_balloon.ko"
+                                                                            "virtio_ring.ko"
+                                                                            "virtio_blk.ko"
+                                                                            "virtio_pci.ko"
+                                                                            ;; https://issues.guix.gnu.org/31887
+                                                                            "mptbase.ko"
+                                                                            "mptscsih.ko"
+                                                                            "mptspi.ko"
+                                                                            "virtio_net.ko")
+                                                          rest))
+                                        #:custom-services (feature-custom-services
+                                                           #:feature-name-prefix 'guilem-kuv500-extra
+                                                           #:system-services
+                                                           (list))))
 
 

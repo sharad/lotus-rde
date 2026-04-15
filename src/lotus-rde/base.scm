@@ -564,7 +564,8 @@
    (system-services-getter get-system-services)))
 
 
-(define* (feature-guix-service #:key
+(define* (feature-guix-services
+          #:key
           (discover? #t)
           (build-accounts 10)
           (authorize-key? #f)
