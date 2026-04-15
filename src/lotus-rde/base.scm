@@ -1,11 +1,7 @@
 (define-module (lotus-rde base)
   #:use-module (ice-9 match)
-  #:use-module (rde features base)
-  #:use-module (rde features system)
-  #:use-module (rde features wm)
-  #:use-module (lotus-rde lib utils)
-  #:use-module (gnu system file-systems)
-  #:use-module (gnu system mapped-devices)
+  #:use-module (rde features)
+  #:use-module (gnu packages base)
   #:export (feature-file-database-services
             feature-guix-publish-services
             feature-schedular-services
