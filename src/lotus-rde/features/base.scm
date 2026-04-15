@@ -645,15 +645,16 @@
    (system-services-getter get-system-services)))
 
 
-(define* define-lotus-machine-features (hostname #:key
-                                        (disk-serial-if-system "aaa")
-                                        (disk-serial-if-home "aaa")
-                                        (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
-                                        (kernel linux)
-                                        (firmware '())
-                                        (kernel-arguments '())
-                                        (initrd base-initrd)
-                                        (custom-services #f))
+(define* (define-lotus-machine-features hostname
+           #:key
+           (disk-serial-if-system "aaa")
+           (disk-serial-if-home "aaa")
+           (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
+           (kernel linux)
+           (firmware '())
+           (kernel-arguments '())
+           (initrd base-initrd)
+           (custom-services #f))
   (list (feature-host-info #:host-name hostname
                            ;; #:locale    (operating-system-locale bare-bone-os)
                            ;; ls `guix build tzdata`/share/zoneinfo
