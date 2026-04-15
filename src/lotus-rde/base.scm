@@ -5,7 +5,26 @@
   #:use-module (rde features wm)
   #:use-module (lotus-rde api utils)
   #:use-module (gnu system file-systems)
-  #:use-module (gnu system mapped-devices))
+  #:use-module (gnu system mapped-devices)
+  #:export (feature-file-database-services
+            feature-guix-publish-services
+            feature-schedular-services
+            feature-unattended-upgrade-services
+            feature-disk-services
+            feature-privileged-programs-services
+            feature-messaging-services
+            feature-mail-services
+            feature-iio-sensor-proxy-services
+            feature-dnsmasq-services
+            feature-network-manager-services
+            feature-dns-services
+            feature-pointer-services
+            feature-bluetooth-services
+            feature-music-services
+            feature-printing-services
+            feature-polkit-services
+            feature-krberos-services
+            define-machine))
 
 
 ;; (get-value 'number-of-ttys cfg 6)
@@ -650,3 +669,77 @@
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
+
+(define* define-machine (hostname #:key
+                         (disk-serial-if-system "aaa")
+                         (disk-serial-if-home "aaa")
+                         (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
+                         (kernel linux)
+                         (firmware '())
+                         (initrd base-initrd)
+                         (custom-services #f))
+  (list (feature-host-info #:host-name hostname
+                           ;; #:locale    (operating-system-locale bare-bone-os)
+                           ;; ls `guix build tzdata`/share/zoneinfo
+                           #:timezone "Asia/Kolkata")
+        (feature-kernel #:kernel kernel
+                        #:initrd initrd
+                        #:firmware firmware
+                        #:kernel-arguments (append (list "usbcore.autosuspend=-1"
+                                                         "libata.force=2:disable"
+                                                         "libata.noacpi=1"
+                                                         "libata.ignore_hpa=1"
+                                                         "--verbose"
+                                                         "nosplash"
+                                                         "debug")))
+                                                   ;; (if (and (pair? %lotus-swap-devices)
+                                                   ;;          (> (length %lotus-swap-devices) 0))
+                                                   ;;     (list (string-append "resume="
+                                                   ;;                          (swap-space-target (car %lotus-swap-devices))))
+                                                   ;;     '())
+        (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader grub-bootloader)
+                                                                                 (targets    '())))
+                                                                                 ;; (keyboard-layout %lotus-keyboard-layout)
+                                                                                 ;; (menu-entries    %lotus-grub-ubuntu-menuentries)
+          ;; Allows to declare specific bootloader configuration,
+          ;; grub-efi-bootloader used by default
+          ;; (feature-bootloader)
+        (let-values (((rootfs sys-devices sys-fs) (devfs-system #:disk-serial-id disk-serial-if-system
+                                                                #:fs-boot-efi-partition fs-boot-efi-partition))
+                     ((home-devices home-fs) (devfs-system #:disk-serial-id disk-serial-if-home)))
+          (feature-file-systems #:mapped-devices (append sys-devices home-devices)
+                                #:file-systems (append sys-fs home-fs)
+                                #:swap-devices '()
+                                #:user-pam-file-systems '()))
+        guilem-kuv500-services
+
+        (feature-base-services)
+        (feature-desktop-services)
+
+        (feature-file-database-services)
+        ;; (feature-guix-publish-services)
+        (feature-schedular-services)
+        (feature-unattended-upgrade-services)
+        (feature-disk-services)
+        (feature-privileged-programs-services)
+        (feature-messaging-services)
+        (feature-mail-services)
+        (feature-iio-sensor-proxy-services)
+        (feature-network-manager-services)
+
+        (feature-dns-services)
+        (feature-pointer-services)
+        (feature-bluetooth-services)
+
+        ;; (feature-music-services)
+        ;; (feature-printing-services)
+        ;; (feature-polkit-services)
+        ;; (feature-krberos-services)
+        (feature-container-sevices)
+        (feature-security-services)
+        (feature-audit-services)
+        (feature-guix-services)
+        (feature-desktop-manager-service)
+        (feature-pulseaudio-service)))
+
+
