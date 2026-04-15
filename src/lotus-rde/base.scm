@@ -3,7 +3,7 @@
   #:use-module (rde features base)
   #:use-module (rde features system)
   #:use-module (rde features wm)
-  #:use-module (lotus-rde api utils)
+  #:use-module (lotus-rde lib utils)
   #:use-module (gnu system file-systems)
   #:use-module (gnu system mapped-devices)
   #:export (feature-file-database-services

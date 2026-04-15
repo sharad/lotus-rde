@@ -1,3 +1,7 @@
+(define-module (lotus-rde base)
+  #:use-module (ice-9 match)
+  #:use-module (lotus-rde lib utils)
+  #:export (feature-mapped-file-systems))
 
 
 

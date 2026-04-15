@@ -1,11 +1,10 @@
-(define-module (lotus-rde rde api utils)
-  ;; #:use-module (lotus-rde rde api defaults)
+(define-module (lotus-rde lib utils)
   #:use-module (guix gexp)
   #:use-module (guix build utils)
   #:use-module (gnu system mapped-devices)
-
-  #:export (build-mapped-device
-            build-parent-dir-file-system-builder))
+  #:export (lotus-devfs-system
+            lotus-devfs-home
+            lotus-devfs-swap))
 
 
 
