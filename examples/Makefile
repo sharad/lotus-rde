@@ -1,20 +1,20 @@
 
 
-CHANNELS_FILE=./env/guix/rde-configs/env/guix/channels.scm
-CHANNELS_FILE_LOCAL_RDE=./env/guix/rde-configs/env/guix/channels-ci.scm
-CHANNELS_FILE_LATEST_GUIX=./env/guix/rde-configs/env/guix/channels-ci-latest-guix.scm
+CHANNELS_FILE = ./env/guix/rde-configs/env/guix/channels.scm
+CHANNELS_FILE_LOCAL_RDE = ./env/guix/rde-configs/env/guix/channels-ci.scm
+CHANNELS_FILE_LATEST_GUIX = ./env/guix/rde-configs/env/guix/channels-ci-latest-guix.scm
 
 GUIXTM_FLAGS = $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
 
 
-GUIXTM=GUILE_LOAD_PATH="../src:../tests:./src" guix time-machine -L ./env/guix -C ${CHANNELS_FILE}$(GUIXTM_FLAGS)
-GUIXTM_LOCAL_RDE=guix time-machine -L ./env/guix -C ${CHANNELS_FILE_LOCAL_RDE}$(GUIXTM_FLAGS)
-GUIXTM_LATEST_GUIX=guix time-machine -L ./env/guix -C ${CHANNELS_FILE_LATEST_GUIX}$(GUIXTM_FLAGS)
+GUIXTM = GUILE_LOAD_PATH = "../src:../tests:./src" guix time-machine -L ./env/guix -C ${CHANNELS_FILE}$(GUIXTM_FLAGS)
+GUIXTM_LOCAL_RDE = guix time-machine -L ./env/guix -C ${CHANNELS_FILE_LOCAL_RDE}$(GUIXTM_FLAGS)
+GUIXTM_LATEST_GUIX = guix time-machine -L ./env/guix -C ${CHANNELS_FILE_LATEST_GUIX}$(GUIXTM_FLAGS)
 
-GUIX=$(GUIXTM) --
+GUIX = $(GUIXTM) --
 
-SRC_DIR=./src
-CONFIGS=${SRC_DIR}/rde-configs/configs.scm
+SRC_DIR = ./src
+CONFIGS = ${SRC_DIR}/rde-configs/configs.scm
 PULL_EXTRA_OPTIONS=
 # --allow-downgrades
 
