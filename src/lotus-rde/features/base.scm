@@ -1,5 +1,6 @@
 (define-module (lotus-rde features base)
   #:use-module (ice-9 match)
+  #:use-module (gnu bootloaders)
   #:use-module (gnu packages base)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
