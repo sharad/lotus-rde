@@ -20,7 +20,7 @@
             feature-printing-services
             feature-polkit-services
             feature-krberos-services
-            define-machine))
+            define-lotus-machine-features))
 
 
 ;; (get-value 'number-of-ttys cfg 6)
