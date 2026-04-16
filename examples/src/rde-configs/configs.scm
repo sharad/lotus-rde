@@ -64,8 +64,9 @@
    (features
     (append
      %ixy-features
-     %abcdw-features))
-   (operating-system (lotus-get-operating-system this-rde-config))))
+     %abcdw-features))))
+   ;; (operating-system (lotus-get-operating-system this-rde-config))
+   
 
 (define-public ixy-os
   (rde-config-operating-system ixy-config))
@@ -85,8 +86,7 @@
    (features
     (append
      %live-features
-     %guest-features))
-   (operating-system (lotus-get-operating-system this-rde-config))))
+     %guest-features))))
 
 (define-public live-os
   (rde-config-operating-system live-config))
@@ -98,8 +98,7 @@
    (features
     (append
      %dell5480-features
-     %sharad-features))
-   (operating-system (lotus-get-operating-system this-rde-config))))
+     %sharad-features))))
 
 (define-public dell5480-os
   (rde-config-operating-system dell5480-config))
@@ -113,8 +112,7 @@
   (rde-config
    (features
     (append %guilem-kuv500-features
-            %sharad-features))
-   (operating-system (lotus-get-operating-system this-rde-config))))
+            %sharad-features))))
 
 (define-public guilem-kuv500-os
   (rde-config-operating-system guilem-kuv500-config))
@@ -128,8 +126,7 @@
   (rde-config
    (features
     (append %gx2-guix-vmware-features
-            %sharad-features)
-    (operating-system (lotus-get-operating-system this-rde-config)))))
+            %sharad-features))))
 
 (define-public gx2-guix-vmware-os
   (rde-config-operating-system gx2-guix-vmware-config))
