@@ -27,18 +27,8 @@
 ;;; variable value.
 
 (define (dispatcher)
-  (let ((rde-target (getenv "RDE_TARGET")))
-    (match rde-target
-      ("ixy-home" ixy-he)
-      ("ixy-system" ixy-os)
-      ("live-system" live-os)
-      ("dell5480-home" dell5480-he)
-      ("dell5480-system" dell5480-os)
-      ("guilem-kuv500-home" guilem-kuv500-he)
-      ("guilem-kuv500-system" guilem-kuv500-os)
-      ("gx2-guix-vmware-home" gx2-guix-vmware-he)
-      ("gx2-guix-vmware-system" gx2-guix-vmware-os)
-      (_ gx2-guix-vmware-os))))
+  guilem-kuv500-os)
+
 
 ;; (pretty-print-rde-config ixy-config)
 ;; (use-modules (gnu services)
