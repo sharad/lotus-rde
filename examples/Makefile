@@ -13,7 +13,7 @@ GUIXTM_LOCAL_RDE = guix time-machine -L ./env/guix -C ${CHANNELS_FILE_LOCAL_RDE}
 GUIXTM_LATEST_GUIX = guix time-machine -L ./env/guix -C ${CHANNELS_FILE_LATEST_GUIX}$(GUIXTM_FLAGS)
 
 GUIXTM_default = $(GUIXTM)
-GUIXTM_local_rde = $(GUIXTM_LOCAL_RDE)
+GUIXTM_local = $(GUIXTM_LOCAL_RDE)
 GUIXTM_latest = $(GUIXTM_LATEST_GUIX)
 
 GUIX = $(GUIXTM_$(BUILD_TYPE)) --
