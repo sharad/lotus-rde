@@ -28,6 +28,7 @@
   #:use-module (ice-9 hash-table)
   #:use-module (ice-9 match)
   #:use-module (ice-9 pretty-print)
+  #:use-module (rde features)
   #:export (lotus-get-operating-system))
 
 (define (lotus-get-operating-system config)
