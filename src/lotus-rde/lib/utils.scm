@@ -1,4 +1,5 @@
 (define-module (lotus-rde lib utils)
+  #:use-module (srfi srfi-11)
   #:use-module (guix gexp)
   #:use-module (guix build utils)
   #:use-module (gnu system mapped-devices)
