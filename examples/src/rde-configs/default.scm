@@ -20,8 +20,8 @@
 
 
 
-(define build-srv-local-file-system  (build-parent-dir-file-system-builder "/srv/volumes/local"))
-(define build-srv-distro-file-system (build-parent-dir-file-system-builder "/srv/volumes/distro"))
+;; (define build-srv-local-file-system  (build-parent-dir-file-system-builder "/srv/volumes/local"))
+;; (define build-srv-distro-file-system (build-parent-dir-file-system-builder "/srv/volumes/distro"))
 
 
 (define %local-udev-lvm-mapped-devices             '())

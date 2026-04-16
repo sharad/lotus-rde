@@ -11,7 +11,7 @@ CHANNELS_FILE_LATEST_GUIX = ./env/guix/rde-configs/env/guix/channels-ci-latest-g
 
 GUIXTM_FLAGS = $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
 GUIXTM_PREFIX_ENV = GUILE_LOAD_PATH="../src:../tests:./src"
-GUIXTM_COMMAND = guix time-machine -L ./env/guix
+GUIXTM_COMMAND = guix time-machine -L ./env/guix -L ./src
 
 GUIXTM = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE}$(GUIXTM_FLAGS)
 GUIXTM_LOCAL_RDE = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE_LOCAL_RDE}$(GUIXTM_FLAGS)
