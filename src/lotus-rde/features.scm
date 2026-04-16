@@ -1,6 +1,33 @@
 
 (define-module (lotus-rde features)
+  #:use-module (guix records)
+  #:use-module (guix ui)
   #:use-module (guix gexp)
+
+  #:use-module (gnu services)
+  #:use-module (gnu system)
+  #:use-module (gnu system file-systems)
+  #:use-module (gnu system accounts)
+  #:use-module (gnu system shadow)
+  #:use-module (gnu system nss)
+  #:use-module (gnu services guix)
+  #:use-module (gnu services shepherd)
+  #:use-module (rde system bare-bone)
+  #:use-module (rde system services accounts)
+  #:use-module (rde system services admin)
+
+  #:use-module (gnu bootloader)
+  #:use-module (gnu bootloader grub)
+  #:use-module (gnu home)
+  #:use-module (gnu services configuration)
+
+  #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-26)
+  #:use-module (srfi srfi-35)
+
+  #:use-module (ice-9 hash-table)
+  #:use-module (ice-9 match)
+  #:use-module (ice-9 pretty-print)
   #:export (lotus-get-operating-system))
 
 (define (lotus-get-operating-system config)
