@@ -1,6 +1,6 @@
 
 (define-module (lotus-rde features)
-  #:use-module (guix records)
+  #:use-module (guix gexp)
   #:export (lotus-get-operating-system))
 
 (define (lotus-get-operating-system config)
