@@ -1,5 +1,6 @@
 (define-module (lotus-rde features mfs)
   #:use-module (ice-9 match)
+  #:use-module (srfi srfi-11)
   #:use-module (lotus-rde lib utils)
   #:export (feature-mapped-file-systems))
 
