@@ -115,12 +115,12 @@
                                         #:kernel linux
                                         #:firmware (list linux-firmware)
                                         #:kernel-arguments (append (list "usbcore.autosuspend=-1"
-                                                                    "libata.force=2:disable"
-                                                                                       "libata.noacpi=1"
-                                                                                       "libata.ignore_hpa=1"
-                                                                                       "--verbose"
-                                                                                       "nosplash"
-                                                                                       "debug"))
+                                                                         "libata.force=2:disable"
+                                                                         "libata.noacpi=1"
+                                                                         "libata.ignore_hpa=1"
+                                                                         "--verbose"
+                                                                         "nosplash"
+                                                                         "debug"))
                                         ;; (if (and (pair? %lotus-swap-devices)
                                         ;;          (> (length %lotus-swap-devices) 0))
                                         ;;     (list (string-append "resume="

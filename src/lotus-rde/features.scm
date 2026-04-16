@@ -1,8 +1,5 @@
-(define-module (lotus-rde features))
-
-
-
-
+(define-module (lotus-rde features)
+  #:export (lotus-get-operating-system))
 
 (define (lotus-get-operating-system config)
   (when (rde-config-integrate-he-in-os? config)
