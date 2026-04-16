@@ -1,3 +1,4 @@
+
 (define-module (lotus-rde features)
   #:export (lotus-get-operating-system))
 
