@@ -1,4 +1,4 @@
-(define-module (rde features))
+(define-module (lotus-rde features))
 
 
 
