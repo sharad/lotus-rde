@@ -14,12 +14,12 @@
           (name 'guix-more-lotus)
           (url "https://github.com/sharad/guix-more.git")
           (branch "master")
-          (commit "59fc6bec7fb4b1d246704cb57ab96f9fffe96c85"))
+          (commit "6243b2009efb7f1da6690d3df4bdf1bc500b7219"))
         (channel
           (name 'nonguix)
           (url "https://gitlab.com/nonguix/nonguix")
           (branch "master")
-          (commit "82be0b7adaaaa7a98d47382d7f72dd2e31d8e6d8")
+          (commit "626c946a89a6b0fab6fd49dc1ad8b9e07695c91b")
           (introduction
            (make-channel-introduction
             "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
@@ -29,7 +29,7 @@
           (name 'rde)
           (url "https://git.sr.ht/~abcdw/rde")
           (branch "master")
-          (commit "c5aea8d9c81db29f3e4d9ea5a6a152ece11c26cc")
+          (commit "4ea3b80d46ae795c86bddcf3e213a249b75afde5")
           (introduction
            (make-channel-introduction
             "257cebd587b66e4d865b3537a9a88cccd7107c95"
@@ -39,7 +39,7 @@
           (name 'lotus)
           (url "https://github.com/sharad/guix")
           (branch "master")
-          (commit "c4b8b95d4d113d552682d22c35438edcde994fa8"))
+          (commit "5398848b4f5a84b2742bcf6461aba15c96108396"))
         (channel
           (name 'guix-android)
           (url "https://framagit.org/tyreunom/guix-android.git")
@@ -49,7 +49,7 @@
           (name 'guix)
           (url "https://git.guix.gnu.org/guix.git")
           (branch "master")
-          (commit "9f5840e8950d34b0ddbda678122891ad80bc3af3")
+          (commit "41ab1cb9e44aca2f77534d4d2fa4386b039f74f9")
           (introduction
            (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
