@@ -3,6 +3,7 @@
   #:use-module (rde features system)
   #:use-module (rde features wm)
   #:use-module (lotus-rde features base)
+  #:use-module (gnu system file-systems)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
   #:use-module (ice-9 match))

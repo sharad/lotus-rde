@@ -2,6 +2,7 @@
   #:use-module (rde features base)
   #:use-module (rde features system)
   #:use-module (rde features wm)
+  #:use-module (gnu system file-systems)
   #:use-module (lotus-rde features base)
   #:use-module (ice-9 match))
 
