@@ -1,9 +1,11 @@
 (define-module (lotus-rde features base)
   #:use-module (ice-9 match)
-  #:use-module (rde features)
   #:use-module (gnu packages base)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
+  #:use-module (rde features)
+  #:use-module (rde features base)
+  #:use-module (rde features system)
   #:export (feature-file-database-services
             feature-guix-publish-services
             feature-schedular-services
