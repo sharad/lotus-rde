@@ -2,6 +2,8 @@
   #:use-module (ice-9 match)
   #:use-module (rde features)
   #:use-module (gnu packages base)
+  #:use-module (nongnu packages linux)
+  #:use-module (nongnu system linux-initrd)
   #:export (feature-file-database-services
             feature-guix-publish-services
             feature-schedular-services
