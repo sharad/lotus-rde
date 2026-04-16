@@ -9,8 +9,8 @@
   #:use-module ((rde env guix channels) #:prefix rde:)
   #:use-module (srfi srfi-1))
 
-(display "Current source location: ")
-(display (canonicalize-path (string-append (getcwd))))
+;; (display "Current source location: ")
+;; (display (canonicalize-path (string-append (getcwd))))
 
 (define core-channels-with-local-lotus-rde
   (cons
