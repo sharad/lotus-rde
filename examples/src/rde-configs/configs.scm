@@ -66,14 +66,12 @@
      %ixy-features
      %abcdw-features))))
    ;; (operating-system (lotus-get-operating-system this-rde-config))
-   
 
 (define-public ixy-os
   (rde-config-operating-system ixy-config))
 
 (define-public ixy-he
   (rde-config-home-environment ixy-config))
-
 
 ;;; live
 

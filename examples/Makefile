@@ -20,7 +20,7 @@ GUIX = $(GUIXTM_$(BUILD_TYPE)) --
 
 
 SRC_DIR = ./src
-CONFIGS = ${SRC_DIR}/rde-configs/configs.scm
+CONFIGS ?= ${SRC_DIR}/rde-configs/configs.scm
 PULL_EXTRA_OPTIONS=
 # --allow-downgrades
 
