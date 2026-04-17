@@ -10,6 +10,7 @@
   #:use-module (guix build utils)
   #:use-module (gnu system mapped-devices)
   #:use-module (gnu system file-systems)
+  #:use-module (gnu system uuid)
   #:use-module (gnu packages lvm)
   #:export (lotus-devfs-system
             lotus-devfs-home
@@ -206,15 +207,15 @@
 
 
 
-(define-values (lotus-build-mapped-device lotus-build-file-system lotus-get-disk-name)
-  (lotus-lvm-dev-fs-builders (lambda () %lotus-disk-serial-id)
-                             #:prefix (lambda () %lotus-disk-prefix)
-                             #:suffix-seq (lambda () %lotus-disk-suffix-seq)))
+;; (define-values (lotus-build-mapped-device lotus-build-file-system lotus-get-disk-name)
+;;   (lotus-lvm-dev-fs-builders (lambda () %lotus-disk-serial-id)
+;;                              #:prefix (lambda () %lotus-disk-prefix)
+;;                              #:suffix-seq (lambda () %lotus-disk-suffix-seq)))
 
-(define-values (lotus-local-build-mapped-device lotus-local-build-file-system local-lotus-get-disk-name)
-  (lotus-lvm-dev-fs-builders (lambda () %local-disk-serial-id)
-                             #:prefix (lambda () %local-disk-prefix)
-                             #:suffix-seq 0))
+;; (define-values (lotus-local-build-mapped-device lotus-local-build-file-system local-lotus-get-disk-name)
+;;   (lotus-lvm-dev-fs-builders (lambda () %local-disk-serial-id)
+;;                              #:prefix (lambda () %local-disk-prefix)
+;;                              #:suffix-seq 0))
 
 
 (define %local-home-build-mapped-device lotus-build-mapped-device)
@@ -390,18 +391,18 @@
                                                                               md-guix-var-tmp)
                                                                         (list fs-guix-root
                                                                               fs-guix-var))))
-             (fs-boot-efi        (fs (mount-point         "/boot/efi"
-                                                          (device              fs-boot-efi-partition)
-                                                          (type                "vfat")
-                                                          (check?              #t) ;
-                                                          (mount?              guix-bootefi-mount?)
-                                                          (create-mount-point? guix-bootefi-create-mount-point?)
-                                                          (needed-for-boot?    guix-bootefi-needed-for-boot?)
-                                                          (flags               '(read-only))
-                                                          (options             "defaults,ro,noauto")
-                                                          (dependencies        (append (list md-guix-root)
-                                                                                       (list fs-guix-boot
-                                                                                             fs-guix-root)))))))
+             (fs-boot-efi        (file-system (mount-point         "/boot/efi")
+                                              (device              fs-boot-efi-partition)
+                                              (type                "vfat")
+                                              (check?              #t) ;
+                                              (mount?              guix-bootefi-mount?)
+                                              (create-mount-point? guix-bootefi-create-mount-point?)
+                                              (needed-for-boot?    guix-bootefi-needed-for-boot?)
+                                              (flags               '(read-only))
+                                              (options             "defaults,ro,noauto")
+                                              (dependencies        (append (list md-guix-root)
+                                                                           (list fs-guix-boot
+                                                                                 fs-guix-root))))))
         (let ((devices (list md-guix-root      ;8M
                              md-guix-boot      ;12M
                              md-guix-gnu       ;35G
@@ -443,16 +444,16 @@
                                                                 #:prefix (lambda () disk-prefix)
                                                                 #:suffix-seq (lambda () disk-suffix-seq))))
                   ;; ((home-build-md home-build-fs) (values build-md build-fs))
-      (let* ((md-house-home     (home-build-md "house" "home" #:suffix-seq 0))
+      (let* ((md-house-home     (build-md "house" "home" #:suffix-seq 0))
 
-             (fs-house-home      (home-build-fs "/home" "house" "home"
-                                                #:suffix-seq          0
-                                                #:check?              #t ;; fs-house-home-check?
-                                                #:mount?              #t ;; (if system-init #f #t)
-                                                #:create-mount-point? #t
-                                                #:needed-for-boot?    #f
-                                                #:dependencies        (append (list md-house-home)
-                                                                              (list))))) ;; fs-guix-root
+             (fs-house-home     (build-fs "/home" "house" "home"
+                                               #:suffix-seq          0
+                                               #:check?              #t ;; fs-house-home-check?
+                                               #:mount?              #t ;; (if system-init #f #t)
+                                               #:create-mount-point? #t
+                                               #:needed-for-boot?    #f
+                                               #:dependencies        (append (list md-house-home)
+                                                                             (list))))) ;; fs-guix-root
         (let ((devices (list md-house-home))
               (fs (list fs-house-home)))
           (display "Devices: ~a~%" devices)
