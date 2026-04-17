@@ -694,7 +694,7 @@
 
 
         (feature-base-services)
-        (feature-desktop-services)
+        (feature-desktop-services)))
 
         ;; (feature-file-database-services)
         ;; ;; (feature-guix-publish-services)
@@ -723,12 +723,17 @@
         ;; (feature-pulseaudio-service)
 
 
-        (feature-custom-services
-         #:feature-name-prefix 'openssh-server-extra
-         #:system-services
-         (list
-          ;; (service dhcp-client-service-type)
-          ;; (service cloud-init-service-type)
-          (service openssh-service-type)))))
+        ;; (feature-custom-services
+        ;;  #:feature-name-prefix 'openssh-server-extra
+        ;;  #:system-services
+        ;;  (list
+        ;;   ;; (service dhcp-client-service-type)
+        ;;   ;; (service cloud-init-service-type)
+        ;;   (service openssh-service-type)))
+
+
+
+
+        
 
 
