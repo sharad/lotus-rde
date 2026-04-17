@@ -1,4 +1,6 @@
 (define-module (lotus-rde lib utils)
+  #:use-module (ice-9 stat)
+  #:use-module (ice-9 popen)
   #:use-module (srfi srfi-11)
   #:use-module (guix gexp)
   #:use-module (guix modules)
@@ -154,34 +156,34 @@
                    (type   lvm-device-mapping)))
 
   (define* (fs-builder mount-point
-                              group
-                              volume
-                              #:key
-                              (suffix-seq suffix-seq)
-                              (type "ext4")
-                              (check? #t)
-                              (mount? #t)
-                              (flags  '())
-                              (options #f)
-                              (create-mount-point? #t)
-                              (needed-for-boot?    #t)
-                              (dependencies (list)))
-           (file-system (mount-point         mount-point)
-                        (device              (string-append "/dev/mapper/"
-                                                            (get-serial-id serial-id
-                                                                           prefix)
-                                                            "X" (string-join (list (get-group group
-                                                                                              suffix-seq)
-                                                                                   volume)
-                                                                             "-")))
-                        (type                type)
-                        (check?              check?)
-                        (mount?              mount?)
-                        (flags               flags)
-                        (options             options)
-                        (create-mount-point? create-mount-point?)
-                        (needed-for-boot?    needed-for-boot?)
-                        (dependencies        dependencies)))
+                       group
+                       volume
+                       #:key
+                       (suffix-seq suffix-seq)
+                       (type "ext4")
+                       (check? #t)
+                       (mount? #t)
+                       (flags  '())
+                       (options #f)
+                       (create-mount-point? #t)
+                       (needed-for-boot?    #t)
+                       (dependencies (list)))
+    (file-system (mount-point         mount-point)
+                 (device              (string-append "/dev/mapper/"
+                                                     (get-serial-id serial-id
+                                                                    prefix)
+                                                     "X" (string-join (list (get-group group
+                                                                                       suffix-seq)
+                                                                            volume)
+                                                                      "-")))
+                 (type                type)
+                 (check?              check?)
+                 (mount?              mount?)
+                 (flags               flags)
+                 (options             options)
+                 (create-mount-point? create-mount-point?)
+                 (needed-for-boot?    needed-for-boot?)
+                 (dependencies        dependencies)))
 
   (define (get-disk-name) (get-serial-id serial-id prefix))
 
