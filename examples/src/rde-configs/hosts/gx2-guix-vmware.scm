@@ -58,7 +58,5 @@
 
 ;;    (feature-base-services)))
 
-(display %gx2-guix-vmware-features)
-(newline)
 
 

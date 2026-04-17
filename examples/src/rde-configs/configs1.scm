@@ -15,10 +15,20 @@
              (rde-configs hosts gx2-guix-vmware)
              (rde-configs users sharad))
 
+
+;; (display %gx2-guix-vmware-features)
+
+
 (define gx2-guix-vmware-config
   (rde-config
    (features
     (append %gx2-guix-vmware-features
             %sharad-features))))
+(display "HELLO")
+(newline)
+(display %sharad-features)
+(newline)
+(display "HELLO")
+(newline)
 (rde-config-operating-system gx2-guix-vmware-config)
 
