@@ -681,13 +681,17 @@
         ;; Allows to declare specific bootloader configuration,
         ;; grub-efi-bootloader used by default
         ;; (feature-bootloader)
-        (let-values (((_ sys-devices sys-fs) (lotus-devfs-system
-                                              #:disk-serial-id disk-serial-if-system
-                                              #:fs-boot-efi-partition fs-boot-efi-partition))
+        (let-values (;; ((_ sys-devices sys-fs) (lotus-devfs-system
+                     ;;                          #:disk-serial-id disk-serial-if-system
+                     ;;                          #:fs-boot-efi-partition fs-boot-efi-partition))
                      ((home-devices home-fs) (lotus-devfs-home
                                               #:disk-serial-id disk-serial-if-home)))
-          (feature-file-systems #:mapped-devices (append sys-devices home-devices)
-                                #:file-systems (append sys-fs home-fs)
+          ;; (feature-file-systems #:mapped-devices (append sys-devices home-devices)
+          ;;                       #:file-systems (append sys-fs home-fs)
+          ;;                       ;; #:swap-devices (list (lotus-devfs-swap))
+          ;;                       #:user-pam-file-systems '())
+          (feature-file-systems #:mapped-devices (append home-devices)
+                                #:file-systems (append home-fs)
                                 ;; #:swap-devices (list (lotus-devfs-swap))
                                 #:user-pam-file-systems '()))
 
