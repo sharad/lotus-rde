@@ -1,4 +1,5 @@
 (define-module (lotus-rde lib utils)
+  #:use-module (ice-9 format)
   #:use-module (ice-9 stat)
   #:use-module (ice-9 popen)
   #:use-module (srfi srfi-11)
