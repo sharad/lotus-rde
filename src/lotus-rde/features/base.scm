@@ -688,7 +688,7 @@
                                               #:disk-serial-id disk-serial-if-home)))
           (feature-file-systems #:mapped-devices (append sys-devices home-devices)
                                 #:file-systems (append sys-fs home-fs)
-                                #:swap-devices (lotus-devfs-swap)
+                                ;; #:swap-devices (list (lotus-devfs-swap))
                                 #:user-pam-file-systems '()))
 
 
