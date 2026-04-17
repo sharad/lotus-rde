@@ -658,8 +658,8 @@
 
 (define* (define-lotus-machine-features hostname
            #:key
-           (disk-serial-if-system "aaa")
-           (disk-serial-if-home "aaa")
+           (disk-serial-id-system "aaa")
+           (disk-serial-id-home "aaa")
            (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
            (kernel linux)
            (firmware '())
@@ -682,10 +682,10 @@
         ;; grub-efi-bootloader used by default
         ;; (feature-bootloader)
         (let-values (;; ((_ sys-devices sys-fs) (lotus-devfs-system
-                     ;;                          #:disk-serial-id disk-serial-if-system
+                     ;;                          #:disk-serial-id disk-serial-id-system
                      ;;                          #:fs-boot-efi-partition fs-boot-efi-partition))
                      ((home-devices home-fs) (lotus-devfs-home
-                                              #:disk-serial-id disk-serial-if-home)))
+                                              #:disk-serial-id disk-serial-id-home)))
           ;; (feature-file-systems #:mapped-devices (append sys-devices home-devices)
           ;;                       #:file-systems (append sys-fs home-fs)
           ;;                       ;; #:swap-devices (list (lotus-devfs-swap))

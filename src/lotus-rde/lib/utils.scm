@@ -203,10 +203,10 @@
 
 ;; from local-default.scm
 
-(define (build-mapped-device source disk-id vg lv)
-  (mapped-device (source source)
-                 (targets (list (string-append disk-id "X" (string-append vg "-" lv))))
-                 (type   lvm-device-mapping)))
+;; (define (build-mapped-device source disk-id vg lv)
+;;   (mapped-device (source source)
+;;                  (targets (list (string-append disk-id "X" (string-append vg "-" lv))))
+;;                  (type   lvm-device-mapping)))
 
 
 
@@ -443,26 +443,26 @@
                            (disk-serial-id "CHANGEIT")
                            (disk-prefix "vds")
                            (disk-suffix-seq 0))
-  (let*-values (((build-md build-fs _) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
-                                                                  #:prefix (lambda () disk-prefix)
-                                                                  #:suffix-seq (lambda () disk-suffix-seq))))
-                  ;; ((home-build-md home-build-fs) (values build-md build-fs))
-      (let* ((md-house-home     (build-md "house" "home" #:suffix-seq 0))
+  (let-values (((build-md build-fs _) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
+                                                                 #:prefix (lambda () disk-prefix)
+                                                                 #:suffix-seq (lambda () disk-suffix-seq))))
+    ;; ((home-build-md home-build-fs) (values build-md build-fs))
+    (let* ((md-house-home     (build-md "house" "home" #:suffix-seq 0))
 
-             (fs-house-home     (build-fs "/home" "house" "home"
-                                               #:suffix-seq          0
-                                               #:check?              #t ;; fs-house-home-check?
-                                               #:mount?              #t ;; (if system-init #f #t)
-                                               #:create-mount-point? #t
-                                               #:needed-for-boot?    #f
-                                               #:dependencies        (append (list md-house-home)
-                                                                             (list))))) ;; fs-guix-root
-        (let ((devices (list md-house-home))
-              (fs (list fs-house-home)))
-          (format #t "Devices: ~a~%" devices)
-          (format #t "File systems: ~a~%" fs)
-          (values devices
-                  fs)))))
+           (fs-house-home     (build-fs "/home" "house" "home"
+                                      #:suffix-seq          0
+                                      #:check?              #t ;; fs-house-home-check?
+                                      #:mount?              #t ;; (if system-init #f #t)
+                                      #:create-mount-point? #t
+                                      #:needed-for-boot?    #f
+                                      #:dependencies        (append (list md-house-home)
+                                                             (list))))) ;; fs-guix-root
+      (let ((devices (list md-house-home))
+            (fs (list fs-house-home)))
+        (format #t "Devices: ~a~%" devices)
+        (format #t "File systems: ~a~%" fs)
+        (values devices
+                fs)))))
 
 ;; (define* (lotus-devfs-swap #:key
 ;;                            ;; lotus-lvm-dev-fs-builders
