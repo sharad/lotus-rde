@@ -4,30 +4,30 @@
   #:use-module (gnu services)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 match)
-  #:use-module (rde-configs hosts guilem-kuv500)
+  #:use-module (rde-configs hosts gx2-guix-vmware)
   #:use-module (rde-configs users sharad)
   #:use-module (ice-9 pretty-print))
 
 
-;;; guilem-kuv500
+;;; gx2-guix-vmware
 
-(define-public guilem-kuv500-config
+(define-public gx2-guix-vmware-config
   (rde-config
    (features
-    (append %guilem-kuv500-features
+    (append %gx2-guix-vmware-features
             %sharad-features))))
 
-(define-public guilem-kuv500-os
-  (rde-config-operating-system guilem-kuv500-config))
+(define-public gx2-guix-vmware-os
+  (rde-config-operating-system gx2-guix-vmware-config))
 
-(define-public guilem-kuv500-he
-  (rde-config-home-environment guilem-kuv500-config))
+(define-public gx2-guix-vmware-he
+  (rde-config-home-environment gx2-guix-vmware-config))
 
 ;;; Dispatcher, which helps to return various values based on environment
 ;;; variable value.
 
 (define (dispatcher)
-  guilem-kuv500-os)
+  gx2-guix-vmware-os)
 
 
 ;; (pretty-print-rde-config ixy-config)
