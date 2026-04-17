@@ -1,6 +1,7 @@
 (define-module (lotus-rde lib utils)
   #:use-module (srfi srfi-11)
   #:use-module (guix gexp)
+  #:use-module (guix modules)
   #:use-module (guix build utils)
   #:use-module (gnu system mapped-devices)
   #:export (lotus-devfs-system
@@ -10,54 +11,54 @@
 
 
 
-(define %local-host-name "komputilo")
-(define %local-default-realm  '((#:default #f)
-                                (#:realms)))
+;; (define %local-host-name "komputilo")
+;; (define %local-default-realm  '((#:default #f)
+;;                                 (#:realms)))
 
 
-(define %local-disk-serial-id          "CHANGEIT")
-(define %local-disk-prefix             "vds")
-(define %local-disk-suffix-seq         01)
-(define %local-fs-check? #t)
+;; (define %local-disk-serial-id          "CHANGEIT")
+;; (define %local-disk-prefix             "vds")
+;; (define %local-disk-suffix-seq         01)
+;; (define %local-fs-check? #t)
 
-(define (build-local-disk-serial-id)
-  %local-disk-serial-id)
+;; (define (build-local-disk-serial-id)
+;;   %local-disk-serial-id)
 
 
 
 
-;; http://www.shido.info/lisp/scheme_syntax_e.html
-(define-syntax base-system-value
-  (syntax-rules ()
-    ((_ local alternate)
-     (if (not %lotus-system-init) local alternate))))
+;; ;; http://www.shido.info/lisp/scheme_syntax_e.html
+;; (define-syntax base-system-value
+;;   (syntax-rules ()
+;;     ((_ local alternate)
+;;      (if (not %lotus-system-init) local alternate))))
 
-(define-syntax nongnu-system-value
-  (syntax-rules ()
-    ((_ local alternat)
-     (if (and %lotus-use-nongnu
-              (not %lotus-system-init))
-         local alternat))))
+;; (define-syntax nongnu-system-value
+;;   (syntax-rules ()
+;;     ((_ local alternat)
+;;      (if (and %lotus-use-nongnu
+;;               (not %lotus-system-init))
+;;          local alternat))))
 
 
 
 ;; Functions
-(define (local-authorized-guix-keys-local-to-etc-config-file etc-subdir local-dir)
-  (let ((currdir (string-append (dirname (current-filename)) "/")))
-    (if (file-exists? (string-append currdir local-dir "/"))
-        (map (lambda (f)
-               (list (string-append etc-subdir "/" (substring f (string-length currdir)))
-                     (local-file f)))
-             (find-files (string-append currdir local-dir "/")
-                         ".pub"))
-        '())))
+;; (define (local-authorized-guix-keys-local-to-etc-config-file etc-subdir local-dir)
+;;   (let ((currdir (string-append (dirname (current-filename)) "/")))
+;;     (if (file-exists? (string-append currdir local-dir "/"))
+;;         (map (lambda (f)
+;;                (list (string-append etc-subdir "/" (substring f (string-length currdir)))
+;;                      (local-file f)))
+;;              (find-files (string-append currdir local-dir "/")
+;;                          ".pub"))
+;;         '())))
 
-(define (local-authorized-guix-keys dir)
-  (if (file-exists? dir)
-      (map (lambda (f) (local-file f))
-           (find-files (string-append dir "/")
-                       ".pub"))
-      '()))
+;; (define (local-authorized-guix-keys dir)
+;;   (if (file-exists? dir)
+;;       (map (lambda (f) (local-file f))
+;;            (find-files (string-append dir "/")
+;;                        ".pub"))
+;;       '()))
 
 
 
