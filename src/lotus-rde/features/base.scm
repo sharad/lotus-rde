@@ -127,7 +127,7 @@
 ;;      (values `())
 ;;      (home-services-getter get-home-services)
 ;;      (system-services-getter get-system-services))))
-;; 
+
 
 ;; (define* (feature-unattended-upgrade-services
 ;;           #:key
@@ -161,7 +161,7 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; (define* (feature-disk-services
 ;;           #:key)
@@ -177,7 +177,7 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; (define* (feature-privileged-programs-services
 ;;           #:key
@@ -206,14 +206,14 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; ;; TODO
 ;; ;; https://github.com/xavierm02/guix-config/blob/master/config.scm
 ;; ;; (simple-service 'i3-packages
 ;; ;;                 profile-service-type
 ;; ;;                 (list dmenu i3-wm i3lock i3status))
-;; 
+
 
 ;; (define* (feature-messaging-services
 ;;           #:key
@@ -238,7 +238,7 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; (define* (feature-mail-services
 ;;           #:key
@@ -265,7 +265,7 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; (define* (feature-iio-sensor-proxy-services
 ;;           #:key
@@ -285,7 +285,7 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; (define* (feature-dnsmasq-services
 ;;           #:key
@@ -309,7 +309,7 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; (define* (feature-network-manager-services
 ;;           #:key
@@ -347,7 +347,7 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; (define* (feature-pointer-services)
 ;;   ;; https://guix.gnu.org/manual/en/html_node/GPM-Services.html
@@ -363,7 +363,7 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; (define* (feature-bluetooth-services
 ;;           #:key (auto-enable? #t))
@@ -382,7 +382,7 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; (define* (feature-music-services
 ;;           #:key
@@ -434,7 +434,7 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; (define* (feature-printing-services
 ;;           #:key
@@ -460,7 +460,7 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; (define* (feature-polkit-services
 ;;           #:key)
@@ -476,7 +476,7 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; (define* (feature-krberos-services
 ;;           #:key
@@ -499,7 +499,7 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; (define* (feature-container-sevices #:key)
 ;;    ;; https://guix.gnu.org/manual/en/html_node/Container-Services.html
@@ -517,7 +517,7 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; (define* (feature-security-services
 ;;           #:key
@@ -564,7 +564,7 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-;; 
+
 
 ;; (define* (feature-guix-services
 ;;           #:key
@@ -607,50 +607,50 @@
 ;;    (system-services-getter get-system-services)))
 
 
-(define* (feature-desktop-manager-service
-          #:key
-          (xorg-configuration (xorg-configuration
-                               (keyboard-layout %lotus-keyboard-layout)))
-          (allow-empty-password? #t)
-          (auto-login? #t)
-          (default-user #f))
-  ;; https://gitlab.com/Efraim/guix-config/blob/master/macbook41_config.scm)
-  ;; https://issues.guix.info/issue/35674
-  (define (get-home-services config)
-    (cons*))
+;; (define* (feature-desktop-manager-service
+;;           #:key
+;;           (xorg-configuration (xorg-configuration
+;;                                (keyboard-layout %lotus-keyboard-layout)))
+;;           (allow-empty-password? #t)
+;;           (auto-login? #t)
+;;           (default-user #f))
+;;   ;; https://gitlab.com/Efraim/guix-config/blob/master/macbook41_config.scm)
+;;   ;; https://issues.guix.info/issue/35674
+;;   (define (get-home-services config)
+;;     (cons*))
 
-  (define (get-system-packages config)
-    (cons*
-     (service gdm-service-type
-              (gdm-configuration
-               (xorg-configuration xorg-configuration)
-               (allow-empty-passwords? allow-empty-password?)
-               (auto-login? auto-login?)
-               (default-user %lotus-account-user-name)))))
+;;   (define (get-system-packages config)
+;;     (cons*
+;;      (service gdm-service-type
+;;               (gdm-configuration
+;;                (xorg-configuration xorg-configuration)
+;;                (allow-empty-passwords? allow-empty-password?)
+;;                (auto-login? auto-login?)
+;;                (default-user %lotus-account-user-name)))))
 
-  (feature
-   (name 'gdm-service)
-   (values `())
-   (home-services-getter get-home-services)
-   (system-services-getter get-system-services)))
+;;   (feature
+;;    (name 'gdm-service)
+;;    (values `())
+;;    (home-services-getter get-home-services)
+;;    (system-services-getter get-system-services)))
 
-(define* (feature-pulseaudio-service
-          #:key
-          (script-file (local-file "/etc/guix/default.pa")))
-  (define (get-home-services config)
-    (cons*))
+;; (define* (feature-pulseaudio-service
+;;           #:key
+;;           (script-file (local-file "/etc/guix/default.pa")))
+;;   (define (get-home-services config)
+;;     (cons*))
 
-  (define (get-system-packages config)
-    (cons*
-     (service pulseaudio-service-type
-              (pulseaudio-configuration
-               (script-file script-file)))))
+;;   (define (get-system-packages config)
+;;     (cons*
+;;      (service pulseaudio-service-type
+;;               (pulseaudio-configuration
+;;                (script-file script-file)))))
 
-  (feature
-   (name 'pulseaudio)
-   (values `())
-   (home-services-getter get-home-services)
-   (system-services-getter get-system-services)))
+;;   (feature
+;;    (name 'pulseaudio)
+;;    (values `())
+;;    (home-services-getter get-home-services)
+;;    (system-services-getter get-system-services)))
 
 
 (define* (define-lotus-machine-features hostname
