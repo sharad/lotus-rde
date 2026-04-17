@@ -14,7 +14,7 @@
   #:use-module (gnu system mapped-devices)
   #:use-module (gnu system file-systems)
   #:use-module (gnu system uuid)
-  #:use-module (gnu packages lvm)
+  #:use-module (gnu packages linux)
   #:export (lotus-devfs-system
             lotus-devfs-home
             lotus-devfs-swap))
