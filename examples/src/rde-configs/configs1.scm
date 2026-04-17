@@ -21,7 +21,7 @@
     (append %gx2-guix-vmware-features
             %sharad-features))))
 
-(pretty-print (rde-config-values gx2-guix-vmware-config))
+;; (pretty-print (rde-config-values gx2-guix-vmware-config))
 
 (rde-config-operating-system gx2-guix-vmware-config)
 
