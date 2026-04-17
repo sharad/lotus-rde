@@ -45,7 +45,18 @@
 ;;                                                               (list))))
 
 
-(define-public %gx2-guix-vmware-features (list))
+
+
+(define-public %gx2-guix-vmware-features
+  (list
+   (feature-host-info
+    #:host-name "gx2")
+
+   (feature-file-systems
+    #:file-systems '()
+    #:mapped-devices '())
+
+   (feature-base-services)))
 
 (display %gx2-guix-vmware-features)
 (newline)
