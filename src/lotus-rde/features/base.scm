@@ -3,6 +3,7 @@
   #:use-module (srfi srfi-11)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
+  #:use-module (gnu system linux-initrd)
   #:use-module (gnu packages base)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
