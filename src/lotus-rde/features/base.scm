@@ -688,42 +688,45 @@
                                 #:swap-devices (lotus-devfs-swap)
                                 #:user-pam-file-systems '()))
 
+
+
+
+        (feature-base-services)
+        (feature-desktop-services)
+
+        ;; (feature-file-database-services)
+        ;; ;; (feature-guix-publish-services)
+        ;; (feature-schedular-services)
+        ;; (feature-unattended-upgrade-services)
+        ;; (feature-disk-services)
+        ;; (feature-privileged-programs-services)
+        ;; (feature-messaging-services)
+        ;; (feature-mail-services)
+        ;; (feature-iio-sensor-proxy-services)
+        ;; (feature-network-manager-services)
+
+        ;; (feature-dns-services)
+        ;; (feature-pointer-services)
+        ;; (feature-bluetooth-services)
+
+        ;; ;; (feature-music-services)
+        ;; ;; (feature-printing-services)
+        ;; ;; (feature-polkit-services)
+        ;; ;; (feature-krberos-services)
+        ;; (feature-container-sevices)
+        ;; (feature-security-services)
+        ;; (feature-audit-services)
+        ;; (feature-guix-services)
+        ;; (feature-desktop-manager-service)
+        ;; (feature-pulseaudio-service)
+
+
         (feature-custom-services
          #:feature-name-prefix 'openssh-server-extra
          #:system-services
          (list
           ;; (service dhcp-client-service-type)
           ;; (service cloud-init-service-type)
-          (service openssh-service-type)))
-
-
-        (feature-base-services)
-        (feature-desktop-services)
-
-        (feature-file-database-services)
-        ;; (feature-guix-publish-services)
-        (feature-schedular-services)
-        (feature-unattended-upgrade-services)
-        (feature-disk-services)
-        (feature-privileged-programs-services)
-        (feature-messaging-services)
-        (feature-mail-services)
-        (feature-iio-sensor-proxy-services)
-        (feature-network-manager-services)
-
-        (feature-dns-services)
-        (feature-pointer-services)
-        (feature-bluetooth-services)
-
-        ;; (feature-music-services)
-        ;; (feature-printing-services)
-        ;; (feature-polkit-services)
-        ;; (feature-krberos-services)
-        (feature-container-sevices)
-        (feature-security-services)
-        (feature-audit-services)
-        (feature-guix-services)
-        (feature-desktop-manager-service)
-        (feature-pulseaudio-service)))
+          (service openssh-service-type)))))
 
 
