@@ -218,8 +218,8 @@
 ;;                              #:suffix-seq 0))
 
 
-(define %local-home-build-mapped-device lotus-build-mapped-device)
-(define %local-home-build-file-system   lotus-build-file-system)
+;; (define %local-home-build-mapped-device lotus-build-mapped-device)
+;; (define %local-home-build-file-system   lotus-build-file-system)
 
 
 (define* (build-parent-dir-file-system-builder parent-dir
