@@ -122,7 +122,7 @@
 
 (define* (lotus-lvm-dev-fs-builders serial-id #:key (prefix "vds") (suffix-seq 01) (separator "X"))
 
-  ;; (display "serial-id ~a~%" serial-id)
+  ;; (format #t "serial-id ~a~%" serial-id)
 
   (define (get-string s)
     (cond ((string? s) s)
@@ -425,8 +425,8 @@
                         fs-guix-var-guix
                         fs-guix-var-tmp
                         fs-boot-efi)))
-          (display "Devices: ~a~%" devices)
-          (display "File systems: ~a~%" fs)
+          (format #t "Devices: ~a~%" devices)
+          (format #t "File systems: ~a~%" fs)
 
           (values fs-guix-root
                   devices
@@ -454,8 +454,8 @@
                                                                              (list))))) ;; fs-guix-root
         (let ((devices (list md-house-home))
               (fs (list fs-house-home)))
-          (display "Devices: ~a~%" devices)
-          (display "File systems: ~a~%" fs)
+          (format #t "Devices: ~a~%" devices)
+          (format #t "File systems: ~a~%" fs)
           (values devices
                   fs)))))
 
