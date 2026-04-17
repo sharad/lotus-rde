@@ -679,8 +679,8 @@
                            ;; #:locale    (operating-system-locale bare-bone-os)
                            ;; ls `guix build tzdata`/share/zoneinfo
                            #:timezone "Asia/Kolkata")
-        (feature-kernel #:kernel kernel
-                        #:initrd initrd
+        (feature-kernel ;; #:kernel kernel
+                        ;; #:initrd initrd
                         #:firmware firmware
                         #:kernel-arguments kernel-arguments)
         ;; (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader grub-bootloader)
