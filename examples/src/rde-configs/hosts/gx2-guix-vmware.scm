@@ -3,6 +3,7 @@
   #:use-module (rde features system)
   #:use-module (rde features wm)
   #:use-module (gnu system file-systems)
+  #:use-module (gnu system linux-initrd)
   #:use-module (lotus-rde features base)
   #:use-module (ice-9 match)
   #:export (%gx2-guix-vmware-features))
