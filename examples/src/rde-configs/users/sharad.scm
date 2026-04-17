@@ -684,8 +684,8 @@ subject:/home:/) and tag:new}\"'"
      #:full-name "Sharad Pratap"
      #:home-directory "home/s/hell"
      #:email "s@localhost"
-     ;; #:user-initial-password-hash
-     ;; "$6$abc$3SAZZQGdvQgAscM2gupP1tC.SqnsaLSPoAnEOb2k6jXMhzQqS1kCSplAJ/vUy2rrnpHtt6frW2Ap5l/tIvDsz."
+     #:user-initial-password-hash
+     "$6$abc$3SAZZQGdvQgAscM2gupP1tC.SqnsaLSPoAnEOb2k6jXMhzQqS1kCSplAJ/vUy2rrnpHtt6frW2Ap5l/tIvDsz."
      ;; (crypt "bob" "$6$abc")
 
      ;; WARNING: This option can reduce the explorability by hiding
