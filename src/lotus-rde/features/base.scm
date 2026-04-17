@@ -5,6 +5,7 @@
   #:use-module (gnu bootloader grub)
   #:use-module (gnu system linux-initrd)
   #:use-module (gnu packages base)
+  #:use-module (gnu services)
   #:use-module (gnu services ssh)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
@@ -694,7 +695,7 @@
 
 
         (feature-base-services)
-        (feature-desktop-services)))
+        (feature-desktop-services)
 
         ;; (feature-file-database-services)
         ;; ;; (feature-guix-publish-services)
@@ -723,17 +724,17 @@
         ;; (feature-pulseaudio-service)
 
 
-        ;; (feature-custom-services
-        ;;  #:feature-name-prefix 'openssh-server-extra
-        ;;  #:system-services
-        ;;  (list
-        ;;   ;; (service dhcp-client-service-type)
-        ;;   ;; (service cloud-init-service-type)
-        ;;   (service openssh-service-type)))
+        (feature-custom-services
+         #:feature-name-prefix 'openssh-server-extra
+         #:system-services
+         (list
+          ;; (service dhcp-client-service-type)
+          ;; (service cloud-init-service-type)
+          (service openssh-service-type)))))
 
 
 
 
-        
+
 
 
