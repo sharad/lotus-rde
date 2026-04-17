@@ -125,7 +125,8 @@
 ;; The type of LVM mapped devices.
 (define lvm-device-mapping (mapped-device-kind (open open-lvm-device)
                                                ;; (check check-lvm-device)
-                                               (close close-lvm-device)))
+                                               (close close-lvm-device)
+                                               (modules '("dm_mod")))
 
 
 (define* (lotus-lvm-dev-fs-builders serial-id #:key (prefix "vds") (suffix-seq 01) (separator "X"))
