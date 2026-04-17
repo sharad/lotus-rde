@@ -272,6 +272,8 @@
                              (disk-suffix-seq 01)
                              (guix-boot-mount? #f)
                              (guix-boot-create-mount-point? #f)
+                             (guix-bootefi-mount? #f)
+                             (guix-bootedi-create-mount-point? #f)
                              (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
                              (guix-bootefi-mount? #f)
                              (guix-bootefi-needed-for-boot? #f))
