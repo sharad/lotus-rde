@@ -10,24 +10,24 @@
   #:use-module (rde features base)
   #:use-module (rde features system)
   #:use-module (lotus-rde lib utils)
-  #:export (feature-file-database-services
-            feature-guix-publish-services
-            feature-schedular-services
-            feature-unattended-upgrade-services
-            feature-disk-services
-            feature-privileged-programs-services
-            feature-messaging-services
-            feature-mail-services
-            feature-iio-sensor-proxy-services
-            feature-dnsmasq-services
-            feature-network-manager-services
-            feature-dns-services
-            feature-pointer-services
-            feature-bluetooth-services
-            feature-music-services
-            feature-printing-services
-            feature-polkit-services
-            feature-krberos-services
+  #:export (;; feature-file-database-services
+            ;; feature-guix-publish-services
+            ;; feature-schedular-services
+            ;; feature-unattended-upgrade-services
+            ;; feature-disk-services
+            ;; feature-privileged-programs-services
+            ;; feature-messaging-services
+            ;; feature-mail-services
+            ;; feature-iio-sensor-proxy-services
+            ;; feature-dnsmasq-services
+            ;; feature-network-manager-services
+            ;; feature-dns-services
+            ;; feature-pointer-services
+            ;; feature-bluetooth-services
+            ;; feature-music-services
+            ;; feature-printing-services
+            ;; feature-polkit-services
+            ;; feature-krberos-services
             define-lotus-machine-features))
 
 
