@@ -1,6 +1,7 @@
 (define-module (lotus-rde features base)
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-11)
+  #:use-module (srfi srfi-64)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
   #:use-module (gnu system linux-initrd)
