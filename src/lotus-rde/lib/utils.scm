@@ -271,7 +271,7 @@
 ;;              #:needed-for-boot?    needed-for-boot?
 ;;              #:dependencies        (get-value dep-mapped-devs)))
 
-;;   fs-builder)
+;; fs-builder
 
 
 (define* (lotus-devfs-system #:key
@@ -322,8 +322,8 @@
                                            #:flags               '(read-only)
                                            #:options             "defaults,ro,noauto"
                                            #:dependencies        (append (list md-guix-root
-                                                                               md-guix-boot)
-                                                                         (list fs-guix-root))))
+                                                                               md-guix-boot))))
+                                                                         ;; (list fs-guix-root)
              (fs-guix-gnu        (build-fs "/gnu" "guix" "gnu"
                                            #:check?              #t ;; fs-guix-gnu-check?
                                            #:mount?              #t
@@ -332,24 +332,24 @@
                                            #:flags               '(read-only)
                                            ;; #:options             "defaults,ro,noauto"
                                            #:dependencies        (append (list md-guix-root
-                                                                               md-guix-gnu)
-                                                                         (list fs-guix-root))))
+                                                                               md-guix-gnu))))
+                                                                         ;; (list fs-guix-root)
              (fs-sys-tmp        (build-fs "/tmp" "sys" "tmp"
                                           #:check?              #t ;; fs-sys-tmp-check?
                                           #:mount?              #t
                                           #:create-mount-point? #t
                                           #:needed-for-boot?    #t
                                           #:dependencies        (append (list md-guix-root
-                                                                              md-sys-tmp)
-                                                                        (list fs-guix-root))))
+                                                                              md-sys-tmp))))
+                                                                        ;; (list fs-guix-root)
              (fs-guix-var        (build-fs "/var" "guix" "var"
                                            #:check?              #t ;; fs-guix-var-check?
                                            #:mount?              #t
                                            #:create-mount-point? #t
                                            #:needed-for-boot?    #t
                                            #:dependencies        (append (list md-guix-root
-                                                                               md-guix-var)
-                                                                         (list fs-guix-root))))
+                                                                               md-guix-var))))
+                                                                         ;; (list fs-guix-root)
              (fs-guix-var-cache  (build-fs "/var/cache" "guix" "varScache"
                                            #:check?              #t ;; fs-guix-var-check?
                                            #:mount?              #t
@@ -357,9 +357,9 @@
                                            #:needed-for-boot?    #t
                                            #:dependencies        (append (list md-guix-root
                                                                                md-guix-var
-                                                                               md-guix-var-cache)
-                                                                         (list fs-guix-root
-                                                                               fs-guix-var))))
+                                                                               md-guix-var-cache))))
+                                                                         ;; (list fs-guix-root
+                                                                         ;;       fs-guix-var)
              (fs-guix-var-lib    (build-fs "/var/lib" "guix" "varSlib"
                                            #:check?              #t ;; fs-guix-var-check?
                                            #:mount?              #t
@@ -367,9 +367,9 @@
                                            #:needed-for-boot?    #t
                                            #:dependencies        (append (list md-guix-root
                                                                                md-guix-var
-                                                                               md-guix-var-lib)
-                                                                         (list fs-guix-root
-                                                                               fs-guix-var))))
+                                                                               md-guix-var-lib))))
+                                                                         ;; (list fs-guix-root
+                                                                         ;;       fs-guix-var)
              (fs-guix-var-log    (build-fs "/var/log" "guix" "varSlog"
                                            #:check?              #t ;; fs-guix-var-check?
                                            #:mount?              #t
@@ -377,9 +377,9 @@
                                            #:needed-for-boot?    #t
                                            #:dependencies        (append (list md-guix-root
                                                                                md-guix-var
-                                                                               md-guix-var-log)
-                                                                         (list fs-guix-root
-                                                                               fs-guix-var))))
+                                                                               md-guix-var-log))))
+                                                                         ;; (list fs-guix-root
+                                                                         ;;       fs-guix-var)
              (fs-guix-var-guix   (build-fs "/var/guix" "guix" "varSguix"
                                            #:check?              #t ;; fs-guix-var-check?
                                            #:mount?              #t
@@ -387,10 +387,9 @@
                                            #:needed-for-boot?    #t
                                            #:dependencies        (append (list md-guix-root
                                                                                md-guix-var
-                                                                               md-guix-var-guix)
-                                                                         (list fs-guix-root
-                                                                               fs-guix-var))))
-
+                                                                               md-guix-var-guix))))
+                                                                         ;; (list fs-guix-root
+                                                                         ;;       fs-guix-var)
              (fs-guix-var-tmp   (build-fs "/var/tmp" "guix" "varStmp"
                                           ;; https://unix.stackexchange.com/questions/30489/what-is-the-difference-between-tmp-and-var-tmp
                                           #:check?              #t ;; fs-guix-var-check?
@@ -399,9 +398,9 @@
                                           #:needed-for-boot?    #t
                                           #:dependencies        (append (list md-guix-root
                                                                               md-guix-var
-                                                                              md-guix-var-tmp)
-                                                                        (list fs-guix-root
-                                                                              fs-guix-var))))
+                                                                              md-guix-var-tmp))))
+                                                                        ;; (list fs-guix-root
+                                                                        ;;       fs-guix-var)
              (fs-boot-efi        (file-system (mount-point         "/boot/efi")
                                               (device              fs-boot-efi-partition)
                                               (type                "vfat")
@@ -411,9 +410,9 @@
                                               (needed-for-boot?    guix-bootefi-needed-for-boot?)
                                               (flags               '(read-only))
                                               (options             "defaults,ro,noauto")
-                                              (dependencies        (append (list md-guix-root)
-                                                                           (list fs-guix-boot
-                                                                                 fs-guix-root))))))
+                                              (dependencies        (append (list md-guix-root))))))
+                                                                           ;; (list fs-guix-boot
+                                                                           ;;       fs-guix-root)
         (let ((devices (list md-guix-root      ;8M
                              md-guix-boot      ;12M
                              md-guix-gnu       ;35G
