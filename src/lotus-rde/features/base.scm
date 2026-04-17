@@ -690,8 +690,8 @@
           ;;                       #:file-systems (append sys-fs home-fs)
           ;;                       ;; #:swap-devices (list (lotus-devfs-swap))
           ;;                       #:user-pam-file-systems '())
-          (feature-file-systems #:mapped-devices (append home-devices)
-                                #:file-systems (append home-fs)
+          (feature-file-systems #:mapped-devices (append home-devices (list))
+                                #:file-systems (append home-fs (list))
                                 ;; #:swap-devices (list (lotus-devfs-swap))
                                 #:user-pam-file-systems '()))
 
