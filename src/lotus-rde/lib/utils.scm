@@ -434,8 +434,8 @@
                         fs-guix-var-guix
                         fs-guix-var-tmp
                         fs-boot-efi)))
-          (format #t "Devices: ~a~%" devices)
-          (format #t "File systems: ~a~%" fs)
+          ;; (format #t "Devices: ~a~%" devices)
+          ;; (format #t "File systems: ~a~%" fs)
 
           (values fs-guix-root
                   devices
@@ -450,9 +450,9 @@
   (let-values (((build-md build-fs _) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
                                                                  #:prefix (lambda () disk-prefix)
                                                                  #:suffix-seq (lambda () disk-suffix-seq))))
-    (format #t "disk-id: ~a\n" disk-serial-id)
-    (format #t "build-md: ~a\n" build-md)
-    (format #t "build-fs: ~a\n" build-fs)
+    ;; (format #t "disk-id: ~a\n" disk-serial-id)
+    ;; (format #t "build-md: ~a\n" build-md)
+    ;; (format #t "build-fs: ~a\n" build-fs)
     ;; ((home-build-md home-build-fs) (values build-md build-fs))
     (let* ((md-house-home     (build-md "house" "home" #:suffix-seq 0))
 
@@ -466,8 +466,8 @@
                                                              (list))))) ;; fs-guix-root
       (let ((devices (list md-house-home))
             (fs (list fs-house-home)))
-        (format #t "Devices: ~a~%" devices)
-        (format #t "File systems: ~a~%" fs)
+        ;; (format #t "Devices: ~a~%" devices)
+        ;; (format #t "File systems: ~a~%" fs)
         (values devices
                 fs)))))
 
