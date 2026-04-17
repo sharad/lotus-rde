@@ -12,7 +12,7 @@
   #:use-module (rde features)
   #:use-module (rde features base)
   #:use-module (rde features system)
-  ;; #:use-module (lotus-rde lib utils)
+  #:use-module (lotus-rde lib utils)
   #:export (;; feature-file-database-services
             ;; feature-guix-publish-services
             ;; feature-schedular-services
