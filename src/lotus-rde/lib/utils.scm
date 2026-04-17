@@ -3,14 +3,14 @@
   #:use-module (ice-9 stat)
   #:use-module (ice-9 popen)
   #:use-module (ice-9 string-fun)
-  #:use-modules (ice-9 threads)
+  #:use-module (ice-9 threads)
   #:use-module (srfi srfi-11)
   #:use-module (guix gexp)
   #:use-module (guix modules)
   #:use-module (guix build utils)
   #:use-module (gnu system mapped-devices)
   #:use-module (gnu system file-systems)
-  #:use-modules (gnu packages lvm)
+  #:use-module (gnu packages lvm)
   #:export (lotus-devfs-system
             lotus-devfs-home
             lotus-devfs-swap))
