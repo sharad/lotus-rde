@@ -2,7 +2,6 @@
   #:use-module (ice-9 match)
   #:use-module (ice-9 hash-table)
   #:use-module (ice-9 format)
-  #:use-module (ice-9 stat)
   #:use-module (ice-9 popen)
   #:use-module (ice-9 ftw)
   #:use-module (ice-9 threads)
