@@ -11,8 +11,8 @@
 
 
 (define-public %gx2-guix-vmware-features (define-lotus-machine-features "gx2-guix-vmware"
-                                           #:disk-serial-if-system "vmware"
-                                           #:disk-serial-if-home "vmware"
+                                           #:disk-serial-id-system "vmware"
+                                           #:disk-serial-id-home "vmware"
                                            #:fs-boot-efi-partition (uuid "4D78-999F" 'fat32)
                                            #:kernel-arguments (append (list "usbcore.autosuspend=-1"
                                                                        "libata.force=2:disable"

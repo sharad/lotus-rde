@@ -110,8 +110,8 @@
 
 
 ;; (define-public %guilem-kuv500-features (define-lotus-machine-features "guilem-kuv500"
-;;                                          #:disk-serial-if-system "aaa"
-;;                                          #:disk-serial-if-home "aaa"
+;;                                          #:disk-serial-id-system "aaa"
+;;                                          #:disk-serial-id-home "aaa"
 ;;                                          #:fs-boot-efi-partition (uuid "0000-0000" 'fat32)
 ;;                                          #:kernel linux
 ;;                                          #:firmware (list linux-firmware)
