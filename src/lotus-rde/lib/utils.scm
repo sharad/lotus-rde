@@ -8,6 +8,7 @@
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-11)
   #:use-module (srfi srfi-13)
+  ;; #:use-module (srfi srfi-64)
   #:use-module (guix gexp)
   #:use-module (guix modules)
   #:use-module (guix build utils)

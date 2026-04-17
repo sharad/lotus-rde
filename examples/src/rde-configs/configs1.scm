@@ -30,5 +30,10 @@
 (newline)
 (display "HELLO")
 (newline)
-(rde-config-operating-system gx2-guix-vmware-config)
+
+(let ((os (rde-config-operating-system gx2-guix-vmware-config)))
+  (display os)
+  (newline)
+  os)
+
 

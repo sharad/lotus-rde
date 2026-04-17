@@ -694,7 +694,7 @@
 
 
         (feature-base-services)
-        (feature-desktop-services)
+        ;; (feature-desktop-services)
 
         ;; (feature-file-database-services)
         ;; ;; (feature-guix-publish-services)
