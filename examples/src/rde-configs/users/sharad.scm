@@ -445,7 +445,7 @@ if [ -f $GUIX_PROFILE/etc/profile ]; then source $GUIX_PROFILE/etc/profile; fi
   (append
    ;; all-features-with-custom-kernel-and-substitutes
    (list
-    (feature-additional-services)
+    ;; (feature-additional-services)
     (feature-user-info
      #:user-name "s"
      #:full-name "Sharad Pratap"
