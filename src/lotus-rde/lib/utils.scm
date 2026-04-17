@@ -272,7 +272,7 @@
       (let* ((md-guix-root      (build-md "guix" "root"))
              (md-guix-boot      (build-md "guix" "boot"))
              (md-guix-gnu       (build-md "guix" "gnu"))
-             (md-guix-swap      (build-md "guix" "swap"))
+             ;; (md-guix-swap      (build-md "guix" "swap"))
              (md-guix-var       (build-md "guix" "var"))
              (md-guix-var-cache (build-md "guix" "varScache"))
              (md-guix-var-lib   (build-md "guix" "varSlib"))
@@ -280,12 +280,12 @@
              (md-guix-var-guix  (build-md "guix" "varSguix"))
              (md-guix-var-tmp   (build-md "guix" "varStmp"))
              (md-sys-tmp        (build-md "sys" "tmp"))
-             (swap-devices      (if #t
-                                   (list (swap-space (target (string-append "/dev/mapper/" disk-prefix disk-serial-id "X" "guix"
-                                                                            (if (> disk-suffix-seq 0) (format #f "~2'0d" disk-suffix-seq) "")
-                                                                            "-"
-                                                                            "swap"))
-                                          (list)))))
+             ;; (swap-devices      (if #t
+             ;;                       (list (swap-space (target (string-append "/dev/mapper/" disk-prefix disk-serial-id "X" "guix"
+             ;;                                                                (if (> disk-suffix-seq 0) (format #f "~2'0d" disk-suffix-seq) "")
+             ;;                                                                "-"
+             ;;                                                                "swap"))
+             ;;                              (list)))))
              (fs-guix-root       (build-fs "/" "guix" "root"
                                            #:check? #t ;; fs-guix-root-check?
                                            #:mount? #t
@@ -403,7 +403,7 @@
                              md-guix-var-log   ;300M
                              md-guix-var-guix  ;350M
                              md-guix-var-tmp   ;1G
-                             md-guix-swap      ;1G
+                             ;; md-guix-swap      ;1G
                              md-sys-tmp        ;20G
                              md-house-home))
               (fs (list fs-guix-root
@@ -418,7 +418,12 @@
                         fs-guix-var-tmp
                         fs-house-home
                         fs-boot-efi)))
-          (values fs-guix-root devices fs)))))
+          (display "Devices: ~a~%" devices)
+          (display "File systems: ~a~%" fs)
+
+          (values fs-guix-root
+                  devices
+                  fs)))))
 
 (define* (lotus-devfs-home #:key
                            ;; lotus-lvm-dev-fs-builders
@@ -442,7 +447,10 @@
                                                                               (list))))) ;; fs-guix-root
         (let ((devices (list md-house-home))
               (fs (list fs-house-home)))
-          (values devices fs)))))
+          (display "Devices: ~a~%" devices)
+          (display "File systems: ~a~%" fs)
+          (values devices
+                  fs)))))
 
 (define* (lotus-devfs-swap #:key
                            ;; lotus-lvm-dev-fs-builders
