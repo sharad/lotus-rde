@@ -130,7 +130,7 @@
   (rde-config-operating-system gx2-guix-vmware-config))
 
 (define-public gx2-guix-vmware-he
-  (rde-config--home-environment gx2-guix-vmware-config))
+  (rde-config-home-environment gx2-guix-vmware-config))
 
 ;;; Dispatcher, which helps to return various values based on environment
 ;;; variable value.

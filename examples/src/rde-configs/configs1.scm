@@ -11,23 +11,28 @@
 
 ;;; gx2-guix-vmware
 
-(define-public gx2-guix-vmware-config
+(use-modules (rde features)
+             (lotus-rde features)
+             (rde-configs hosts gx2-guix-vmware)
+             (rde-configs users sharad))
+
+(define gx2-guix-vmware-config
   (rde-config
    (features
     (append %gx2-guix-vmware-features
             %sharad-features))))
 
-(define-public gx2-guix-vmware-os
-  (rde-config-operating-system gx2-guix-vmware-config))
+;; (define-public gx2-guix-vmware-os
+;;   (rde-config-operating-system gx2-guix-vmware-config))
 
-(define-public gx2-guix-vmware-he
-  (rde-config-home-environment gx2-guix-vmware-config))
+;; (define-public gx2-guix-vmware-he
+;;   (rde-config-home-environment gx2-guix-vmware-config))
 
 ;;; Dispatcher, which helps to return various values based on environment
 ;;; variable value.
 
-(define (dispatcher)
-  gx2-guix-vmware-os)
+;; (define (dispatcher)
+;;   gx2-guix-vmware-os)
 
 
 ;; (pretty-print-rde-config ixy-config)
@@ -46,8 +51,8 @@
 ;;  (rde-config-home-services ixy-config))
 
 ;; (define br ((@ (rde api store) build-with-store) ixy-he))
-(dispatcher)
-
+;; (dispatcher)
+(rde-config-operating-system gx2-guix-vmware-config)
 
 ;;; TODO: Call reconfigure from scheme file.
 ;;; TODO: Rename configs.scm to main.scm?
