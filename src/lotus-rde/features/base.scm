@@ -674,8 +674,8 @@
                         #:initrd initrd
                         #:firmware firmware
                         #:kernel-arguments kernel-arguments)
-        (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader grub-bootloader)
-                                                                                 (targets    '())))
+        ;; (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader grub-bootloader)
+        ;;                                                                          (targets    '())))
                                                                                  ;; (keyboard-layout %lotus-keyboard-layout)
                                                                                  ;; (menu-entries    %lotus-grub-ubuntu-menuentries)
         ;; Allows to declare specific bootloader configuration,
