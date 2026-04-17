@@ -5,6 +5,7 @@
   #:use-module (gnu bootloader grub)
   #:use-module (gnu system linux-initrd)
   #:use-module (gnu packages base)
+  #:use-module (gnu services ssh)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
   #:use-module (rde features)

@@ -41,8 +41,7 @@
                                                              rest))
                                            #:custom-services (feature-custom-services
                                                               #:feature-name-prefix 'gx2-guix-vmware-extra
-                                                              #:system-services
-                                                              (list))))
+                                                              #:system-services (list))))
 
 
 
