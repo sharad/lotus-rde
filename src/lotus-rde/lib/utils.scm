@@ -4,7 +4,7 @@
   #:use-module (ice-9 popen)
   #:use-module (ice-9 threads)
   #:use-module (srfi srfi-11)
-  #:use-module (ice-9 srfi-13)
+  #:use-module (srfi srfi-13)
   #:use-module (guix gexp)
   #:use-module (guix modules)
   #:use-module (guix build utils)
