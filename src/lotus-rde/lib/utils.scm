@@ -77,7 +77,7 @@
 'lvm'."
   (with-imported-modules (source-module-closure '((gnu build file-systems)
                                                   (guix build utils)
-                                                  (ice-9 threads)
+                                                  ;; (ice-9 threads)
                                                   (ice-9 srfi-13)
                                                   (gnu packages lvm)))
                          #~(let ((source   #$source)
@@ -447,6 +447,9 @@
   (let-values (((build-md build-fs _) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
                                                                  #:prefix (lambda () disk-prefix)
                                                                  #:suffix-seq (lambda () disk-suffix-seq))))
+    (format #t "disk-id: ~a\n" disk-serial-id)
+    (format #t "build-md: ~a\n" build-md)
+    (format #t "build-fs: ~a\n" build-fs)
     ;; ((home-build-md home-build-fs) (values build-md build-fs))
     (let* ((md-house-home     (build-md "house" "home" #:suffix-seq 0))
 
