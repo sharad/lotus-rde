@@ -127,13 +127,13 @@
     (cond ((string? s) s)
           ((procedure? s)
            (s))
-          (else (error (format #t "Wrong value ~a~%" s)))))
+          (else (error (format #f "Wrong value ~a~%" s)))))
 
   (define (get-number n)
     (cond ((number? n) n)
           ((procedure? n)
            (n))
-          (else (error (format #t "Wrong value ~a~%" n)))))
+          (else (error (format #f "Wrong value ~a~%" n)))))
 
   (define (get-serial-id serial-id prefix)
     (string-append (get-string prefix)
