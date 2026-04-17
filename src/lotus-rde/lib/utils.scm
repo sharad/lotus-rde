@@ -222,47 +222,47 @@
 ;; (define %local-home-build-file-system   lotus-build-file-system)
 
 
-(define* (build-parent-dir-file-system-builder parent-dir
-                                              #:key
-                                              (dep-mapped-devs (lambda () %local-udev-lvm-mapped-devices))
-                                              (builder         lotus-local-build-file-system)
-                                              (disk-name       local-lotus-get-disk-name)
-                                              (check?          %local-fs-check?)
-                                              (mount?          #f)
-                                              (flags           '())
-                                              (options         #f)
-                                              (type            "ext4")
-                                              (create-mount-point? #f)
-                                              (needed-for-boot? #f))
-  (define* (fs-builder vg lv
-                       #:key
-                       (dep-mapped-devs dep-mapped-devs)
-                       (builder         builder)
-                       (disk-name       disk-name)
-                       (check?          check?)
-                       (mount?          mount?)
-                       (flags           flags)
-                       (options         options)
-                       (type            type)
-                       (create-mount-point? create-mount-point?)
-                       (needed-for-boot? needed-for-boot?))
-    (define (get-value v)
-      (cond ((procedure? v)
-             (v))
-            (else v)))
-    (builder (string-append parent-dir "/" (disk-name) "/" vg "/" lv)
-             vg
-             lv
-             #:check?  check?
-             #:mount?  mount?
-             #:flags   flags
-             #:options options
-             #:type    type
-             #:create-mount-point? create-mount-point?
-             #:needed-for-boot?    needed-for-boot?
-             #:dependencies        (get-value dep-mapped-devs)))
+;; (define* (build-parent-dir-file-system-builder parent-dir
+;;                                               #:key
+;;                                               (dep-mapped-devs (lambda () %local-udev-lvm-mapped-devices))
+;;                                               (builder         lotus-local-build-file-system)
+;;                                               (disk-name       local-lotus-get-disk-name)
+;;                                               (check?          %local-fs-check?)
+;;                                               (mount?          #f)
+;;                                               (flags           '())
+;;                                               (options         #f)
+;;                                               (type            "ext4")
+;;                                               (create-mount-point? #f)
+;;                                               (needed-for-boot? #f))
+;;   (define* (fs-builder vg lv
+;;                        #:key
+;;                        (dep-mapped-devs dep-mapped-devs)
+;;                        (builder         builder)
+;;                        (disk-name       disk-name)
+;;                        (check?          check?)
+;;                        (mount?          mount?)
+;;                        (flags           flags)
+;;                        (options         options)
+;;                        (type            type)
+;;                        (create-mount-point? create-mount-point?)
+;;                        (needed-for-boot? needed-for-boot?))
+;;     (define (get-value v)
+;;       (cond ((procedure? v)
+;;              (v))
+;;             (else v)))
+;;     (builder (string-append parent-dir "/" (disk-name) "/" vg "/" lv)
+;;              vg
+;;              lv
+;;              #:check?  check?
+;;              #:mount?  mount?
+;;              #:flags   flags
+;;              #:options options
+;;              #:type    type
+;;              #:create-mount-point? create-mount-point?
+;;              #:needed-for-boot?    needed-for-boot?
+;;              #:dependencies        (get-value dep-mapped-devs)))
 
-  fs-builder)
+;;   fs-builder)
 
 
 (define* (lotus-devfs-system #:key
@@ -413,8 +413,7 @@
                              md-guix-var-guix  ;350M
                              md-guix-var-tmp   ;1G
                              ;; md-guix-swap      ;1G
-                             md-sys-tmp        ;20G
-                             md-house-home))
+                             md-sys-tmp))        ;20G
               (fs (list fs-guix-root
                         fs-guix-boot
                         fs-guix-gnu
@@ -425,7 +424,6 @@
                         fs-guix-var-log
                         fs-guix-var-guix
                         fs-guix-var-tmp
-                        fs-house-home
                         fs-boot-efi)))
           (display "Devices: ~a~%" devices)
           (display "File systems: ~a~%" fs)
