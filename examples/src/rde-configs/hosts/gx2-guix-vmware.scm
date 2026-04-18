@@ -8,13 +8,13 @@
   #:use-module (gnu system linux-initrd)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
-  #:use-module (lotus-rde features base)
+  #:use-module (lotus-rde features system)
   #:use-module (ice-9 match)
   #:export (%gx2-guix-vmware-features))
 
 
 
-(define-public %gx2-guix-vmware-features (define-lotus-machine-features "gx2-guix-vmware"
+(define-public %gx2-guix-vmware-features (feature-lotus-machine "gx2-guix-vmware"
                                            #:disk-serial-id-system "vmware"
                                            #:disk-serial-id-home "vmware"
                                            #:fs-boot-efi-partition (uuid "4D78-999F" 'fat32)

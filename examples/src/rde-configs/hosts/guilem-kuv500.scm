@@ -116,7 +116,7 @@
                                                               #:disk-serial-id-system "500ca1"
                                                               #:disk-serial-id-home "s4b83r"
                                                               #:fs-boot-efi-partition (uuid "2E6A-18DF" 'fat32)
-                                                              #:kernel-arguments (append (list "usbcore.autosuspend=-1")
+                                                              #:kernel-arguments (list "usbcore.autosuspend=-1"
                                                                                        "libata.force=2:disable"
                                                                                        "libata.noacpi=1"
                                                                                        "libata.ignore_hpa=1"
