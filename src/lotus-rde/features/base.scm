@@ -17,7 +17,7 @@
   #:use-module (rde features networking)
   #:use-module (rde features system)
   #:use-module (lotus-rde features mfs)
-  #:export (lotus-assert))
+  #:export ())
 ;; feature-file-database-services
 ;; feature-guix-publish-services
 ;; feature-schedular-services
@@ -37,13 +37,6 @@
 ;; feature-polkit-services
 ;; feature-krberos-services))
 
-
-(define (lotus-assert condition . msg)
-  (throw-message
-   condition
-   (if (null? msg)
-       (list "Assertion failed")
-       msg)))
 
 
 ;; (get-value 'number-of-ttys cfg 6)

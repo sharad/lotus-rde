@@ -15,8 +15,11 @@
   #:use-module (gnu system file-systems)
   #:use-module (gnu system uuid)
   #:use-module (gnu packages linux)
-  #:export (lotus-devfs-system
-            lotus-devfs-home
-            lotus-devfs-swap))
+  #:export (lotus-assert))
 
-
+(define (lotus-assert condition . msg)
+  (throw-message
+   condition
+   (if (null? msg)
+       (list "Assertion failed")
+       msg)))

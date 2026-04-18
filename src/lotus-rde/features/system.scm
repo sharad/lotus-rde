@@ -52,7 +52,7 @@
                                      #:disk-serial-id-home disk-serial-id-home
                                      #:fs-boot-efi-partition fs-boot-efi-partition)
         (feature-base-services)
-        ;; (feature-desktop-services)
+        (feature-desktop-services)
 
         ;; (feature-file-database-services)
         ;; ;; (feature-guix-publish-services)
