@@ -1,7 +1,6 @@
 (define-module (lotus-rde features base)
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-11)
-  
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
   #:use-module (gnu system linux-initrd)
@@ -694,9 +693,6 @@
                                                                  #:fs-boot-efi-partition fs-boot-efi-partition))
                      ((home-devices home-fs) (lotus-devfs-home ;; #:fs-root rootfs
                                                                #:disk-serial-id disk-serial-id-home)))
-
-
-
           ;; (assert (list? sys-devices) "sys-devices not list")
           ;; (assert (list? home-devices) "home-devices not list")
           ;; (assert (list? sys-fs) "sys-fs not list")
@@ -713,17 +709,12 @@
           ;; (for-each (lambda (x)
           ;;             (assert x "home-fs contains #f"))
           ;;           home-fs)
-
           (feature-file-systems #:mapped-devices (append sys-devices home-devices)
                                 #:file-systems (append sys-fs home-fs)
                                 ;; #:swap-devices (list (lotus-devfs-swap))
                                 #:user-pam-file-systems '()))
-
-
-
-
         (feature-base-services)
-        ;; (feature-desktop-services)
+        (feature-desktop-services)
 
         ;; (feature-file-database-services)
         ;; ;; (feature-guix-publish-services)
