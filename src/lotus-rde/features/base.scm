@@ -11,6 +11,7 @@
   #:use-module (nongnu system linux-initrd)
   #:use-module (rde features)
   #:use-module (rde features base)
+  #:use-module (rde features guile)
   #:use-module (rde features system)
   #:use-module (lotus-rde lib utils)
   #:export (;; feature-file-database-services
@@ -742,18 +743,11 @@
         ;; (feature-desktop-manager-service)
         ;; (feature-pulseaudio-service)
 
-
-        (feature-custom-services
-         #:feature-name-prefix 'openssh-server-extra
-         #:system-services
-         (list
-          ;; (service dhcp-client-service-type)
-          ;; (service cloud-init-service-type)
-          (service openssh-service-type)))))
-
-
-
-
-
+        (feature-shepherd)
+        (feature-custom-services #:feature-name-prefix 'openssh-server-extra
+                                 #:system-services (list
+                                                    ;; (service dhcp-client-service-type)
+                                                    ;; (service cloud-init-service-type)
+                                                    (service openssh-service-type)))))
 
 
