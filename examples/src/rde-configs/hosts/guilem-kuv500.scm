@@ -1,6 +1,7 @@
 (define-module (rde-configs hosts guilem-kuv500)
   #:use-module (ice-9 match)
   #:use-module (gnu system file-systems)
+  #:use-module (gnu system uuid)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
   #:use-module (rde features base)
