@@ -17,18 +17,21 @@
 
 (define (make-os-thunk f)
   (lambda (cfg)
-    (lambda ()
-      (f cfg))))
+    (f cfg)))
 
 (define guilem-kuv500-config
-  (rde-config
-   (features
-    (append %guilem-kuv500-features
-            %sharad-features))))
+  (letrec ((cfg (rde-config
+                 (features
+                        (append %guilem-kuv500-features
+                                 %sharad-features))
+                 (operating-system
+                         ((make-os-thunk lotus-get-operating-system) cfg)))))
+    cfg))
+
 (display "Starting to build now...")
 (newline)
 
-(let ((os (lotus-get-operating-system guilem-kuv500-config)))
+(let ((os (rde-config-operating-system guilem-kuv500-config)))
   (display os)
   (newline)
   os)
