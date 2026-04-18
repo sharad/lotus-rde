@@ -715,7 +715,7 @@
                                 ;; #:swap-devices (list (lotus-devfs-swap))
                                 #:user-pam-file-systems '()))
         (feature-base-services)
-        (feature-desktop-services)
+        ;; (feature-desktop-services)
 
         ;; (feature-file-database-services)
         ;; ;; (feature-guix-publish-services)
