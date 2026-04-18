@@ -21,7 +21,7 @@
     (append %guilem-kuv500-features
             %sharad-features))
    (operating-system
-     (lotus-get-operating-system  this-rde-config))))
+     (lotus-get-operating-system this-rde-config))))
 (display "Starting to build now...")
 (newline)
 
