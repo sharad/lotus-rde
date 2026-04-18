@@ -480,7 +480,9 @@
                                       #:create-mount-point? #t
                                       #:needed-for-boot?    #f
                                       #:dependencies        (append (list md-house-home)
-                                                             (list))))) ;; fs-guix-root
+                                                                    (if fs-root
+                                                                        (list fs-root)
+                                                                        (list))))))
       (let ((devices (list md-house-home))
             (fs (list fs-house-home)))
         ;; (format #t "Devices: ~a~%" devices)
