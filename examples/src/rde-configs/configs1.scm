@@ -15,20 +15,14 @@
              (rde-configs hosts guilem-kuv500)
              (rde-configs users sharad))
 
-
-;; (display %guilem-kuv500-features)
-
-
 (define guilem-kuv500-config
   (rde-config
    (features
     (append %guilem-kuv500-features
-            %sharad-features))))
-(display "HELLO")
-(newline)
-(display %sharad-features)
-(newline)
-(display "HELLO")
+            %sharad-features))
+   (operating-system
+     (lotus-get-operating-system  this-rde-config))))
+(display "Starting to build now...")
 (newline)
 
 (let ((os (rde-config-operating-system guilem-kuv500-config)))
