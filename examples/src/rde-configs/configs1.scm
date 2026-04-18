@@ -22,8 +22,6 @@
 (newline)
 
 (let ((os (rde-config-operating-system guilem-kuv500-config)))
-  (display os)
-  (newline)
   os)
 
 
