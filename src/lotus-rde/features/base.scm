@@ -7,6 +7,8 @@
   #:use-module (gnu packages base)
   #:use-module (gnu services)
   #:use-module (gnu services ssh)
+  #:use-module (gnu packages linux)
+  #:use-module (gnu system linux-initrd)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
   #:use-module (rde features)
@@ -671,7 +673,7 @@
            (disk-serial-id-system "aaa")
            (disk-serial-id-home "aaa")
            (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
-           (kernel linux)
+           (kernel linux-libre)
            (firmware '())
            (kernel-arguments '())
            (initrd base-initrd)
@@ -680,8 +682,8 @@
                            ;; #:locale    (operating-system-locale bare-bone-os)
                            ;; ls `guix build tzdata`/share/zoneinfo
                            #:timezone "Asia/Kolkata")
-        (feature-kernel ;; #:kernel kernel
-                        ;; #:initrd initrd
+        (feature-kernel #:kernel kernel
+                        #:initrd initrd
                         #:firmware firmware
                         #:kernel-arguments kernel-arguments)
         ;; (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader grub-bootloader)
