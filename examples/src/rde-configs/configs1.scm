@@ -4,7 +4,7 @@
   #:use-module (gnu services)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 match)
-  #:use-module (rde-configs hosts gx2-guix-vmware)
+  #:use-module (rde-configs hosts guilem-kuv500)
   #:use-module (rde-configs users sharad)
   #:use-module (ice-9 pretty-print))
 
@@ -12,11 +12,11 @@
 
 (use-modules (rde features)
              (lotus-rde features)
-             (rde-configs hosts gx2-guix-vmware)
+             (rde-configs hosts guilem-kuv500)
              (rde-configs users sharad))
 
 
-;; (display %gx2-guix-vmware-features)
+;; (display %guilem-kuv500-features)
 
 
 (define guilem-kuv500-config
