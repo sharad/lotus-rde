@@ -1,12 +1,12 @@
 (define-module (rde-configs hosts guilem-kuv500)
-  #:use-module (rde features base)
-  #:use-module (rde features system)
-  #:use-module (rde features wm)
-  #:use-module (lotus-rde features base)
+  #:use-module (ice-9 match)
   #:use-module (gnu system file-systems)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
-  #:use-module (ice-9 match))
+  #:use-module (rde features base)
+  #:use-module (rde features system)
+  #:use-module (rde features wm)
+  #:use-module (lotus-rde features system))
 
 
 
@@ -108,41 +108,41 @@
 ;; your stuff
 ;; (feature-hidpi)
 
-(define-public %guilem-kuv500-features (define-lotus-machine-features "guilem-kuv500"
-                                                                      #:kernel linux
-                                                                      #:initrd microcode-initrd
-                                                                      #:firmware (list linux-firmware)
-                                                                      #:disk-serial-id-system "500ca1"
-                                                                      #:disk-serial-id-home "s4b83r"
-                                                                      #:fs-boot-efi-partition (uuid "2E6A-18DF" 'fat32)
-                                                                      #:kernel-arguments (append (list "usbcore.autosuspend=-1"
-                                                                                                  "libata.force=2:disable"
-                                                                                                  "libata.noacpi=1"
-                                                                                                  "libata.ignore_hpa=1"
-                                                                                                  "--verbose"
-                                                                                                  "nosplash"
-                                                                                                  "debug"))
-                                                                      ;; (if (and (pair? %lotus-swap-devices)
-                                                                      ;;          (> (length %lotus-swap-devices) 0))
-                                                                      ;;     (list (string-append "resume="
-                                                                      ;;                          (swap-space-target (car %lotus-swap-devices))))
-                                                                      ;;     '())
-                                                                      ;; #:initrd (lambda (file-systems . rest)
-                                                                      ;;            (apply base-initrd file-systems
-                                                                      ;;                   #:extra-modules '("virtio.ko"
-                                                                      ;;                                     "virtio_balloon.ko"
-                                                                      ;;                                     "virtio_ring.ko"
-                                                                      ;;                                     "virtio_blk.ko"
-                                                                      ;;                                     "virtio_pci.ko"
-                                                                      ;;                                     ;; https://issues.guix.gnu.org/31887
-                                                                      ;;                                     "mptbase.ko"
-                                                                      ;;                                     "mptscsih.ko"
-                                                                      ;;                                     "mptspi.ko"
-                                                                      ;;                                     "virtio_net.ko")
-                                                                      ;;                   rest))
-                                                                      #:custom-services (feature-custom-services
-                                                                                         #:feature-name-prefix 'guilem-kuv500-extra
-                                                                                         #:system-services (list))))
+(define-public %guilem-kuv500-features (feature-lotus-machine "guilem-kuv500"
+                                                              #:kernel linux
+                                                              #:initrd microcode-initrd
+                                                              #:firmware (list linux-firmware)
+                                                              #:disk-serial-id-system "500ca1"
+                                                              #:disk-serial-id-home "s4b83r"
+                                                              #:fs-boot-efi-partition (uuid "2E6A-18DF" 'fat32)
+                                                              #:kernel-arguments (append (list "usbcore.autosuspend=-1")
+                                                                                       "libata.force=2:disable"
+                                                                                       "libata.noacpi=1"
+                                                                                       "libata.ignore_hpa=1"
+                                                                                       "--verbose"
+                                                                                       "nosplash"
+                                                                                       "debug")
+                                                              ;; (if (and (pair? %lotus-swap-devices)
+                                                              ;;          (> (length %lotus-swap-devices) 0))
+                                                              ;;     (list (string-append "resume="
+                                                              ;;                          (swap-space-target (car %lotus-swap-devices))))
+                                                              ;;     '())
+                                                              ;; #:initrd (lambda (file-systems . rest)
+                                                              ;;            (apply base-initrd file-systems
+                                                              ;;                   #:extra-modules '("virtio.ko"
+                                                              ;;                                     "virtio_balloon.ko"
+                                                              ;;                                     "virtio_ring.ko"
+                                                              ;;                                     "virtio_blk.ko"
+                                                              ;;                                     "virtio_pci.ko"
+                                                              ;;                                     ;; https://issues.guix.gnu.org/31887
+                                                              ;;                                     "mptbase.ko"
+                                                              ;;                                     "mptscsih.ko"
+                                                              ;;                                     "mptspi.ko"
+                                                              ;;                                     "virtio_net.ko")
+                                                              ;;                   rest))
+                                                              #:custom-services (feature-custom-services
+                                                                                 #:feature-name-prefix 'guilem-kuv500-extra
+                                                                                 #:system-services (list))))
 
 ;; (define-public %guilem-kuv500-features (list))
 
