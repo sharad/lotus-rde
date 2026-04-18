@@ -83,7 +83,7 @@
                                                   (guix build utils)
                                                   ;; (ice-9 threads)
                                                   (ice-9 srfi-13)
-                                                  (gnu packages lvm)))
+                                                  (gnu packages linux)))
                          #~(let ((source   #$source)
                                  (targets  '#$targets)
                                  (lvm-bin  #$(file-append lvm2-static "/sbin/lvm")))
