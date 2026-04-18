@@ -110,7 +110,7 @@
 
 (define-public %guilem-kuv500-features (define-lotus-machine-features "guilem-kuv500"
                                                                       #:kernel linux
-                                                                      #:initrd microcode-initrd
+                                                                      ;; #:initrd microcode-initrd
                                                                       #:firmware linux-firmware
                                                                       #:disk-serial-id-system "500ca1"
                                                                       #:disk-serial-id-home "500ca1"
