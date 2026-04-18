@@ -25,6 +25,7 @@
 
 (define* (feature-lotus-machine hostname
                                 #:key
+                                (timezone "Asia/Kolkata")
                                 (disk-serial-id-system "aaa")
                                 (disk-serial-id-home "aaa")
                                 (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
@@ -36,7 +37,7 @@
   (list (feature-host-info #:host-name hostname
                            ;; #:locale    (operating-system-locale bare-bone-os)
                            ;; ls `guix build tzdata`/share/zoneinfo
-                           #:timezone "Asia/Kolkata")
+                           #:timezone timezone)
         (feature-kernel #:kernel kernel
                         #:initrd initrd
                         #:firmware firmware
