@@ -12,6 +12,7 @@
   #:use-module (rde features)
   #:use-module (rde features base)
   #:use-module (rde features guile)
+  #:use-module (rde features networking)
   #:use-module (rde features system)
   #:use-module (lotus-rde lib utils)
   #:export (;; feature-file-database-services
@@ -742,7 +743,7 @@
         ;; (feature-guix-services)
         ;; (feature-desktop-manager-service)
         ;; (feature-pulseaudio-service)
-
+        (feature-networking)
         (feature-shepherd)
         (feature-custom-services #:feature-name-prefix 'openssh-server-extra
                                  #:system-services (list
