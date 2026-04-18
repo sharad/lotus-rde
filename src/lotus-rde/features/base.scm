@@ -695,8 +695,8 @@
         ;; (feature-bootloader)
 
         (feature-mapped-file-systems #:disk-serial-id-system disk-serial-id-system
-                                    #:disk-serial-id-home disk-serial-id-home
-                                    #:fs-boot-efi-partition fs-boot-efi-partition)
+                                     #:disk-serial-id-home disk-serial-id-home
+                                     #:fs-boot-efi-partition fs-boot-efi-partition)
         ;; (let-values (((_ sys-devices sys-fs) (lotus-devfs-system #:disk-serial-id disk-serial-id-system
         ;;                                                          #:fs-boot-efi-partition fs-boot-efi-partition))
         ;;              ((home-devices home-fs) (lotus-devfs-home ;; #:fs-root rootfs
