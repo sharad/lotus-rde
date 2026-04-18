@@ -19,10 +19,10 @@
 ;; (display %gx2-guix-vmware-features)
 
 
-(define gx2-guix-vmware-config
+(define guilem-kuv500-config
   (rde-config
    (features
-    (append %gx2-guix-vmware-features
+    (append %guilem-kuv500-features
             %sharad-features))))
 (display "HELLO")
 (newline)
@@ -31,7 +31,7 @@
 (display "HELLO")
 (newline)
 
-(let ((os (rde-config-operating-system gx2-guix-vmware-config)))
+(let ((os (rde-config-operating-system guilem-kuv500-config)))
   (display os)
   (newline)
   os)
