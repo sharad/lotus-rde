@@ -32,6 +32,9 @@
   #:export (lotus-get-operating-system))
 
 (define (lotus-get-operating-system config)
+  (define rde-config-integrate-he-in-os?
+    (@@ (rde features) rde-config-integrate-he-in-os?))
+  
   (when (rde-config-integrate-he-in-os? config)
     (require-value 'user-name config))
   (let* ((initial-os (rde-config-initial-os config))
