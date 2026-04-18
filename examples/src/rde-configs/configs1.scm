@@ -15,19 +15,9 @@
              (rde-configs hosts guilem-kuv500)
              (rde-configs users sharad))
 
-(define (make-os-thunk f)
-  (lambda (cfg)
-    (f cfg)))
-
 (define guilem-kuv500-config
-  (letrec ((cfg (rde-config
-                 (features
-                        (append %guilem-kuv500-features
-                                 %sharad-features))
-                 (operating-system
-                         ((make-os-thunk lotus-get-operating-system) cfg)))))
-    cfg))
-
+  (lotus-make-rde-config #:features (append %guilem-kuv500-features
+                                     %sharad-features)))
 (display "Starting to build now...")
 (newline)
 

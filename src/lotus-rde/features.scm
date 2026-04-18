@@ -29,7 +29,7 @@
   #:use-module (ice-9 match)
   #:use-module (ice-9 pretty-print)
   #:use-module (rde features)
-  #:export (lotus-get-operating-system))
+  #:export (lotus-make-rde-config))
 
 (define (lotus-get-operating-system config)
   (define rde-config-integrate-he-in-os?
@@ -174,3 +174,15 @@
           (shepherd-configuration
            (inherit this-config)
            (shepherd (get-value 'shepherd config)))))))))
+
+(define* (lotus-make-rde-config #:features features)
+  (define (make-os-thunk f)
+    (lambda (cfg)
+      (f cfg)))
+  (letrec ((cfg (rde-config
+                 (features
+                  (append %guilem-kuv500-features
+                          %sharad-features))
+                 (operating-system
+                   ((make-os-thunk lotus-get-operating-system) cfg)))))
+    cfg))
