@@ -145,8 +145,39 @@
 ;;                                                             #:system-services
 ;;                                                             (list))))
 
+(define-public %guilem-kuv500-features (define-lotus-machine-features "guilem-kuv500"
+                                         #:disk-serial-id-system "500ca1"
+                                         #:disk-serial-id-home "500ca1"
+                                         #:fs-boot-efi-partition (uuid "2E6A-18DF" 'fat32)
+                                         #:kernel-arguments (append (list "usbcore.autosuspend=-1"
+                                                                     "libata.force=2:disable"
+                                                                     "libata.noacpi=1"
+                                                                     "libata.ignore_hpa=1"
+                                                                     "--verbose"
+                                                                     "nosplash"
+                                                                     "debug"))
+                                         ;; (if (and (pair? %lotus-swap-devices)
+                                         ;;          (> (length %lotus-swap-devices) 0))
+                                         ;;     (list (string-append "resume="
+                                         ;;                          (swap-space-target (car %lotus-swap-devices))))
+                                         ;;     '())
+                                         ;; #:initrd (lambda (file-systems . rest)
+                                         ;;            (apply base-initrd file-systems
+                                         ;;                   #:extra-modules '("virtio.ko"
+                                         ;;                                     "virtio_balloon.ko"
+                                         ;;                                     "virtio_ring.ko"
+                                         ;;                                     "virtio_blk.ko"
+                                         ;;                                     "virtio_pci.ko"
+                                         ;;                                     ;; https://issues.guix.gnu.org/31887
+                                         ;;                                     "mptbase.ko"
+                                         ;;                                     "mptscsih.ko"
+                                         ;;                                     "mptspi.ko"
+                                         ;;                                     "virtio_net.ko")
+                                         ;;                   rest))
+                                         #:custom-services (feature-custom-services
+                                                            #:feature-name-prefix 'guilem-kuv500-extra
+                                                            #:system-services (list))))
 
-
-(define-public %guilem-kuv500-features (list))
+;; (define-public %guilem-kuv500-features (list))
 
 
