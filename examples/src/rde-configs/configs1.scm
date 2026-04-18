@@ -17,7 +17,7 @@
 
 (define guilem-kuv500-config
   (lotus-make-rde-config #:features (append %guilem-kuv500-features
-                                     %sharad-features)))
+                                            %sharad-features)))
 (display "Starting to build now...")
 (newline)
 

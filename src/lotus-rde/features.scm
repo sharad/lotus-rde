@@ -175,14 +175,12 @@
            (inherit this-config)
            (shepherd (get-value 'shepherd config)))))))))
 
-(define* (lotus-make-rde-config #:features features)
+(define* (lotus-make-rde-config #:key (features '()))
   (define (make-os-thunk f)
     (lambda (cfg)
       (f cfg)))
   (letrec ((cfg (rde-config
-                 (features
-                  (append %guilem-kuv500-features
-                          %sharad-features))
+                 (features features)
                  (operating-system
                    ((make-os-thunk lotus-get-operating-system) cfg)))))
     cfg))
