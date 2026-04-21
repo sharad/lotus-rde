@@ -15,16 +15,19 @@
 
 
 (define-public %gx2-guix-vmware-features (feature-lotus-machine "gx2-guix-vmware"
-                                           #:disk-serial-id-system "vmware"
-                                           #:disk-serial-id-home "vmware"
-                                           #:fs-boot-efi-partition (uuid "4D78-999F" 'fat32)
-                                           #:kernel-arguments (append (list "usbcore.autosuspend=-1"
-                                                                       "libata.force=2:disable"
-                                                                       "libata.noacpi=1"
-                                                                       "libata.ignore_hpa=1"
-                                                                       "--verbose"
-                                                                       "nosplash"
-                                                                       "debug"))
+                                                                #:kernel linux
+                                                                #:initrd microcode-initrd
+                                                                #:firmware (list linux-firmware)
+                                                                #:disk-serial-id-system "vmware"
+                                                                #:disk-serial-id-home "vmware"
+                                                                #:fs-boot-efi-partition (uuid "4D78-999F" 'fat32)
+                                                                #:kernel-arguments (append (list "usbcore.autosuspend=-1"
+                                                                                            "libata.force=2:disable"
+                                                                                            "libata.noacpi=1"
+                                                                                            "libata.ignore_hpa=1"
+                                                                                            "--verbose"
+                                                                                            "nosplash"
+                                                                                            "debug"))
                                            ;; (if (and (pair? %lotus-swap-devices)
                                            ;;          (> (length %lotus-swap-devices) 0))
                                            ;;     (list (string-append "resume="
@@ -43,9 +46,9 @@
                                            ;;                                     "mptspi.ko"
                                            ;;                                     "virtio_net.ko")
                                            ;;                   rest))
-                                           #:custom-services (feature-custom-services
-                                                              #:feature-name-prefix 'gx2-guix-vmware-extra
-                                                              #:system-services (list))))
+                                                                #:custom-services (feature-custom-services
+                                                                                   #:feature-name-prefix 'gx2-guix-vmware-extra
+                                                                                   #:system-services (list))))
 
 
 
