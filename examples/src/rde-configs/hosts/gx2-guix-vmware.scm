@@ -51,8 +51,8 @@
 
 
 
-(display %gx2-guix-vmware-features)
-(newline)
+;; (display %gx2-guix-vmware-features)
+;; (newline)
 
 ;; (define-public %gx2-guix-vmware-features
 ;;   (list

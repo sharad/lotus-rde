@@ -19,7 +19,7 @@
                                             %sharad-features)))
 
 (display "RDE configuration for gx2-guix-vmware:")
-(display gx2-guix-vmware-config)
+;; (display gx2-guix-vmware-config)
 
 (display "Starting to build now...")
 (newline)
