@@ -18,21 +18,18 @@
   (lotus-make-rde-config #:features (append %gx2-guix-vmware-features
                                             %sharad-features)))
 
-(display "RDE configuration for gx2-guix-vmware:")
-;; (display gx2-guix-vmware-config)
-
 (display "Starting to build now...")
 (newline)
 
 (let ((os (rde-config-operating-system gx2-guix-vmware-config)))
-  (display "File system configuration:\n")
-  (pretty-print (operating-system-file-systems os))
-  (display "Mapped devices:\n")
-  (pretty-print (operating-system-mapped-devices os))
-  (display "Bootloader:\n")
-  (pretty-print (operating-system-bootloader os))
-  (display "Services:\n")
-  (pretty-print (operating-system-services os))
+  ;; (display "File system configuration:\n")
+  ;; (pretty-print (operating-system-file-systems os))
+  ;; (display "Mapped devices:\n")
+  ;; (pretty-print (operating-system-mapped-devices os))
+  ;; (display "Bootloader:\n")
+  ;; (pretty-print (operating-system-bootloader os))
+  ;; (display "Services:\n")
+  ;; (pretty-print (operating-system-services os))
 
   os)
 
