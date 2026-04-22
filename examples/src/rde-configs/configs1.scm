@@ -1,14 +1,13 @@
 (define-module (rde-configs configs1)
-  #:use-module (rde features)
-  #:use-module (lotus-rde features)
-  #:use-module (gnu services)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 match)
   #:use-module (rde-configs hosts gx2-guix-vmware)
   #:use-module (rde-configs users sharad)
-  #:use-module (ice-9 pretty-print))
-
-
+  #:use-module (ice-9 pretty-print)
+  #:use-module (gnu system)
+  #:use-module (gnu services)
+  #:use-module (rde features)
+  #:use-module (lotus-rde features))
 
 (use-modules (rde features)
              (lotus-rde features)
