@@ -2,7 +2,7 @@
              (guix packages)
              (guix git-download)
              (guix build-system trivial)
-             (rde packages)
+             (lotus-rde packages)
              (gnu packages base)
              (gnu packages texinfo)
              ((guix licenses) #:prefix license:))
