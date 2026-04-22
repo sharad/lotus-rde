@@ -16,7 +16,7 @@
           (name 'lotus-rde)
           (url "https://github.com/sharad/lotus-rde.git")
           (branch "master")
-          (commit "2ed6d12d0fd882361cea03b79c47ef55d212d89d"))
+          (commit "65a9cae813ed496b45b04c5723ec01792f8f2251"))
         ;; (introduction
         ;; (make-channel-introduction
         ;; "257cebd587b66e4d865b3537a9a88cccd7107c95"
