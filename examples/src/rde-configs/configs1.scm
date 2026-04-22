@@ -22,6 +22,12 @@
 (newline)
 
 (let ((os (rde-config-operating-system gx2-guix-vmware-config)))
+
+  (pretty-print (operating-system-file-systems os))
+  (pretty-print (operating-system-mapped-devices os))
+  (pretty-print (operating-system-bootloader os))
+  (pretty-print (operating-system-services os))
+
   os)
 
 
