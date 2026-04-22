@@ -18,6 +18,7 @@
   #:use-module (rde features guile)
   #:use-module (rde features networking)
   #:use-module (rde features system)
+  #:use-module (rde packages)
   #:use-module (lotus-rde features mfs)
   #:export (feature-lotus-machine))
 
@@ -53,6 +54,19 @@
                                      #:disk-serial-id-home disk-serial-id-home
                                      #:fs-boot-efi-partition fs-boot-efi-partition)
         (feature-base-services)
+        (feature-base-packages #:system-packages (strings->packages "stumpwm"
+                                                                    "stumpwm-gnome"
+                                                                    "sbcl"
+                                                                    "sbcl-stumpwm-cpu"
+                                                                    "sbcl-stumpwm-mem"
+                                                                    "sbcl-stumpwm-numpad-layouts"
+                                                                    "sbcl-stumpwm-screenshot"
+                                                                    "sbcl-stumpwm-winner-mode"
+                                                                    "sbcl-dbus"
+                                                                    "libfixposix"
+                                                                    "pkg-config"
+                                                                    "cl-fad"
+                                                                    "cl-slime-swank"))
         (feature-desktop-services)
 
         ;; (feature-file-database-services)

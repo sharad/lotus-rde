@@ -679,6 +679,7 @@ subject:/home:/) and tag:new}\"'"
    ;; all-features-with-custom-kernel-and-substitutes
    (list
     (feature-additional-services)
+    ;; (feature-base-packages #:home-packages (list )
     (feature-user-info
      #:user-name "s"
      #:full-name "Sharad Pratap"
