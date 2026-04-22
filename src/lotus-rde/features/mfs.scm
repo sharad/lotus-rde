@@ -78,11 +78,7 @@
   ;; BUG: Fix using https://github.com/Webconverger/webc/blob/1164d83512305d49a8c3dc37b5d26e2d4dd84204/usr/share/initramfs-tools/scripts/init-top/udev
   "Return a gexp that maps SOURCES to TARGETSS as a LVM device, using
 'lvm'."
-  (with-imported-modules (source-module-closure '((gnu build file-systems)
-                                                  (guix build utils)
-                                                  ;; (ice-9 threads)
-                                                  (ice-9 srfi-13)
-                                                  (gnu packages linux)))
+  (with-imported-modules (source-module-closure '((gnu build file-systems)))
                          #~(let ((source   #$source)
                                  (targets  '#$targets)
                                  (lvm-bin  #$(file-append lvm2-static "/sbin/lvm")))
