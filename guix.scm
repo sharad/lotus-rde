@@ -7,4 +7,4 @@
              (gnu packages texinfo)
              ((guix licenses) #:prefix license:))
 
-rde
+lotus-rde
