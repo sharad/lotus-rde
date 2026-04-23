@@ -1,7 +1,7 @@
 ;; -*- mode: scheme; -*-
 (define-module (rde env guix channels-ci-latest-guix)
   #:use-module (guix channels)
-  #:export (core-channels))
+  #:export (core-channelscore-channels-with-local-rde-and-latest-guix))
 
 
 
@@ -75,12 +75,12 @@
                                            (url "https://github.com/sharad/lotus-rde.git"))))
 
 
-(define core-channels (append %guix-more-channels
-                       %nonguix-channels
-                       %rde-channels
-                       ;; %rde-lotus-channels -- not required
-                       %guix-lotus-channels
-                       %guix-android-channels
-                       %local-default-channels))
+(define core-channels-with-local-rde-and-latest-guix (append %guix-more-channels
+                                                      %nonguix-channels
+                                                      %rde-channels
+                                                      ;; %rde-lotus-channels -- not required
+                                                      %guix-lotus-channels
+                                                      %guix-android-channels
+                                                      %local-default-channels))
 
 
