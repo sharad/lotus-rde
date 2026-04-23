@@ -67,7 +67,7 @@ guix: env/sync
 guix-pull:
 	guix pull -L ./env/guix -C ${CHANNELS_FILE}
 
-guix-update-channel:
+guix-update-channel: guix
 	echo ';; -*- mode: scheme; -*-' > $(CHANNELS_FILE)
 	echo ';;; rde --- Reproducible development environment.' >> $(CHANNELS_FILE)
 	echo ';;;' >> $(CHANNELS_FILE)
