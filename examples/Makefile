@@ -61,9 +61,13 @@ env/guix/rde/env/guix/channels-ci-latest-guix.scm: ../env/guix/rde/env/guix/chan
 	echo -e ";;; Do not edit it manually" >> $@
 
 
+.PHONY: env/sync guix guix-update-channel
+
 # env/sync: env/guix/rde/env/guix/channels.scm
 env/sync: env/guix/rde/env/guix/channels.scm env/guix/rde/env/guix/channels-ci-latest-guix.scm
+
 guix: env/sync
+	echo "syncing env"
 
 guix-pull:
 	guix pull -L ./env/guix -C ${CHANNELS_FILE}
