@@ -1,7 +1,7 @@
 ;; -*- mode: scheme; -*-
 (define-module (rde env guix channels-ci-latest-guix)
   #:use-module (guix channels)
-  #:export (core-channelscore-channels-with-local-rde-and-latest-guix))
+  #:export (core-channels-with-local-rde-and-latest-guix))
 
 
 
