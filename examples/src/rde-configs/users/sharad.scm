@@ -683,7 +683,7 @@ subject:/home:/) and tag:new}\"'"
     (feature-user-info
      #:user-name "s"
      #:full-name "Sharad Pratap"
-     #:home-directory "home/s/hell"
+     #:home-directory "/home/s/hell"
      #:email "s@localhost"
      #:user-initial-password-hash
      "$6$abc$3SAZZQGdvQgAscM2gupP1tC.SqnsaLSPoAnEOb2k6jXMhzQqS1kCSplAJ/vUy2rrnpHtt6frW2Ap5l/tIvDsz."
