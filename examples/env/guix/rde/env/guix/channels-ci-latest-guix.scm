@@ -84,3 +84,6 @@
                                                       %local-default-channels))
 
 
+
+;;; This is an automatic copy of RDE's channels.scm
+;;; Do not edit it manually
