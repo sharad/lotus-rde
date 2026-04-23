@@ -54,6 +54,13 @@ env/guix/rde/env/guix/channels.scm: ../env/guix/rde/env/guix/channels.scm
 	echo -e "\n;;; This is an automatic copy of RDE's channels.scm" >> $@
 	echo -e ";;; Do not edit it manually" >> $@
 
+env/guix/rde/env/guix/channels-ci-latest-guix.scm: ../env/guix/rde/env/guix/channels-ci-latest-guix.scm
+	mkdir -p $(@D)
+	cat $< > $@
+	echo -e "\n;;; This is an automatic copy of RDE's channels.scm" >> $@
+	echo -e ";;; Do not edit it manually" >> $@
+
+
 env/sync: env/guix/rde/env/guix/channels.scm
 guix: env/sync
 
