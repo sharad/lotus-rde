@@ -41,8 +41,8 @@ guix-pull:
 
 guix-update-pull:
 	guix pull
-	guix pull --news;
-	guix pull --news --details
+	-guix pull --news;
+	-guix pull --news --details
 
 guix-update-channels-latest: guix-update-pull
 	echo ';; -*- mode: scheme; -*-' > $(CHANNELS_ENV)

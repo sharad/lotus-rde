@@ -39,7 +39,7 @@
           (name 'lotus)
           (url "https://github.com/sharad/guix")
           (branch "master")
-          (commit "5398848b4f5a84b2742bcf6461aba15c96108396"))
+          (commit "c4e1ee16b0cb18441c432d332323faaede2c1d49"))
         (channel
           (name 'guix-android)
           (url "https://framagit.org/tyreunom/guix-android.git")
@@ -49,7 +49,7 @@
           (name 'guix)
           (url "https://git.guix.gnu.org/guix.git")
           (branch "master")
-          (commit "ef1638ebdf2659c1e4f9922fc8b1557bad7cfb91")
+          (commit "23377537daf96392e5faef6bf5ed8310e1ff8dd6")
           (introduction
            (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
