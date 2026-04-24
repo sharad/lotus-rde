@@ -104,21 +104,21 @@
 (define-public dell5480-he
   (rde-config-home-environment dell5480-config))
 
-;;; guilem-kuv500
+;;; guilem-lat7420
 
-(define-public guilem-kuv500-config
+(define-public guilem-lat7420-config
   (rde-config
    (features
-    (append %guilem-kuv500-features
+    (append %guilem-lat7420-features
             %sharad-features))))
 
-(define-public guilem-kuv500-os
-  (rde-config-operating-system guilem-kuv500-config))
+(define-public guilem-lat7420-os
+  (rde-config-operating-system guilem-lat7420-config))
 
-(define-public guilem-kuv500-he
-  (rde-config-home-environment guilem-kuv500-config))
+(define-public guilem-lat7420-he
+  (rde-config-home-environment guilem-lat7420-config))
 
-;;; guilem-kuv500
+;;; guilem-lat7420
 
 (define-public gx2-guix-vmware-config
   (rde-config
@@ -143,8 +143,8 @@
       ("live-system" live-os)
       ("dell5480-home" dell5480-he)
       ("dell5480-system" dell5480-os)
-      ("guilem-kuv500-home" guilem-kuv500-he)
-      ("guilem-kuv500-system" guilem-kuv500-os)
+      ("guilem-lat7420-home" guilem-lat7420-he)
+      ("guilem-lat7420-system" guilem-lat7420-os)
       ("gx2-guix-vmware-home" gx2-guix-vmware-he)
       ("gx2-guix-vmware-system" gx2-guix-vmware-os)
       (_ gx2-guix-vmware-os))))
