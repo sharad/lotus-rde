@@ -1,11 +1,9 @@
 
 (define-module (rde-configs hosts dell5480)
-  #:use-module (rde features base)
-  #:use-module (rde features system)
-  #:use-module (rde features wm)
-  #:use-module (gnu system file-systems)
-  #:use-module (gnu system mapped-devices)
-  #:use-module (ice-9 match))
+  #:use-module (gnu system uuid)
+  #:use-module (nongnu packages linux)
+  #:use-module (nongnu system linux-initrd)
+  #:use-module (lotus-rde features system))
 
 
 ;;; Hardware/host specifis features
