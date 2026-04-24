@@ -3,6 +3,7 @@
   #:use-module (gnu system uuid)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
+  #:use-module (rde features base)
   #:use-module (lotus-rde features system))
 
 
