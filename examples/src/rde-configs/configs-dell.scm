@@ -1,4 +1,4 @@
-(define-module (rde-configs configs1)
+(define-module (rde-configs configs-dell)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 match)
   #:use-module (rde-configs hosts dell5480)
