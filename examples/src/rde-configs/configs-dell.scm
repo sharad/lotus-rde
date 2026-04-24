@@ -14,6 +14,8 @@
              (rde-configs hosts dell5480)
              (rde-configs users sharad))
 
+(display "Hello")
+
 (define dell5480-config
   (lotus-make-rde-config #:features (append %dell5480-features
                                             %sharad-features)))
