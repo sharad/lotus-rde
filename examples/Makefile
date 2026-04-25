@@ -25,6 +25,11 @@ GUIXTM_latest = $(GUIXTM_LATEST_GUIX)
 GUIX = $(GUIXTM_$(BUILD_TYPE)) --
 
 
+GUIX_SYSTEM_FLAGS = --debug=3
+GUIX_HOME_FLAGS = --debug=5 --verbosity=3
+
+
+
 SRC_DIR = ./src
 CONFIGS ?= ${SRC_DIR}/rde-configs/configs.scm
 PULL_EXTRA_OPTIONS=
@@ -99,19 +104,19 @@ guix-update-channel: guix
 ifneq ($(strip $(RDE_TARGET)),)
 
 rde/home/build: guix
-	${GUIX} home \
+	${GUIX} home $(GUIX_HOME_FLAGS) \
 	build ${CONFIGS}
 
 rde/home/reconfigure: guix
-	${GUIX} home \
+	${GUIX} home $(GUIX_HOME_FLAGS) \
 	reconfigure ${CONFIGS}
 
 rde/system/build: guix
-	${GUIX} system \
+	${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	build ${CONFIGS}
 
 rde/system/reconfigure: guix
-	${GUIX} system --debug=5 --verbosity=3\
+	${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	reconfigure ${CONFIGS}
 
 endif
@@ -119,37 +124,37 @@ endif
 
 
 ixy/home/build: guix
-	RDE_TARGET=ixy-home ${GUIX} home \
+	RDE_TARGET=ixy-home ${GUIX} home $(GUIX_HOME_FLAGS) \
 	build ${CONFIGS}
 
 ixy/home/reconfigure: guix
-	RDE_TARGET=ixy-home ${GUIX} home \
+	RDE_TARGET=ixy-home ${GUIX} home $(GUIX_HOME_FLAGS) \
 	reconfigure ${CONFIGS}
 
 ixy/system/build: guix
-	RDE_TARGET=ixy-system ${GUIX} system \
+	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	build ${CONFIGS}
 
 ixy/system/reconfigure: guix
-	RDE_TARGET=ixy-system ${GUIX} system \
+	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	reconfigure ${CONFIGS}
 
 cow-store:
 	sudo herd start cow-store ${ROOT_MOUNT_POINT}
 
 ixy/system/init: guix
-	RDE_TARGET=ixy-system ${GUIX} system \
+	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	init ${CONFIGS} ${ROOT_MOUNT_POINT}
 
 target:
 	mkdir -p target
 
 live/image/build: guix
-	RDE_TARGET=live-system ${GUIX} system image --image-type=iso9660 \
+	RDE_TARGET=live-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) image --image-type=iso9660 \
 	${CONFIGS}
 
 target/rde-live.iso: guix target
-	RDE_TARGET=live-system ${GUIX} system image --image-type=iso9660 \
+	RDE_TARGET=live-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) image --image-type=iso9660 \
 	${CONFIGS} -r target/rde-live-tmp.iso
 	mv -f target/rde-live-tmp.iso target/rde-live.iso
 
@@ -169,7 +174,7 @@ minimal-emacs: guix
 	#--eval "(require 'feature-loader-portable)"
 
 minimal/home/build: guix
-	${GUIX} home build ./src/rde-configs/minimal.scm
+	${GUIX} home $(GUIX_HOME_FLAGS) build ./src/rde-configs/minimal.scm
 
 minimal/home/build/ci:
 	${GUIXTM_LOCAL_RDE} -- \
@@ -190,7 +195,7 @@ minimal/home/build/ci-latest-guix-no-auth:
 	home build ./src/rde-configs/minimal.scm
 
 cloud-rde: guix
-	${GUIX} system image -e '(@ (rde-configs hosts cloud) cloud-image)'
+	${GUIX} system $(GUIX_SYSTEM_FLAGS) image -e '(@ (rde-configs hosts cloud) cloud-image)'
 
 clean-target:
 	rm -rf ./target
