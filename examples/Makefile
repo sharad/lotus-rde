@@ -13,7 +13,7 @@ GUIXTM_FLAGS = $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE
 GUIXTM_PREFIX_ENV = GUILE_LOAD_PATH="../src:../tests:./src"
 # GUIXTM_COMMAND = guix time-machine -L ./env/guix
 # GUIXTM_COMMAND = guix time-machine -L ./env/guix -L ./src -L ../src --debug=3
-GUIXTM_COMMAND = guix time-machine -L ./env/guix --debug=3
+GUIXTM_COMMAND = guix time-machine -L ./env/guix --debug=5
 
 GUIXTM = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE}$(GUIXTM_FLAGS)
 GUIXTM_LOCAL_RDE = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE_LOCAL_RDE}$(GUIXTM_FLAGS)
