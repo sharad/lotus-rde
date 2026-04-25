@@ -91,7 +91,8 @@ guix-update-channel: guix
 	echo '#:export (core-channels))' >> $(CHANNELS_FILE)
 	echo >> $(CHANNELS_FILE)
 	echo -n "(define core-channels (cons (channel (name 'lotus-rde) (url \"https://github.com/sharad/lotus-rde.git\") (branch \"master\") (commit \"" >> $(CHANNELS_FILE)
-	git rev-parse --default HEAD | tr -d '\n' >> $(CHANNELS_FILE)
+	# git rev-parse --default HEAD | tr -d '\n' >> $(CHANNELS_FILE)
+	git rev-list -1 HEAD -- src | tr -d '\n' >> $(CHANNELS_ENV)
 	echo '"))' >> $(CHANNELS_FILE)
 	echo ' ;; (introduction'  >> $(CHANNELS_FILE)
 	echo ' ;; (make-channel-introduction'  >> $(CHANNELS_FILE)
@@ -100,6 +101,19 @@ guix-update-channel: guix
 	echo ' ;;  "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0")))'  >> $(CHANNELS_FILE)
 	echo 'rde:core-channels)) core-channels' >> $(CHANNELS_FILE)
 	guix style --whole-file $(CHANNELS_FILE)
+
+
+rde/build/guix: guix
+	${GUIX} home $(GUIX_HOME_FLAGS) \
+	build guix
+
+rde/repl: guix
+	${GUIX} home $(GUIX_HOME_FLAGS) \
+	repl
+
+rde/describe: guix
+	${GUIX} home $(GUIX_HOME_FLAGS) \
+	describe
 
 
 ifneq ($(strip $(RDE_TARGET)),)
