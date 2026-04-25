@@ -8,7 +8,8 @@ CHANNELS_FILE = ./env/guix/rde-configs/env/guix/channels.scm
 CHANNELS_FILE_LOCAL_RDE = ./env/guix/rde-configs/env/guix/channels-ci.scm
 CHANNELS_FILE_LATEST_GUIX = ./env/guix/rde-configs/env/guix/channels-ci-latest-guix.scm
 
-GUIXTM_FLAGS = $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
+GUIXTM_FLAGS = --debug=3
+GUIXTM_FLAGS += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
 GUIXTM_PREFIX_ENV = GUILE_LOAD_PATH="../src:../tests:./src"
 # GUIXTM_COMMAND = guix time-machine -L ./env/guix
 # GUIXTM_COMMAND = guix time-machine -L ./env/guix -L ./src -L ../src --debug=3
