@@ -28,6 +28,9 @@ QEMU_BASE_ARGS= \
 # -vga vmware
 # -vga none -device qxl-vga,vgamem_mb=32
 
+.PHONY: examples/rde/home/build examples/rde/home/reconfigure
+.PHONY: examples/rde/system/build examples/rde/system/reconfigure
+
 
 all: ares
 	@echo default target
@@ -70,6 +73,9 @@ guix-update-examples-channel:
 guix-update-examples-channel-latest: guix-update-channels-latest
 	make guix-update-examples-channel
 
+git-commit: guix-update-examples-channel
+	git correct-push
+
 ares:
 	${GUIX} shell ${DEV_ENV_LOAD_PATH} \
 	guile-next guile-ares-rs \
@@ -81,6 +87,23 @@ ares:
 ((@ (ares server) run-nrepl-server)))"
 
 repl: ares
+
+ifneq ($(strip $(RDE_TARGET)),)
+
+examples/rde/home/build:
+	make -C examples rde/home/build
+
+examples/rde/home/reconfigure:
+	make -C examples rde/home/reconfigure
+
+examples/rde/system/build:
+	make -C examples rde/system/build
+
+examples/rde/system/reconfigure:
+	make -C examples rde/system/reconfigure
+
+endif
+
 
 examples/ixy/home/reconfigure:
 	RDE_TARGET=ixy-home ${GUIX} home \
