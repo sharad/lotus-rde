@@ -67,6 +67,7 @@ env/guix/rde/env/guix/channels-ci-latest-guix.scm: ../env/guix/rde/env/guix/chan
 
 
 .PHONY: env/sync guix guix-update-channel
+.PHONY: rde/build/guix rde/repl rde/describe
 
 # env/sync: env/guix/rde/env/guix/channels.scm
 env/sync: env/guix/rde/env/guix/channels.scm env/guix/rde/env/guix/channels-ci-latest-guix.scm
