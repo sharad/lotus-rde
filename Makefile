@@ -87,6 +87,24 @@ ares:
 repl: ares
 
 
+## -- pkg-exec targets
+PKGEXEC = pkg-exec
+# Pattern rule: any target that looks like subdir/something
+$(PKGEXEC)/%:
+	pkg-exec $(MAKE) $*
+# Optional: Add a phony declaration if targets aren't actual files
+.PHONY: $(PKGEXEC)/%
+## -- pkg-exec targets
+
+## -- sudo targets
+SUDO = sudo
+# Pattern rule: any target that looks like subdir/something
+$(SUDO)/%:
+	sudo $(MAKE) $*
+# Optional: Add a phony declaration if targets aren't actual files
+.PHONY: $(SUDO)/%
+## -- sudo targets
+
 ## -- examples dir targets
 SUBDIR = examples
 # Pattern rule: any target that looks like subdir/something
@@ -95,6 +113,7 @@ $(SUBDIR)/%:
 # Optional: Add a phony declaration if targets aren't actual files
 .PHONY: $(SUBDIR)/%
 ## -- examples dir targets
+
 
 examples/ixy/home/reconfigure:
 	RDE_TARGET=ixy-home ${GUIX} home \
