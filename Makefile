@@ -31,7 +31,6 @@ QEMU_BASE_ARGS= \
 .PHONY: examples/rde/home/build examples/rde/home/reconfigure
 .PHONY: examples/rde/system/build examples/rde/system/reconfigure
 
-
 all: ares
 	@echo default target
 
@@ -87,6 +86,15 @@ ares:
 ((@ (ares server) run-nrepl-server)))"
 
 repl: ares
+
+
+
+SUBDIR = examples
+# Pattern rule: any target that looks like subdir/something
+$(SUBDIR)/%:
+	$(MAKE) -C $(SUBDIR) $*
+# Optional: Add a phony declaration if targets aren't actual files
+.PHONY: $(SUBDIR)/%
 
 ifneq ($(strip $(RDE_TARGET)),)
 
