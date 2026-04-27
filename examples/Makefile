@@ -117,7 +117,14 @@ rde/describe: guix
 	describe
 
 
-ifneq ($(strip $(RDE_TARGET)),)
+RDE_HOST ?= $(HOST)
+export RDE_HOST
+RDE_USER ?= $(USER)
+export RDE_USER
+RDE_TARGET ?= system
+export RDE_TARGET
+
+# ifneq ($(strip $(RDE_TARGET)),)
 
 rde/home/build: guix
 	${GUIX} home $(GUIX_HOME_FLAGS) \
@@ -135,7 +142,7 @@ rde/system/reconfigure: guix
 	${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	reconfigure ${CONFIGS}
 
-endif
+# endif
 
 
 

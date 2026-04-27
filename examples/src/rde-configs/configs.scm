@@ -186,3 +186,37 @@
 
 ;;; TODO: Call reconfigure from scheme file.
 ;;; TODO: Rename configs.scm to main.scm?
+
+
+
+
+
+
+(define (dispatcher)
+
+  (define (env-var->symbol envname)
+    (let* ((envvar (getenv envname))
+           (sym (and target (string->symbol envvar)))
+           (val (and sym (module-ref (current-module) sym #f))))
+      (or var #f)))
+
+  (let* ((rde-host-feature (env-var->symbol "RDE_HOST"))
+         (rde-user-fature  (env-var->symbol "RDE_USER")))
+    (if (and rde-host-feature
+             rde-user-fature)
+        (let ((config (rde-config
+                       (features
+                        (append rde-host-feature
+                                rde-user-fature)))))
+          (let ((rde-target (getenv "RDE_TARGET")))
+            (match rde-target
+              ("home" (rde-config-home-environment config))
+              ("system" (rde-config-operating-system config))
+              (_ #f))))
+        (begin
+          (format #t "Invalid RDE_TARGET: ~a\n" target)
+          #f))))
+
+
+
+(dispatcher)
