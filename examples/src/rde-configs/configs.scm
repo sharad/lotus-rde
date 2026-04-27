@@ -196,7 +196,7 @@
 
   (define (env-var->symbol envname)
     (let* ((envvar (getenv envname))
-           (sym (and target (string->symbol envvar)))
+           (sym (and envvar (string->symbol envvar)))
            (val (and sym (module-ref (current-module) sym #f))))
       (or var #f)))
 
