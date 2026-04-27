@@ -39,12 +39,15 @@ check:
 guix-pull:
 	make -C examples guix-pull
 
-guix-update-pull:
+guix-pull-latest:
 	guix pull
 	-guix pull --news;
 	-guix pull --news --details
 
-guix-update-channels-latest: guix-update-pull
+guix-update-channels-latest:
+	echo you may wanted to run
+	echo make guix-pull-latest
+	echo
 	echo ';; -*- mode: scheme; -*-' > $(CHANNELS_ENV)
 	echo ';;; rde --- Reproducible development environment.' >> $(CHANNELS_ENV)
 	echo ';;;' >> $(CHANNELS_ENV)
