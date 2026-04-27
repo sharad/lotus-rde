@@ -196,20 +196,20 @@
 
 (define (dispatcher)
 
-  (define (env-var->symbol envname)
+  (define (env-features->symbol envname)
     (let* ((envvar (getenv envname))
-           (sym (and envvar (string->symbol envvar)))
+           (sym (and envvar (string->symbol (string-append "%" envvar "-features"))))
            (val (and sym (module-ref (current-module) sym #f))))
+      (format #t "envname: ~a, envvar: ~a, sym: ~a, val: ~a\n" envname envvar sym val)
       (or val #f)))
 
-  (let* ((rde-host-feature (env-var->symbol "RDE_HOST"))
-         (rde-user-fature  (env-var->symbol "RDE_USER")))
+  (let* ((rde-host-feature (env-features->symbol "RDE_HOST"))
+         (rde-user-fature  (env-features->symbol "RDE_USER")))
     (if (and rde-host-feature
              rde-user-fature)
         (let ((config (lotus-make-rde-config #:features
-                                             (features
-                                              (append rde-host-feature
-                                                      rde-user-fature)))))
+                                             (append rde-host-feature
+                                                     rde-user-fature))))
           (let ((rde-target (getenv "RDE_TARGET")))
             (match rde-target
               ("home" (rde-config-home-environment config))
