@@ -99,7 +99,7 @@
   (let* ((rde-host-feature (env-features->symbol "RDE_HOST"))
          (rde-user-fature  (env-features->symbol "RDE_USER")))
 
-    (format #t "RDE_TARGET: ~a\n" "RDE_TARGET" (getenv "RDE_TARGET"))
+    (format #t "RDE_TARGET: ~a\n" (getenv "RDE_TARGET"))
 
     (if (and rde-host-feature
              rde-user-fature)
