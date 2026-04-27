@@ -200,7 +200,7 @@
     (let* ((envvar (getenv envname))
            (sym (and envvar (string->symbol (string-append "%" envvar "-features"))))
            (val (and sym (module-ref (current-module) sym #f))))
-      (format #t "envname: ~a, envvar: ~a, sym: ~a, val: ~a\n" envname envvar sym val)
+      (format #t "envname: ~a, envvar: ~a, sym: ~a, null?: ~a\n" envname envvar sym (null? val))
       (or val #f)))
 
   (let* ((rde-host-feature (env-features->symbol "RDE_HOST"))
