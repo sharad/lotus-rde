@@ -4,9 +4,16 @@
 BUILD_TYPE ?= default
 
 
-CHANNELS_FILE = ./env/guix/rde-configs/env/guix/channels.scm
+CHANNELS_RDE_FILE = ./env/guix/rde-configs/env/guix/channels.scm
 CHANNELS_FILE_LOCAL_RDE = ./env/guix/rde-configs/env/guix/channels-ci.scm
 CHANNELS_FILE_LATEST_GUIX = ./env/guix/rde-configs/env/guix/channels-ci-latest-guix.scm
+
+CHANNEL_FILE_default = $(CHANNELS_RDE_FILE)
+CHANNEL_FILE_local = $(CHANNELS_FILE_LOCAL_RDE)
+CHANNEL_FILE_latest = $(CHANNELS_FILE_LATEST_GUIX)
+
+CHANNELS_FILE = $(CHANNEL_FILE_$(BUILD_TYPE))
+
 
 GUIXTM_FLAGS =  --debug=3
 GUIXTM_FLAGS += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
@@ -16,14 +23,8 @@ GUIXTM_PREFIX_ENV = GUILE_LOAD_PATH="../src:../tests:./src"
 GUIXTM_COMMAND = guix time-machine -L ./env/guix
 
 GUIXTM = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE} $(GUIXTM_FLAGS)
-GUIXTM_LOCAL_RDE = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE_LOCAL_RDE} $(GUIXTM_FLAGS)
-GUIXTM_LATEST_GUIX = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE_LATEST_GUIX} $(GUIXTM_FLAGS)
 
-GUIXTM_default = $(GUIXTM)
-GUIXTM_local = $(GUIXTM_LOCAL_RDE)
-GUIXTM_latest = $(GUIXTM_LATEST_GUIX)
-
-GUIX = $(GUIXTM_$(BUILD_TYPE)) --
+GUIX = $(GUIXTM) --
 
 
 GUIX_SYSTEM_FLAGS = --debug=3
@@ -79,29 +80,29 @@ guix-pull:
 	guix pull -L ./env/guix -C ${CHANNELS_FILE}
 
 guix-update-channel: guix
-	echo ';; -*- mode: scheme; -*-' > $(CHANNELS_FILE)
-	echo ';;; rde --- Reproducible development environment.' >> $(CHANNELS_FILE)
-	echo ';;;' >> $(CHANNELS_FILE)
-	echo ';;; SPDX-FileCopyrightText: 2024, 2025 Andrew Tropin <andrew@trop.in>' >> $(CHANNELS_FILE)
-	echo ';;;' >> $(CHANNELS_FILE)
-	echo ';;; SPDX-License-Identifier: GPL-3.0-or-later' >> $(CHANNELS_FILE)
-	echo >> $(CHANNELS_FILE)
-	echo '(define-module (rde-configs env guix channels)' >> $(CHANNELS_FILE)
-	echo '#:use-module ((rde env guix channels) #:prefix rde:)' >> $(CHANNELS_FILE)
-	echo '#:use-module (guix channels)' >> $(CHANNELS_FILE)
-	echo '#:export (core-channels))' >> $(CHANNELS_FILE)
-	echo >> $(CHANNELS_FILE)
-	echo -n "(define core-channels (cons (channel (name 'lotus-rde) (url \"https://github.com/sharad/lotus-rde.git\") (branch \"master\") (commit \"" >> $(CHANNELS_FILE)
-	# git rev-parse --default HEAD | tr -d '\n' >> $(CHANNELS_FILE)
-	git rev-list -1 HEAD -- ../src | tr -d '\n' >> $(CHANNELS_FILE)
-	echo '"))' >> $(CHANNELS_FILE)
-	echo ' ;; (introduction'  >> $(CHANNELS_FILE)
-	echo ' ;; (make-channel-introduction'  >> $(CHANNELS_FILE)
-	echo ' ;; "257cebd587b66e4d865b3537a9a88cccd7107c95"'  >> $(CHANNELS_FILE)
-	echo ' ;;  (openpgp-fingerprint'  >> $(CHANNELS_FILE)
-	echo ' ;;  "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0")))'  >> $(CHANNELS_FILE)
-	echo 'rde:core-channels)) core-channels' >> $(CHANNELS_FILE)
-	guix style --whole-file $(CHANNELS_FILE)
+	echo ';; -*- mode: scheme; -*-' > $(CHANNELS_RDE_FILE)
+	echo ';;; rde --- Reproducible development environment.' >> $(CHANNELS_RDE_FILE)
+	echo ';;;' >> $(CHANNELS_RDE_FILE)
+	echo ';;; SPDX-FileCopyrightText: 2024, 2025 Andrew Tropin <andrew@trop.in>' >> $(CHANNELS_RDE_FILE)
+	echo ';;;' >> $(CHANNELS_RDE_FILE)
+	echo ';;; SPDX-License-Identifier: GPL-3.0-or-later' >> $(CHANNELS_RDE_FILE)
+	echo >> $(CHANNELS_RDE_FILE)
+	echo '(define-module (rde-configs env guix channels)' >> $(CHANNELS_RDE_FILE)
+	echo '#:use-module ((rde env guix channels) #:prefix rde:)' >> $(CHANNELS_RDE_FILE)
+	echo '#:use-module (guix channels)' >> $(CHANNELS_RDE_FILE)
+	echo '#:export (core-channels))' >> $(CHANNELS_RDE_FILE)
+	echo >> $(CHANNELS_RDE_FILE)
+	echo -n "(define core-channels (cons (channel (name 'lotus-rde) (url \"https://github.com/sharad/lotus-rde.git\") (branch \"master\") (commit \"" >> $(CHANNELS_RDE_FILE)
+	# git rev-parse --default HEAD | tr -d '\n' >> $(CHANNELS_RDE_FILE)
+	git rev-list -1 HEAD -- ../src | tr -d '\n' >> $(CHANNELS_RDE_FILE)
+	echo '"))' >> $(CHANNELS_RDE_FILE)
+	echo ' ;; (introduction'  >> $(CHANNELS_RDE_FILE)
+	echo ' ;; (make-channel-introduction'  >> $(CHANNELS_RDE_FILE)
+	echo ' ;; "257cebd587b66e4d865b3537a9a88cccd7107c95"'  >> $(CHANNELS_RDE_FILE)
+	echo ' ;;  (openpgp-fingerprint'  >> $(CHANNELS_RDE_FILE)
+	echo ' ;;  "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0")))'  >> $(CHANNELS_RDE_FILE)
+	echo 'rde:core-channels)) core-channels' >> $(CHANNELS_RDE_FILE)
+	guix style --whole-file $(CHANNELS_RDE_FILE)
 
 
 rde/build/guix: guix

@@ -40,7 +40,7 @@ guix-pull:
 	make -C examples guix-pull
 
 guix-pull-latest:
-	guix pull
+	BUILD_TYPE=latest make -C examples guix-pull
 	-guix pull --news;
 	-guix pull --news --details
 
