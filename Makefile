@@ -91,7 +91,11 @@ repl: ares
 PKGEXEC = pkg-exec
 # Pattern rule: any target that looks like subdir/something
 $(PKGEXEC)/%:
-	pkg-exec $(MAKE) $*
+	mkdir -p /tmp/guix-build-workspace/build/tmp
+	sudo-run chmod +rx /var/log
+	sudo mount -o remount,rw /gnu
+	$(MAKE) $*
+	sudo mount -o remount,ro /gnu
 # Optional: Add a phony declaration if targets aren't actual files
 .PHONY: $(PKGEXEC)/%
 ## -- pkg-exec targets
