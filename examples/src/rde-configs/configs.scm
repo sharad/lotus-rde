@@ -1,10 +1,10 @@
 (define-module (rde-configs configs)
-  #:use-module (rde features)
-  #:use-module (lotus-rde features)
-  #:use-module (gnu services)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 match)
-  #:use-module (ice-9 pretty-print))
+  #:use-module (ice-9 pretty-print)
+  #:use-module (gnu services)
+  #:use-module (rde features)
+  #:use-module (lotus-rde features))
 
 (define* (use-nested-configuration-modules
           #:key
@@ -198,16 +198,16 @@
     (let* ((envvar (getenv envname))
            (sym (and envvar (string->symbol envvar)))
            (val (and sym (module-ref (current-module) sym #f))))
-      (or var #f)))
+      (or val #f)))
 
   (let* ((rde-host-feature (env-var->symbol "RDE_HOST"))
          (rde-user-fature  (env-var->symbol "RDE_USER")))
     (if (and rde-host-feature
              rde-user-fature)
-        (let ((config (rde-config
-                       (features
-                        (append rde-host-feature
-                                rde-user-fature)))))
+        (let ((config (lotus-make-rde-config #:features
+                                             (features
+                                              (append rde-host-feature
+                                                      rde-user-fature)))))
           (let ((rde-target (getenv "RDE_TARGET")))
             (match rde-target
               ("home" (rde-config-home-environment config))
