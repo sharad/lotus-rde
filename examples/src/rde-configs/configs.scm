@@ -149,7 +149,7 @@
 ;;; Dispatcher, which helps to return various values based on environment
 ;;; variable value.
 
-(define (dispatcher)
+(define (dispatcher-old)
   (let ((rde-target (getenv "RDE_TARGET")))
     (match rde-target
       ("ixy-home" ixy-he)
@@ -181,7 +181,9 @@
 ;;  (rde-config-home-services ixy-config))
 
 ;; (define br ((@ (rde api store) build-with-store) ixy-he))
-(dispatcher)
+
+
+;; (dispatcher)
 
 
 ;;; TODO: Call reconfigure from scheme file.
@@ -214,7 +216,7 @@
               ("system" (rde-config-operating-system config))
               (_ #f))))
         (begin
-          (format #t "Invalid RDE_TARGET: ~a\n" target)
+          (format #t "Invalid RDE_HOST: ~a or RDE_USER: ~a\n" rde-host-feature rde-user-fature)
           #f))))
 
 
