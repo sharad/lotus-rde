@@ -93,7 +93,7 @@ guix-update-channel: guix
 	echo >> $(CHANNELS_FILE)
 	echo -n "(define core-channels (cons (channel (name 'lotus-rde) (url \"https://github.com/sharad/lotus-rde.git\") (branch \"master\") (commit \"" >> $(CHANNELS_FILE)
 	# git rev-parse --default HEAD | tr -d '\n' >> $(CHANNELS_FILE)
-	git rev-list -1 HEAD -- src | tr -d '\n' >> $(CHANNELS_FILE)
+	git rev-list -1 HEAD -- ../src | tr -d '\n' >> $(CHANNELS_FILE)
 	echo '"))' >> $(CHANNELS_FILE)
 	echo ' ;; (introduction'  >> $(CHANNELS_FILE)
 	echo ' ;; (make-channel-introduction'  >> $(CHANNELS_FILE)
