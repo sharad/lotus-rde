@@ -57,113 +57,9 @@
 ;; TODO: <https://www.labri.fr/perso/nrougier/GTD/index.html#table-of-contents>
 
 
-;;; ixy
-
-(define-public ixy-config
-  (rde-config
-   (features
-    (append
-     %ixy-features
-     %abcdw-features))))
-   ;; (operating-system (lotus-get-operating-system this-rde-config))
-
-(define-public ixy-os
-  (rde-config-operating-system ixy-config))
-
-(define-public ixy-he
-  (rde-config-home-environment ixy-config))
-
-;;; live
-
-;; TODO: Pull channels from lock file in advance and link them to example-config
-;; TODO: Add auto-login
-
-(define-public live-config
-  (rde-config
-   (integrate-he-in-os? #t)
-   (features
-    (append
-     %live-features
-     %guest-features))))
-
-(define-public live-os
-  (rde-config-operating-system live-config))
-
-;;; dell5480
-
-(define-public dell5480-config
-  (rde-config
-   (features
-    (append
-     %dell5480-features
-     %sharad-features))))
-
-(define-public dell5480-os
-  (rde-config-operating-system dell5480-config))
-
-(define-public dell5480-he
-  (rde-config-home-environment dell5480-config))
-
-;;; guilem-lat7420
-
-(define-public guilem-lat7420-config
-  (rde-config
-   (features
-    (append %guilem-lat7420-features
-            %sharad-features))))
-
-(define-public guilem-lat7420-os
-  (rde-config-operating-system guilem-lat7420-config))
-
-(define-public guilem-lat7420-he
-  (rde-config-home-environment guilem-lat7420-config))
-
-;;; guilem-kuv500
-
-(define-public guilem-kuv500-config
-  (rde-config
-   (features
-    (append %guilem-kuv500-features
-            %sharad-features))))
-
-(define-public guilem-kuv500-os
-  (rde-config-operating-system guilem-kuv500-config))
-
-(define-public guilem-kuv500-he
-  (rde-config-home-environment guilem-kuv500-config))
-
-;;; guilem-lat7420
-
-(define-public gx2-guix-vmware-config
-  (rde-config
-   (features
-    (append %gx2-guix-vmware-features
-            %sharad-features))))
-
-(define-public gx2-guix-vmware-os
-  (rde-config-operating-system gx2-guix-vmware-config))
-
-(define-public gx2-guix-vmware-he
-  (rde-config-home-environment gx2-guix-vmware-config))
-
 ;;; Dispatcher, which helps to return various values based on environment
 ;;; variable value.
 
-(define (dispatcher-old)
-  (let ((rde-target (getenv "RDE_TARGET")))
-    (match rde-target
-      ("ixy-home" ixy-he)
-      ("ixy-system" ixy-os)
-      ("live-system" live-os)
-      ("dell5480-home" dell5480-he)
-      ("dell5480-system" dell5480-os)
-      ("guilem-kuv500-home" guilem-kuv500-he)
-      ("guilem-kuv500-system" guilem-kuv500-os)
-      ("guilem-lat7420-home" guilem-lat7420-he)
-      ("guilem-lat7420-system" guilem-lat7420-os)
-      ("gx2-guix-vmware-home" gx2-guix-vmware-he)
-      ("gx2-guix-vmware-system" gx2-guix-vmware-os)
-      (_ gx2-guix-vmware-os))))
 
 ;; (pretty-print-rde-config ixy-config)
 ;; (use-modules (gnu services)
@@ -183,17 +79,14 @@
 ;; (define br ((@ (rde api store) build-with-store) ixy-he))
 
 
-;; (dispatcher)
-
-
 ;;; TODO: Call reconfigure from scheme file.
 ;;; TODO: Rename configs.scm to main.scm?
 
 
 
 
-
-
+;; ixy-config RDE_HOST=ixy RDE_USER=abcdw
+;; live-config RDE_HOST=live RDE_USER=guest
 (define (dispatcher)
 
   (define (env-features->symbol envname)
@@ -205,6 +98,9 @@
 
   (let* ((rde-host-feature (env-features->symbol "RDE_HOST"))
          (rde-user-fature  (env-features->symbol "RDE_USER")))
+
+    (format #t "RDE_TARGET: ~a\n" "RDE_TARGET" (getenv "RDE_TARGET"))
+
     (if (and rde-host-feature
              rde-user-fature)
         (let ((config (lotus-make-rde-config #:features
