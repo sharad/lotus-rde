@@ -14,6 +14,7 @@
                                                                 #:disk-serial-id-system "vmware"
                                                                 #:disk-serial-id-home "vmware"
                                                                 #:fs-boot-efi-partition (uuid "4D78-999F" 'fat32)
+                                                                #:bootloader-targets '("/boot/efi")
                                                                 #:kernel-arguments (append (list "usbcore.autosuspend=-1"
                                                                                             "libata.force=2:disable"
                                                                                             "libata.noacpi=1"

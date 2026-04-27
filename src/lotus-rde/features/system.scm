@@ -30,6 +30,7 @@
                                 (disk-serial-id-system "aaa")
                                 (disk-serial-id-home "aaa")
                                 (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
+                                (bootloader-targets '())
                                 (kernel linux-libre)
                                 (firmware '())
                                 (kernel-arguments '())
@@ -43,8 +44,8 @@
                         #:initrd initrd
                         #:firmware firmware
                         #:kernel-arguments kernel-arguments)
-        (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader grub-bootloader)
-                                                                                 (targets    '())))
+        (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader grub-efi-bootloader)
+                                                                                 (targets    bootloader-targets)))
                                                                                  ;; (keyboard-layout %lotus-keyboard-layout)
                                                                                  ;; (menu-entries    %lotus-grub-ubuntu-menuentries)
         ;; Allows to declare specific bootloader configuration,
