@@ -112,19 +112,19 @@ export RDE_TARGET
 # ifneq ($(strip $(RDE_TARGET)),)
 
 rde/home/build: guix
-	${GUIX} home $(GUIX_HOME_FLAGS) \
+	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
 	build ${CONFIGS}
 
 rde/home/reconfigure: guix
-	${GUIX} home $(GUIX_HOME_FLAGS) \
+	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
 	reconfigure ${CONFIGS}
 
 rde/system/build: guix
-	${GUIX} system $(GUIX_SYSTEM_FLAGS) \
+	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	build ${CONFIGS}
 
 rde/system/reconfigure: guix
-	${GUIX} system $(GUIX_SYSTEM_FLAGS) \
+	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	reconfigure ${CONFIGS}
 
 # endif

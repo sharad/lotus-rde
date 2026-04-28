@@ -119,23 +119,31 @@ $(SUBDIR)/%:
 
 
 
+RDE_HOST ?= $(HOST)
+export RDE_HOST
+RDE_USER ?= $(USER)
+export RDE_USER
+RDE_TARGET ?= system
+export RDE_TARGET
+
+
 rde/home/build:
-	${GUIX} home \
+	RDE_TARGET=home ${GUIX} home \
 	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	build ${CONFIGS}
 
 rde/home/reconfigure:
-	${GUIX} home \
+	RDE_TARGET=home ${GUIX} home \
 	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	reconfigure ${CONFIGS}
 
 rde/system/build:
-	${GUIX} system \
+	RDE_TARGET=system ${GUIX} system \
 	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	build ${CONFIGS}
 
 rde/system/reconfigure:
-	${GUIX} system \
+	RDE_TARGET=system ${GUIX} system \
 	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	reconfigure ${CONFIGS}
 
