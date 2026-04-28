@@ -166,5 +166,5 @@
         ;;                                             ;; (service cloud-init-service-type)
         ;;                                             (service openssh-service-type)))
 
-        (feature-shepherd)))
+   ))
 
