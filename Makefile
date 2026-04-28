@@ -3,7 +3,7 @@
 
 CHANNELS_ENV=./env/guix/rde/env/guix/channels.scm
 
-GUIXTM=guix time-machine -C ./env/guix/rde/env/guix/channels.scm
+GUIXTM=guix time-machine -C $(CHANNELS_ENV)
 GUIX=$(GUIXTM) --
 EMACS=$(GUIX) shell emacs emacs-ox-html-stable-ids -- emacs
 HUT=$(GUIX) shell hut -- hut
@@ -29,6 +29,9 @@ QEMU_BASE_ARGS= \
 # -vga none -device qxl-vga,vgamem_mb=32
 
 
+.PHONY: guix-pull guix-update-current-channels git-commit git-push examples/guix-update-channels-latest
+
+
 all: ares
 	@echo default target
 
@@ -38,12 +41,12 @@ check:
 
 guix-pull:
 	make -C examples guix-pull
-	-guix pull --news;
+	-guix pull --news
 	-guix pull --news --details
 
-guix-update-channels-latest:
+guix-update-current-channels:
 	echo you may wanted to run
-	echo make guix-pull-latest
+	echo make guix-pull BUILD_TYPE=latest
 	echo
 	echo ';; -*- mode: scheme; -*-' > $(CHANNELS_ENV)
 	echo ';;; rde --- Reproducible development environment.' >> $(CHANNELS_ENV)
@@ -63,16 +66,17 @@ guix-update-channels-latest:
 	echo core-channels >> $(CHANNELS_ENV)
 	guix style --whole-file $(CHANNELS_ENV)
 
+# examples/guix-update-channels:
+# 	make -C examples guix-update-channels
 
-guix-update-examples-channel:
-	make -C examples guix-update-channel
-
-guix-update-examples-channel-latest: guix-update-channels-latest
-	make guix-update-examples-channel
-
-git-commit: guix-update-examples-channel
+git-commit:
 	git commit -a -m "correction"
+
+git-push: git-commit
 	git push
+
+examples/guix-update-channels-latest: guix-pull guix-update-current-channels examples/guix-update-channel git-commit
+	echo "updated channels to latest guix commit"
 
 ares:
 	${GUIX} shell ${DEV_ENV_LOAD_PATH} \

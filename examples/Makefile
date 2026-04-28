@@ -67,7 +67,7 @@ env/guix/rde/env/guix/channels-ci-latest-guix.scm: ../env/guix/rde/env/guix/chan
 	echo -e ";;; Do not edit it manually" >> $@
 
 
-.PHONY: env/sync guix guix-update-channel
+.PHONY: env/sync guix guix-update-channels
 .PHONY: rde/build/guix rde/repl rde/describe
 
 # env/sync: env/guix/rde/env/guix/channels.scm
@@ -79,7 +79,7 @@ guix: env/sync
 guix-pull:
 	guix pull -L ./env/guix -C ${CHANNELS_FILE}
 
-guix-update-channel: guix
+guix-update-channels: guix
 	echo ';; -*- mode: scheme; -*-' > $(CHANNELS_RDE_FILE)
 	echo ';;; rde --- Reproducible development environment.' >> $(CHANNELS_RDE_FILE)
 	echo ';;;' >> $(CHANNELS_RDE_FILE)
