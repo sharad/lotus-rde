@@ -523,6 +523,11 @@
     ;; (for-each (lambda (x)
     ;;             (assert x "home-fs contains #f"))
     ;;           home-fs)
+
+    (display "Home devices: ")
+    (display home-devices)
+    (newline)
+
     (feature-file-systems #:mapped-devices (append sys-devices home-devices)
                           #:file-systems (append sys-fs home-fs)
                           ;; #:swap-devices (list (lotus-devfs-swap))
