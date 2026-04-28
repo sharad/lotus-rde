@@ -78,6 +78,10 @@ guix: env/sync
 	echo "syncing env"
 
 guix-pull:
+ifeq ($(BUILD_TYPE),latest)
+	echo BUILD_TYPE=$(BUILD_TYPE)
+	guix pull
+endif
 	guix pull -L ./env/guix -C ${CHANNELS_FILE}
 
 guix-update-channels: guix
