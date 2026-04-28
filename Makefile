@@ -57,8 +57,8 @@ guix-pull:
 
 
 $(CHANNELS_RDE_ENV_FILE):
-	guix pull
-	./bin/guix-update-current-channels > $@
+	@echo run    guix pull
+	./bin/guix-update-current-channels.sh > $@
 	guix style --whole-file $@
 
 guix-update-current-channels: $(CHANNELS_RDE_ENV_FILE)
