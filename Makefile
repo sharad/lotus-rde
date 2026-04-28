@@ -150,18 +150,18 @@ rde/system/reconfigure:
 
 
 
-examples/ixy/home/reconfigure:
-	RDE_TARGET=ixy-home ${GUIX} home \
-	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
-	reconfigure ${CONFIGS}
+# examples/ixy/home/reconfigure:
+# 	RDE_TARGET=ixy-home ${GUIX} home \
+# 	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
+# 	reconfigure ${CONFIGS}
 
-examples/ixy/home/build:
-	RDE_TARGET=ixy-home ${GUIX} home \
-	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
-	build ${CONFIGS}
+# examples/ixy/home/build:
+# 	RDE_TARGET=ixy-home ${GUIX} home \
+# 	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
+# 	build ${CONFIGS}
 
-examples/target/rde-live.iso:
-	make -C examples target/rde-live.iso
+# examples/target/rde-live.iso:
+# 	make -C examples target/rde-live.iso
 
 qemu/1/run:
 	qemu-system-x86_64 \
