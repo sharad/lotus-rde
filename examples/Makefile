@@ -142,26 +142,30 @@ $(CMD)/%:
 
 
 
-ixy/home/build: guix
-	RDE_TARGET=ixy-home ${GUIX} home $(GUIX_HOME_FLAGS) \
-	build ${CONFIGS}
+# ixy/home/build: guix
+# 	RDE_TARGET=ixy-home ${GUIX} home $(GUIX_HOME_FLAGS) \
+# 	build ${CONFIGS}
 
-ixy/home/reconfigure: guix
-	RDE_TARGET=ixy-home ${GUIX} home $(GUIX_HOME_FLAGS) \
-	reconfigure ${CONFIGS}
+# ixy/home/reconfigure: guix
+# 	RDE_TARGET=ixy-home ${GUIX} home $(GUIX_HOME_FLAGS) \
+# 	reconfigure ${CONFIGS}
 
-ixy/system/build: guix
-	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	build ${CONFIGS}
+# ixy/system/build: guix
+# 	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
+# 	build ${CONFIGS}
 
-ixy/system/reconfigure: guix
-	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	reconfigure ${CONFIGS}
+# ixy/system/reconfigure: guix
+# 	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
+# 	reconfigure ${CONFIGS}
 
 cow-store:
 	sudo herd start cow-store ${ROOT_MOUNT_POINT}
 
-ixy/system/init: guix
+# ixy/system/init: guix
+# 	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
+# 	init ${CONFIGS} ${ROOT_MOUNT_POINT}
+
+rde/system/init: guix
 	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	init ${CONFIGS} ${ROOT_MOUNT_POINT}
 
