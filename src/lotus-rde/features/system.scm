@@ -141,5 +141,5 @@
         (feature-mapped-file-systems #:disk-serial-id-system disk-serial-id-system
                                      #:disk-serial-id-home disk-serial-id-home
                                      #:fs-boot-efi-partition fs-boot-efi-partition)
-        ;; (feature-base-services)
+        (feature-base-services)
         (feature-shepherd)))
