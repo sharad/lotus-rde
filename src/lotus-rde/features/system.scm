@@ -20,7 +20,8 @@
   #:use-module (rde features system)
   #:use-module (rde packages)
   #:use-module (lotus-rde features mfs)
-  #:export (feature-lotus-machine))
+  #:export (feature-lotus-machine
+            feature-lotus-machine-minimal))
 
 
 
