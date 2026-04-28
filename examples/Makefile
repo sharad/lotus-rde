@@ -55,17 +55,15 @@ ares: env/sync
 "(begin (use-modules (guix gexp)) #;(load gexp reader macro globally) \
 ((@ (ares server) run-nrepl-server)))"
 
-env/guix/rde/env/guix/channels.scm: ../env/guix/rde/env/guix/channels.scm
-	mkdir -p $(@D)
-	cat $< > $@
-	echo -e "\n;;; This is an automatic copy of RDE's channels.scm" >> $@
-	echo -e ";;; Do not edit it manually" >> $@
 
-env/guix/rde/env/guix/channels-ci-latest-guix.scm: ../env/guix/rde/env/guix/channels-ci-latest-guix.scm
+env/guix/rde/env/guix/%.scm: ../env/guix/rde/env/guix/%.scm
 	mkdir -p $(@D)
-	cat $< > $@
-	echo -e "\n;;; This is an automatic copy of RDE's channels.scm" >> $@
-	echo -e ";;; Do not edit it manually" >> $@
+	{ \
+	  cat $<; \
+	  printf '\n;;; This is an automatic copy of RDE'\''s $(notdir $<)\n'; \
+	  printf ';;; Do not edit it manually\n'; \
+	} > $@
+
 
 
 .PHONY: env/sync guix guix-update-channels
@@ -75,39 +73,20 @@ env/guix/rde/env/guix/channels-ci-latest-guix.scm: ../env/guix/rde/env/guix/chan
 env/sync: env/guix/rde/env/guix/channels.scm env/guix/rde/env/guix/channels-ci-latest-guix.scm
 
 guix: env/sync
-	echo "syncing env"
 
 guix-pull:
-ifeq ($(BUILD_TYPE),latest)
-	echo BUILD_TYPE=$(BUILD_TYPE)
-	guix pull
-endif
 	guix pull -L ./env/guix -C ${CHANNELS_FILE}
 
-guix-update-channels: guix
-	echo ';; -*- mode: scheme; -*-' > $(CHANNELS_RDE_FILE)
-	echo ';;; rde --- Reproducible development environment.' >> $(CHANNELS_RDE_FILE)
-	echo ';;;' >> $(CHANNELS_RDE_FILE)
-	echo ';;; SPDX-FileCopyrightText: 2024, 2025 Andrew Tropin <andrew@trop.in>' >> $(CHANNELS_RDE_FILE)
-	echo ';;;' >> $(CHANNELS_RDE_FILE)
-	echo ';;; SPDX-License-Identifier: GPL-3.0-or-later' >> $(CHANNELS_RDE_FILE)
-	echo >> $(CHANNELS_RDE_FILE)
-	echo '(define-module (rde-configs env guix channels)' >> $(CHANNELS_RDE_FILE)
-	echo '#:use-module ((rde env guix channels) #:prefix rde:)' >> $(CHANNELS_RDE_FILE)
-	echo '#:use-module (guix channels)' >> $(CHANNELS_RDE_FILE)
-	echo '#:export (core-channels))' >> $(CHANNELS_RDE_FILE)
-	echo >> $(CHANNELS_RDE_FILE)
-	echo -n "(define core-channels (cons (channel (name 'lotus-rde) (url \"https://github.com/sharad/lotus-rde.git\") (branch \"master\") (commit \"" >> $(CHANNELS_RDE_FILE)
-	# git rev-parse --default HEAD | tr -d '\n' >> $(CHANNELS_RDE_FILE)
-	git rev-list -1 HEAD -- ../src | tr -d '\n' >> $(CHANNELS_RDE_FILE)
-	echo '"))' >> $(CHANNELS_RDE_FILE)
-	echo ' ;; (introduction'  >> $(CHANNELS_RDE_FILE)
-	echo ' ;; (make-channel-introduction'  >> $(CHANNELS_RDE_FILE)
-	echo ' ;; "257cebd587b66e4d865b3537a9a88cccd7107c95"'  >> $(CHANNELS_RDE_FILE)
-	echo ' ;;  (openpgp-fingerprint'  >> $(CHANNELS_RDE_FILE)
-	echo ' ;;  "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0")))'  >> $(CHANNELS_RDE_FILE)
-	echo 'rde:core-channels)) core-channels' >> $(CHANNELS_RDE_FILE)
-	guix style --whole-file $(CHANNELS_RDE_FILE)
+
+SRC_COMMIT := $(shell git rev-list -1 HEAD -- ../src)
+$(CHANNELS_RDE_FILE): .channels-src-$(SRC_COMMIT)
+.channels-src-%:
+	./bin/rde-generate-channels.sh > $@
+	guix style --whole-file $@
+	rm -f .channels-src-*
+	touch $@
+
+guix-update-channels: $(CHANNELS_RDE_FILE)
 
 
 rde/build/guix: guix

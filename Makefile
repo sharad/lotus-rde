@@ -44,30 +44,14 @@ guix-pull:
 	-guix pull --news
 	-guix pull --news --details
 
-guix-update-current-channels:
-	echo you may wanted to run
-	echo make guix-pull BUILD_TYPE=latest
-	echo
-	echo ';; -*- mode: scheme; -*-' > $(CHANNELS_ENV)
-	echo ';;; rde --- Reproducible development environment.' >> $(CHANNELS_ENV)
-	echo ';;;' >> $(CHANNELS_ENV)
-	echo ';;; SPDX-FileCopyrightText: 2024, 2025 Andrew Tropin <andrew@trop.in>' >> $(CHANNELS_ENV)
-	echo ';;;' >> $(CHANNELS_ENV)
-	echo ';;; SPDX-License-Identifier: GPL-3.0-or-later' >> $(CHANNELS_ENV)
-	echo >> $(CHANNELS_ENV)
-	echo '(define-module (rde env guix channels)' >> $(CHANNELS_ENV)
-	echo '  #:use-module (guix channels)' >> $(CHANNELS_ENV)
-	echo '  #:export (core-channels))' >> $(CHANNELS_ENV)
-	echo >> $(CHANNELS_ENV)
-	echo '(define core-channels' >> $(CHANNELS_ENV)
-	guix describe --format=channels >> $(CHANNELS_ENV)
-	echo ')' >> $(CHANNELS_ENV)
-	echo >> $(CHANNELS_ENV)
-	echo core-channels >> $(CHANNELS_ENV)
-	guix style --whole-file $(CHANNELS_ENV)
 
-# examples/guix-update-channels:
-# 	make -C examples guix-update-channels
+$(CHANNELS_ENV):
+	guix pull
+	./bin/guix-update-current-channels > $@
+	guix style --whole-file $@
+
+guix-update-current-channels: $(CHANNELS_ENV)
+
 
 git-commit:
 	git commit -a -m "correction"
@@ -75,7 +59,7 @@ git-commit:
 git-push: git-commit
 	git push
 
-examples/guix-update-channels-latest: guix-pull guix-update-current-channels examples/guix-update-channel git-commit
+examples/guix-update-channels-latest: guix-pull guix-update-current-channels examples/guix-update-channels git-commit
 	echo "updated channels to latest guix commit"
 
 ares:
