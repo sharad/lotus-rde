@@ -27,8 +27,9 @@ GUIXTM = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE} $(GUIXTM_FLA
 GUIX = $(GUIXTM) --
 
 
-GUIX_SYSTEM_FLAGS = --debug=3
-GUIX_HOME_FLAGS = --debug=5 --verbosity=3
+GUIX_FLAGS = --debug=5 --verbosity=3
+GUIX_SYSTEM_FLAGS = $(GUIX_FLAGS)
+GUIX_HOME_FLAGS = $(GUIX_FLAGS)
 
 
 
@@ -144,6 +145,17 @@ rde/system/reconfigure: guix
 	reconfigure ${CONFIGS}
 
 # endif
+
+
+
+## -- sudo targets
+CMD = cmd
+# Pattern rule: any target that looks like subdir/something
+$(CMD)/%:
+	${GUIX} $* $(GUIX_FLAGS)
+# Optional: Add a phony declaration if targets aren't actual files
+.PHONY: $(CMD)/%
+## -- sudo targets
 
 
 

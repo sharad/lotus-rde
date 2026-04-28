@@ -141,30 +141,5 @@
         (feature-mapped-file-systems #:disk-serial-id-system disk-serial-id-system
                                      #:disk-serial-id-home disk-serial-id-home
                                      #:fs-boot-efi-partition fs-boot-efi-partition)
-        (feature-base-services)
-
-        ;; (feature-base-packages #:system-packages (strings->packages "stumpwm"
-        ;;                                                             "stumpwm-gnome"
-        ;;                                                             "sbcl"
-        ;;                                                             "sbcl-stumpwm-cpu"
-        ;;                                                             "sbcl-stumpwm-mem"
-        ;;                                                             "sbcl-stumpwm-numpad-layouts"
-        ;;                                                             "sbcl-stumpwm-screenshot"
-        ;;                                                             "sbcl-stumpwm-winner-mode"
-        ;;                                                             "sbcl-dbus"
-        ;;                                                             "libfixposix"
-        ;;                                                             "pkg-config"
-        ;;                                                             "cl-fad"
-        ;;                                                             "cl-slime-swank"))
-        ;; (feature-desktop-services)
-        ;; (feature-networking)
-
-
-        ;; (feature-custom-services #:feature-name-prefix 'openssh-server-extra
-        ;;                          #:system-services (list
-        ;;                                             ;; (service dhcp-client-service-type)
-        ;;                                             ;; (service cloud-init-service-type)
-        ;;                                             (service openssh-service-type)))
-
-   ))
-
+        ;; (feature-base-services)
+        (feature-shepherd)))
