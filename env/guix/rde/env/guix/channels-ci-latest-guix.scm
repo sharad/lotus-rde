@@ -83,4 +83,5 @@
                                                       %guix-android-channels
                                                       %local-default-channels))
 
+core-channels-with-local-rde-and-latest-guix
 
