@@ -102,3 +102,68 @@
                                                     ;; (service dhcp-client-service-type)
                                                     ;; (service cloud-init-service-type)
                                                     (service openssh-service-type)))))
+
+
+
+
+
+
+
+
+(define* (feature-lotus-machine-minimal hostname
+                                #:key
+                                (timezone "Asia/Kolkata")
+                                (disk-serial-id-system "aaa")
+                                (disk-serial-id-home "aaa")
+                                (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
+                                (bootloader-targets '())
+                                (kernel linux-libre)
+                                (firmware '())
+                                (kernel-arguments '())
+                                (initrd base-initrd)
+                                (custom-services #f))
+  (list (feature-host-info #:host-name hostname
+                           ;; #:locale    (operating-system-locale bare-bone-os)
+                           ;; ls `guix build tzdata`/share/zoneinfo
+                           #:timezone timezone)
+        (feature-kernel #:kernel kernel
+                        #:initrd initrd
+                        #:firmware firmware
+                        #:kernel-arguments kernel-arguments)
+        (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader grub-efi-bootloader)
+                                                                                 (targets    bootloader-targets)))
+                                                                                 ;; (keyboard-layout %lotus-keyboard-layout)
+                                                                                 ;; (menu-entries    %lotus-grub-ubuntu-menuentries)
+        ;; Allows to declare specific bootloader configuration,
+        ;; grub-efi-bootloader used by default
+        ;; (feature-bootloader)
+        (feature-mapped-file-systems #:disk-serial-id-system disk-serial-id-system
+                                     #:disk-serial-id-home disk-serial-id-home
+                                     #:fs-boot-efi-partition fs-boot-efi-partition)
+        (feature-base-services)
+
+        ;; (feature-base-packages #:system-packages (strings->packages "stumpwm"
+        ;;                                                             "stumpwm-gnome"
+        ;;                                                             "sbcl"
+        ;;                                                             "sbcl-stumpwm-cpu"
+        ;;                                                             "sbcl-stumpwm-mem"
+        ;;                                                             "sbcl-stumpwm-numpad-layouts"
+        ;;                                                             "sbcl-stumpwm-screenshot"
+        ;;                                                             "sbcl-stumpwm-winner-mode"
+        ;;                                                             "sbcl-dbus"
+        ;;                                                             "libfixposix"
+        ;;                                                             "pkg-config"
+        ;;                                                             "cl-fad"
+        ;;                                                             "cl-slime-swank"))
+        ;; (feature-desktop-services)
+        ;; (feature-networking)
+
+
+        ;; (feature-custom-services #:feature-name-prefix 'openssh-server-extra
+        ;;                          #:system-services (list
+        ;;                                             ;; (service dhcp-client-service-type)
+        ;;                                             ;; (service cloud-init-service-type)
+        ;;                                             (service openssh-service-type)))
+
+        (feature-shepherd)))
+
