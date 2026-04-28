@@ -1,7 +1,18 @@
 # pipefail is not POSIX complaint
 
 
-CHANNELS_ENV=./env/guix/rde/env/guix/channels.scm
+# CHANNELS_ENV=./env/guix/rde/env/guix/channels.scm
+
+BUILD_TYPE ?= default
+CHANNELS_RDE_ENV_FILE = ./env/guix/rde/env/guix/channels.scm
+CHANNELS_LATEST_GUIX_ENV_FILE = ./env/guix/rde/env/guix/channels-ci-latest-guix.scm
+CHANNEL_ENV_FILE_default = $(CHANNELS_RDE_ENV_FILE)
+CHANNEL_ENV_FILE_local = $(CHANNELS_RDE_ENV_FILE)
+CHANNEL_ENV_FILE_latest = $(CHANNELS_LATEST_GUIX_ENV_FILE)
+
+CHANNELS_ENV = $(CHANNEL_ENV_FILE_$(BUILD_TYPE))
+
+
 
 GUIXTM=guix time-machine -C $(CHANNELS_ENV)
 GUIX=$(GUIXTM) --
@@ -45,12 +56,12 @@ guix-pull:
 	-guix pull --news --details
 
 
-$(CHANNELS_ENV):
+$(CHANNELS_RDE_ENV_FILE):
 	guix pull
 	./bin/guix-update-current-channels > $@
 	guix style --whole-file $@
 
-guix-update-current-channels: $(CHANNELS_ENV)
+guix-update-current-channels: $(CHANNELS_RDE_ENV_FILE)
 
 
 git-commit:
@@ -105,6 +116,30 @@ $(SUBDIR)/%:
 # Optional: Add a phony declaration if targets aren't actual files
 .PHONY: $(SUBDIR)/%
 ## -- examples dir targets
+
+
+
+rde/home/build:
+	${GUIX} home \
+	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
+	build ${CONFIGS}
+
+rde/home/reconfigure:
+	${GUIX} home \
+	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
+	reconfigure ${CONFIGS}
+
+rde/system/build:
+	${GUIX} system \
+	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
+	build ${CONFIGS}
+
+rde/system/reconfigure:
+	${GUIX} system \
+	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
+	reconfigure ${CONFIGS}
+
+
 
 
 examples/ixy/home/reconfigure:
