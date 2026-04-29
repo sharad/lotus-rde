@@ -429,7 +429,7 @@
                                               (needed-for-boot?    guix-bootefi-needed-for-boot?)
                                               (flags               '(read-only))
                                               ;; (options             "defaults,ro,noauto")
-                                              (options             "ro,noauto")
+                                              (options             "ro")
                                               (dependencies        (append (list md-guix-root
                                                                                  fs-guix-boot
                                                                                  fs-guix-root))))))
