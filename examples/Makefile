@@ -167,8 +167,10 @@ $(CMD)/%:
 # 	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 # 	reconfigure ${CONFIGS}
 
-cow-store:
+/tmp/.cow-store-start:
 	sudo herd start cow-store ${ROOT_MOUNT_POINT}
+
+cow-store: /tmp/.cow-store-start
 
 # ixy/system/init: guix
 # 	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
