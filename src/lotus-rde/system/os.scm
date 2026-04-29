@@ -109,8 +109,9 @@
         (feature-mapped-file-systems #:disk-serial-id-system disk-serial-id-system
                                      #:disk-serial-id-home disk-serial-id-home
                                      #:fs-boot-efi-partition fs-boot-efi-partition)
-        (feature-base-services #:guix-substitute-urls %lotus-guix-substitute-urls
-                               #:guix-authorized-keys '())
+        ;; (feature-base-services #:guix-substitute-urls %lotus-guix-substitute-urls
+        ;;                        #:guix-authorized-keys '())
+        (feature-base-services)
         (feature-base-packages #:system-packages (apply strings->packages %lotus-system-packages))
         (feature-desktop-services)
 
@@ -119,14 +120,35 @@
                                  #:system-services
                                  (list
                                   (simple-service 'guix-moe guix-service-type
-                                                  (guix-extension (authorized-keys (list (plain-file "nonguix.org"
+                                                  (guix-extension (authorized-keys (list (plain-file "cuirass-genenetwork-org.pub"
+                                                                                                     "(public-key (ecc (curve Ed25519) (q #11217788B41ADC8D5B8E71BD87EF699C65312EC387752899FE9C888856F5C769#)))")
+                                                                                         (plain-file "guix.tobias.gr"
+                                                                                                     "(public-key (ecc (curve Ed25519) (q #628CD75C05C78223317092AFDCBE7130D363ACA938114A067F4F9DCF346B59DB#)))")
+                                                                                         (plain-file "bordeaux.guix.gnu.org"
+                                                                                                     "(public-key (ecc (curve Ed25519) (q #7D602902D3A2DBB83F8A0FB98602A754C5493B0B778C8D1DD4E0F41DE14DE34F#)))")
+                                                                                         (plain-file "ci.guix.info"
+                                                                                                     "(public-key (ecc (curve Ed25519) (q #8D156F295D24B0D9A86FA5741A840FF2D24F60F7B6C4134814AD55625971B394#)))")
+                                                                                         (plain-file "berlin.guix.gnu.org"
+                                                                                                     "(public-key (ecc (curve Ed25519) (q #8D156F295D24B0D9A86FA5741A840FF2D24F60F7B6C4134814AD55625971B394#)))")
+                                                                                         (plain-file "mirror.brielmaier.net"
+                                                                                                     "(public-key (ecc (curve Ed25519) (q #34C318D602FCF6198C5A9F5290A8DB2382D2D0C5478441F8308D24E31BA61633#)))")
+                                                                                         (plain-file "substitutes.nonguix.org.pub"
                                                                                                      "(public-key (ecc (curve Ed25519) (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))")
-                                                                                         (plain-file "guix-moe-old.pub"
+                                                                                         (plain-file "nonguix-proxy.ditigal.xyz.pub"
+                                                                                                     "(public-key (ecc (curve Ed25519) (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))")
+                                                                                         (plain-file "cache-cdn.guix.moe-old.pub"
                                                                                                      "(public-key (ecc (curve Ed25519) (q #374EC58F5F2EC0412431723AF2D527AD626B049D657B5633AAAEBC694F3E33F9#)))")
-                                                                                         ;; New key since 2025-10-29.
-                                                                                         (plain-file "guix-moe.pub"
+                                                                                          ;; New key since 2025-10-29.
+                                                                                         (plain-file "cache-cdn.guix.moe.pub"
                                                                                                      "(public-key (ecc (curve Ed25519) (q #552F670D5005D7EB6ACF05284A1066E52156B51D75DE3EBD3030CD046675D543#)))")))
-                                                                  (substitute-urls '("https://substitutes.nonguix.org"
+                                                                  (substitute-urls '("https://cuirass.genenetwork.org"
+                                                                                     "https://guix.tobias.gr"
+                                                                                     "https://bordeaux.guix.gnu.org"
+                                                                                     "https://ci.guix.info/"
+                                                                                     "https://berlin.guix.gnu.org"
+                                                                                     "https://mirror.brielmaier.net"
+                                                                                     "https://substitutes.nonguix.org"
+                                                                                     "https://nonguix-proxy.ditigal.xyz"
                                                                                      "https://cache-cdn.guix.moe"))))))
 
         ;; (feature-file-database-services)
