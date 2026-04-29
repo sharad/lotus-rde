@@ -1,15 +1,10 @@
 
-
-
-
 BUILD_TYPE ?= default
 
 
 MAKE_TMPL_PATH = makes
 MAKE_SRC_FILES := $(wildcard ../$(MAKE_TMPL_PATH)/*.mk)
 MAKE_DST_FILES := $(patsubst ../%,./%,$(MAKE_FILES))
-
-
 
 
 RDE_GUIX_ENV_DIR_TMPL_PATH = env/guix/rde/env/guix
@@ -33,18 +28,11 @@ CHANNELS_FILE = $(CHANNEL_FILE_$(BUILD_TYPE))
 GUIXTM_FLAGS =  --debug=3
 GUIXTM_FLAGS += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
 GUIXTM_PREFIX_ENV = GUILE_LOAD_PATH="../src:../tests:./src"
-# GUIXTM_COMMAND = guix time-machine -L ./env/guix
-# GUIXTM_COMMAND = guix time-machine -L ./env/guix -L ./src -L ../src --debug=3
 GUIXTM_COMMAND = guix time-machine -L ./env/guix
 
 GUIXTM = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE} $(GUIXTM_FLAGS)
 
 GUIX = $(GUIXTM) --
-
-
-# GUIX_FLAGS = --debug=3 --verbosity=3
-# GUIX_SYSTEM_FLAGS = $(GUIX_FLAGS)
-# GUIX_HOME_FLAGS = $(GUIX_FLAGS)
 
 
 
@@ -53,11 +41,9 @@ CONFIGS ?= ${SRC_DIR}/rde-configs/configs.scm
 PULL_EXTRA_OPTIONS=
 # --allow-downgrades
 
-# ROOT_MOUNT_POINT=/mnt
 
 
 include makes/common.mk
-
 
 VERSION=latest
 
@@ -133,46 +119,6 @@ rde/describe: guix
 	describe
 
 
-# RDE_HOST ?= $(HOST)
-# export RDE_HOST
-# RDE_USER ?= $(USER)
-# export RDE_USER
-# RDE_TARGET ?= system
-# export RDE_TARGET
-
-# # ifneq ($(strip $(RDE_TARGET)),)
-
-# rde/home/build: guix
-# 	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
-# 	build ${CONFIGS}
-
-# rde/home/reconfigure: guix
-# 	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
-# 	reconfigure ${CONFIGS}
-
-# rde/system/build: guix
-# 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-# 	build ${CONFIGS}
-
-# rde/system/reconfigure: guix
-# 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-# 	reconfigure ${CONFIGS}
-
-# # endif
-
-
-
-# ## -- sudo targets
-# CMD = cmd
-# # Pattern rule: any target that looks like subdir/something
-# $(CMD)/%:
-# 	${GUIX} $* $(GUIX_FLAGS)
-# # Optional: Add a phony declaration if targets aren't actual files
-# .PHONY: $(CMD)/%
-# ## -- sudo targets
-
-
-
 # ixy/home/build: guix
 # 	RDE_TARGET=ixy-home ${GUIX} home $(GUIX_HOME_FLAGS) \
 # 	build ${CONFIGS}
@@ -188,19 +134,6 @@ rde/describe: guix
 # ixy/system/reconfigure: guix
 # 	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 # 	reconfigure ${CONFIGS}
-
-# /tmp/.cow-store-start:
-# 	sudo herd start cow-store ${ROOT_MOUNT_POINT}
-
-# cow-store: /tmp/.cow-store-start
-
-# ixy/system/init: guix
-# 	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-# 	init ${CONFIGS} ${ROOT_MOUNT_POINT}
-
-# rde/system/init: guix /tmp/.cow-store-start
-# 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-# 	init ${CONFIGS} ${ROOT_MOUNT_POINT}
 
 target:
 	mkdir -p target
