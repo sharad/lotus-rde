@@ -1,5 +1,5 @@
 
-(define-module (lotus-rde features system)
+(define-module (lotus-rde system os)
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-11)
   #:use-module (gnu bootloader)

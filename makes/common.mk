@@ -6,21 +6,19 @@
 
 
 
-GUIXTM_FLAGS += --debug=3
-GUIXTM_FLAGS += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
+GUIXTM_FLAGS      += --debug=3
+GUIXTM_FLAGS      += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
 GUIXTM_PREFIX_ENV +=
-GUIXTM_COMMAND = guix time-machine
+GUIXTM_COMMAND     = guix time-machine
 
-GUIXTM = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE} $(GUIXTM_FLAGS)
-
-GUIX = $(GUIXTM) --
-
-
-
+GUIXTM             = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE} $(GUIXTM_FLAGS)
 
 GUIX_FLAGS        += --debug=3 --verbosity=3
 GUIX_SYSTEM_FLAGS += $(GUIX_FLAGS)
 GUIX_HOME_FLAGS   += $(GUIX_FLAGS)
+
+GUIX = $(GUIXTM) --
+
 
 
 ROOT_MOUNT_POINT=/mnt
