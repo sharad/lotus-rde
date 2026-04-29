@@ -176,7 +176,7 @@ cow-store: /tmp/.cow-store-start
 # 	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 # 	init ${CONFIGS} ${ROOT_MOUNT_POINT}
 
-rde/system/init: guix
+rde/system/init: guix /tmp/.cow-store-start
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	init ${CONFIGS} ${ROOT_MOUNT_POINT}
 
