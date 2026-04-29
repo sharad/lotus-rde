@@ -52,26 +52,26 @@
 
 (define %channel-root
   (find (lambda (path)
-          (file-exists? (string-append path "/rde/packages.scm")))
+          (file-exists? (string-append path "/lotus-rde/packages.scm")))
         %load-path))
 
 (define %rde-patch-path
-  (list (string-append %channel-root "/rde/packages/patches")))
+  (list (string-append %channel-root "/lotus-rde/packages/patches")))
 
 (define-public lotus-rde
   (package
-    (name "lotusrde")
-    (version "0.6.0")
-    (home-page "https://trop.in/rde")
+    (name "lotus-rde")
+    (version "0.0.1")
+    (home-page "https://github.com/sharad/lotus-rde")
     (source
      (origin
       (method git-fetch)
-      (uri (git-reference (url "https://git.sr.ht/~abcdw/rde")
-                          (commit "580acbca3e8b6165cdbbb2543b9ce5516b79c5d2")))
+      (uri (git-reference (url "https://github.com/sharad/lotus-rde.git")
+                          (commit "86cb4e608014fa43e54995bd5e40b6ca105793c8")))
       (sha256
        (base32
-        "0rcyi4jj09yxj56hlr0v1z70qb4bidf9g4zzq4y4rxl4wdimh2qr"))
-      (file-name (string-append "rde-" version "-checkout"))))
+        "1ynlq6sn18pnf0dmv21g2c0jh4qcnrilpb5198j37l2v5jx0faz9"))
+      (file-name (string-append "lotus-rde-" version "-checkout"))))
     (build-system guile-build-system)
     (arguments
      (list

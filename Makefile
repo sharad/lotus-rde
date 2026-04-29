@@ -4,17 +4,20 @@
 # CHANNELS_ENV=./env/guix/rde/env/guix/channels.scm
 
 BUILD_TYPE ?= default
-CHANNELS_RDE_ENV_FILE = ./env/guix/rde/env/guix/channels.scm
-CHANNELS_LATEST_GUIX_ENV_FILE = ./env/guix/rde/env/guix/channels-ci-latest-guix.scm
-CHANNEL_ENV_FILE_default = $(CHANNELS_RDE_ENV_FILE)
-CHANNEL_ENV_FILE_local = $(CHANNELS_RDE_ENV_FILE)
-CHANNEL_ENV_FILE_latest = $(CHANNELS_LATEST_GUIX_ENV_FILE)
 
-CHANNELS_ENV = $(CHANNEL_ENV_FILE_$(BUILD_TYPE))
+CHANNELS_ENV_RDE_FILE    = ./env/guix/rde/env/guix/channels.scm
+CHANNELS_ENV_LATEST_FILE = ./env/guix/rde/env/guix/channels-ci-latest-guix.scm
+
+CHANNELS_ENV_FILE_default = $(CHANNELS_ENV_RDE_FILE)
+CHANNELS_ENV_FILE_local   = $(CHANNELS_ENV_RDE_FILE)
+CHANNELS_ENV_FILE_rde     = $(CHANNELS_ENV_RDE_FILE)
+CHANNELS_ENV_FILE_latest  = $(CHANNELS_ENV_LATEST_FILE)
+
+CHANNELS_FILE             = $(CHANNELS_ENV_FILE_$(BUILD_TYPE))
 
 
 
-GUIXTM=guix time-machine -C $(CHANNELS_ENV)
+GUIXTM=guix time-machine -C $(CHANNELS_FILE)
 GUIX=$(GUIXTM) --
 EMACS=$(GUIX) shell emacs emacs-ox-html-stable-ids -- emacs
 HUT=$(GUIX) shell hut -- hut
@@ -56,12 +59,12 @@ guix-pull:
 	-guix pull --news --details
 
 
-$(CHANNELS_RDE_ENV_FILE):
+$(CHANNELS_ENV_RDE_FILE):
 	@echo run    guix pull
 	./bin/guix-update-current-channels.sh > $@
 	guix style --whole-file $@
 
-guix-update-current-channels: $(CHANNELS_RDE_ENV_FILE)
+guix-update-current-channels: $(CHANNELS_ENV_RDE_FILE)
 
 
 git-commit:
