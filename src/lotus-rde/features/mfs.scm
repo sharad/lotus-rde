@@ -297,7 +297,7 @@
       (let* ((md-guix-root      (build-md "guix" "root"))
              (md-guix-boot      (build-md "guix" "boot"))
              (md-guix-gnu       (build-md "guix" "gnu"))
-             ;; (md-guix-swap      (build-md "guix" "swap"))
+             (md-guix-swap      (build-md "guix" "swap"))
              (md-guix-var       (build-md "guix" "var"))
              (md-guix-var-cache (build-md "guix" "varScache"))
              (md-guix-var-lib   (build-md "guix" "varSlib"))
@@ -443,7 +443,7 @@
                              md-guix-var-log   ;300M
                              md-guix-var-guix  ;350M
                              md-guix-var-tmp   ;1G
-                             ;; md-guix-swap      ;1G
+                             md-guix-swap      ;1G
                              md-sys-tmp))        ;20G
               (fs (list fs-guix-root
                         fs-guix-boot
