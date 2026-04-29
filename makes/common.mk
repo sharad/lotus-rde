@@ -14,6 +14,7 @@ GUIXTM_COMMAND     = guix time-machine
 GUIXTM             = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE} $(GUIXTM_FLAGS)
 
 GUIX_FLAGS        += --debug=3 --verbosity=3
+GUIX_FLAGS        += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
 GUIX_SYSTEM_FLAGS += $(GUIX_FLAGS)
 GUIX_HOME_FLAGS   += $(GUIX_FLAGS)
 
