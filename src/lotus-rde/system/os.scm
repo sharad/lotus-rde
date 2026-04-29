@@ -52,6 +52,14 @@
                                                   "cl-fad"
                                                   "cl-slime-swank"))
 
+(define %lotus-kernel-arguments (list "usbcore.autosuspend=-1"
+                                      "libata.force=2:disable"
+                                      "libata.noacpi=1"
+                                      "libata.ignore_hpa=1"
+                                      "--verbose"
+                                      "nosplash"
+                                      "debug"))
+
 
 (define* (feature-lotus-machine hostname
                                 #:key
