@@ -25,6 +25,34 @@
 
 
 
+(define %lotus-guix-substitute-urls '(;; "https://ci.guix.gnu.org"
+                                      ;; "https://bayfront.guixsd.org"
+                                      ;; "http://guix.genenetwork.org" -- Backtrace
+                                      ;; "https://berlin.guixsd.org"
+                                      "https://cuirass.genenetwork.org"
+                                      "https://guix.tobias.gr"
+                                      "https://bordeaux.guix.gnu.org"
+                                      "https://ci.guix.info/"
+                                      "https://berlin.guix.gnu.org"
+                                      "https://substitutes.nonguix.org"
+                                      "https://nonguix-proxy.ditigal.xyz"
+                                      "https://mirror.brielmaier.net"))
+
+(define %lotus-system-packages (strings->packages "stumpwm"
+                                                  "stumpwm-gnome"
+                                                  "sbcl"
+                                                  "sbcl-stumpwm-cpu"
+                                                  "sbcl-stumpwm-mem"
+                                                  "sbcl-stumpwm-numpad-layouts"
+                                                  "sbcl-stumpwm-screenshot"
+                                                  "sbcl-stumpwm-winner-mode"
+                                                  "sbcl-dbus"
+                                                  "libfixposix"
+                                                  "pkg-config"
+                                                  "cl-fad"
+                                                  "cl-slime-swank"))
+
+
 (define* (feature-lotus-machine hostname
                                 #:key
                                 (timezone "Asia/Kolkata")
@@ -69,20 +97,9 @@
         (feature-mapped-file-systems #:disk-serial-id-system disk-serial-id-system
                                      #:disk-serial-id-home disk-serial-id-home
                                      #:fs-boot-efi-partition fs-boot-efi-partition)
-        (feature-base-services)
-        (feature-base-packages #:system-packages (strings->packages "stumpwm"
-                                                                    "stumpwm-gnome"
-                                                                    "sbcl"
-                                                                    "sbcl-stumpwm-cpu"
-                                                                    "sbcl-stumpwm-mem"
-                                                                    "sbcl-stumpwm-numpad-layouts"
-                                                                    "sbcl-stumpwm-screenshot"
-                                                                    "sbcl-stumpwm-winner-mode"
-                                                                    "sbcl-dbus"
-                                                                    "libfixposix"
-                                                                    "pkg-config"
-                                                                    "cl-fad"
-                                                                    "cl-slime-swank"))
+        (feature-base-services #:guix-substitute-urls %lotus-guix-substitute-urls
+                               #:guix-authorized-keys '())
+        (feature-base-packages #:system-packages %lotus-system-packages)
         (feature-desktop-services)
 
         ;; (feature-file-database-services)
@@ -157,5 +174,6 @@
         (feature-mapped-file-systems #:disk-serial-id-system disk-serial-id-system
                                      #:disk-serial-id-home disk-serial-id-home
                                      #:fs-boot-efi-partition fs-boot-efi-partition)
-        (feature-base-services)
+        (feature-base-services #:guix-substitute-urls %lotus-guix-substitute-urls
+                               #:guix-authorized-keys '())
         (feature-shepherd)))

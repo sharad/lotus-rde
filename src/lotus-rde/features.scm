@@ -31,11 +31,21 @@
   #:use-module (rde features)
   #:export (lotus-make-rde-config))
 
+
+
 (define (lotus-get-operating-system config)
   (define rde-config-integrate-he-in-os?
     (@@ (rde features) rde-config-integrate-he-in-os?))
   (define rde-config-initial-os
     (@@ (rde features) rde-config-initial-os))
+  (define (resume-swap-device config)
+    (let ((swap-devices (get-value 'swap-devices config '())))
+      (if (and (pair? swap-devices)
+               (> (length swap-devices) 0))
+          (list (string-append "resume="
+                               (swap-space-target (car swap-devices))))
+          '())))
+
 
   (when (rde-config-integrate-he-in-os? config)
     (require-value 'user-name config))
@@ -105,10 +115,10 @@
          (rde-kernel       (get-value
                             'kernel config
                             (operating-system-kernel initial-os)))
-         (rde-kernel-arguments
-                           (get-value
-                            'kernel-arguments config
-                            (operating-system-user-kernel-arguments initial-os)))
+         (rde-kernel-arguments (append (resume-swap-device config)
+                                       (get-value
+                                        'kernel-arguments config
+                                        (operating-system-user-kernel-arguments initial-os))))
          (rde-kernel-modules
                            (get-value
                             'kernel-loadable-modules config

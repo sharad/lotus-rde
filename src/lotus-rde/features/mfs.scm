@@ -149,6 +149,16 @@
                      (if (> suffix-seq 0)
                          (format #f "~2'0d" suffix-seq)
                          ""))))
+
+  (define* (dev-target-builder group volume #:key (suffix-seq suffix-seq))
+    (string-append (get-serial-id serial-id
+                                  prefix)
+                   "X"
+                   (string-join (list (get-group group
+                                                 suffix-seq)
+                                      volume)
+                                "-")))
+
   (define* (dev-builder group volume #:key (suffix-seq suffix-seq))
     (mapped-device (source (string-append (get-serial-id serial-id
                                                          prefix)
@@ -198,6 +208,7 @@
 
   (values dev-builder
           fs-builder
+          dev-target-builder
           get-disk-name))
 
 
@@ -280,9 +291,9 @@
                              (guix-bootefi-create-mount-point? #t)
                              (guix-bootefi-needed-for-boot? #t)
                              (fs-boot-efi-partition (uuid "0000-0000" 'fat32)))
-  (let*-values (((build-md build-fs _) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
-                                                                  #:prefix (lambda () disk-prefix)
-                                                                  #:suffix-seq (lambda () disk-suffix-seq))))
+  (let*-values (((build-md build-fs _ _) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
+                                                                    #:prefix (lambda () disk-prefix)
+                                                                    #:suffix-seq (lambda () disk-suffix-seq))))
       (let* ((md-guix-root      (build-md "guix" "root"))
              (md-guix-boot      (build-md "guix" "boot"))
              (md-guix-gnu       (build-md "guix" "gnu"))
@@ -458,9 +469,9 @@
                            (disk-serial-id "CHANGEIT")
                            (disk-prefix "vds")
                            (disk-suffix-seq 0))
-  (let-values (((build-md build-fs _) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
-                                                                 #:prefix (lambda () disk-prefix)
-                                                                 #:suffix-seq (lambda () disk-suffix-seq))))
+  (let-values (((build-md build-fs _ _) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
+                                                                   #:prefix (lambda () disk-prefix)
+                                                                   #:suffix-seq (lambda () disk-suffix-seq))))
     ;; (format #t "disk-id: ~a\n" disk-serial-id)
     ;; (format #t "build-md: ~a\n" build-md)
     ;; (format #t "build-fs: ~a\n" build-fs)
@@ -485,16 +496,16 @@
         (values devices
                 fs)))))
 
-;; (define* (lotus-devfs-swap #:key
-;;                            ;; lotus-lvm-dev-fs-builders
-;;                            (fs-root #f)
-;;                            (disk-serial-id "CHANGEIT")
-;;                            (disk-prefix "vds")
-;;                            (disk-suffix-seq 0))
-;;   (let*-values (((build-md build-fs _) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
-;;                                                                   #:prefix (lambda () disk-prefix)
-;;                                                                   #:suffix-seq (lambda () disk-suffix-seq))))
-;;                (build-md "guix" "swap")))
+(define* (lotus-devfs-swap #:key
+                           ;; lotus-lvm-dev-fs-builders
+                           (fs-root #f)
+                           (disk-serial-id "CHANGEIT")
+                           (disk-prefix "vds")
+                           (disk-suffix-seq 0))
+  (let*-values (((_ _ build-target _) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
+                                                                 #:prefix (lambda () disk-prefix)
+                                                                 #:suffix-seq (lambda () disk-suffix-seq))))
+    (values (list (swap-space (target (build-target "guix" "swap")))))))
 
 
 
@@ -506,7 +517,8 @@
   (let*-values (((rootfs sys-devices sys-fs) (lotus-devfs-system #:disk-serial-id disk-serial-id-system
                                                                  #:fs-boot-efi-partition fs-boot-efi-partition))
                 ((home-devices home-fs) (lotus-devfs-home #:fs-root rootfs
-                                                          #:disk-serial-id disk-serial-id-home)))
+                                                          #:disk-serial-id disk-serial-id-home))
+                ((swap-devices) (lotus-devfs-swap #:disk-serial-id disk-serial-id-system)))
     ;; (assert (list? sys-devices) "sys-devices not list")
     ;; (assert (list? home-devices) "home-devices not list")
     ;; (assert (list? sys-fs) "sys-fs not list")
@@ -524,13 +536,13 @@
     ;;             (assert x "home-fs contains #f"))
     ;;           home-fs)
 
-    (display "Home devices: ")
-    (display home-devices)
-    (newline)
+    ;; (display "Home devices: ")
+    ;; (display home-devices)
+    ;; (newline)
 
     (feature-file-systems #:mapped-devices (append sys-devices home-devices)
                           #:file-systems (append sys-fs home-fs)
-                          ;; #:swap-devices (list (lotus-devfs-swap))
+                          #:swap-devices swap-devices
                           #:user-pam-file-systems '())))
 
 
