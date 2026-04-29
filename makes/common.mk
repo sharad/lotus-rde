@@ -42,6 +42,14 @@ $(SUBDIR)/%:
 .PHONY: $(SUBDIR)/%
 ## -- examples dir targets
 
+## -- sudo targets
+CMD = cmd
+# Pattern rule: any target that looks like subdir/something
+$(CMD)/%:
+	${GUIX} $* $(GUIX_FLAGS)
+# Optional: Add a phony declaration if targets aren't actual files
+.PHONY: $(CMD)/%
+## -- sudo targets
 
 
 RDE_HOST ?= $(HOST)
@@ -63,14 +71,14 @@ rde/home/reconfigure:
 	reconfigure ${CONFIGS}
 
 
-.cow-store-start:
+/tmp/.cow-store-start:
 	sudo herd start cow-store ${ROOT_MOUNT_POINT}
-	touch .cow-store-start
+	touch /tmp/.cow-store-start
 
-cow-store: .cow-store-start
+cow-store: /tmp/.cow-store-start
 
 
-rde/system/init: guix .cow-store-start
+rde/system/init: guix /tmp/.cow-store-start
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	init ${CONFIGS} ${ROOT_MOUNT_POINT}

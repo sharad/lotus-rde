@@ -1,6 +1,6 @@
 
 
-include makes/common.mk
+
 
 BUILD_TYPE ?= default
 
@@ -54,6 +54,10 @@ PULL_EXTRA_OPTIONS=
 # --allow-downgrades
 
 # ROOT_MOUNT_POINT=/mnt
+
+
+include makes/common.mk
+
 
 VERSION=latest
 
@@ -158,14 +162,14 @@ rde/describe: guix
 
 
 
-## -- sudo targets
-CMD = cmd
-# Pattern rule: any target that looks like subdir/something
-$(CMD)/%:
-	${GUIX} $* $(GUIX_FLAGS)
-# Optional: Add a phony declaration if targets aren't actual files
-.PHONY: $(CMD)/%
-## -- sudo targets
+# ## -- sudo targets
+# CMD = cmd
+# # Pattern rule: any target that looks like subdir/something
+# $(CMD)/%:
+# 	${GUIX} $* $(GUIX_FLAGS)
+# # Optional: Add a phony declaration if targets aren't actual files
+# .PHONY: $(CMD)/%
+# ## -- sudo targets
 
 
 
@@ -202,11 +206,11 @@ target:
 	mkdir -p target
 
 live/image/build: guix
-	RDE_TARGET=live-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) image --image-type=iso9660 \
+	RDE_HOST=live RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) image --image-type=iso9660 \
 	${CONFIGS}
 
 target/rde-live.iso: guix target
-	RDE_TARGET=live-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) image --image-type=iso9660 \
+	RDE_HOST=live RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) image --image-type=iso9660 \
 	${CONFIGS} -r target/rde-live-tmp.iso
 	mv -f target/rde-live-tmp.iso target/rde-live.iso
 

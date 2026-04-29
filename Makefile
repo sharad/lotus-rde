@@ -4,8 +4,6 @@
 # CHANNELS_ENV=./env/guix/rde/env/guix/channels.scm
 
 
-include makes/common.mk
-
 
 
 BUILD_TYPE ?= default
@@ -54,6 +52,19 @@ QEMU_BASE_ARGS= \
 
 
 # ROOT_MOUNT_POINT=/mnt
+
+
+include makes/common.mk
+
+
+## -- examples dir targets
+SUBDIR = examples
+# Pattern rule: any target that looks like subdir/something
+$(SUBDIR)/%:
+	$(MAKE) -C $(SUBDIR) $*
+# Optional: Add a phony declaration if targets aren't actual files
+.PHONY: $(SUBDIR)/%
+## -- examples dir targets
 
 
 .PHONY: guix-pull guix-update-current-channels git-commit git-push examples/guix-update-channels-latest
@@ -124,14 +135,6 @@ repl: ares
 # .PHONY: $(SUDO)/%
 # ## -- sudo targets
 
-## -- examples dir targets
-SUBDIR = examples
-# Pattern rule: any target that looks like subdir/something
-$(SUBDIR)/%:
-	$(MAKE) -C $(SUBDIR) $*
-# Optional: Add a phony declaration if targets aren't actual files
-.PHONY: $(SUBDIR)/%
-## -- examples dir targets
 
 
 
