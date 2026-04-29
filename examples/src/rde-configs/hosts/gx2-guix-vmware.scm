@@ -8,9 +8,9 @@
 
 
 (define-public %gx2-guix-vmware-features (feature-lotus-machine-minimal "gx2-guix-vmware"
-                                                                ;; #:kernel linux
-                                                                ;; #:initrd microcode-initrd
-                                                                ;; #:firmware (list linux-firmware)
+                                                                #:kernel linux
+                                                                #:initrd microcode-initrd
+                                                                #:firmware (list linux-firmware)
                                                                 #:disk-serial-id-system "vmware"
                                                                 #:disk-serial-id-home "vmware"
                                                                 #:initrd-modules '("virtio.ko"
