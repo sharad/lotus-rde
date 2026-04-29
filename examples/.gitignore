@@ -1,2 +1,3 @@
 target/**
 .channels-src-*
+.cow-store-start

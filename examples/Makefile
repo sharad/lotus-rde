@@ -1,7 +1,15 @@
 
 
+include makes/common.mk
 
 BUILD_TYPE ?= default
+
+
+MAKE_TMPL_PATH = makes
+MAKE_SRC_FILES := $(wildcard ../$(MAKE_TMPL_PATH)/*.mk)
+MAKE_DST_FILES := $(patsubst ../%,./%,$(MAKE_FILES))
+
+
 
 
 RDE_GUIX_ENV_DIR_TMPL_PATH = env/guix/rde/env/guix
@@ -34,9 +42,9 @@ GUIXTM = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE} $(GUIXTM_FLA
 GUIX = $(GUIXTM) --
 
 
-GUIX_FLAGS = --debug=3 --verbosity=3
-GUIX_SYSTEM_FLAGS = $(GUIX_FLAGS)
-GUIX_HOME_FLAGS = $(GUIX_FLAGS)
+# GUIX_FLAGS = --debug=3 --verbosity=3
+# GUIX_SYSTEM_FLAGS = $(GUIX_FLAGS)
+# GUIX_HOME_FLAGS = $(GUIX_FLAGS)
 
 
 
@@ -45,9 +53,24 @@ CONFIGS ?= ${SRC_DIR}/rde-configs/configs.scm
 PULL_EXTRA_OPTIONS=
 # --allow-downgrades
 
-ROOT_MOUNT_POINT=/mnt
+# ROOT_MOUNT_POINT=/mnt
 
 VERSION=latest
+
+
+$(MAKE_TMPL_PATH)/%.mk: ../$(MAKE_TMPL_PATH)/%.mk
+	  cp $< $@
+
+$(RDE_GUIX_ENV_DIR_TMPL_PATH)/%.scm: ../$(RDE_GUIX_ENV_DIR_TMPL_PATH)/%.scm
+	mkdir -p $(@D)
+	{ \
+	  cat $<; \
+	  printf '\n;;; This is an automatic copy of RDE'\''s $(notdir $<)\n'; \
+	  printf ';;; Do not edit it manually\n'; \
+	} > $@
+
+
+
 
 
 
@@ -65,13 +88,7 @@ ares: env/sync
 ((@ (ares server) run-nrepl-server)))"
 
 
-$(RDE_GUIX_ENV_DIR_TMPL_PATH)/%.scm: ../$(RDE_GUIX_ENV_DIR_TMPL_PATH)/%.scm
-	mkdir -p $(@D)
-	{ \
-	  cat $<; \
-	  printf '\n;;; This is an automatic copy of RDE'\''s $(notdir $<)\n'; \
-	  printf ';;; Do not edit it manually\n'; \
-	} > $@
+
 
 
 
@@ -79,7 +96,7 @@ $(RDE_GUIX_ENV_DIR_TMPL_PATH)/%.scm: ../$(RDE_GUIX_ENV_DIR_TMPL_PATH)/%.scm
 .PHONY: rde/build/guix rde/repl rde/describe
 
 # env/sync: env/guix/rde/env/guix/channels.scm
-env/sync: $(CHANNEL_ENV_DST_FILES)
+env/sync: $(CHANNEL_ENV_DST_FILES) $(MAKE_DST_FILES)
 
 guix: env/sync
 
@@ -88,6 +105,7 @@ guix-pull:
 
 
 SRC_COMMIT := $(shell git rev-list -1 HEAD -- ../src)
+
 $(CHANNELS_RDE_CONFIGS_FILE): .channels-src-$(SRC_COMMIT)
 .channels-src-%:
 	./bin/rde-generate-channels.sh > $@
@@ -111,32 +129,32 @@ rde/describe: guix
 	describe
 
 
-RDE_HOST ?= $(HOST)
-export RDE_HOST
-RDE_USER ?= $(USER)
-export RDE_USER
-RDE_TARGET ?= system
-export RDE_TARGET
+# RDE_HOST ?= $(HOST)
+# export RDE_HOST
+# RDE_USER ?= $(USER)
+# export RDE_USER
+# RDE_TARGET ?= system
+# export RDE_TARGET
 
-# ifneq ($(strip $(RDE_TARGET)),)
+# # ifneq ($(strip $(RDE_TARGET)),)
 
-rde/home/build: guix
-	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
-	build ${CONFIGS}
+# rde/home/build: guix
+# 	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
+# 	build ${CONFIGS}
 
-rde/home/reconfigure: guix
-	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
-	reconfigure ${CONFIGS}
+# rde/home/reconfigure: guix
+# 	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
+# 	reconfigure ${CONFIGS}
 
-rde/system/build: guix
-	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	build ${CONFIGS}
+# rde/system/build: guix
+# 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
+# 	build ${CONFIGS}
 
-rde/system/reconfigure: guix
-	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	reconfigure ${CONFIGS}
+# rde/system/reconfigure: guix
+# 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
+# 	reconfigure ${CONFIGS}
 
-# endif
+# # endif
 
 
 
@@ -167,18 +185,18 @@ $(CMD)/%:
 # 	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 # 	reconfigure ${CONFIGS}
 
-/tmp/.cow-store-start:
-	sudo herd start cow-store ${ROOT_MOUNT_POINT}
+# /tmp/.cow-store-start:
+# 	sudo herd start cow-store ${ROOT_MOUNT_POINT}
 
-cow-store: /tmp/.cow-store-start
+# cow-store: /tmp/.cow-store-start
 
 # ixy/system/init: guix
 # 	RDE_TARGET=ixy-system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 # 	init ${CONFIGS} ${ROOT_MOUNT_POINT}
 
-rde/system/init: guix /tmp/.cow-store-start
-	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	init ${CONFIGS} ${ROOT_MOUNT_POINT}
+# rde/system/init: guix /tmp/.cow-store-start
+# 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
+# 	init ${CONFIGS} ${ROOT_MOUNT_POINT}
 
 target:
 	mkdir -p target

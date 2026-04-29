@@ -1,0 +1,89 @@
+
+
+
+GUIX_FLAGS = --debug=3 --verbosity=3
+GUIX_SYSTEM_FLAGS = $(GUIX_FLAGS)
+GUIX_HOME_FLAGS = $(GUIX_FLAGS)
+
+
+ROOT_MOUNT_POINT=/mnt
+
+
+
+
+## -- pkg-exec targets
+PKGEXEC = pkg-exec
+# Pattern rule: any target that looks like subdir/something
+$(PKGEXEC)/%:
+	mkdir -p /tmp/guix-build-workspace/build/tmp
+	sudo-run chmod +rx /var/log
+	sudo mount -o remount,rw /gnu
+	$(MAKE) $*
+	sudo mount -o remount,ro /gnu
+# Optional: Add a phony declaration if targets aren't actual files
+.PHONY: $(PKGEXEC)/%
+## -- pkg-exec targets
+
+## -- sudo targets
+SUDO = sudo
+# Pattern rule: any target that looks like subdir/something
+$(SUDO)/%:
+	sudo $(MAKE) $*
+# Optional: Add a phony declaration if targets aren't actual files
+.PHONY: $(SUDO)/%
+## -- sudo targets
+
+## -- examples dir targets
+SUBDIR = examples
+# Pattern rule: any target that looks like subdir/something
+$(SUBDIR)/%:
+	$(MAKE) -C $(SUBDIR) $*
+# Optional: Add a phony declaration if targets aren't actual files
+.PHONY: $(SUBDIR)/%
+## -- examples dir targets
+
+
+
+RDE_HOST ?= $(HOST)
+export RDE_HOST
+RDE_USER ?= $(USER)
+export RDE_USER
+RDE_TARGET ?= system
+export RDE_TARGET
+
+
+rde/home/build:
+	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
+	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
+	build ${CONFIGS}
+
+rde/home/reconfigure:
+	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
+	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
+	reconfigure ${CONFIGS}
+
+
+.cow-store-start:
+	sudo herd start cow-store ${ROOT_MOUNT_POINT}
+	touch .cow-store-start
+
+cow-store: .cow-store-start
+
+
+rde/system/init: guix .cow-store-start
+	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
+	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
+	init ${CONFIGS} ${ROOT_MOUNT_POINT}
+
+rde/system/build:
+	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
+	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
+	build ${CONFIGS}
+
+rde/system/reconfigure:
+	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
+	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
+	reconfigure ${CONFIGS}
+
+
+
