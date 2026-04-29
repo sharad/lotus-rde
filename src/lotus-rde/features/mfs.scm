@@ -542,7 +542,7 @@
 
     (feature-file-systems #:mapped-devices (append sys-devices home-devices)
                           #:file-systems (append sys-fs home-fs)
-                          #:swap-devices swap-devices
+                          ;; #:swap-devices swap-devices
                           #:user-pam-file-systems '())))
 
 
