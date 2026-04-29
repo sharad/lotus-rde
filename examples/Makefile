@@ -4,13 +4,20 @@
 BUILD_TYPE ?= default
 
 
-CHANNELS_RDE_FILE = ./env/guix/rde-configs/env/guix/channels.scm
-CHANNELS_FILE_LOCAL_RDE = ./env/guix/rde-configs/env/guix/channels-ci.scm
-CHANNELS_FILE_LATEST_GUIX = ./env/guix/rde-configs/env/guix/channels-ci-latest-guix.scm
+RDE_GUIX_ENV_DIR_TMPL_PATH = env/guix/rde/env/guix
+CHANNEL_ENV_SRC_FILES := $(wildcard ../$(RDE_GUIX_ENV_DIR_TMPL_PATH)/*.scm)
+CHANNEL_ENV_DST_FILES := $(patsubst ../%,./%,$(CHANNEL_ENV_SRC_FILES))
 
-CHANNEL_FILE_default = $(CHANNELS_RDE_FILE)
-CHANNEL_FILE_local = $(CHANNELS_FILE_LOCAL_RDE)
-CHANNEL_FILE_latest = $(CHANNELS_FILE_LATEST_GUIX)
+RDE_CONFIG_GUIX_ENV_DIR_PATH = ./env/guix/rde-configs/env/guix
+
+
+CHANNELS_RDE_CONFIGS_FILE        = $(RDE_CONFIG_GUIX_ENV_DIR_PATH)/channels.scm
+CHANNELS_RDE_CONFIGS_LOCAL_FILE  = $(RDE_CONFIG_GUIX_ENV_DIR_PATH)/channels-ci.scm
+CHANNELS_RDE_CONFIGS_LATEST_FILE = $(RDE_CONFIG_GUIX_ENV_DIR_PATH)/channels-ci-latest-guix.scm
+
+CHANNEL_FILE_default = $(CHANNELS_RDE_CONFIGS_FILE)
+CHANNEL_FILE_local   = $(CHANNELS_RDE_CONFIGS_LOCAL_FILE)
+CHANNEL_FILE_latest  = $(CHANNELS_RDE_CONFIGS_LATEST_FILE)
 
 CHANNELS_FILE = $(CHANNEL_FILE_$(BUILD_TYPE))
 
@@ -42,6 +49,8 @@ ROOT_MOUNT_POINT=/mnt
 
 VERSION=latest
 
+
+
 repl: ares
 
 ares: env/sync
@@ -56,7 +65,7 @@ ares: env/sync
 ((@ (ares server) run-nrepl-server)))"
 
 
-env/guix/rde/env/guix/%.scm: ../env/guix/rde/env/guix/%.scm
+$(RDE_GUIX_ENV_DIR_TMPL_PATH)/%.scm: ../$(RDE_GUIX_ENV_DIR_TMPL_PATH)/%.scm
 	mkdir -p $(@D)
 	{ \
 	  cat $<; \
@@ -70,7 +79,7 @@ env/guix/rde/env/guix/%.scm: ../env/guix/rde/env/guix/%.scm
 .PHONY: rde/build/guix rde/repl rde/describe
 
 # env/sync: env/guix/rde/env/guix/channels.scm
-env/sync: env/guix/rde/env/guix/channels.scm env/guix/rde/env/guix/channels-ci-latest-guix.scm
+env/sync: $(CHANNEL_ENV_DST_FILES)
 
 guix: env/sync
 
@@ -79,14 +88,14 @@ guix-pull:
 
 
 SRC_COMMIT := $(shell git rev-list -1 HEAD -- ../src)
-$(CHANNELS_RDE_FILE): .channels-src-$(SRC_COMMIT)
+$(CHANNELS_RDE_CONFIGS_FILE): .channels-src-$(SRC_COMMIT)
 .channels-src-%:
 	./bin/rde-generate-channels.sh > $@
 	guix style --whole-file $@
 	rm -f .channels-src-*
 	touch $@
 
-guix-update-channels: $(CHANNELS_RDE_FILE)
+guix-update-channels: $(CHANNELS_RDE_CONFIGS_FILE)
 
 
 rde/build/guix: guix
