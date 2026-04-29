@@ -43,6 +43,14 @@ QEMU_BASE_ARGS= \
 # -vga none -device qxl-vga,vgamem_mb=32
 
 
+GUIX_FLAGS = --debug=3 --verbosity=3
+GUIX_SYSTEM_FLAGS = $(GUIX_FLAGS)
+GUIX_HOME_FLAGS = $(GUIX_FLAGS)
+
+
+ROOT_MOUNT_POINT=/mnt
+
+
 .PHONY: guix-pull guix-update-current-channels git-commit git-push examples/guix-update-channels-latest
 
 
@@ -131,22 +139,33 @@ export RDE_TARGET
 
 
 rde/home/build:
-	RDE_TARGET=home ${GUIX} home \
+	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
 	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	build ${CONFIGS}
 
 rde/home/reconfigure:
-	RDE_TARGET=home ${GUIX} home \
+	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
 	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	reconfigure ${CONFIGS}
 
+
+/tmp/.cow-store-start:
+	sudo herd start cow-store ${ROOT_MOUNT_POINT}
+
+cow-store: /tmp/.cow-store-start
+
+rde/system/init: guix /tmp/.cow-store-start
+	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
+	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
+	init ${CONFIGS} ${ROOT_MOUNT_POINT}
+
 rde/system/build:
-	RDE_TARGET=system ${GUIX} system \
+	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	build ${CONFIGS}
 
 rde/system/reconfigure:
-	RDE_TARGET=system ${GUIX} system \
+	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	reconfigure ${CONFIGS}
 
