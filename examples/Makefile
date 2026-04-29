@@ -25,14 +25,8 @@ CHANNEL_FILE_latest  = $(CHANNELS_RDE_CONFIGS_LATEST_FILE)
 CHANNELS_FILE = $(CHANNEL_FILE_$(BUILD_TYPE))
 
 
-GUIXTM_FLAGS =  --debug=3
-GUIXTM_FLAGS += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
+GUIXTM_FLAGS =  -L ./env/guix
 GUIXTM_PREFIX_ENV = GUILE_LOAD_PATH="../src:../tests:./src"
-GUIXTM_COMMAND = guix time-machine -L ./env/guix
-
-GUIXTM = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE} $(GUIXTM_FLAGS)
-
-GUIX = $(GUIXTM) --
 
 
 

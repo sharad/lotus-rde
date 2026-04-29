@@ -1,9 +1,26 @@
 
 
 
-GUIX_FLAGS = --debug=3 --verbosity=3
-GUIX_SYSTEM_FLAGS = $(GUIX_FLAGS)
-GUIX_HOME_FLAGS = $(GUIX_FLAGS)
+
+
+
+
+
+GUIXTM_FLAGS += --debug=3
+GUIXTM_FLAGS += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
+GUIXTM_PREFIX_ENV +=
+GUIXTM_COMMAND = guix time-machine
+
+GUIXTM = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE} $(GUIXTM_FLAGS)
+
+GUIX = $(GUIXTM) --
+
+
+
+
+GUIX_FLAGS        += --debug=3 --verbosity=3
+GUIX_SYSTEM_FLAGS += $(GUIX_FLAGS)
+GUIX_HOME_FLAGS   += $(GUIX_FLAGS)
 
 
 ROOT_MOUNT_POINT=/mnt
@@ -42,6 +59,14 @@ $(SUBDIR)/%:
 .PHONY: $(SUBDIR)/%
 ## -- examples dir targets
 
+## -- sudo targets
+CMD = cmd
+# Pattern rule: any target that looks like subdir/something
+$(CMD)/%:
+	${GUIX} $* $(GUIX_FLAGS)
+# Optional: Add a phony declaration if targets aren't actual files
+.PHONY: $(CMD)/%
+## -- sudo targets
 
 
 RDE_HOST ?= $(HOST)
@@ -54,35 +79,30 @@ export RDE_TARGET
 
 rde/home/build:
 	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
-	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	build ${CONFIGS}
 
 rde/home/reconfigure:
 	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
-	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	reconfigure ${CONFIGS}
 
 
-.cow-store-start:
+/tmp/.cow-store-start:
 	sudo herd start cow-store ${ROOT_MOUNT_POINT}
-	touch .cow-store-start
+	touch /tmp/.cow-store-start
 
-cow-store: .cow-store-start
+cow-store: /tmp/.cow-store-start
 
 
-rde/system/init: guix .cow-store-start
+rde/system/init: guix /tmp/.cow-store-start
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	init ${CONFIGS} ${ROOT_MOUNT_POINT}
 
 rde/system/build:
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	build ${CONFIGS}
 
 rde/system/reconfigure:
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	reconfigure ${CONFIGS}
 
 

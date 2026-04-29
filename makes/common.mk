@@ -1,9 +1,26 @@
 
 
 
-GUIX_FLAGS = --debug=3 --verbosity=3
-GUIX_SYSTEM_FLAGS = $(GUIX_FLAGS)
-GUIX_HOME_FLAGS = $(GUIX_FLAGS)
+
+
+
+
+
+GUIXTM_FLAGS += --debug=3
+GUIXTM_FLAGS += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
+GUIXTM_PREFIX_ENV +=
+GUIXTM_COMMAND = guix time-machine
+
+GUIXTM = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE} $(GUIXTM_FLAGS)
+
+GUIX = $(GUIXTM) --
+
+
+
+
+GUIX_FLAGS        += --debug=3 --verbosity=3
+GUIX_SYSTEM_FLAGS += $(GUIX_FLAGS)
+GUIX_HOME_FLAGS   += $(GUIX_FLAGS)
 
 
 ROOT_MOUNT_POINT=/mnt
@@ -62,12 +79,10 @@ export RDE_TARGET
 
 rde/home/build:
 	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
-	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	build ${CONFIGS}
 
 rde/home/reconfigure:
 	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
-	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	reconfigure ${CONFIGS}
 
 
@@ -80,17 +95,14 @@ cow-store: /tmp/.cow-store-start
 
 rde/system/init: guix /tmp/.cow-store-start
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	init ${CONFIGS} ${ROOT_MOUNT_POINT}
 
 rde/system/build:
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	build ${CONFIGS}
 
 rde/system/reconfigure:
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
 	reconfigure ${CONFIGS}
 
 

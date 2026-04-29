@@ -20,17 +20,24 @@ CHANNELS_FILE             = $(CHANNELS_ENV_FILE_$(BUILD_TYPE))
 
 
 
-GUIXTM=guix time-machine -C $(CHANNELS_FILE)
-GUIX=$(GUIXTM) --
-EMACS=$(GUIX) shell emacs emacs-ox-html-stable-ids -- emacs
-HUT=$(GUIX) shell hut -- hut
 
-EXAMPLES_SRC_DIR=./examples/src
-CONFIGS=${EXAMPLES_SRC_DIR}/rde-configs/configs.scm
+GUIXTM_FLAGS =
+GUIXTM_PREFIX_ENV =
 
-DEV_ENV_LOAD_PATH=-L ./env/guix -L ./env/dev -L ./src
-RDE_SRC_LOAD_PATH=-L ./env/guix -L ./env/dev -L ./src
-EXAMPLES_LOAD_PATH=-L ${EXAMPLES_SRC_DIR}
+
+EMACS = $(GUIX) shell emacs emacs-ox-html-stable-ids -- emacs
+HUT   = $(GUIX) shell hut -- hut
+
+EXAMPLES_SRC_DIR = ./examples/src
+CONFIGS = ${EXAMPLES_SRC_DIR}/rde-configs/configs.scm
+
+DEV_ENV_LOAD_PATH  = -L ./env/guix -L ./env/dev -L ./src
+RDE_SRC_LOAD_PATH  = -L ./env/guix -L ./env/dev -L ./src
+EXAMPLES_LOAD_PATH = -L ${EXAMPLES_SRC_DIR}
+
+
+GUIX_FLAGS = $(RDE_SRC_LOAD_PATH) $(EXAMPLES_LOAD_PATH)
+
 
 DEV_SRC_LOAD_PATH=${RDE_SRC_LOAD_PATH} \
 ${EXAMPLES_LOAD_PATH} \
@@ -112,9 +119,9 @@ repl: ares
 
 
 # examples/ixy/home/reconfigure:
-# 	RDE_TARGET=ixy-home ${GUIX} home \
-# 	${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
-# 	reconfigure ${CONFIGS}
+#   RDE_TARGET=ixy-home ${GUIX} home \
+#   ${RDE_SRC_LOAD_PATH} ${EXAMPLES_LOAD_PATH} \
+#   reconfigure ${CONFIGS}
 
 # examples/ixy/home/build:
 # 	RDE_TARGET=ixy-home ${GUIX} home \
