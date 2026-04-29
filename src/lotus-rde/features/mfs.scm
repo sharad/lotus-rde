@@ -506,7 +506,8 @@
   (let*-values (((_x _y build-target _z) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
                                                                     #:prefix (lambda () disk-prefix)
                                                                     #:suffix-seq (lambda () disk-suffix-seq))))
-    (values (list (swap-space (target (build-target "guix" "swap")))))))
+    (values (list (swap-space (target (string-append "/dev/mapper/"
+                                                     (build-target "guix" "swap"))))))))
 
 
 
@@ -541,9 +542,11 @@
     ;; (display home-devices)
     ;; (newline)
 
-    (feature-file-systems #:mapped-devices (append sys-devices home-devices)
-                          #:file-systems (append sys-fs home-fs)
-                          ;; #:swap-devices swap-devices
+    (feature-file-systems #:mapped-devices (append sys-devices
+                                                   home-devices)
+                          #:file-systems (append sys-fs
+                                                 home-fs)
+                          #:swap-devices swap-devices
                           #:user-pam-file-systems '())))
 
 
