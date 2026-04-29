@@ -67,7 +67,7 @@ $(SUBDIR)/%:
 ## -- examples dir targets
 
 
-.PHONY: guix-pull guix-update-current-channels git-commit git-push examples/guix-update-channels-latest
+.PHONY: guix guix-pull guix-update-current-channels git-commit git-push examples/guix-update-channels-latest
 
 
 all: ares
@@ -76,6 +76,10 @@ all: ares
 check:
 	guile -L ./src -L ./tests -L ./files/emacs/gider/src -c \
 	'((@ (rde test-runners) run-project-tests-cli))'
+
+
+guix:
+	guix --version
 
 guix-pull:
 	make -C examples guix-pull
