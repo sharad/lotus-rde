@@ -7,24 +7,24 @@
 
 
 
-(define-public %gx2-guix-vmware-features (feature-lotus-machine-minimal "gx2-guix-vmware"
-                                                                #:kernel linux
-                                                                #:initrd microcode-initrd
-                                                                #:firmware (list linux-firmware)
-                                                                #:disk-serial-id-system "vmware"
-                                                                #:disk-serial-id-home "vmware"
-                                                                #:initrd-modules '("virtio.ko"
-                                                                                   "virtio_balloon.ko"
-                                                                                   "virtio_ring.ko"
-                                                                                   "virtio_blk.ko"
-                                                                                   "virtio_pci.ko"
-                                                                                   ;; https://issues.guix.gnu.org/31887
-                                                                                   "mptbase.ko"
-                                                                                   "mptscsih.ko"
-                                                                                   "mptspi.ko"
-                                                                                   "virtio_net.ko")
-                                                                #:fs-boot-efi-partition (uuid "4D78-999F" 'fat32)
-                                                                #:bootloader-targets '("/boot/efi")))
+(define-public %gx2-guix-vmware-features (iron-lotus-machine-minimal "gx2-guix-vmware"
+                                                                     #:kernel linux
+                                                                     #:initrd microcode-initrd
+                                                                     #:firmware (list linux-firmware)
+                                                                     #:disk-serial-id-system "vmware"
+                                                                     #:disk-serial-id-home "vmware"
+                                                                     #:initrd-modules '("virtio.ko"
+                                                                                        "virtio_balloon.ko"
+                                                                                        "virtio_ring.ko"
+                                                                                        "virtio_blk.ko"
+                                                                                        "virtio_pci.ko"
+                                                                                        ;; https://issues.guix.gnu.org/31887
+                                                                                        "mptbase.ko"
+                                                                                        "mptscsih.ko"
+                                                                                        "mptspi.ko"
+                                                                                        "virtio_net.ko")
+                                                                     #:fs-boot-efi-partition (uuid "4D78-999F" 'fat32)
+                                                                     #:bootloader-targets '("/boot/efi")))
 
 
 

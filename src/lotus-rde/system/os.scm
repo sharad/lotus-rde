@@ -20,8 +20,8 @@
   #:use-module (rde features system)
   #:use-module (rde packages)
   #:use-module (lotus-rde features mfs)
-  #:export (feature-lotus-machine
-            feature-lotus-machine-minimal))
+  #:export (iron-lotus-machine
+            iron-lotus-machine-minimal))
 
 
 
@@ -39,30 +39,31 @@
                                       "https://nonguix-proxy.ditigal.xyz"
                                       "https://mirror.brielmaier.net"))
 
-(define %lotus-system-packages (strings->packages "stumpwm"
-                                                  "stumpwm-gnome"
-                                                  "sbcl"
-                                                  "sbcl-stumpwm-cpu"
-                                                  "sbcl-stumpwm-mem"
-                                                  "sbcl-stumpwm-numpad-layouts"
-                                                  "sbcl-stumpwm-screenshot"
-                                                  "sbcl-stumpwm-winner-mode"
-                                                  "sbcl-dbus"
-                                                  "libfixposix"
-                                                  "pkg-config"
-                                                  "cl-fad"
-                                                  "cl-slime-swank"))
+(define %lotus-system-packages '("stumpwm"
+                                 "stumpwm-gnome"
+                                 "sbcl"
+                                 "sbcl-stumpwm-cpu"
+                                 "sbcl-stumpwm-mem"
+                                 "sbcl-stumpwm-numpad-layouts"
+                                 "sbcl-stumpwm-screenshot"
+                                 "sbcl-stumpwm-winner-mode"
+                                 "sbcl-dbus"
+                                 "libfixposix"
+                                 "pkg-config"
+                                 "cl-fad"
+                                 "cl-slime-swank"))
 
-(define %lotus-kernel-arguments (list "usbcore.autosuspend=-1"
-                                      "libata.force=2:disable"
-                                      "libata.noacpi=1"
-                                      "libata.ignore_hpa=1"
-                                      "--verbose"
-                                      "nosplash"
-                                      "debug"))
+(define %lotus-kernel-arguments '("usbcore.autosuspend=-1"
+                                  "libata.force=2:disable"
+                                  "libata.noacpi=1"
+                                  "libata.ignore_hpa=1"
+                                  "--verbose"
+                                  "nosplash"
+                                  "debug"))
+
 
 
-(define* (feature-lotus-machine hostname
+(define* (iron-lotus-machine hostname
                                 #:key
                                 (timezone "Asia/Kolkata")
                                 (disk-serial-id-system "aaa")
@@ -108,8 +109,23 @@
                                      #:fs-boot-efi-partition fs-boot-efi-partition)
         (feature-base-services #:guix-substitute-urls %lotus-guix-substitute-urls
                                #:guix-authorized-keys '())
-        (feature-base-packages #:system-packages %lotus-system-packages)
+        (feature-base-packages #:system-packages (apply strings->packages %lotus-system-packages))
         (feature-desktop-services)
+
+
+        (feature-custom-services #:feature-name-prefix 'substitutes
+                                 #:system-services
+                                 (list
+                                  (simple-service 'guix-moe guix-service-type
+                                                  (guix-extension (authorized-keys (list (plain-file "nonguix.org"
+                                                                                                     "(public-key (ecc (curve Ed25519) (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))")
+                                                                                         (plain-file "guix-moe-old.pub"
+                                                                                                     "(public-key (ecc (curve Ed25519) (q #374EC58F5F2EC0412431723AF2D527AD626B049D657B5633AAAEBC694F3E33F9#)))")
+                                                                                         ;; New key since 2025-10-29.
+                                                                                         (plain-file "guix-moe.pub"
+                                                                                                     "(public-key (ecc (curve Ed25519) (q #552F670D5005D7EB6ACF05284A1066E52156B51D75DE3EBD3030CD046675D543#)))")))
+                                                                  (substitute-urls '("https://substitutes.nonguix.org"
+                                                                                     "https://cache-cdn.guix.moe"))))))
 
         ;; (feature-file-database-services)
         ;; ;; (feature-guix-publish-services)
@@ -145,13 +161,7 @@
                                                     (service openssh-service-type)))))
 
 
-
-
-
-
-
-
-(define* (feature-lotus-machine-minimal hostname
+(define* (iron-lotus-machine-minimal hostname
                                 #:key
                                 (timezone "Asia/Kolkata")
                                 (disk-serial-id-system "aaa")
@@ -186,3 +196,5 @@
         (feature-base-services #:guix-substitute-urls %lotus-guix-substitute-urls
                                #:guix-authorized-keys '())
         (feature-shepherd)))
+
+

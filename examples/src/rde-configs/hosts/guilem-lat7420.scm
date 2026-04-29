@@ -105,41 +105,41 @@
 ;; your stuff
 ;; (feature-hidpi)
 
-(define-public %guilem-lat7420-features (feature-lotus-machine "guilem-lat7420"
-                                                               #:kernel linux
-                                                               #:initrd microcode-initrd
-                                                               #:firmware (list linux-firmware)
-                                                               #:disk-serial-id-system "knba2f"
-                                                               #:disk-serial-id-home "knba2f"
-                                                               #:fs-boot-efi-partition (uuid "C4B7-5EA9" 'fat32)
-                                                               #:kernel-arguments (list "usbcore.autosuspend=-1"
-                                                                                        "libata.force=2:disable"
-                                                                                        "libata.noacpi=1"
-                                                                                        "libata.ignore_hpa=1"
-                                                                                        "--verbose"
-                                                                                        "nosplash"
-                                                                                        "debug")
-                                                               ;; (if (and (pair? %lotus-swap-devices)
-                                                               ;;          (> (length %lotus-swap-devices) 0))
-                                                               ;;     (list (string-append "resume="
-                                                               ;;                          (swap-space-target (car %lotus-swap-devices))))
-                                                               ;;     '())
-                                                               ;; #:initrd (lambda (file-systems . rest)
-                                                               ;;            (apply base-initrd file-systems
-                                                               ;;                   #:extra-modules '("virtio.ko"
-                                                               ;;                                     "virtio_balloon.ko"
-                                                               ;;                                     "virtio_ring.ko"
-                                                               ;;                                     "virtio_blk.ko"
-                                                               ;;                                     "virtio_pci.ko"
-                                                               ;;                                     ;; https://issues.guix.gnu.org/31887
-                                                               ;;                                     "mptbase.ko"
-                                                               ;;                                     "mptscsih.ko"
-                                                               ;;                                     "mptspi.ko"
-                                                               ;;                                     "virtio_net.ko")
-                                                               ;;                   rest))
-                                                               #:custom-services (feature-custom-services
-                                                                                  #:feature-name-prefix 'guilem-lat7420-extra
-                                                                                  #:system-services (list))))
+(define-public %guilem-lat7420-features (iron-lotus-machine "guilem-lat7420"
+                                                            #:kernel linux
+                                                            #:initrd microcode-initrd
+                                                            #:firmware (list linux-firmware)
+                                                            #:disk-serial-id-system "knba2f"
+                                                            #:disk-serial-id-home "knba2f"
+                                                            #:fs-boot-efi-partition (uuid "C4B7-5EA9" 'fat32)
+                                                            #:kernel-arguments (list "usbcore.autosuspend=-1"
+                                                                                     "libata.force=2:disable"
+                                                                                     "libata.noacpi=1"
+                                                                                     "libata.ignore_hpa=1"
+                                                                                     "--verbose"
+                                                                                     "nosplash"
+                                                                                     "debug")
+                                                            ;; (if (and (pair? %lotus-swap-devices)
+                                                            ;;          (> (length %lotus-swap-devices) 0))
+                                                            ;;     (list (string-append "resume="
+                                                            ;;                          (swap-space-target (car %lotus-swap-devices))))
+                                                            ;;     '())
+                                                            ;; #:initrd (lambda (file-systems . rest)
+                                                            ;;            (apply base-initrd file-systems
+                                                            ;;                   #:extra-modules '("virtio.ko"
+                                                            ;;                                     "virtio_balloon.ko"
+                                                            ;;                                     "virtio_ring.ko"
+                                                            ;;                                     "virtio_blk.ko"
+                                                            ;;                                     "virtio_pci.ko"
+                                                            ;;                                     ;; https://issues.guix.gnu.org/31887
+                                                            ;;                                     "mptbase.ko"
+                                                            ;;                                     "mptscsih.ko"
+                                                            ;;                                     "mptspi.ko"
+                                                            ;;                                     "virtio_net.ko")
+                                                            ;;                   rest))
+                                                            #:custom-services (feature-custom-services
+                                                                               #:feature-name-prefix 'guilem-lat7420-extra
+                                                                               #:system-services (list))))
 
 ;; (define-public %guilem-lat7420-features (list))
 

@@ -1,3 +1,4 @@
+
 (define-module (rde-configs configs)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 match)
@@ -93,26 +94,26 @@
     (let* ((envvar (getenv envname))
            (sym (and envvar (string->symbol (string-append "%" envvar "-features"))))
            (val (and sym (module-ref (current-module) sym #f))))
-      (format #t "envname: ~a, envvar: ~a, sym: ~a, null?: ~a\n" envname envvar sym (null? val))
-      (or val #f)))
+      (format #t "envname: ~a, envvar: ~a, sym: ~a, null?: ~a\n" envname envvar sym (not val))
+      val))
 
-  (let* ((rde-host-feature (env-features->symbol "RDE_HOST"))
-         (rde-user-fature  (env-features->symbol "RDE_USER")))
+  (let* ((rde-host-features (env-features->symbol "RDE_HOST"))
+         (rde-user-fatures  (env-features->symbol "RDE_USER")))
 
     (format #t "RDE_TARGET: ~a\n" (getenv "RDE_TARGET"))
 
-    (if (and rde-host-feature
-             rde-user-fature)
+    (if (and rde-host-features
+             rde-user-fatures)
         (let ((config (lotus-make-rde-config #:features
-                                             (append rde-host-feature
-                                                     rde-user-fature))))
+                                             (append rde-host-features
+                                                     rde-user-fatures))))
           (let ((rde-target (getenv "RDE_TARGET")))
             (match rde-target
               ("home" (rde-config-home-environment config))
               ("system" (rde-config-operating-system config))
               (_ #f))))
         (begin
-          (format #t "Invalid RDE_HOST: ~a or RDE_USER: ~a\n" rde-host-feature rde-user-fature)
+          (format #t "Invalid RDE_HOST: ~a or RDE_USER: ~a\n" rde-host-features rde-user-fatures)
           #f))))
 
 
