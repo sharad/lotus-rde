@@ -36,13 +36,27 @@
                                 (firmware '())
                                 (kernel-arguments '())
                                 (initrd base-initrd)
+                                (initrd-modules '())
                                 (custom-services #f))
+
+  ;; (initrd-modules '("virtio.ko"
+  ;;                   "virtio_balloon.ko"
+  ;;                   "virtio_ring.ko"
+  ;;                   "virtio_blk.ko"
+  ;;                   "virtio_pci.ko"
+  ;;                   ;; https://issues.guix.gnu.org/31887
+  ;;                   "mptbase.ko"
+  ;;                   "mptscsih.ko"
+  ;;                   "mptspi.ko"
+  ;;                   "virtio_net.ko"))
+
   (list (feature-host-info #:host-name hostname
                            ;; #:locale    (operating-system-locale bare-bone-os)
                            ;; ls `guix build tzdata`/share/zoneinfo
                            #:timezone timezone)
         (feature-kernel #:kernel kernel
                         #:initrd initrd
+                        #:initrd-modules initrd-modules
                         #:firmware firmware
                         #:kernel-arguments kernel-arguments)
         (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader grub-efi-bootloader)
@@ -122,6 +136,7 @@
                                 (firmware '())
                                 (kernel-arguments '())
                                 (initrd base-initrd)
+                                (initrd-modules '())
                                 (custom-services #f))
   (list (feature-host-info #:host-name hostname
                            ;; #:locale    (operating-system-locale bare-bone-os)
@@ -129,6 +144,7 @@
                            #:timezone timezone)
         (feature-kernel #:kernel kernel
                         #:initrd initrd
+                        #:initrd-modules initrd-modules
                         #:firmware firmware
                         #:kernel-arguments kernel-arguments)
         (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader grub-efi-bootloader)
