@@ -101,8 +101,10 @@ rde/system/build:
 	build ${CONFIGS}
 
 rde/system/reconfigure:
+	sudo mount -o rw /boot
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	reconfigure ${CONFIGS}
+	sudo umount /boot
 
 
 

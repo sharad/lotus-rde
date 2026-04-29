@@ -501,7 +501,7 @@
                            (fs-root #f)
                            (disk-serial-id "CHANGEIT")
                            (disk-prefix "vds")
-                           (disk-suffix-seq 0))
+                           (disk-suffix-seq 01))
   (let*-values (((_x _y build-target _z) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
                                                                     #:prefix (lambda () disk-prefix)
                                                                     #:suffix-seq (lambda () disk-suffix-seq))))
