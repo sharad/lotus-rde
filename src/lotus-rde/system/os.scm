@@ -34,6 +34,7 @@
                                       "https://bordeaux.guix.gnu.org"
                                       "https://ci.guix.info/"
                                       "https://berlin.guix.gnu.org"
+                                      "https://cache-cdn.guix.moe"
                                       "https://substitutes.nonguix.org"
                                       "https://nonguix-proxy.ditigal.xyz"
                                       "https://mirror.brielmaier.net"))
