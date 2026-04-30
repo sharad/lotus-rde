@@ -120,7 +120,7 @@
                                   %desktop-services)
                                   ;; (append %desktop-services
                                   ;;         %rde-desktop-system-services)
-        (feature-zsh #:default-shell #t)
+        (feature-zsh #:default-shell? #t)
 
         (feature-custom-services #:feature-name-prefix 'substitutes
                                  #:system-services
