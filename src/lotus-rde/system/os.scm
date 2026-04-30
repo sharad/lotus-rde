@@ -120,7 +120,7 @@
         ;;                        #:guix-authorized-keys '())
 
         ;; (feature-users-group)
-        ;; (feature-base-services)
+        (feature-base-services)
         (feature-base-packages #:system-packages (apply strings->packages %lotus-system-packages))
         (feature-desktop-services)
         ;; (feature-zsh #:default-shell? #t)
