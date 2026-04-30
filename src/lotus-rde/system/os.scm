@@ -119,7 +119,7 @@
         ;; (feature-base-services #:guix-substitute-urls %lotus-guix-substitute-urls
         ;;                        #:guix-authorized-keys '())
 
-        ;; (feature-users-group)
+        (feature-users-group)
         ;; (feature-base-services)
         (feature-base-packages #:system-packages (apply strings->packages %lotus-system-packages))
         (feature-desktop-services)
