@@ -127,21 +127,21 @@
 
 (define %lotus-rde-base-system-services
   (list
-   ;; (service greetd-service-type)
+   (service greetd-service-type)
    ;; (service mingetty-service-type
    ;;          (mingetty-configuration (tty "tty1")))
-   (service mingetty-service-type
-            (mingetty-configuration (tty "tty2")))
-   (service mingetty-service-type
-            (mingetty-configuration (tty "tty3")))
-   (service mingetty-service-type
-            (mingetty-configuration (tty "tty4")))
-   (service mingetty-service-type
-            (mingetty-configuration (tty "tty5")))
-   (service mingetty-service-type
-            (mingetty-configuration (tty "tty6")))
-   (service mingetty-service-type
-            (mingetty-configuration (tty "tty7")))
+   ;; (service mingetty-service-type
+   ;;          (mingetty-configuration (tty "tty2")))
+   ;; (service mingetty-service-type
+   ;;          (mingetty-configuration (tty "tty3")))
+   ;; (service mingetty-service-type
+   ;;          (mingetty-configuration (tty "tty4")))
+   ;; (service mingetty-service-type
+   ;;          (mingetty-configuration (tty "tty5")))
+   ;; (service mingetty-service-type
+   ;;          (mingetty-configuration (tty "tty6")))
+   ;; (service mingetty-service-type
+   ;;          (mingetty-configuration (tty "tty7")))
    (service virtual-terminal-service-type)
    (service console-font-service-type '())
 
@@ -224,7 +224,7 @@
                (cons
                 (format #f "tty~a" x)
                 (get-value 'console-font cfg "LatGrkCyr-8x16")))
-             (iota (get-value 'number-of-ttys cfg 5) 2)))
+             (iota (get-value 'number-of-ttys cfg 6) 1)))
        (guix-service-type
         config =>
         (guix-configuration
@@ -243,6 +243,14 @@
        ;;            (default-session-command
        ;;              #~(string-append #$shadow "/bin/login"))))
        ;;         (iota (get-value 'number-of-ttys cfg 5) 2)))))
+       (greetd-service-type
+        config =>
+        (greetd-configuration
+         (terminals
+          (map (lambda (x)
+                 (greetd-terminal-configuration
+                  (terminal-vt (number->string x))))
+               (iota 6 1)))))
        (udev-service-type
         config =>
         (udev-configuration

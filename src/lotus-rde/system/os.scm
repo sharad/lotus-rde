@@ -122,7 +122,8 @@
 
         ;; (feature-users-group)
         (feature-lotus-base-services)
-        (feature-base-packages #:system-packages (apply strings->packages %lotus-system-packages))
+        (feature-base-packages #:system-packages
+                               (apply strings->packages %lotus-system-packages))
         (feature-desktop-services)
         ;; (feature-zsh #:default-shell? #t)
         (feature-login-shell #:login-shell (file-append zsh "/bin/zsh"))
