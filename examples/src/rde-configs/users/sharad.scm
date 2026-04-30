@@ -1,4 +1,5 @@
 (define-module (rde-configs users sharad)
+  #:use-module (srfi srfi-1)
   #:use-module (contrib features javascript)
   #:use-module (gnu home services shepherd)
   #:use-module (gnu home services xdg)
@@ -52,7 +53,7 @@
   #:use-module (rde home services wm)
   #:use-module (rde packages aspell)
   #:use-module (rde packages)
-  #:use-module (srfi srfi-1))
+  #:use-module (lotus-rde features base))
 
 
 ;;; Helpers
