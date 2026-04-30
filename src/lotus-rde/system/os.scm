@@ -6,6 +6,7 @@
   #:use-module (gnu services)
   #:use-module (gnu services base)
   #:use-module (gnu services ssh)
+  #:use-module (gnu services desktop)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
   #:use-module (gnu system linux-initrd)
