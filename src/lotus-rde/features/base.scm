@@ -1,4 +1,46 @@
 (define-module (lotus-rde features base)
+  #:use-module (rde features)
+  #:use-module (rde predicates)
+  #:use-module (rde system services admin)
+
+  #:use-module (gnu system)
+  #:use-module (gnu system setuid)
+  #:use-module (gnu services)
+  #:use-module (gnu services base)
+  #:use-module (gnu services desktop)
+  #:use-module (gnu services sound)
+  #:use-module (gnu services shepherd)
+  #:use-module (gnu services xorg)
+  #:use-module (gnu services admin)
+  #:use-module (gnu services sysctl)
+  #:use-module (gnu services networking)
+  #:use-module (gnu services avahi)
+  #:use-module (gnu services dbus)
+  #:use-module (gnu home services)
+  #:use-module (gnu home services admin)
+  #:use-module (gnu home services desktop)
+  #:use-module (gnu home services shepherd)
+
+  #:use-module (gnu packages avahi)
+  #:use-module (gnu packages nss)
+  #:use-module (gnu packages fonts)
+  #:use-module (gnu packages glib)
+  #:use-module (gnu packages bash)
+  #:use-module (gnu packages base)
+  #:use-module (gnu packages linux)
+  #:use-module (gnu packages libusb)
+  #:use-module (gnu packages nfs)
+  #:use-module (gnu packages gnome)
+  #:use-module (gnu packages freedesktop)
+  #:use-module (rde packages)
+
+  #:use-module (srfi srfi-1)
+  #:use-module (guix gexp)
+  #:use-module (guix diagnostics)
+  #:use-module (guix i18n)
+
+
+
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-11)
   #:use-module (guix gexp)
@@ -28,7 +70,8 @@
   #:use-module (rde features system)
   #:use-module (lotus-rde features mfs)
   #:export (feature-login-shell
-            feature-users-group))
+            feature-users-group
+            feature-lotus-base-services))
 ;; feature-file-database-services
 ;; feature-guix-publish-services
 ;; feature-schedular-services
@@ -77,6 +120,135 @@
           (shell (file-append zsh "/bin/zsh"))
           (supplementary-groups '("wheel" "netdev" "audio" "video" "dialout"))))))))))
 
+
+
+
+(define %lotus-rde-base-system-services
+  (list
+   (service greetd-service-type)
+   (service virtual-terminal-service-type)
+   (service console-font-service-type '())
+
+   (service static-networking-service-type
+            (list %loopback-static-networking))
+   (service urandom-seed-service-type)
+   (service guix-service-type)
+   (service nscd-service-type)
+
+   (service shepherd-system-log-service-type)
+
+   (service shepherd-timer-service-type)
+   (service shepherd-transient-service-type)
+
+   (service log-rotation-service-type)
+   (service log-cleanup-service-type
+            (log-cleanup-configuration
+             (directory "/var/log/guix/drvs")))
+   (service udev-service-type
+            (udev-configuration
+             (rules (list lvm2 fuse alsa-utils crda))))
+
+   (service sysctl-service-type)
+
+   (service special-files-service-type
+            `(("/bin/sh" ,(file-append bash "/bin/sh"))
+              ("/usr/bin/env" ,(file-append coreutils "/bin/env"))))))
+
+
+(define %lotus-rde-base-home-services
+  ;; Non-essential but useful services to have by default.
+  (list (service home-log-rotation-service-type)
+        (service home-shepherd-timer-service-type)
+        (service home-shepherd-transient-service-type)))
+
+(define* (feature-lotus-base-services
+          #:key
+          (default-substitute-urls #f)
+          (default-authorized-guix-keys #f)
+          (guix-substitute-urls #f)
+          (guix-authorized-keys #f)
+          (guix-daemon-extra-options
+           (list "--gc-keep-derivations=yes" "--gc-keep-outputs=yes"))
+          (guix-daemon-privileged? #t)
+          (udev-rules '())
+          (guix-http-proxy #f)
+          (base-system-services %lotus-rde-base-system-services)
+          (base-home-services %lotus-rde-base-home-services))
+  "Provides base system services."
+  (ensure-pred list-of-strings? guix-daemon-extra-options)
+  (ensure-pred boolean? guix-daemon-privileged?)
+  (ensure-pred list-of-file-likes? udev-rules)
+  (ensure-pred maybe-string? guix-http-proxy)
+  (ensure-pred list-of-services? base-system-services)
+  (ensure-pred list-of-services? base-home-services)
+
+  (when default-substitute-urls
+    (warning
+     (G_ "'~a' in feature-base-services is deprecated and ignored, use '~a' instead~%")
+     'default-substitute-urls 'guix-extensions))
+  (when default-authorized-guix-keys
+    (warning
+     (G_ "'~a' in feature-base-services is deprecated and ignored, use '~a' instead~%")
+     'default-authorized-guix-keys 'guix-extensions))
+  (when guix-substitute-urls
+    (warning
+     (G_ "'~a' in feature-base-services is deprecated and ignored, use '~a' instead~%")
+     'guix-substitute-urls 'guix-extensions))
+  (when guix-authorized-keys
+    (warning
+     (G_ "'~a' in feature-base-services is deprecated and ignored, use '~a' instead~%")
+     'guix-authorized-keys 'guix-extensions))
+
+  (define (get-base-system-services cfg)
+    (append
+     (modify-services base-system-services
+       (console-font-service-type
+        config =>
+        (map (lambda (x)
+               (cons
+                (format #f "tty~a" x)
+                (get-value 'console-font cfg "LatGrkCyr-8x16")))
+             (iota (get-value 'number-of-ttys cfg 6) 1)))
+       (guix-service-type
+        config =>
+        (guix-configuration
+         (inherit config)
+         (privileged? guix-daemon-privileged?)
+         (extra-options guix-daemon-extra-options)
+         (http-proxy guix-http-proxy)))
+       (greetd-service-type
+        config =>
+        (greetd-configuration
+         (terminals
+          (map (lambda (x)
+                 (greetd-terminal-configuration
+                  (terminal-vt (number->string x))
+                  (terminal-switch #t)
+                  (default-session-command
+                    #~(string-append #$shadow "/bin/login"))))
+               (iota 6 1)))))
+       (udev-service-type
+        config =>
+        (udev-configuration
+         (inherit config)
+         (rules (append
+                 udev-rules
+                 (udev-configuration-rules config))))))
+     (list
+      (simple-service
+       'base-preserve-terminfo-variable
+       sudoers-service-type
+       (list "
+# Keep terminfo database for root and %wheel.
+Defaults:%wheel env_keep+=TERMINFO_DIRS
+Defaults:%wheel env_keep+=TERMINFO")))))
+
+  (feature
+   (name 'base-services)
+   (values `((base-services . #t)
+             (number-of-ttys . ,%number-of-ttys)))
+   (system-services-getter get-base-system-services)
+   (home-services-getter (const base-home-services))))
 
 ;; (get-value 'number-of-ttys cfg 6)
 ;; (make-feature-values scaling-factor console-font)

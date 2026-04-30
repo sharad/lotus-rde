@@ -120,7 +120,7 @@
         ;;                        #:guix-authorized-keys '())
 
         ;; (feature-users-group)
-        (feature-base-services)
+        (feature-lotus-base-services)
         (feature-base-packages #:system-packages (apply strings->packages %lotus-system-packages))
         (feature-desktop-services)
         ;; (feature-zsh #:default-shell? #t)
@@ -187,11 +187,12 @@
         ;; (feature-guix-services)
         ;; (feature-desktop-manager-service)
         ;; (feature-pulseaudio-service)
-        (feature-networking)
+        (feature-networking #:mdns? #t)
         (feature-shepherd)
         (feature-custom-services #:feature-name-prefix 'openssh-server-extra
                                  #:system-services (list
                                                     ;; (service dhcp-client-service-type)
+                                                    ;; (service network-manager-service-type)
                                                     ;; (service cloud-init-service-type)
                                                     (service openssh-service-type)))))
 
