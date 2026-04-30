@@ -119,11 +119,12 @@
         ;; (feature-base-services #:guix-substitute-urls %lotus-guix-substitute-urls
         ;;                        #:guix-authorized-keys '())
 
-        (feature-base-services)
+        ;; (feature-users-group)
+        ;; (feature-base-services)
         (feature-base-packages #:system-packages (apply strings->packages %lotus-system-packages))
         (feature-desktop-services)
         ;; (feature-zsh #:default-shell? #t)
-        (feature-login-shell #:login-shell #~(string-append #$zsh "/bin/zsh"))
+        ;; (feature-login-shell #:login-shell #~(string-append #$zsh "/bin/zsh"))
 
         (feature-custom-services #:feature-name-prefix 'substitutes
                                  #:system-services
