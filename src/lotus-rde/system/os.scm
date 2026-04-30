@@ -191,7 +191,7 @@
         (feature-shepherd)
         (feature-custom-services #:feature-name-prefix 'openssh-server-extra
                                  #:system-services (list
-                                                    (service dhcp-client-service-type)
+                                                    ;; (service dhcp-client-service-type)
                                                     ;; (service network-manager-service-type)
                                                     ;; (service cloud-init-service-type)
                                                     (service openssh-service-type)))))
