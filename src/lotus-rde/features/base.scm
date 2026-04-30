@@ -7,6 +7,7 @@
   #:use-module (gnu system linux-initrd)
   #:use-module (gnu services desktop)
   #:use-module (gnu services)
+  #:use-module (gnu services accounts)
   #:use-module (gnu services avahi)
   #:use-module (gnu services ssh)
   #:use-module (gnu packages base)
