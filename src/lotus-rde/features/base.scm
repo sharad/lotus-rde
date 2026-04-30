@@ -71,7 +71,7 @@
   #:use-module (rde features system)
   #:use-module (lotus-rde features mfs)
   #:export (feature-login-shell
-            feature-users-group
+            feature-lotus-users-group
             feature-lotus-base-services))
 ;; feature-file-database-services
 ;; feature-guix-publish-services
@@ -100,7 +100,7 @@
    (name 'login-shell)
    (values (make-feature-values login-shell))))
 
-(define (feature-users-group)
+(define (feature-lotus-users-group)
   (feature
    (name 'users-group)
    (system-services-getter
@@ -127,8 +127,8 @@
 (define %lotus-rde-base-system-services
   (list
    ;; (service greetd-service-type)
-   (service mingetty-service-type
-            (mingetty-configuration (tty "tty1")))
+   ;; (service mingetty-service-type
+   ;;          (mingetty-configuration (tty "tty1")))
    (service mingetty-service-type
             (mingetty-configuration (tty "tty2")))
    (service mingetty-service-type
@@ -139,14 +139,14 @@
             (mingetty-configuration (tty "tty5")))
    (service mingetty-service-type
             (mingetty-configuration (tty "tty6")))
-   (service virtual-terminal-service-type)
+   ;; (service virtual-terminal-service-type)
    ;; (service console-font-service-type '())
 
-   (service static-networking-service-type
-            (list %loopback-static-networking))
+   ;; (service static-networking-service-type
+   ;;          (list %loopback-static-networking))
    (service urandom-seed-service-type)
    (service guix-service-type)
-   (service nscd-service-type)
+   ;; (service nscd-service-type)
 
    (service shepherd-system-log-service-type)
 
