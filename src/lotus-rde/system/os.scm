@@ -20,6 +20,7 @@
   #:use-module (rde features base)
   #:use-module (rde features guile)
   #:use-module (rde features networking)
+  #:use-module (rde features shells)
   #:use-module (rde features system)
   #:use-module (rde packages)
   #:use-module (lotus-rde features mfs)
