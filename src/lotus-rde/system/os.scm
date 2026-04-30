@@ -6,7 +6,6 @@
   #:use-module (gnu services)
   #:use-module (gnu services base)
   #:use-module (gnu services ssh)
-  #:use-module (gnu services desktop)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
   #:use-module (gnu system linux-initrd)
@@ -17,7 +16,7 @@
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
   #:use-module (rde features)
-  #:use-module (rde features base)
+  #:use-module (lotus-rde features base)
   #:use-module (rde features guile)
   #:use-module (rde features networking)
   #:use-module (rde features shells)
@@ -116,10 +115,7 @@
 
         (feature-base-services)
         (feature-base-packages #:system-packages (apply strings->packages %lotus-system-packages))
-        (feature-desktop-services #:default-desktop-system-services
-                                  %desktop-services)
-                                  ;; (append %desktop-services
-                                  ;;         %rde-desktop-system-services)
+        (feature-lotus-desktop-services)
         (feature-zsh #:default-shell? #t)
 
         (feature-custom-services #:feature-name-prefix 'substitutes

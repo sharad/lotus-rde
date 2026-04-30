@@ -4,6 +4,7 @@
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
   #:use-module (gnu system linux-initrd)
+  #:use-module (gnu services desktop)
   #:use-module (gnu packages base)
   #:use-module (gnu services)
   #:use-module (gnu services ssh)
@@ -45,7 +46,50 @@
 
 
 
+(define* (feature-lotus-desktop-services
+          #:key
+          (default-desktop-system-services %desktop-services)
+          (avahi avahi)
+          ;; (dbus dbus)
+          (elogind elogind)
+          (geoclue geoclue)
+          (udisks udisks)
+          (upower upower))
+  "Provides desktop system services."
+  (ensure-pred file-like? avahi)
+  (ensure-pred file-like? dbus)
+  (ensure-pred file-like? elogind)
+  (ensure-pred file-like? geoclue)
+  (ensure-pred file-like? udisks)
+  (ensure-pred file-like? upower)
 
+  (define (get-home-services _)
+    (list (service home-dbus-service-type
+                   (home-dbus-configuration (dbus dbus)))))
+
+  (define (get-system-services _)
+    (cons*
+     (service avahi-service-type
+              (avahi-configuration (avahi avahi)))
+     ;; (service dbus-root-service-type
+     ;;          (dbus-configuration (dbus dbus)))
+     (service elogind-service-type
+              (elogind-configuration (elogind elogind)))
+     (service geoclue-service-type
+              (geoclue-configuration (geoclue geoclue)))
+     (service udisks-service-type
+              (udisks-configuration (udisks udisks)))
+     (service upower-service-type
+              (upower-configuration (upower upower)))
+     default-desktop-system-services))
+
+  (feature
+   (name 'desktop-services)
+   (values `((desktop-services . #t)
+             (elogind . ,elogind)
+             (dbus . ,dbus)))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 
