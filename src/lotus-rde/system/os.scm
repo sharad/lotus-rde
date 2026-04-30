@@ -114,8 +114,10 @@
 
         (feature-base-services)
         (feature-base-packages #:system-packages (apply strings->packages %lotus-system-packages))
-        (feature-desktop-services)
-
+        (feature-desktop-services #:default-desktop-system-services
+                                  (append %desktop-services
+                                          %rde-desktop-system-services))
+        (feature-zsh #:default-shell #t)
 
         (feature-custom-services #:feature-name-prefix 'substitutes
                                  #:system-services
