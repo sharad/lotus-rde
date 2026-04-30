@@ -209,7 +209,7 @@
                (cons
                 (format #f "tty~a" x)
                 (get-value 'console-font cfg "LatGrkCyr-8x16")))
-             (iota (get-value 'number-of-ttys cfg 6) 1)))
+             (iota (get-value 'number-of-ttys cfg 5) 2)))
        (guix-service-type
         config =>
         (guix-configuration
@@ -227,7 +227,7 @@
                   (terminal-switch #t)
                   (default-session-command
                     #~(string-append #$shadow "/bin/login"))))
-               (iota 6 2)))))
+               (iota (get-value 'number-of-ttys cfg 5) 2)))))
        (udev-service-type
         config =>
         (udev-configuration
