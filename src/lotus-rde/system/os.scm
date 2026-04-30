@@ -6,6 +6,7 @@
   #:use-module (gnu services)
   #:use-module (gnu services base)
   #:use-module (gnu services ssh)
+  #:use-module (gnu services xorg)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
   #:use-module (gnu system linux-initrd)
@@ -16,12 +17,13 @@
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
   #:use-module (rde features)
-  #:use-module (lotus-rde features base)
+  #:use-module (rde features base)
   #:use-module (rde features guile)
   #:use-module (rde features networking)
   #:use-module (rde features shells)
   #:use-module (rde features system)
   #:use-module (rde packages)
+  #:use-module (lotus-rde features base)
   #:use-module (lotus-rde features mfs)
   #:export (iron-lotus-machine
             iron-lotus-machine-minimal))
@@ -115,12 +117,13 @@
 
         (feature-base-services)
         (feature-base-packages #:system-packages (apply strings->packages %lotus-system-packages))
-        (feature-lotus-desktop-services)
+        (feature-desktop-services)
         (feature-zsh #:default-shell? #t)
 
         (feature-custom-services #:feature-name-prefix 'substitutes
                                  #:system-services
                                  (list
+                                  (service gdm-service-type)
                                   (simple-service 'guix-moe guix-service-type
                                                   (guix-extension (authorized-keys (list (plain-file "cuirass-genenetwork-org.pub"
                                                                                                      "(public-key (ecc (curve Ed25519) (q #11217788B41ADC8D5B8E71BD87EF699C65312EC387752899FE9C888856F5C769#)))")
