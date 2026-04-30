@@ -69,7 +69,7 @@
           (id 1000))
          (user-account
           (name "s")
-          (id 1000)
+          (uid 1000)
           (group "users")
           (home-directory "/home/s/hell")
           (shell (file-append zsh "/bin/zsh"))

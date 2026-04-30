@@ -696,5 +696,5 @@ subject:/home:/) and tag:new}\"'"
     ;;  ;; it's not recommended to use it.
     ;;  #:emacs-advanced-user? #f)
 
-    ;; (feature-users-group)
+    (feature-users-group)
     )))
