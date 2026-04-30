@@ -227,7 +227,7 @@
                   (terminal-switch #t)
                   (default-session-command
                     #~(string-append #$shadow "/bin/login"))))
-               (iota 6 2)))))
+               (iota 6 1)))))
        (udev-service-type
         config =>
         (udev-configuration
