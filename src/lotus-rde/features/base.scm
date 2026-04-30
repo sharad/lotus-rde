@@ -140,7 +140,7 @@
    (service mingetty-service-type
             (mingetty-configuration (tty "tty6")))
    (service virtual-terminal-service-type)
-   (service console-font-service-type '())
+   ;; (service console-font-service-type '())
 
    (service static-networking-service-type
             (list %loopback-static-networking))
@@ -215,13 +215,13 @@
   (define (get-base-system-services cfg)
     (append
      (modify-services base-system-services
-       (console-font-service-type
-        config =>
-        (map (lambda (x)
-               (cons
-                (format #f "tty~a" x)
-                (get-value 'console-font cfg "LatGrkCyr-8x16")))
-             (iota (get-value 'number-of-ttys cfg 5) 2)))
+       ;; (console-font-service-type
+       ;;  config =>
+       ;;  (map (lambda (x)
+       ;;         (cons
+       ;;          (format #f "tty~a" x)
+       ;;          (get-value 'console-font cfg "LatGrkCyr-8x16")))
+       ;;       (iota (get-value 'number-of-ttys cfg 5) 2)))
        (guix-service-type
         config =>
         (guix-configuration
