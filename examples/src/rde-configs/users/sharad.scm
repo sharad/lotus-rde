@@ -684,9 +684,10 @@ subject:/home:/) and tag:new}\"'"
      #:full-name "Sharad Pratap"
      #:home-directory "/home/s/hell"
      #:email "s@localhost"
-     #:user-initial-password-hash #f
+     ;; #:user-initial-password-hash "$6$abc$yvk.Ln2iQ9WE8ZR5heHDQ31n3tpO3n6t5DfEYtoGBb9C3OU2LVWCNQ6q8UEoC7x8ogVqlfipLvFQJyJ4U8JAf."
      ;; "$6$abc$3SAZZQGdvQgAscM2gupP1tC.SqnsaLSPoAnEOb2k6jXMhzQqS1kCSplAJ/vUy2rrnpHtt6frW2Ap5l/tIvDsz."
      ;; (crypt "bob" "$6$abc")
+     #:user-groups '("wheel" "netdev" "audio" "video" "dialout")
 
      ;; WARNING: This option can reduce the explorability by hiding
      ;; some helpful messages and parts of the interface for the sake
