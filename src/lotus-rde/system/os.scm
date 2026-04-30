@@ -4,6 +4,7 @@
   #:use-module (srfi srfi-11)
   #:use-module (guix gexp)
   #:use-module (gnu system uuid)
+  #:use-module (gnu system keyboard)
   #:use-module (gnu system linux-initrd)
   #:use-module (gnu services)
   #:use-module (gnu services base)
@@ -134,7 +135,7 @@
                                             (xorg-configuration
                                              (xorg-configuration
                                               (keyboard-layout (keyboard-layout "us" "altgr-intl"))))
-                                            (allow-empty-passwords? %lotus-gdm-allow-empty-password)
+                                            (allow-empty-passwords? #t)
                                             (auto-login?            #f)
                                             (default-user           "s")))
                                   (simple-service 'guix-moe guix-service-type

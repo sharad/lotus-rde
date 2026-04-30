@@ -676,14 +676,15 @@ subject:/home:/) and tag:new}\"'"
 (define-public %sharad-features
   (append
    ;; all-features-with-custom-kernel-and-substitutes
+   (list)
    (list
     (feature-additional-services)
-    (feature-base-packages #:home-packages (list )
+    (feature-base-packages #:home-packages (list ))
     (feature-user-info #:user-name "s"
                        #:full-name "Sharad Pratap"
                        #:home-directory "/home/s/hell"
                        #:email "s@localhost"
-                       #:user-initial-password-hash "$6$abc$yvk.Ln2iQ9WE8ZR5heHDQ31n3tpO3n6t5DfEYtoGBb9C3OU2LVWCNQ6q8UEoC7x8ogVqlfipLvFQJyJ4U8JAf."
+                       ;; #:user-initial-password-hash "$6$abc$yvk.Ln2iQ9WE8ZR5heHDQ31n3tpO3n6t5DfEYtoGBb9C3OU2LVWCNQ6q8UEoC7x8ogVqlfipLvFQJyJ4U8JAf."
                        ;; "$6$abc$3SAZZQGdvQgAscM2gupP1tC.SqnsaLSPoAnEOb2k6jXMhzQqS1kCSplAJ/vUy2rrnpHtt6frW2Ap5l/tIvDsz."
                        ;; (crypt "bob" "$6$abc")
                        #:user-groups '("wheel" "netdev" "audio" "video" "dialout")
@@ -692,7 +693,6 @@ subject:/home:/) and tag:new}\"'"
                        ;; some helpful messages and parts of the interface for the sake
                        ;; of minimalistic, less distractive and clean look.  Generally
                        ;; it's not recommended to use it.
-                       #:emacs-advanced-user? #f)
+                       #:emacs-advanced-user? #f))))
 
-    ;; (feature-lotus-users-group)
-    )))
+;; (feature-lotus-users-group)

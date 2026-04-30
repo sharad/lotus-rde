@@ -48,6 +48,7 @@
   #:use-module (gnu bootloader grub)
   #:use-module (gnu system accounts)
   #:use-module (gnu system shadow)
+  #:use-module (gnu system keyboard)
   #:use-module (gnu system linux-initrd)
   #:use-module (gnu services)
   #:use-module (gnu services desktop)
