@@ -140,6 +140,8 @@
             (mingetty-configuration (tty "tty5")))
    (service mingetty-service-type
             (mingetty-configuration (tty "tty6")))
+   (service mingetty-service-type
+            (mingetty-configuration (tty "tty7")))
    (service virtual-terminal-service-type)
    (service console-font-service-type '())
 
