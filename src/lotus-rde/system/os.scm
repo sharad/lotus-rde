@@ -124,12 +124,19 @@
         (feature-base-packages #:system-packages (apply strings->packages %lotus-system-packages))
         (feature-desktop-services)
         ;; (feature-zsh #:default-shell? #t)
-        ;; (feature-login-shell #:login-shell #~(string-append #$zsh "/bin/zsh"))
+        (feature-login-shell #:login-shell (file-append zsh "/bin/zsh"))
 
         (feature-custom-services #:feature-name-prefix 'substitutes
                                  #:system-services
                                  (list
-                                  (service gdm-service-type)
+                                  (service gdm-service-type
+                                           (gdm-configuration
+                                            (xorg-configuration
+                                             (xorg-configuration
+                                              (keyboard-layout (keyboard-layout "us" "altgr-intl"))))
+                                            (allow-empty-passwords? %lotus-gdm-allow-empty-password)
+                                            (auto-login?            #f)
+                                            (default-user           "s")))
                                   (simple-service 'guix-moe guix-service-type
                                                   (guix-extension (authorized-keys (list (plain-file "cuirass-genenetwork-org.pub"
                                                                                                      "(public-key (ecc (curve Ed25519) (q #11217788B41ADC8D5B8E71BD87EF699C65312EC387752899FE9C888856F5C769#)))")

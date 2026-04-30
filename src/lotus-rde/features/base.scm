@@ -71,7 +71,7 @@
   #:use-module (rde features system)
   #:use-module (lotus-rde features mfs)
   #:export (feature-login-shell
-            feature-lotus-users-group
+            ;; feature-lotus-users-group
             feature-lotus-base-services))
 ;; feature-file-database-services
 ;; feature-guix-publish-services
@@ -100,26 +100,26 @@
    (name 'login-shell)
    (values (make-feature-values login-shell))))
 
-(define (feature-lotus-users-group)
-  (feature
-   (name 'users-group)
-   (system-services-getter
-    (lambda (_)
-      (list
-       (simple-service
-        'users-group
-        account-service-type
-        (list
-         (user-group
-          (name "users")
-          (id 1000))
-         (user-account
-          (name "s")
-          (uid 1000)
-          (group "users")
-          (home-directory "/home/s/hell")
-          (shell (file-append zsh "/bin/zsh"))
-          (supplementary-groups '("wheel" "netdev" "audio" "video" "dialout"))))))))))
+;; (define (feature-lotus-users-group)
+;;   (feature
+;;    (name 'users-group)
+;;    (system-services-getter
+;;     (lambda (_)
+;;       (list
+;;        (simple-service
+;;         'users-group
+;;         account-service-type
+;;         (list
+;;          (user-group
+;;           (name "users")
+;;           (id 1000))
+;;          (user-account
+;;           (name "s")
+;;           (uid 1000)
+;;           (group "users")
+;;           (home-directory "/home/s/hell")
+;;           (shell (file-append zsh "/bin/zsh"))
+;;           (supplementary-groups '("wheel" "netdev" "audio" "video" "dialout"))))))))))
 
 
 
@@ -140,13 +140,13 @@
    (service mingetty-service-type
             (mingetty-configuration (tty "tty6")))
    (service virtual-terminal-service-type)
-   ;; (service console-font-service-type '())
+   (service console-font-service-type '())
 
    (service static-networking-service-type
             (list %loopback-static-networking))
    (service urandom-seed-service-type)
    (service guix-service-type)
-   ;; (service nscd-service-type)
+   (service nscd-service-type)
 
    (service shepherd-system-log-service-type)
 
@@ -215,13 +215,13 @@
   (define (get-base-system-services cfg)
     (append
      (modify-services base-system-services
-       ;; (console-font-service-type
-       ;;  config =>
-       ;;  (map (lambda (x)
-       ;;         (cons
-       ;;          (format #f "tty~a" x)
-       ;;          (get-value 'console-font cfg "LatGrkCyr-8x16")))
-       ;;       (iota (get-value 'number-of-ttys cfg 5) 2)))
+       (console-font-service-type
+        config =>
+        (map (lambda (x)
+               (cons
+                (format #f "tty~a" x)
+                (get-value 'console-font cfg "LatGrkCyr-8x16")))
+             (iota (get-value 'number-of-ttys cfg 5) 2)))
        (guix-service-type
         config =>
         (guix-configuration
