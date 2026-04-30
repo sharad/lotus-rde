@@ -139,11 +139,11 @@
             (mingetty-configuration (tty "tty5")))
    (service mingetty-service-type
             (mingetty-configuration (tty "tty6")))
-   ;; (service virtual-terminal-service-type)
+   (service virtual-terminal-service-type)
    ;; (service console-font-service-type '())
 
-   ;; (service static-networking-service-type
-   ;;          (list %loopback-static-networking))
+   (service static-networking-service-type
+            (list %loopback-static-networking))
    (service urandom-seed-service-type)
    (service guix-service-type)
    ;; (service nscd-service-type)
