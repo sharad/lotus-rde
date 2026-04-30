@@ -345,13 +345,12 @@ if [ -f $GUIX_PROFILE/etc/profile ]; then source $GUIX_PROFILE/etc/profile; fi
   (feature-custom-services
    #:feature-name-prefix 'sharad
    #:home-services
-   (list
-    home-extra-packages-service
-    sway-extra-config-service
-    ssh-extra-config-service
-    i2pd-add-ilita-irc-service
-    ;; rde-guix-add-to-shell-profile-service
-    mpv-add-user-settings-service)))
+   (list home-extra-packages-service
+         sway-extra-config-service
+         ssh-extra-config-service
+         i2pd-add-ilita-irc-service
+         ;; rde-guix-add-to-shell-profile-service
+         mpv-add-user-settings-service)))
 
 ;;; User-specific features with personal preferences
 
@@ -685,12 +684,12 @@ subject:/home:/) and tag:new}\"'"
      #:full-name "Sharad Pratap"
      #:home-directory "/home/s/hell"
      #:email "s@localhost"
-     #:user-initial-password-hash
-     "$6$abc$3SAZZQGdvQgAscM2gupP1tC.SqnsaLSPoAnEOb2k6jXMhzQqS1kCSplAJ/vUy2rrnpHtt6frW2Ap5l/tIvDsz."
+     #:user-initial-password-hash #f
+     ;; "$6$abc$3SAZZQGdvQgAscM2gupP1tC.SqnsaLSPoAnEOb2k6jXMhzQqS1kCSplAJ/vUy2rrnpHtt6frW2Ap5l/tIvDsz."
      ;; (crypt "bob" "$6$abc")
 
      ;; WARNING: This option can reduce the explorability by hiding
      ;; some helpful messages and parts of the interface for the sake
      ;; of minimalistic, less distractive and clean look.  Generally
      ;; it's not recommended to use it.
-     #:emacs-advanced-user? #t))))
+     #:emacs-advanced-user? #f))))
