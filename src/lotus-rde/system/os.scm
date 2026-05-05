@@ -74,18 +74,18 @@
 
 
 (define* (iron-lotus-machine hostname
-                                #:key
-                                (timezone "Asia/Kolkata")
-                                (disk-serial-id-system "aaa")
-                                (disk-serial-id-home "aaa")
-                                (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
-                                (bootloader-targets '())
-                                (kernel linux-libre)
-                                (firmware '())
-                                (kernel-arguments '())
-                                (initrd base-initrd)
-                                (initrd-modules '())
-                                (custom-services #f))
+                             #:key
+                             (timezone "Asia/Kolkata")
+                             (disk-serial-id-system "aaa")
+                             (disk-serial-id-home "aaa")
+                             (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
+                             (bootloader-targets '())
+                             (kernel linux-libre)
+                             (firmware '())
+                             (kernel-arguments '())
+                             (initrd base-initrd)
+                             (initrd-modules '())
+                             (custom-services #f))
 
   ;; (initrd-modules '("virtio.ko"
   ;;                   "virtio_balloon.ko"
@@ -109,8 +109,8 @@
                         #:kernel-arguments kernel-arguments)
         (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader grub-efi-bootloader)
                                                                                  (targets    bootloader-targets)))
-                                                                                 ;; (keyboard-layout %lotus-keyboard-layout)
-                                                                                 ;; (menu-entries    %lotus-grub-ubuntu-menuentries)
+        ;; (keyboard-layout %lotus-keyboard-layout)
+        ;; (menu-entries    %lotus-grub-ubuntu-menuentries)
         ;; Allows to declare specific bootloader configuration,
         ;; grub-efi-bootloader used by default
         ;; (feature-bootloader)
@@ -158,7 +158,7 @@
                                                                                                      "(public-key (ecc (curve Ed25519) (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))")
                                                                                          (plain-file "cache-cdn.guix.moe-old.pub"
                                                                                                      "(public-key (ecc (curve Ed25519) (q #374EC58F5F2EC0412431723AF2D527AD626B049D657B5633AAAEBC694F3E33F9#)))")
-                                                                                          ;; New key since 2025-10-29.
+                                                                                         ;; New key since 2025-10-29.
                                                                                          (plain-file "cache-cdn.guix.moe.pub"
                                                                                                      "(public-key (ecc (curve Ed25519) (q #552F670D5005D7EB6ACF05284A1066E52156B51D75DE3EBD3030CD046675D543#)))")))
                                                                   (substitute-urls '("https://cuirass.genenetwork.org"

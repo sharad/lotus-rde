@@ -353,7 +353,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
    (service sane-service-type)
    ;; Add polkti rules, so that non-root users in the wheel group can
    ;; perform administrative tasks (similar to "sudo").
-   polkit-wheel-service
+   ;; polkit-wheel-service
 
    ;; Allow desktop users to also mount NTFS and NFS file systems
    ;; without root.
@@ -392,7 +392,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   ;; FIXME: Since GDM depends on more dependencies that do not build on i686,
   ;; keep SDDM on it for the time being.
   ;; XXX: When changing login manager, also change set-xorg-configuration
-  (list ;; (service gdm-service-type)
+  (list (service gdm-service-type)
 
         ;; Screen lockers are a pretty useful thing and these are small.
         (service screen-locker-service-type
@@ -449,12 +449,12 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
         ;; The D-Bus clique.
         ;; (service avahi-service-type)
-        (service udisks-service-type)
+        ;; (service udisks-service-type)
         ;; (service upower-service-type)
         (service accountsservice-service-type)
         (service cups-pk-helper-service-type)
         (service colord-service-type)
-        (service geoclue-service-type)
+        ;; (service geoclue-service-type)
         (service polkit-service-type)
         ;; (service elogind-service-type)
         ;; (service dbus-root-service-type)
@@ -498,7 +498,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-system-services _)
     (cons*
 
-     ;; (service gnome-desktop-service-type)
+     (service gnome-desktop-service-type)
 
      (service avahi-service-type
               (avahi-configuration (avahi avahi)))
