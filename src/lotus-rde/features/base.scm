@@ -392,7 +392,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   ;; FIXME: Since GDM depends on more dependencies that do not build on i686,
   ;; keep SDDM on it for the time being.
   ;; XXX: When changing login manager, also change set-xorg-configuration
-  (cons* (service gdm-service-type)
+  (list (service gdm-service-type)
 
          ;; Screen lockers are a pretty useful thing and these are small.
          (service screen-locker-service-type
