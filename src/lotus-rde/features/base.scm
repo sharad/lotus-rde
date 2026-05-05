@@ -498,12 +498,12 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-system-services _)
     (cons*
 
-     (service gnome-desktop-service-type)
+     ;; (service gnome-desktop-service-type)
 
      (service avahi-service-type
               (avahi-configuration (avahi avahi)))
-     ;; (service dbus-root-service-type
-     ;;          (dbus-configuration (dbus dbus)))
+     (service dbus-root-service-type
+              (dbus-configuration (dbus dbus)))
      (service elogind-service-type
               (elogind-configuration (elogind elogind)))
      (service geoclue-service-type
