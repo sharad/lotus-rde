@@ -448,7 +448,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
         (service usb-modeswitch-service-type)
 
         ;; The D-Bus clique.
-        (service avahi-service-type)
+        ;; (service avahi-service-type)
         (service udisks-service-type)
         ;; (service upower-service-type)
         (service accountsservice-service-type)
