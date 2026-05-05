@@ -6,6 +6,9 @@
   #:use-module (gnu system)
   #:use-module (gnu system setuid)
   #:use-module (gnu services)
+  #:use-module (gnu services admin)
+  #:use-module (gnu services shepherd)
+  #:use-module (gnu services sysctl)
   #:use-module (gnu services base)
   #:use-module (gnu services desktop)
   #:use-module (gnu services sound)
@@ -125,7 +128,7 @@
 
 
 
-(define %lotus-rde-base-system-services
+(define %lotus-rde-base-system-services1
   (list
    (service greetd-service-type)
    ;; (service mingetty-service-type
@@ -169,6 +172,65 @@
    (service special-files-service-type
             `(("/bin/sh" ,(file-append bash "/bin/sh"))
               ("/usr/bin/env" ,(file-append coreutils "/bin/env"))))))
+
+
+
+
+(define %lotus-rde-base-system-services
+  ;; https://github.com/lfam/guix/blob/56ad75cdabe759d8cc004a369ae9c845d34ae896/gnu/services/base.scm
+  (list (service login-service-type)
+
+        (service virtual-terminal-service-type)
+        (service console-font-service-type
+                 (map (lambda (tty)
+                        (cons tty %default-console-font))
+                      '("tty1" "tty2" "tty3" "tty4" "tty5" "tty6")))
+
+        (service syslog-service-type)
+        (service agetty-service-type (agetty-configuration
+                                       (extra-options '("-L")) ; no carrier detect
+                                       (term "vt100")
+                                       (tty #f) ; automatic
+                                       (shepherd-requirement '(syslogd))))
+
+        (service mingetty-service-type (mingetty-configuration
+                                         (tty "tty1")))
+        (service mingetty-service-type (mingetty-configuration
+                                         (tty "tty2")))
+        (service mingetty-service-type (mingetty-configuration
+                                         (tty "tty3")))
+        (service mingetty-service-type (mingetty-configuration
+                                         (tty "tty4")))
+        (service mingetty-service-type (mingetty-configuration
+                                         (tty "tty5")))
+        (service mingetty-service-type (mingetty-configuration
+                                         (tty "tty6")))
+
+        (service static-networking-service-type
+                 (list %loopback-static-networking))
+        (service urandom-seed-service-type)
+        (service guix-service-type)
+        (service nscd-service-type)
+
+        (service log-rotation-service-type)
+
+        ;; Convenient services brought by the Shepherd.
+        (service shepherd-timer-service-type)
+        (service shepherd-transient-service-type)
+
+        ;; Periodically delete old build logs.
+        (service log-cleanup-service-type
+                 (log-cleanup-configuration
+                  (directory "/var/log/guix/drvs")))
+
+        ;; The LVM2 rules are needed as soon as LVM2 or the device-mapper is
+        ;; used, so enable them by default.  The FUSE and ALSA rules are
+        ;; less critical, but handy.
+        (service udev-service-type
+                 (udev-configuration
+                   (rules (list lvm2 fuse alsa-utils crda))))
+
+        (service sysctl-service-type)))
 
 
 (define %lotus-rde-base-home-services
@@ -243,14 +305,14 @@
        ;;            (default-session-command
        ;;              #~(string-append #$shadow "/bin/login"))))
        ;;         (iota (get-value 'number-of-ttys cfg 5) 2)))))
-       (greetd-service-type
-        config =>
-        (greetd-configuration
-         (terminals
-          (map (lambda (x)
-                 (greetd-terminal-configuration
-                  (terminal-vt (number->string x))))
-               (iota 6 1)))))
+       ;; (greetd-service-type
+       ;;  config =>
+       ;;  (greetd-configuration
+       ;;   (terminals
+       ;;    (map (lambda (x)
+       ;;           (greetd-terminal-configuration
+       ;;            (terminal-vt (number->string x))))
+       ;;         (iota 6 1)))))
        (udev-service-type
         config =>
         (udev-configuration
@@ -273,6 +335,199 @@ Defaults:%wheel env_keep+=TERMINFO")))))
              (number-of-ttys . ,%number-of-ttys)))
    (system-services-getter get-base-system-services)
    (home-services-getter (const base-home-services))))
+
+
+
+
+
+
+(define %rde-from-rde-desktop-system-services
+  (list
+   ;; Add udev rules for MTP devices so that non-root users can access
+   ;; them.
+   (simple-service 'mtp udev-service-type (list libmtp))
+   ;; Add udev rules for scanners.
+   (service sane-service-type)
+   ;; Add polkti rules, so that non-root users in the wheel group can
+   ;; perform administrative tasks (similar to "sudo").
+   polkit-wheel-service
+
+   ;; Allow desktop users to also mount NTFS and NFS file systems
+   ;; without root.
+   (simple-service
+    'mount-setuid-helpers
+    privileged-program-service-type
+    (map (lambda (program)
+           (setuid-program
+            (program program)))
+         (list (file-append nfs-utils "/sbin/mount.nfs")
+               (file-append ntfs-3g "/sbin/mount.ntfs-3g"))))
+
+   ;; The global fontconfig cache directory can sometimes contain
+   ;; stale entries, possibly referencing fonts that have been GC'd,
+   ;; so mount it read-only.
+   (simple-service 'fontconfig-file-system
+                   file-system-service-type
+                   (list %fontconfig-file-system))
+
+
+   ;; The D-Bus clique.
+   (service accountsservice-service-type)
+   (service cups-pk-helper-service-type)
+   (service colord-service-type)
+
+   (service ntp-service-type)
+
+   (service x11-socket-directory-service-type)))
+
+
+(define %rde-lotus-desktop-system-services
+  ;; https://github.com/lfam/guix/blob/56ad75cdabe759d8cc004a369ae9c845d34ae896/gnu/services/desktop.scm
+
+  ;; List of services typically useful for a "desktop" use case.
+
+  ;; FIXME: Since GDM depends on more dependencies that do not build on i686,
+  ;; keep SDDM on it for the time being.
+  ;; XXX: When changing login manager, also change set-xorg-configuration
+  (cons* (service gdm-service-type)
+
+         ;; Screen lockers are a pretty useful thing and these are small.
+         (service screen-locker-service-type
+                  (screen-locker-configuration
+                   (name "slock")
+                   (program (file-append slock "/bin/slock"))))
+         (service screen-locker-service-type
+                  (screen-locker-configuration
+                   (name "xlock")
+                   (program (file-append xlockmore "/bin/xlock"))))
+
+         ;; Add udev rules for MTP devices so that non-root users can access
+         ;; them.
+         (simple-service 'mtp udev-service-type (list libmtp))
+         ;; Add udev rules and default backends for scanners.
+         (service sane-service-type)
+         ;; Add polkit rules, so that non-root users in the wheel group can
+         ;; perform administrative tasks (similar to "sudo").
+         polkit-wheel-service
+
+         ;; Allow desktop users to also mount NTFS and NFS file systems
+         ;; without root.
+         (simple-service 'mount-setuid-helpers privileged-program-service-type
+                         (map file-like->setuid-program
+                              (list (file-append nfs-utils "/sbin/mount.nfs")
+                               (file-append ntfs-3g "/sbin/mount.ntfs-3g"))))
+
+         ;; Add some of the artwork niceties for the desktop.
+         (simple-service 'guix-artwork
+                         profile-service-type
+                         %base-packages-artwork)
+
+         ;; This is a volatile read-write file system mounted at /var/lib/gdm,
+         ;; to avoid GDM stale cache and permission issues.
+         gdm-file-system-service
+
+         ;; Provides a nicer experience for VTE-using terminal emulators such
+         ;; as GNOME Console, Xfce Terminal, etc.
+         (service vte-integration-service-type)
+
+         ;; The global fontconfig cache directory can sometimes contain
+         ;; stale entries, possibly referencing fonts that have been GC'd,
+         ;; so mount it read-only.
+         fontconfig-file-system-service
+
+         ;; NetworkManager and its applet.
+         (service network-manager-service-type)
+         (service wpa-supplicant-service-type)    ;needed by NetworkManager
+         (simple-service 'network-manager-applet
+                         profile-service-type
+                         (list network-manager-applet))
+         (service modem-manager-service-type)
+         (service usb-modeswitch-service-type)
+
+         ;; The D-Bus clique.
+         (service avahi-service-type)
+         (service udisks-service-type)
+         (service upower-service-type)
+         (service accountsservice-service-type)
+         (service cups-pk-helper-service-type)
+         (service colord-service-type)
+         (service geoclue-service-type)
+         (service polkit-service-type)
+         (service elogind-service-type)
+         (service dbus-root-service-type)
+
+         (service ntp-service-type)
+
+         (service x11-socket-directory-service-type)
+
+
+
+         ;; %base-services
+
+         (service pulseaudio-service-type)
+         (service alsa-service-type)))
+
+
+
+
+
+(define* (feature-lotus-desktop-services
+          #:key
+          (default-desktop-system-services %rde-lotus-desktop-system-services)
+          (avahi avahi)
+          (dbus dbus)
+          (elogind elogind)
+          (geoclue geoclue)
+          (udisks udisks)
+          (upower upower))
+  "Provides desktop system services."
+  (ensure-pred file-like? avahi)
+  (ensure-pred file-like? dbus)
+  (ensure-pred file-like? elogind)
+  (ensure-pred file-like? geoclue)
+  (ensure-pred file-like? udisks)
+  (ensure-pred file-like? upower)
+
+  (define (get-home-services _)
+    (list (service home-dbus-service-type
+                   (home-dbus-configuration (dbus dbus)))))
+
+  (define (get-system-services _)
+    (cons*
+
+     (service gnome-desktop-service-type)
+
+     (service avahi-service-type
+              (avahi-configuration (avahi avahi)))
+     (service dbus-root-service-type
+              (dbus-configuration (dbus dbus)))
+     (service elogind-service-type
+              (elogind-configuration (elogind elogind)))
+     (service geoclue-service-type
+              (geoclue-configuration (geoclue geoclue)))
+     (service udisks-service-type
+              (udisks-configuration (udisks udisks)))
+     (service upower-service-type
+              (upower-configuration (upower upower)))
+     default-desktop-system-services))
+
+  (feature
+   (name 'desktop-services)
+   (values `((desktop-services . #t)
+             (elogind . ,elogind)
+             (dbus . ,dbus)))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
+
+
+
+
+
+
+
+
+
+
 
 ;; (get-value 'number-of-ttys cfg 6)
 ;; (make-feature-values scaling-factor console-font)
