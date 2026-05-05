@@ -439,7 +439,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
         fontconfig-file-system-service
 
         ;; NetworkManager and its applet.
-        (service network-manager-service-type)
+        ;; (service network-manager-service-type)
         (service wpa-supplicant-service-type)    ;needed by NetworkManager
         (simple-service 'network-manager-applet
                         profile-service-type
