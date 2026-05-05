@@ -456,7 +456,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
         (service colord-service-type)
         (service geoclue-service-type)
         (service polkit-service-type)
-        (service elogind-service-type)
+        ;; (service elogind-service-type)
         ;; (service dbus-root-service-type)
 
         (service ntp-service-type)
