@@ -131,14 +131,14 @@
         (feature-custom-services #:feature-name-prefix 'substitutes
                                  #:system-services
                                  (list
-                                  (service gdm-service-type
-                                           (gdm-configuration
-                                            (xorg-configuration
-                                             (xorg-configuration
-                                              (keyboard-layout (keyboard-layout "us" "altgr-intl"))))
-                                            (allow-empty-passwords? #t)
-                                            (auto-login?            #f)
-                                            (default-user           "s")))
+                                  ;; (service gdm-service-type
+                                  ;;          (gdm-configuration
+                                  ;;           (xorg-configuration
+                                  ;;            (xorg-configuration
+                                  ;;             (keyboard-layout (keyboard-layout "us" "altgr-intl"))))
+                                  ;;           (allow-empty-passwords? #t)
+                                  ;;           (auto-login?            #f)
+                                  ;;           (default-user           "s")))
                                   (simple-service 'guix-moe guix-service-type
                                                   (guix-extension (authorized-keys (list (plain-file "cuirass-genenetwork-org.pub"
                                                                                                      "(public-key (ecc (curve Ed25519) (q #11217788B41ADC8D5B8E71BD87EF699C65312EC387752899FE9C888856F5C769#)))")
