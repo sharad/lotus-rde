@@ -76,7 +76,8 @@
   #:use-module (lotus-rde features mfs)
   #:export (feature-login-shell
             ;; feature-lotus-users-group
-            feature-lotus-base-services))
+            feature-lotus-base-services
+            feature-lotus-desktop-services))
 ;; feature-file-database-services
 ;; feature-guix-publish-services
 ;; feature-schedular-services
