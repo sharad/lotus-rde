@@ -451,11 +451,17 @@ Defaults:%wheel env_keep+=TERMINFO")))))
         ;; (service avahi-service-type)
         ;; (service udisks-service-type)
         ;; (service upower-service-type)
-        (service accountsservice-service-type)
-        (service cups-pk-helper-service-type)
-        (service colord-service-type)
+
+
+        ;; (service accountsservice-service-type)
+        ;; (service cups-pk-helper-service-type)
+        ;; (service colord-service-type)
+
+
         ;; (service geoclue-service-type)
-        (service polkit-service-type)
+
+        ;; (service polkit-service-type)
+
         ;; (service elogind-service-type)
         ;; (service dbus-root-service-type)
 
