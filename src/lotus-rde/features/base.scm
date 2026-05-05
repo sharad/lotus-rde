@@ -450,7 +450,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
         ;; The D-Bus clique.
         (service avahi-service-type)
         (service udisks-service-type)
-        (service upower-service-type)
+        ;; (service upower-service-type)
         (service accountsservice-service-type)
         (service cups-pk-helper-service-type)
         (service colord-service-type)
