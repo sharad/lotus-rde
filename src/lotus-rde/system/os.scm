@@ -212,7 +212,7 @@
         (feature-shepherd)))
         ;; (feature-custom-services #:feature-name-prefix 'extra
         ;;                          #:system-services %desktop-services)
-        
+
 
 
 (define* (iron-lotus-machine-minimal hostname
