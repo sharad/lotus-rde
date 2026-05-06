@@ -82,7 +82,25 @@
             feature-lotus-base-services
             feature-lotus-desktop-services
             feature-logger-services
-            feature-loopback-services))
+            feature-loopback-services
+
+
+            feature-file-database-services
+            feature-guix-publish-services
+            feature-schedular-services
+            feature-unattended-upgrade-services
+            feature-disk-services
+            feature-privileged-programs-services
+            feature-messaging-services
+            feature-mail-services
+            feature-iio-sensor-proxy-services
+            feature-dnsmasq-services
+            feature-pointer-services
+            feature-bluetooth-services
+            feature-music-services
+            feature-printing-services
+            feature-security-services
+            feature-audit-services))
 ;; feature-file-database-services
 ;; feature-guix-publish-services
 ;; feature-schedular-services
