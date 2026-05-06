@@ -103,17 +103,6 @@
                              (custom-services #f)
                              (login-shell (file-append zsh "/bin/zsh")))
 
-  ;; (initrd-modules '("virtio.ko"
-  ;;                   "virtio_balloon.ko"
-  ;;                   "virtio_ring.ko"
-  ;;                   "virtio_blk.ko"
-  ;;                   "virtio_pci.ko"
-  ;;                   ;; https://issues.guix.gnu.org/31887
-  ;;                   "mptbase.ko"
-  ;;                   "mptscsih.ko"
-  ;;                   "mptspi.ko"
-  ;;                   "virtio_net.ko"))
-
   (list (feature-host-info #:host-name hostname
                            ;; #:locale    (operating-system-locale bare-bone-os)
                            ;; ls `guix build tzdata`/share/zoneinfo
