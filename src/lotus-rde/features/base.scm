@@ -195,9 +195,7 @@
                         (cons tty %default-console-font))
                       '("tty1" "tty2" "tty3" "tty4" "tty5" "tty6")))
 
-        ;; (service syslog-service-type)
-        ;; (service static-networking-service-type
-        ;;          (list %loopback-static-networking))
+        (service syslog-service-type)
 
         (service agetty-service-type (agetty-configuration
                                        (extra-options '("-L")) ; no carrier detect
@@ -218,8 +216,8 @@
         (service mingetty-service-type (mingetty-configuration
                                          (tty "tty6")))
 
-        ;; (service static-networking-service-type
-        ;;          (list %loopback-static-networking))
+        (service static-networking-service-type
+                 (list %loopback-static-networking))
         (service urandom-seed-service-type)
         (service guix-service-type)
         (service nscd-service-type)
@@ -291,6 +289,7 @@
 
   (define (get-base-system-services cfg)
     (append
+     base-system-services
      ;; (modify-services base-system-services
      ;;   (console-font-service-type
      ;;    config =>
@@ -403,7 +402,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   ;; keep SDDM on it for the time being.
   ;; XXX: When changing login manager, also change set-xorg-configuration
   (cons* (service gdm-service-type)
-
+         (service guix-service-type)
          ;; (service syslog-service-type)
          ;; (service static-networking-service-type
          ;;          (list %loopback-static-networking))

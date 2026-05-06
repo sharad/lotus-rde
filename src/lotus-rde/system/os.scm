@@ -132,10 +132,10 @@
                                                     ;; (service cloud-init-service-type)
                                                     (service openssh-service-type)))
 
-        (feature-logger-services)
-        (feature-loopback-services)
-        (feature-lotus-desktop-services)
+        ;; (feature-logger-services)
+        ;; (feature-loopback-services)
         (feature-lotus-base-services)
+        (feature-lotus-desktop-services)
         ;; (feature-zsh #:default-shell? #t)
         (feature-login-shell #:login-shell (file-append zsh "/bin/zsh"))
 
