@@ -119,23 +119,17 @@
        (simple-service
         'users-group
         account-service-type
-        (append
-         %base-user-accounts
-         %base-groups
-         (list
-          (user-group
+        (list
+         (user-group
            (name "users")
            (id 1000))
-          (user-account
+         (user-account
            (name "s")
            (uid 1000)
            (group "users")
            (home-directory "/home/s/hell")
            (shell (file-append zsh "/bin/zsh"))
-           (supplementary-groups '("wheel" "netdev" "audio" "video" "dialout")))))))))))
-
-
-
+           (supplementary-groups '("wheel" "netdev" "audio" "video" "dialout"))))))))))
 
 (define %lotus-rde-base-system-services1
   (list
@@ -331,7 +325,6 @@
      ;;     (rules (append
      ;;             udev-rules
      ;;             (udev-configuration-rules config))))))
-     (list)
      (list
       (simple-service
        'base-preserve-terminfo-variable
@@ -402,7 +395,6 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   ;; keep SDDM on it for the time being.
   ;; XXX: When changing login manager, also change set-xorg-configuration
   (cons* (service gdm-service-type)
-         (service guix-service-type)
          ;; (service syslog-service-type)
          ;; (service static-networking-service-type
          ;;          (list %loopback-static-networking))
