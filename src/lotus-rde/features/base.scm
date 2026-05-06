@@ -79,7 +79,9 @@
   #:export (feature-login-shell
             ;; feature-lotus-users-group
             feature-lotus-base-services
-            feature-lotus-desktop-services))
+            feature-lotus-desktop-services
+            feature-logger-services
+            feature-loopback-services))
 ;; feature-file-database-services
 ;; feature-guix-publish-services
 ;; feature-schedular-services
@@ -190,6 +192,9 @@
                       '("tty1" "tty2" "tty3" "tty4" "tty5" "tty6")))
 
         ;; (service syslog-service-type)
+        ;; (service static-networking-service-type
+        ;;          (list %loopback-static-networking))
+
         (service agetty-service-type (agetty-configuration
                                        (extra-options '("-L")) ; no carrier detect
                                        (term "vt100")
@@ -394,9 +399,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   ;; keep SDDM on it for the time being.
   ;; XXX: When changing login manager, also change set-xorg-configuration
   (cons* (service gdm-service-type)
-         (service syslog-service-type)
-         (service static-networking-service-type
-                  (list %loopback-static-networking))
+
+         ;; (service syslog-service-type)
+         ;; (service static-networking-service-type
+         ;;          (list %loopback-static-networking))
 
 
          ;; Screen lockers are a pretty useful thing and these are small.
@@ -533,6 +539,27 @@ Defaults:%wheel env_keep+=TERMINFO")))))
    (system-services-getter get-system-services)))
 
 
+(define (feature-logger-services)
+  (feature
+   (name 'logger-services)
+   (values `())
+   (home-services-getter (const '()))
+   (system-services-getter
+    (lambda (_)
+      (list (service syslog-service-type))))))
+
+
+
+
+(define (feature-loopback-services)
+  (feature
+   (name 'loopback)
+   (values `())
+   (home-services-getter (const '()))
+   (system-services-getter
+    (lambda (_)
+      (list (service static-networking-service-type
+                     (list %loopback-static-networking)))))))
 
 
 
