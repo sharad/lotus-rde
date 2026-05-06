@@ -110,7 +110,13 @@
    (name 'login-shell)
    (values (make-feature-values login-shell))))
 
-(define (feature-lotus-users-groups)
+(define* (feature-lotus-users-groups #:key
+                                     (uid 1000)
+                                     (gid 1000)
+                                     (group "users")
+                                     (home-directory "/home/s/hell")
+                                     (shell (file-append zsh "/bin/zsh"))
+                                     (supplementary-groups '("wheel" "netdev" "audio" "video" "dialout")))
   (feature
    (name 'users-group)
    (system-services-getter
@@ -121,15 +127,15 @@
         account-service-type
         (list
          (user-group
-           (name "users")
-           (id 1000))
+           (name group)
+           (id gid))
          (user-account
            (name "s")
-           (uid 1000)
-           (group "users")
-           (home-directory "/home/s/hell")
-           (shell (file-append zsh "/bin/zsh"))
-           (supplementary-groups '("wheel" "netdev" "audio" "video" "dialout"))))))))))
+           (uid uid)
+           (group group)
+           (home-directory home-directory)
+           (shell shell)
+           (supplementary-groups supplementary-groups)))))))))
 
 (define %lotus-rde-base-system-services1
   (list
