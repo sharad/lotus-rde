@@ -460,7 +460,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
          ;; (service geoclue-service-type)
          (service polkit-service-type)
-         (service elogind-service-type)
+         ;; (service elogind-service-type)
          (service dbus-root-service-type)
 
          (service ntp-service-type)
@@ -506,8 +506,8 @@ Defaults:%wheel env_keep+=TERMINFO")))))
               (avahi-configuration (avahi avahi)))
      ;; (service dbus-root-service-type
      ;;          (dbus-configuration (dbus dbus)))
-     ;; (service elogind-service-type
-     ;;          (elogind-configuration (elogind elogind)))
+     (service elogind-service-type
+              (elogind-configuration (elogind elogind)))
 
      (service geoclue-service-type
               (geoclue-configuration (geoclue geoclue)))
