@@ -110,26 +110,26 @@
    (name 'login-shell)
    (values (make-feature-values login-shell))))
 
-(define (feature-lotus-users-groups)
-  (feature
-   (name 'users-group)
-   (system-services-getter
-    (lambda (_)
-      (list
-       (simple-service
-        'users-group
-        account-service-type
-        (list
-         (user-group
-          (name "users")
-          (id 1000))
-         (user-account
-          (name "s")
-          (uid 1000)
-          (group "users")
-          (home-directory "/home/s/hell")
-          (shell (file-append zsh "/bin/zsh"))
-          (supplementary-groups '("wheel" "netdev" "audio" "video" "dialout"))))))))))
+;; (define (feature-lotus-users-groups)
+;;   (feature
+;;    (name 'users-group)
+;;    (system-services-getter
+;;     (lambda (_)
+;;       (list
+;;        (simple-service
+;;         'users-group
+;;         account-service-type
+;;         (list
+;;          (user-group
+;;           (name "users")
+;;           (id 1000))
+;;          (user-account
+;;           (name "s")
+;;           (uid 1000)
+;;           (group "users")
+;;           (home-directory "/home/s/hell")
+;;           (shell (file-append zsh "/bin/zsh"))
+;;           (supplementary-groups '("wheel" "netdev" "audio" "video" "dialout"))))))))))
 
 
 
