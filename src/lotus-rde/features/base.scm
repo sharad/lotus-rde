@@ -449,7 +449,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
          ;; The D-Bus clique.
          ;; (service avahi-service-type)
-         (service udisks-service-type)
+         ;; (service udisks-service-type)
          (service upower-service-type)
 
 
@@ -511,8 +511,8 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
      ;; (service geoclue-service-type
      ;;          (geoclue-configuration (geoclue geoclue)))
-     ;; (service udisks-service-type
-     ;;          (udisks-configuration (udisks udisks)))
+     (service udisks-service-type
+              (udisks-configuration (udisks udisks)))
 
      ;; (service upower-service-type
      ;;          (upower-configuration (upower upower)))
