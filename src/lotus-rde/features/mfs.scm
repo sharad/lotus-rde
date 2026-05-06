@@ -19,61 +19,6 @@
   #:export (feature-mapped-file-systems))
 
 
-
-
-
-;; (define %local-host-name "komputilo")
-;; (define %local-default-realm  '((#:default #f)
-;;                                 (#:realms)))
-
-
-;; (define %local-disk-serial-id          "CHANGEIT")
-;; (define %local-disk-prefix             "vds")
-;; (define %local-disk-suffix-seq         01)
-;; (define %local-fs-check? #t)
-
-;; (define (build-local-disk-serial-id)
-;;   %local-disk-serial-id)
-
-
-
-
-;; ;; http://www.shido.info/lisp/scheme_syntax_e.html
-;; (define-syntax base-system-value
-;;   (syntax-rules ()
-;;     ((_ local alternate)
-;;      (if (not %lotus-system-init) local alternate))))
-
-;; (define-syntax nongnu-system-value
-;;   (syntax-rules ()
-;;     ((_ local alternat)
-;;      (if (and %lotus-use-nongnu
-;;               (not %lotus-system-init))
-;;          local alternat))))
-
-
-
-;; Functions
-;; (define (local-authorized-guix-keys-local-to-etc-config-file etc-subdir local-dir)
-;;   (let ((currdir (string-append (dirname (current-filename)) "/")))
-;;     (if (file-exists? (string-append currdir local-dir "/"))
-;;         (map (lambda (f)
-;;                (list (string-append etc-subdir "/" (substring f (string-length currdir)))
-;;                      (local-file f)))
-;;              (find-files (string-append currdir local-dir "/")
-;;                          ".pub"))
-;;         '())))
-
-;; (define (local-authorized-guix-keys dir)
-;;   (if (file-exists? dir)
-;;       (map (lambda (f) (local-file f))
-;;            (find-files (string-append dir "/")
-;;                        ".pub"))
-;;       '()))
-
-
-
-
 (define (open-lvm-device source targets)
   ;; BUG: Fix using https://github.com/Webconverger/webc/blob/1164d83512305d49a8c3dc37b5d26e2d4dd84204/usr/share/initramfs-tools/scripts/init-top/udev
   "Return a gexp that maps SOURCES to TARGETSS as a LVM device, using

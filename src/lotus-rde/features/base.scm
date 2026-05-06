@@ -394,64 +394,64 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   ;; FIXME: Since GDM depends on more dependencies that do not build on i686,
   ;; keep SDDM on it for the time being.
   ;; XXX: When changing login manager, also change set-xorg-configuration
-  (cons* (service gdm-service-type)
+  (list (service gdm-service-type)
          ;; (service syslog-service-type)
          ;; (service static-networking-service-type
          ;;          (list %loopback-static-networking))
 
 
          ;; Screen lockers are a pretty useful thing and these are small.
-         (service screen-locker-service-type
-                  (screen-locker-configuration
-                   (name "slock")
-                   (program (file-append slock "/bin/slock"))))
-         (service screen-locker-service-type
-                  (screen-locker-configuration
-                   (name "xlock")
-                   (program (file-append xlockmore "/bin/xlock"))))
+        (service screen-locker-service-type
+                 (screen-locker-configuration
+                  (name "slock")
+                  (program (file-append slock "/bin/slock"))))
+        (service screen-locker-service-type
+                 (screen-locker-configuration
+                  (name "xlock")
+                  (program (file-append xlockmore "/bin/xlock"))))
 
          ;; Add udev rules for MTP devices so that non-root users can access
          ;; them.
-         (simple-service 'mtp udev-service-type (list libmtp))
+        (simple-service 'mtp udev-service-type (list libmtp))
          ;; Add udev rules and default backends for scanners.
-         (service sane-service-type)
+        (service sane-service-type)
          ;; Add polkit rules, so that non-root users in the wheel group can
          ;; perform administrative tasks (similar to "sudo").
-         polkit-wheel-service
+        polkit-wheel-service
 
          ;; Allow desktop users to also mount NTFS and NFS file systems
          ;; without root.
-         (simple-service 'mount-setuid-helpers privileged-program-service-type
-                         (map file-like->setuid-program
-                              (list (file-append nfs-utils "/sbin/mount.nfs")
-                                    (file-append ntfs-3g "/sbin/mount.ntfs-3g"))))
+        (simple-service 'mount-setuid-helpers privileged-program-service-type
+                        (map file-like->setuid-program
+                             (list (file-append nfs-utils "/sbin/mount.nfs")
+                                   (file-append ntfs-3g "/sbin/mount.ntfs-3g"))))
 
          ;; Add some of the artwork niceties for the desktop.
-         (simple-service 'guix-artwork
-                         profile-service-type
-                         %base-packages-artwork)
+        (simple-service 'guix-artwork
+                        profile-service-type
+                        %base-packages-artwork)
 
          ;; This is a volatile read-write file system mounted at /var/lib/gdm,
          ;; to avoid GDM stale cache and permission issues.
-         gdm-file-system-service
+        gdm-file-system-service
 
          ;; Provides a nicer experience for VTE-using terminal emulators such
          ;; as GNOME Console, Xfce Terminal, etc.
-         (service vte-integration-service-type)
+        (service vte-integration-service-type)
 
          ;; The global fontconfig cache directory can sometimes contain
          ;; stale entries, possibly referencing fonts that have been GC'd,
          ;; so mount it read-only.
-         fontconfig-file-system-service
+        fontconfig-file-system-service
 
          ;; NetworkManager and its applet.
-         (service network-manager-service-type)
-         (service wpa-supplicant-service-type)    ;needed by NetworkManager
-         (simple-service 'network-manager-applet
-                         profile-service-type
-                         (list network-manager-applet))
-         (service modem-manager-service-type)
-         (service usb-modeswitch-service-type)
+        (service network-manager-service-type)
+        (service wpa-supplicant-service-type)    ;needed by NetworkManager
+        (simple-service 'network-manager-applet
+                        profile-service-type
+                        (list network-manager-applet))
+        (service modem-manager-service-type)
+        (service usb-modeswitch-service-type)
 
          ;; The D-Bus clique.
          ;; (service avahi-service-type)
@@ -459,28 +459,25 @@ Defaults:%wheel env_keep+=TERMINFO")))))
          ;; (service upower-service-type)
 
 
-         (service accountsservice-service-type)
-         (service cups-pk-helper-service-type)
-         (service colord-service-type)
+        (service accountsservice-service-type)
+        (service cups-pk-helper-service-type)
+        (service colord-service-type)
 
 
          ;; (service geoclue-service-type)
-         (service polkit-service-type)
+        (service polkit-service-type)
          ;; (service elogind-service-type)
          ;; (service dbus-root-service-type)
 
-         (service ntp-service-type)
+        (service ntp-service-type)
 
-         (service x11-socket-directory-service-type)
-
-
+        (service x11-socket-directory-service-type)
 
          ;; %base-services
 
-         (service pulseaudio-service-type)
-         (service alsa-service-type)
+        (service pulseaudio-service-type)
+        (service alsa-service-type)))
          ;; %lotus-rde-base-system-services
-         (list)))
 
 (define* (feature-lotus-desktop-services
           #:key
@@ -542,8 +539,6 @@ Defaults:%wheel env_keep+=TERMINFO")))))
    (system-services-getter
     (lambda (_)
       (list (service syslog-service-type))))))
-
-
 
 
 (define (feature-loopback-services)
