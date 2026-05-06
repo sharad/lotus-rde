@@ -439,7 +439,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
          fontconfig-file-system-service
 
          ;; NetworkManager and its applet.
-         ;; (service network-manager-service-type)
+         (service network-manager-service-type)
          (service wpa-supplicant-service-type)    ;needed by NetworkManager
          (simple-service 'network-manager-applet
                          profile-service-type
@@ -448,9 +448,9 @@ Defaults:%wheel env_keep+=TERMINFO")))))
          (service usb-modeswitch-service-type)
 
          ;; The D-Bus clique.
-         ;; (service avahi-service-type)
-         ;; (service udisks-service-type)
-         ;; (service upower-service-type)
+         (service avahi-service-type)
+         (service udisks-service-type)
+         (service upower-service-type)
 
 
          (service accountsservice-service-type)
@@ -458,10 +458,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
          (service colord-service-type)
 
 
-         ;; (service geoclue-service-type)
+         (service geoclue-service-type)
          (service polkit-service-type)
-         ;; (service elogind-service-type)
-         ;; (service dbus-root-service-type)
+         (service elogind-service-type)
+         (service dbus-root-service-type)
 
          (service ntp-service-type)
 
@@ -478,6 +478,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 (define* (feature-lotus-desktop-services
           #:key
           (default-desktop-system-services %rde-lotus-desktop-system-services)
+          ;; (default-desktop-system-services %desktop-services)
           (avahi avahi)
           (dbus dbus)
           (elogind elogind)
@@ -499,20 +500,22 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-system-services _)
     (cons*
 
-     ;; (service gnome-desktop-service-type)
+     (service gnome-desktop-service-type)
 
-     (service avahi-service-type
-              (avahi-configuration (avahi avahi)))
-     (service dbus-root-service-type
-              (dbus-configuration (dbus dbus)))
-     (service elogind-service-type
-              (elogind-configuration (elogind elogind)))
-     (service geoclue-service-type
-              (geoclue-configuration (geoclue geoclue)))
-     (service udisks-service-type
-              (udisks-configuration (udisks udisks)))
-     (service upower-service-type
-              (upower-configuration (upower upower)))
+     ;; (service avahi-service-type
+     ;;          (avahi-configuration (avahi avahi)))
+     ;; (service dbus-root-service-type
+     ;;          (dbus-configuration (dbus dbus)))
+     ;; (service elogind-service-type
+     ;;          (elogind-configuration (elogind elogind)))
+
+     ;; (service geoclue-service-type
+     ;;          (geoclue-configuration (geoclue geoclue)))
+     ;; (service udisks-service-type
+     ;;          (udisks-configuration (udisks udisks)))
+
+     ;; (service upower-service-type
+     ;;          (upower-configuration (upower upower)))
      default-desktop-system-services))
 
   (feature

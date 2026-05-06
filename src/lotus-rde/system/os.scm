@@ -10,6 +10,7 @@
   #:use-module (gnu services base)
   #:use-module (gnu services ssh)
   #:use-module (gnu services xorg)
+  #:use-module (gnu services desktop)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
   #:use-module (gnu packages base)
@@ -196,8 +197,11 @@
         ;; (feature-guix-services)
         ;; (feature-desktop-manager-service)
         ;; (feature-pulseaudio-service)
-        (feature-networking #:mdns? #t)
+
+        ;; (feature-networking #:mdns? #t)
         (feature-shepherd)
+        ;; (feature-custom-services #:feature-name-prefix 'extra
+        ;;                          #:system-services %desktop-services)
         (feature-custom-services #:feature-name-prefix 'openssh-server-extra
                                  #:system-services (list
                                                     ;; (service dhcp-client-service-type)
