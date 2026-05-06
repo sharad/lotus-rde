@@ -122,9 +122,17 @@
         ;;                        #:guix-authorized-keys '())
 
         ;; (feature-users-group)
-        ;; (feature-lotus-base-services)
         (feature-base-packages #:system-packages
                                (apply strings->packages %lotus-system-packages))
+
+        (feature-custom-services #:feature-name-prefix 'openssh-server-extra
+                                 #:system-services (list
+                                                    ;; (service dhcp-client-service-type)
+                                                    ;; (service network-manager-service-type)
+                                                    ;; (service cloud-init-service-type)
+                                                    (service openssh-service-type)))
+
+        (feature-lotus-base-services)
         (feature-lotus-desktop-services)
         ;; (feature-zsh #:default-shell? #t)
         (feature-login-shell #:login-shell (file-append zsh "/bin/zsh"))
@@ -199,15 +207,10 @@
         ;; (feature-pulseaudio-service)
 
         ;; (feature-networking #:mdns? #t)
-        (feature-shepherd)
+        (feature-shepherd)))
         ;; (feature-custom-services #:feature-name-prefix 'extra
         ;;                          #:system-services %desktop-services)
-        (feature-custom-services #:feature-name-prefix 'openssh-server-extra
-                                 #:system-services (list
-                                                    ;; (service dhcp-client-service-type)
-                                                    ;; (service network-manager-service-type)
-                                                    ;; (service cloud-init-service-type)
-                                                    (service openssh-service-type)))))
+        
 
 
 (define* (iron-lotus-machine-minimal hostname

@@ -189,7 +189,7 @@
                         (cons tty %default-console-font))
                       '("tty1" "tty2" "tty3" "tty4" "tty5" "tty6")))
 
-        (service syslog-service-type)
+        ;; (service syslog-service-type)
         (service agetty-service-type (agetty-configuration
                                        (extra-options '("-L")) ; no carrier detect
                                        (term "vt100")
@@ -209,8 +209,8 @@
         (service mingetty-service-type (mingetty-configuration
                                          (tty "tty6")))
 
-        (service static-networking-service-type
-                 (list %loopback-static-networking))
+        ;; (service static-networking-service-type
+        ;;          (list %loopback-static-networking))
         (service urandom-seed-service-type)
         (service guix-service-type)
         (service nscd-service-type)
@@ -282,47 +282,48 @@
 
   (define (get-base-system-services cfg)
     (append
-     (modify-services base-system-services
-       (console-font-service-type
-        config =>
-        (map (lambda (x)
-               (cons
-                (format #f "tty~a" x)
-                (get-value 'console-font cfg "LatGrkCyr-8x16")))
-             (iota (get-value 'number-of-ttys cfg 6) 1)))
-       (guix-service-type
-        config =>
-        (guix-configuration
-         (inherit config)
-         (privileged? guix-daemon-privileged?)
-         (extra-options guix-daemon-extra-options)
-         (http-proxy guix-http-proxy)))
-       ;; (greetd-service-type
-       ;;  config =>
-       ;;  (greetd-configuration
-       ;;   (terminals
-       ;;    (map (lambda (x)
-       ;;           (greetd-terminal-configuration
-       ;;            (terminal-vt (number->string x))
-       ;;            (terminal-switch #t)
-       ;;            (default-session-command
-       ;;              #~(string-append #$shadow "/bin/login"))))
-       ;;         (iota (get-value 'number-of-ttys cfg 5) 2)))))
-       ;; (greetd-service-type
-       ;;  config =>
-       ;;  (greetd-configuration
-       ;;   (terminals
-       ;;    (map (lambda (x)
-       ;;           (greetd-terminal-configuration
-       ;;            (terminal-vt (number->string x))))
-       ;;         (iota 6 1)))))
-       (udev-service-type
-        config =>
-        (udev-configuration
-         (inherit config)
-         (rules (append
-                 udev-rules
-                 (udev-configuration-rules config))))))
+     ;; (modify-services base-system-services
+     ;;   (console-font-service-type
+     ;;    config =>
+     ;;    (map (lambda (x)
+     ;;           (cons
+     ;;            (format #f "tty~a" x)
+     ;;            (get-value 'console-font cfg "LatGrkCyr-8x16")))
+     ;;         (iota (get-value 'number-of-ttys cfg 6) 1)))
+     ;;   (guix-service-type
+     ;;    config =>
+     ;;    (guix-configuration
+     ;;     (inherit config)
+     ;;     (privileged? guix-daemon-privileged?)
+     ;;     (extra-options guix-daemon-extra-options)
+     ;;     (http-proxy guix-http-proxy)))
+     ;;   ;; (greetd-service-type
+     ;;   ;;  config =>
+     ;;   ;;  (greetd-configuration
+     ;;   ;;   (terminals
+     ;;   ;;    (map (lambda (x)
+     ;;   ;;           (greetd-terminal-configuration
+     ;;   ;;            (terminal-vt (number->string x))
+     ;;   ;;            (terminal-switch #t)
+     ;;   ;;            (default-session-command
+     ;;   ;;              #~(string-append #$shadow "/bin/login"))))
+     ;;   ;;         (iota (get-value 'number-of-ttys cfg 5) 2)))))
+     ;;   ;; (greetd-service-type
+     ;;   ;;  config =>
+     ;;   ;;  (greetd-configuration
+     ;;   ;;   (terminals
+     ;;   ;;    (map (lambda (x)
+     ;;   ;;           (greetd-terminal-configuration
+     ;;   ;;            (terminal-vt (number->string x))))
+     ;;   ;;         (iota 6 1)))))
+     ;;   (udev-service-type
+     ;;    config =>
+     ;;    (udev-configuration
+     ;;     (inherit config)
+     ;;     (rules (append
+     ;;             udev-rules
+     ;;             (udev-configuration-rules config))))))
+     (list)
      (list
       (simple-service
        'base-preserve-terminfo-variable
@@ -344,44 +345,44 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
 
 
-(define %rde-from-rde-desktop-system-services
-  (list
-   ;; Add udev rules for MTP devices so that non-root users can access
-   ;; them.
-   (simple-service 'mtp udev-service-type (list libmtp))
-   ;; Add udev rules for scanners.
-   (service sane-service-type)
-   ;; Add polkti rules, so that non-root users in the wheel group can
-   ;; perform administrative tasks (similar to "sudo").
-   ;; polkit-wheel-service
+;; (define %rde-from-rde-desktop-system-services
+;;   (list
+;;    ;; Add udev rules for MTP devices so that non-root users can access
+;;    ;; them.
+;;    (simple-service 'mtp udev-service-type (list libmtp))
+;;    ;; Add udev rules for scanners.
+;;    (service sane-service-type)
+;;    ;; Add polkti rules, so that non-root users in the wheel group can
+;;    ;; perform administrative tasks (similar to "sudo").
+;;    ;; polkit-wheel-service
 
-   ;; Allow desktop users to also mount NTFS and NFS file systems
-   ;; without root.
-   (simple-service
-    'mount-setuid-helpers
-    privileged-program-service-type
-    (map (lambda (program)
-           (setuid-program
-            (program program)))
-         (list (file-append nfs-utils "/sbin/mount.nfs")
-               (file-append ntfs-3g "/sbin/mount.ntfs-3g"))))
+;;    ;; Allow desktop users to also mount NTFS and NFS file systems
+;;    ;; without root.
+;;    (simple-service
+;;     'mount-setuid-helpers
+;;     privileged-program-service-type
+;;     (map (lambda (program)
+;;            (setuid-program
+;;             (program program)))
+;;          (list (file-append nfs-utils "/sbin/mount.nfs")
+;;                (file-append ntfs-3g "/sbin/mount.ntfs-3g"))))
 
-   ;; The global fontconfig cache directory can sometimes contain
-   ;; stale entries, possibly referencing fonts that have been GC'd,
-   ;; so mount it read-only.
-   (simple-service 'fontconfig-file-system
-                   file-system-service-type
-                   (list %fontconfig-file-system))
+;;    ;; The global fontconfig cache directory can sometimes contain
+;;    ;; stale entries, possibly referencing fonts that have been GC'd,
+;;    ;; so mount it read-only.
+;;    (simple-service 'fontconfig-file-system
+;;                    file-system-service-type
+;;                    (list %fontconfig-file-system))
 
 
-   ;; The D-Bus clique.
-   (service accountsservice-service-type)
-   (service cups-pk-helper-service-type)
-   (service colord-service-type)
+;;    ;; The D-Bus clique.
+;;    (service accountsservice-service-type)
+;;    (service cups-pk-helper-service-type)
+;;    (service colord-service-type)
 
-   (service ntp-service-type)
+;;    (service ntp-service-type)
 
-   (service x11-socket-directory-service-type)))
+;;    (service x11-socket-directory-service-type)))
 
 
 (define %rde-lotus-desktop-system-services
@@ -393,6 +394,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   ;; keep SDDM on it for the time being.
   ;; XXX: When changing login manager, also change set-xorg-configuration
   (cons* (service gdm-service-type)
+         (service syslog-service-type)
+         (service static-networking-service-type
+                  (list %loopback-static-networking))
+
 
          ;; Screen lockers are a pretty useful thing and these are small.
          (service screen-locker-service-type
@@ -473,7 +478,8 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
          (service pulseaudio-service-type)
          (service alsa-service-type)
-         %lotus-rde-base-system-services))
+         ;; %lotus-rde-base-system-services
+         (list)))
 
 (define* (feature-lotus-desktop-services
           #:key
