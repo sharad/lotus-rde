@@ -458,7 +458,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
          (service colord-service-type)
 
 
-         (service geoclue-service-type)
+         ;; (service geoclue-service-type)
          (service polkit-service-type)
          (service elogind-service-type)
          (service dbus-root-service-type)
@@ -509,8 +509,8 @@ Defaults:%wheel env_keep+=TERMINFO")))))
      ;; (service elogind-service-type
      ;;          (elogind-configuration (elogind elogind)))
 
-     ;; (service geoclue-service-type
-     ;;          (geoclue-configuration (geoclue geoclue)))
+     (service geoclue-service-type
+              (geoclue-configuration (geoclue geoclue)))
      (service udisks-service-type
               (udisks-configuration (udisks udisks)))
 
