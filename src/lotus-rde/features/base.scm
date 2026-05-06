@@ -448,7 +448,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
          (service usb-modeswitch-service-type)
 
          ;; The D-Bus clique.
-         (service avahi-service-type)
+         ;; (service avahi-service-type)
          (service udisks-service-type)
          (service upower-service-type)
 
@@ -502,8 +502,8 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
      (service gnome-desktop-service-type)
 
-     ;; (service avahi-service-type
-     ;;          (avahi-configuration (avahi avahi)))
+     (service avahi-service-type
+              (avahi-configuration (avahi avahi)))
      ;; (service dbus-root-service-type
      ;;          (dbus-configuration (dbus dbus)))
      ;; (service elogind-service-type
