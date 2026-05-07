@@ -67,6 +67,7 @@
   #:use-module (gnu packages shells)
   #:use-module (gnu packages suckless)
   #:use-module (gnu packages xdisorg)
+  #:use-module (gnu packages idutils)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
   #:use-module (rde predicates)
