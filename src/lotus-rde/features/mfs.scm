@@ -438,75 +438,75 @@
                                                      (build-target "guix" "swap"))))))))
 
 
-;; (define* (lotus-devfs-volumes volume-mappings
-;;                               #:key
-;;                               ;; lotus-lvm-dev-fs-builders
-;;                               (fs-root #f)
-;;                               (disk-serial-id "CHANGEIT")
-;;                               (disk-prefix "vds")
-;;                               (disk-suffix-seq 0))
+(define* (lotus-devfs-volumes volume-mappings
+                              #:key
+                              ;; lotus-lvm-dev-fs-builders
+                              (fs-root #f)
+                              (disk-serial-id "CHANGEIT")
+                              (disk-prefix "vds")
+                              (disk-suffix-seq 0))
 
-;;   (define (normalize-mapping entry)
-;;     (match entry
-;;       ;; fully explicit
-;;       (((? string? serial)
-;;         ((((? string? vg) (? string? lv)) ((? string? vgroup) (? string? lvol))) ...)
-;;         rest ...)
-;;        (apply
-;;         (lambda* (#:key
-;;                   (prefix "vds")
-;;                   (seq 0))
-;;           (list serial
-;;                 vg
-;;                 lv
-;;                 vgroup
-;;                 lvol
-;;                 prefix seq))
-;;         rest))
-;;       (((? string? serial)
-;;         ((((? string? vg) (? string? lv))) ...)
-;;         rest ...)
-;;        (apply
-;;         (lambda* (#:key
-;;                   (prefix "vds")
-;;                   (seq 0))
-;;           (list serial
-;;                 vg
-;;                 lv
-;;                 vgroup
-;;                 lvol
-;;                 prefix seq))
-;;         rest))))
+  (define (normalize-mapping entry)
+    (match entry
+      ;; fully explicit
+      (((? string? serial)
+        ((((? string? vg) (? string? lv)) ((? string? vgroup) (? string? lvol))) ...)
+        rest ...)
+       (apply
+        (lambda* (#:key
+                  (prefix "vds")
+                  (seq 0))
+          (list serial
+                vg
+                lv
+                vgroup
+                lvol
+                prefix seq))
+        rest))
+      (((? string? serial)
+        ((((? string? vg) (? string? lv))) ...)
+        rest ...)
+       (apply
+        (lambda* (#:key
+                  (prefix "vds")
+                  (seq 0))
+          (list serial
+                vg
+                lv
+                vgroup
+                lvol
+                prefix seq))
+        rest))))
 
 
 
-;;   (let ((devices '())
-;;         (filesystems '()))
-;;     (for-each
-;;      (match-lambda
-;;        (serial vg-list lv-list vgrp-list lvol-list (? string? prefix) (? number? seq))
-;;        (begin
-;;          (let-values (((build-md build-fs _x _y) (lotus-lvm-dev-fs-builders (lambda () serial)
-;;                                                                             #:prefix (lambda () prefix)
-;;                                                                             #:suffix-seq (lambda () seq))))
-;;            (map (lambda (vg lv vgroup lvol)
-;;                   (format #t "Mapping: serial=~a, vg=~a, lv=~a, vgroup=~a, lvol=~a, prefix=~a, seq=~a~%"
-;;                           serial vg lv vgroup lvol prefix seq)
-;;                   (let* ((md     (build-md vg lv))
-;;                          (fs     (build-fs (string-append "/" vg "/" lv) vg lv
-;;                                              #:suffix-seq          seq
-;;                                              #:check?              #t ;; (lambda () (fs-check? fs))
-;;                                              #:mount?              #t ;; (lambda () (fs-mount? fs))
-;;                                              #:create-mount-point? #t
-;;                                              #:needed-for-boot?    #f
-;;                                              #:dependencies        (append (list md)
-;;                                                                            (if fs-root
-;;                                                                                (list fs-root)
-;;                                                                                (list))))))
-;;                     (list md fs)))
-;;                 vg-list lv-list vgrp-list lvol-list))))
-;;      (map normalize-mapping
-;;           volume-mappings))))
+  (let ((devices '())
+        (filesystems '()))
+    (for-each
+     (match-lambda
+       (serial vg-list lv-list vgrp-list lvol-list (? string? prefix) (? number? seq))
+       (begin
+         (let-values (((build-md build-fs _x _y) (lotus-lvm-dev-fs-builders (lambda () serial)
+                                                                            #:prefix (lambda () prefix)
+                                                                            #:suffix-seq (lambda () seq))))
+           (map (lambda (vg lv vgroup lvol)
+                  (format #t "Mapping: serial=~a, vg=~a, lv=~a, vgroup=~a, lvol=~a, prefix=~a, seq=~a~%"
+                          serial vg lv vgroup lvol prefix seq)
+                  (let* ((md     (build-md vg lv))
+                         (fs     (build-fs (string-append "/" vg "/" lv) vg lv
+                                             #:suffix-seq          seq
+                                             #:check?              #t ;; (lambda () (fs-check? fs))
+                                             #:mount?              #t ;; (lambda () (fs-mount? fs))
+                                             #:create-mount-point? #t
+                                             #:needed-for-boot?    #f
+                                             #:dependencies        (append (list md)
+                                                                           (if fs-root
+                                                                               (list fs-root)
+                                                                               (list))))))
+                    (list md fs)))
+                vg-list lv-list vgrp-list lvol-list))))
+     (map normalize-mapping
+          volume-mappings))))
 
 
 
@@ -549,40 +549,40 @@
                           #:user-pam-file-systems '())))
 
 
-;; (define* (feature-extra-mapped-file-systems
-;;           #:key
-;;           (rootfs #f)
-;;           (disk-serial-id-system "aaaa"))
-;;   (let*-values (((devices fs) (lotus-devfs-system #:disk-serial-id disk-serial-id-system
-;;                                                   #:fs-boot-efi-partition fs-boot-efi-partition)))
-;;     ;; (assert (list? sys-devices) "sys-devices not list")
+(define* (feature-extra-mapped-file-systems
+          #:key
+          (rootfs #f)
+          (disk-serial-id-system "aaaa"))
+  (let*-values (((devices fs) (lotus-devfs-system #:disk-serial-id disk-serial-id-system
+                                                  #:fs-boot-efi-partition fs-boot-efi-partition)))
+    ;; (assert (list? sys-devices) "sys-devices not list")
 
-;;     ;; (assert (list? home-devices) "home-devices not list")
-;;     ;; (assert (list? sys-fs) "sys-fs not list")
-;;     ;; (assert (list? home-fs) "home-fs not list")
-;;     ;; (for-each (lambda (x)
-;;     ;;             (assert x "sys-device contains #f"))
-;;     ;;           sys-devices)
-;;     ;; (for-each (lambda (x)
-;;     ;;             (assert x "home-device contains #f"))
-;;     ;;           home-devices)
-;;     ;; (for-each (lambda (x)
-;;     ;;             (assert x "sys-fs contains #f"))
-;;     ;;           sys-fs)
-;;     ;; (for-each (lambda (x)
-;;     ;;             (assert x "home-fs contains #f"))
-;;     ;;           home-fs)
+    ;; (assert (list? home-devices) "home-devices not list")
+    ;; (assert (list? sys-fs) "sys-fs not list")
+    ;; (assert (list? home-fs) "home-fs not list")
+    ;; (for-each (lambda (x)
+    ;;             (assert x "sys-device contains #f"))
+    ;;           sys-devices)
+    ;; (for-each (lambda (x)
+    ;;             (assert x "home-device contains #f"))
+    ;;           home-devices)
+    ;; (for-each (lambda (x)
+    ;;             (assert x "sys-fs contains #f"))
+    ;;           sys-fs)
+    ;; (for-each (lambda (x)
+    ;;             (assert x "home-fs contains #f"))
+    ;;           home-fs)
 
-;;     ;; (display "Home devices: ")
-;;     ;; (display home-devices)
-;;     ;; (newline)
+    ;; (display "Home devices: ")
+    ;; (display home-devices)
+    ;; (newline)
 
-;;     (feature-file-systems #:mapped-devices (append devices
-;;                                                    devices)
-;;                           #:file-systems (append sys-fs
-;;                                                  home-fs)
-;;                           #:swap-devices swap-devices
-;;                           #:user-pam-file-systems '())))
+    (feature-file-systems #:mapped-devices (append devices
+                                                   devices)
+                          #:file-systems (append sys-fs
+                                                 home-fs)
+                          #:swap-devices swap-devices
+                          #:user-pam-file-systems '())))
 
 
 
