@@ -582,15 +582,6 @@ Defaults:%wheel env_keep+=TERMINFO")))))
       (list (service static-networking-service-type
                      (list %loopback-static-networking)))))))
 
-
-
-
-(define %lotus-heavy-wm-services (list (service gnome-desktop-service-type)
-                                       (service xfce-desktop-service-type)
-                                       (service mate-desktop-service-type)
-                                       (service enlightenment-desktop-service-type)))
-
-
 (define* (feature-gnome-desktop-services
           #:key
           (gnome gnome))
@@ -748,7 +739,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
     (let ((jobs (or jobs (list updatedb-job garbage-collector-job idutils-job))))
       (cons*
        (service mcron-service-type
