@@ -1,3 +1,5 @@
 stale/**
 .nrepl-port
 .cow-store-start
+rf
+guix

@@ -528,7 +528,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-system-services _)
     (cons*
 
-     (service gnome-desktop-service-type)
+     ;; (service gnome-desktop-service-type)
 
      (service avahi-service-type
               (avahi-configuration (avahi avahi)))
@@ -578,9 +578,83 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
 
 
+(define %lotus-heavy-wm-services (list (service gnome-desktop-service-type)
+                                       (service xfce-desktop-service-type)
+                                       (service mate-desktop-service-type)
+                                       (service enlightenment-desktop-service-type)))
 
 
+(define* (feature-gnome-desktop-services
+          #:key
+          (gnome gnome))
+  (define (get-home-services _)
+    (cons*))
 
+  (define (get-system-services _)
+    (list
+     (service gnome-desktop-service-type
+              (gnome-desktop-configuration
+                (gnome gnome)))))
+
+  (feature
+   (name 'gnome-desktop-services)
+   (values `((gnome-desktop . ,gnome)))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
+
+
+(define* (feature-xfce-desktop-services
+          #:key
+          (xfce xfce))
+  (define (get-home-services _)
+    (cons*))
+
+  (define (get-system-services _)
+    (list
+     (service xfce-desktop-service-type
+              (xfce-desktop-configuration
+               (xfce xfce)))))
+  (feature
+   (name 'xfce-desktop-services)
+   (values `((xfce-desktop . ,xfce)))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
+
+
+(define* (feature-mate-desktop-services
+          #:key
+          (mate mate))
+  (define (get-home-services _)
+    (cons*))
+
+  (define (get-system-services _)
+    (list
+     (service mate-desktop-service-type
+              (mate-desktop-configuration
+                (mate mate)))))
+  (feature
+   (name 'mate-desktop-services)
+   (values `((mate-desktop . ,mate)))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
+
+
+(define* (feature-enlightenment-desktop-services
+          #:key
+          (enlightenment enlightenment))
+  (define (get-home-services _)
+    (cons*))
+
+  (define (get-system-services _)
+    (list
+     (service enlightenment-desktop-service-type
+              (enlightenment-desktop-configuration
+                (enlightenment enlightenment)))))
+  (feature
+   (name 'enlightenment-desktop-services)
+   (values `((enlightenment-desktop . ,enlightenment)))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 
 ;; (get-value 'number-of-ttys cfg 6)
