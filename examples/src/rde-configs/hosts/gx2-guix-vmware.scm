@@ -13,16 +13,11 @@
                                                                      #:firmware (list linux-firmware)
                                                                      #:disk-serial-id-system "vmware"
                                                                      #:disk-serial-id-home "vmware"
-                                                                     #:initrd-modules '("virtio.ko"
-                                                                                        "virtio_balloon.ko"
-                                                                                        "virtio_ring.ko"
-                                                                                        "virtio_blk.ko"
-                                                                                        "virtio_pci.ko"
-                                                                                        ;; https://issues.guix.gnu.org/31887
-                                                                                        "mptbase.ko"
-                                                                                        "mptscsih.ko"
-                                                                                        "mptspi.ko"
-                                                                                        "virtio_net.ko")
+                                                                     #:initrd-modules (list "mptbase"
+                                                                                            "mptscsih"
+                                                                                            "mptspi"
+                                                                                            "virtio_net"
+                                                                                            "vmwgfx")
                                                                      #:fs-boot-efi-partition (uuid "4D78-999F" 'fat32)
                                                                      #:bootloader-targets '("/boot/efi")))
 
