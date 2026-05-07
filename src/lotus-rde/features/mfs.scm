@@ -16,7 +16,8 @@
   #:use-module (gnu system uuid)
   #:use-module (gnu packages linux)
   #:use-module (rde features system)
-  #:export (feature-mapped-file-systems))
+  #:export (feature-mapped-file-systems
+            lotus-devfs-volumes))
 
 
 (define (open-lvm-device source targets)
@@ -406,15 +407,15 @@
     (let* ((md-house-home     (build-md "house" "home" #:suffix-seq 0))
 
            (fs-house-home     (build-fs "/home" "house" "home"
-                                      #:suffix-seq          0
-                                      #:check?              #t ;; fs-house-home-check?
-                                      #:mount?              #t ;; (if system-init #f #t)
-                                      #:create-mount-point? #t
-                                      #:needed-for-boot?    #f
-                                      #:dependencies        (append (list md-house-home)
-                                                                    (if fs-root
-                                                                        (list fs-root)
-                                                                        (list))))))
+                                        #:suffix-seq          0
+                                        #:check?              #t ;; fs-house-home-check?
+                                        #:mount?              #t ;; (if system-init #f #t)
+                                        #:create-mount-point? #t
+                                        #:needed-for-boot?    #f
+                                        #:dependencies        (append (list md-house-home)
+                                                                      (if fs-root
+                                                                          (list fs-root)
+                                                                          (list))))))
       (let ((devices (list md-house-home))
             (fs      (list fs-house-home)))
         ;; (format #t "Devices: ~a~%" devices)
@@ -438,19 +439,19 @@
                                                      (build-target "guix" "swap"))))))))
 
 
-(define* (lotus-devfs-volumes volume-mappings
+(define* (lotus-devfs-volumes parent-dir
+                              volume-mappings
                               #:key
                               ;; lotus-lvm-dev-fs-builders
-                              (fs-root #f)
-                              (disk-serial-id "CHANGEIT")
-                              (disk-prefix "vds")
-                              (disk-suffix-seq 0))
+                              (fs-root #f))
 
   (define (normalize-mapping entry)
     (match entry
       ;; fully explicit
-      (((? string? serial)
-        ((((? string? vg) (? string? lv)) ((? string? vgroup) (? string? lvol))) ...)
+      ((serial
+        (((vg lv)
+          (vgroup lvol))
+         ...)
         rest ...)
        (apply
         (lambda* (#:key
@@ -463,8 +464,8 @@
                 lvol
                 prefix seq))
         rest))
-      (((? string? serial)
-        ((((? string? vg) (? string? lv))) ...)
+      ((serial
+        (((vg lv)) ...)
         rest ...)
        (apply
         (lambda* (#:key
@@ -473,40 +474,47 @@
           (list serial
                 vg
                 lv
-                vgroup
-                lvol
+                vg
+                lv
                 prefix seq))
         rest))))
 
 
+  ;; (display volume-mappings)
+  ;; (newline)
+  ;; (display (map normalize-mapping
+  ;;               volume-mappings))
+  ;; (newline)
 
-  (let ((devices '())
-        (filesystems '()))
-    (for-each
-     (match-lambda
-       (serial vg-list lv-list vgrp-list lvol-list (? string? prefix) (? number? seq))
-       (begin
-         (let-values (((build-md build-fs _x _y) (lotus-lvm-dev-fs-builders (lambda () serial)
-                                                                            #:prefix (lambda () prefix)
-                                                                            #:suffix-seq (lambda () seq))))
-           (map (lambda (vg lv vgroup lvol)
-                  (format #t "Mapping: serial=~a, vg=~a, lv=~a, vgroup=~a, lvol=~a, prefix=~a, seq=~a~%"
-                          serial vg lv vgroup lvol prefix seq)
-                  (let* ((md     (build-md vg lv))
-                         (fs     (build-fs (string-append "/" vg "/" lv) vg lv
-                                             #:suffix-seq          seq
-                                             #:check?              #t ;; (lambda () (fs-check? fs))
-                                             #:mount?              #t ;; (lambda () (fs-mount? fs))
-                                             #:create-mount-point? #t
-                                             #:needed-for-boot?    #f
-                                             #:dependencies        (append (list md)
-                                                                           (if fs-root
-                                                                               (list fs-root)
-                                                                               (list))))))
-                    (list md fs)))
-                vg-list lv-list vgrp-list lvol-list))))
-     (map normalize-mapping
-          volume-mappings))))
+  (let* ((mfs (map
+               (match-lambda
+                 ((serial vg-list lv-list vgrp-list lvol-list (? string? prefix) (? number? seq))
+                  (let-values (((build-md build-fs _x diskname) (lotus-lvm-dev-fs-builders (lambda () serial)
+                                                                                           #:prefix (lambda () prefix)
+                                                                                             #:suffix-seq (lambda () seq))))
+                      (let ((mflist (map (lambda (vg lv vgroup lvol)
+                                           (format #t "Mapping: serial=~a, vg=~a, lv=~a, vgroup=~a, lvol=~a, prefix=~a, seq=~a~%"
+                                                   serial vg lv vgroup lvol prefix seq)
+                                           (let* ((md     (build-md vg lv))
+                                                  (fs     (build-fs (string-append parent-dir "/" (diskname)"/" vgroup "/" lvol) vg lv
+                                                                    #:suffix-seq          seq
+                                                                    #:check?              #t ;; (lambda () (fs-check? fs))
+                                                                    #:mount?              #t ;; (lambda () (fs-mount? fs))
+                                                                    #:create-mount-point? #t
+                                                                    #:needed-for-boot?    #f
+                                                                    #:dependencies        (append (list md)
+                                                                                                  (if fs-root
+                                                                                                      (list fs-root)
+                                                                                                      (list))))))
+                                             (list md fs)))
+                                         vg-list lv-list vgrp-list lvol-list)))
+                        (list (map car mflist)
+                              (map cadr mflist))))))
+               (map normalize-mapping
+                    volume-mappings)))
+         (devices      (apply append (map car mfs)))
+         (file-systems (apply append (map cadr mfs))))
+    (list devices file-systems)))
 
 
 
