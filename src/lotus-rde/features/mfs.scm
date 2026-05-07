@@ -243,7 +243,7 @@
       (let* ((md-guix-root      (build-md "guix" "root"))
              (md-guix-boot      (build-md "guix" "boot"))
              (md-guix-gnu       (build-md "guix" "gnu"))
-             (md-guix-swap      (build-md "guix" "swap"))
+             ;; (md-guix-swap      (build-md "guix" "swap"))
              (md-guix-var       (build-md "guix" "var"))
              (md-guix-var-cache (build-md "guix" "varScache"))
              (md-guix-var-lib   (build-md "guix" "varSlib"))
@@ -374,7 +374,7 @@
                              md-guix-var-log   ;300M
                              md-guix-var-guix  ;350M
                              md-guix-var-tmp   ;1G
-                             md-guix-swap      ;1G
+                             ;; md-guix-swap      ;1G
                              md-sys-tmp))      ;20G
               (fs (list fs-guix-root
                         fs-guix-boot
@@ -427,22 +427,22 @@
 
 
 (define* (lotus-devfs-swap #:key
-                           ;; lotus-lvm-dev-fs-builders
-                           (fs-root #f)
                            (disk-serial-id "CHANGEIT")
                            (disk-prefix "vds")
                            (disk-suffix-seq 01))
-  (let*-values (((_x _y build-target _z) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
-                                                                    #:prefix (lambda () disk-prefix)
-                                                                    #:suffix-seq (lambda () disk-suffix-seq))))
-    (values (list (swap-space (target (string-append "/dev/mapper/"
-                                                     (build-target "guix" "swap"))))))))
+  (let*-values (((build-md _y build-target _z) (lotus-lvm-dev-fs-builders (lambda () disk-serial-id)
+                                                                          #:prefix (lambda () disk-prefix)
+                                                                          #:suffix-seq (lambda () disk-suffix-seq))))
+    (let ((md-guix-swap       (build-md "guix" "swap"))
+          (swap-space-devices (swap-space (target (string-append "/dev/mapper/"
+                                                                 (build-target "guix" "swap")))))))
+    (values (list md-guix-swap)
+            (list swap-space-devices))))
 
 
-(define* (lotus-devfs-volumes parent-dir
-                              volume-mappings
+(define* (lotus-devfs-volumes volume-mappings
                               #:key
-                              ;; lotus-lvm-dev-fs-builders
+                              (parent-dir "/srv/volumes/local")
                               (fs-root #f))
 
   (define (normalize-mapping entry)
@@ -456,13 +456,15 @@
        (apply
         (lambda* (#:key
                   (prefix "vds")
-                  (seq 0))
+                  (seq 0)
+                  (parent-dir parent-dir))
           (list serial
                 vg
                 lv
                 vgroup
                 lvol
-                prefix seq))
+                prefix seq
+                parent-dir))
         rest))
       ((serial
         (((vg lv)) ...)
@@ -470,13 +472,15 @@
        (apply
         (lambda* (#:key
                   (prefix "vds")
-                  (seq 0))
+                  (seq 0)
+                  (parent-dir parent-dir))
           (list serial
                 vg
                 lv
                 vg
                 lv
-                prefix seq))
+                prefix seq
+                parent-dir))
         rest))))
 
 
@@ -488,7 +492,7 @@
 
   (let* ((mfs (map
                (match-lambda
-                 ((serial vg-list lv-list vgrp-list lvol-list (? string? prefix) (? number? seq))
+                 ((serial vg-list lv-list vgrp-list lvol-list (? string? prefix) (? number? seq) (? string? parent-dir))
                   (let-values (((build-md build-fs _x diskname) (lotus-lvm-dev-fs-builders (lambda () serial)
                                                                                            #:prefix (lambda () prefix)
                                                                                              #:suffix-seq (lambda () seq))))
@@ -514,7 +518,7 @@
                     volume-mappings)))
          (devices      (apply append (map car mfs)))
          (file-systems (apply append (map cadr mfs))))
-    (list devices file-systems)))
+    (values devices file-systems)))
 
 
 
@@ -522,12 +526,25 @@
           #:key
           (disk-serial-id-system "aaaa")
           (disk-serial-id-home "aaaa")
-          (fs-boot-efi-partition (uuid "0000-0000" 'fat32)))
+          (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
+          (parent-dir "/srv/volumes/local")
+          (volume-mappings '()))
+
+
+  ;; '(((disk-serial-id-system)
+  ;;    (((vg1 lv1) (vg2 lv2))
+  ;;     ((vgroup1 lvol1) (vgroup2 lvol2))
+  ;;     "vds" 0)))
+
+
   (let*-values (((rootfs sys-devices sys-fs) (lotus-devfs-system #:disk-serial-id disk-serial-id-system
                                                                  #:fs-boot-efi-partition fs-boot-efi-partition))
                 ((home-devices home-fs) (lotus-devfs-home #:fs-root rootfs
                                                           #:disk-serial-id disk-serial-id-home))
-                ((swap-devices) (lotus-devfs-swap #:disk-serial-id disk-serial-id-system)))
+                ((swap-devices swap-space-devices) (lotus-devfs-swap #:disk-serial-id disk-serial-id-system))
+                ((volume-devices volume-fs) (lotus-devfs-volumes volume-mappings
+                                                                 #:parent-dir parent-dir
+                                                                 #:fs-root rootfs)))
     ;; (assert (list? sys-devices) "sys-devices not list")
     ;; (assert (list? home-devices) "home-devices not list")
     ;; (assert (list? sys-fs) "sys-fs not list")
@@ -550,46 +567,13 @@
     ;; (newline)
 
     (feature-file-systems #:mapped-devices (append sys-devices
-                                                   home-devices)
+                                                   home-devices
+                                                   swap-devices
+                                                   volume-devices)
                           #:file-systems (append sys-fs
-                                                 home-fs)
-                          #:swap-devices swap-devices
-                          #:user-pam-file-systems '())))
-
-
-(define* (feature-extra-mapped-file-systems
-          #:key
-          (rootfs #f)
-          (disk-serial-id-system "aaaa"))
-  (let*-values (((devices fs) (lotus-devfs-system #:disk-serial-id disk-serial-id-system
-                                                  #:fs-boot-efi-partition fs-boot-efi-partition)))
-    ;; (assert (list? sys-devices) "sys-devices not list")
-
-    ;; (assert (list? home-devices) "home-devices not list")
-    ;; (assert (list? sys-fs) "sys-fs not list")
-    ;; (assert (list? home-fs) "home-fs not list")
-    ;; (for-each (lambda (x)
-    ;;             (assert x "sys-device contains #f"))
-    ;;           sys-devices)
-    ;; (for-each (lambda (x)
-    ;;             (assert x "home-device contains #f"))
-    ;;           home-devices)
-    ;; (for-each (lambda (x)
-    ;;             (assert x "sys-fs contains #f"))
-    ;;           sys-fs)
-    ;; (for-each (lambda (x)
-    ;;             (assert x "home-fs contains #f"))
-    ;;           home-fs)
-
-    ;; (display "Home devices: ")
-    ;; (display home-devices)
-    ;; (newline)
-
-    (feature-file-systems #:mapped-devices (append devices
-                                                   devices)
-                          #:file-systems (append sys-fs
-                                                 home-fs)
-                          #:swap-devices swap-devices
+                                                 home-fs
+                                                 volume-fs)
+                          #:swap-devices swap-space-devices
                           #:user-pam-file-systems '())))
 
 

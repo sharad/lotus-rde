@@ -100,7 +100,10 @@
                              (initrd base-initrd)
                              (initrd-modules %lotus-guix-initrd-modules)
                              (custom-services #f)
-                             (login-shell (file-append zsh "/bin/zsh")))
+                             (login-shell (file-append zsh "/bin/zsh"))
+                             (parent-dir "/srv/volumes/local")
+                             (volume-mappings '()))
+
 
   (list (feature-host-info #:host-name hostname
                            ;; #:locale    (operating-system-locale bare-bone-os)
@@ -120,7 +123,9 @@
         ;; (feature-bootloader)
         (feature-mapped-file-systems #:disk-serial-id-system disk-serial-id-system
                                      #:disk-serial-id-home disk-serial-id-home
-                                     #:fs-boot-efi-partition fs-boot-efi-partition)
+                                     #:fs-boot-efi-partition fs-boot-efi-partition
+                                     #:parent-dir parent-dir
+                                     #:volume-mappings volume-mappings)
         ;; (feature-base-services #:guix-substitute-urls %lotus-guix-substitute-urls
         ;;                        #:guix-authorized-keys '())
 
