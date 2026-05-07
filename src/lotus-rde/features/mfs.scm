@@ -435,9 +435,9 @@
                                                                           #:suffix-seq (lambda () disk-suffix-seq))))
     (let ((md-guix-swap       (build-md "guix" "swap"))
           (swap-space-devices (swap-space (target (string-append "/dev/mapper/"
-                                                                 (build-target "guix" "swap")))))))
-    (values (list md-guix-swap)
-            (list swap-space-devices))))
+                                                                 (build-target "guix" "swap"))))))
+      (values (list md-guix-swap)
+              (list swap-space-devices)))))
 
 
 (define* (lotus-devfs-volumes volume-mappings
