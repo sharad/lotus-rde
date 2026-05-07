@@ -52,6 +52,7 @@
   #:use-module (gnu system accounts)
   #:use-module (gnu system shadow)
   #:use-module (gnu system keyboard)
+  #:use-module (gnu system privilege)
   #:use-module (gnu system linux-initrd)
   #:use-module (gnu services)
   #:use-module (gnu services desktop)
