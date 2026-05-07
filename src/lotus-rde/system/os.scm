@@ -31,8 +31,8 @@
   #:use-module (rde packages)
   #:use-module (lotus-rde features base)
   #:use-module (lotus-rde features mfs)
-  #:export (iron-lotus-machine
-            iron-lotus-machine-minimal))
+  #:export (lotus-metal-machine
+            lotus-metal-machine-minimal))
 
 
 
@@ -87,7 +87,7 @@
 
 
 
-(define* (iron-lotus-machine hostname
+(define* (lotus-metal-machine hostname
                              #:key
                              (timezone "Asia/Kolkata")
                              (disk-serial-id-system "aaa")
@@ -219,7 +219,7 @@
 
 
 
-(define* (iron-lotus-machine-minimal hostname
+(define* (lotus-metal-machine-minimal hostname
                                 #:key
                                 (timezone "Asia/Kolkata")
                                 (disk-serial-id-system "aaa")

@@ -105,7 +105,7 @@
 ;; your stuff
 ;; (feature-hidpi)
 
-(define-public %guilem-lat7420-features (iron-lotus-machine "guilem-lat7420"
+(define-public %guilem-lat7420-features (lotus-metal-machine "guilem-lat7420"
                                                             #:kernel linux
                                                             #:initrd microcode-initrd
                                                             #:firmware (list linux-firmware)

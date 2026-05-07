@@ -105,7 +105,7 @@
 ;; your stuff
 ;; (feature-hidpi)
 
-(define-public %guilem-kuv500-features (iron-lotus-machine "guilem-kuv500"
+(define-public %guilem-kuv500-features (lotus-metal-machine "guilem-kuv500"
                                                            #:kernel linux
                                                            #:initrd microcode-initrd
                                                            #:firmware (list linux-firmware)

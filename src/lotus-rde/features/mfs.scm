@@ -271,10 +271,9 @@
                                            #:needed-for-boot?    guix-boot-needed-for-boot?
                                            #:flags               '(read-only)
                                            #:options             "defaults,ro,noauto"
-                                           #:dependencies        (append (list md-guix-root
-                                                                               md-guix-boot
-                                                                               fs-guix-root))))
-                                                                         ;; (list fs-guix-root)
+                                           #:dependencies        (list md-guix-root
+                                                                       md-guix-boot
+                                                                       fs-guix-root)))
              (fs-guix-gnu        (build-fs "/gnu" "guix" "gnu"
                                            #:check?              #t ;; fs-guix-gnu-check?
                                            #:mount?              #t
@@ -282,89 +281,76 @@
                                            #:needed-for-boot?    #t
                                            #:flags               '(read-only)
                                            ;; #:options             "defaults,ro,noauto"
-                                           #:dependencies        (append (list md-guix-root
-                                                                               md-guix-gnu
-                                                                               fs-guix-root))))
-                                                                         ;; (list fs-guix-root)
+                                           #:dependencies        (list md-guix-root
+                                                                       md-guix-gnu
+                                                                       fs-guix-root)))
              (fs-sys-tmp        (build-fs "/tmp" "sys" "tmp"
                                           #:check?              #t ;; fs-sys-tmp-check?
                                           #:mount?              #t
                                           #:create-mount-point? #t
                                           #:needed-for-boot?    #t
-                                          #:dependencies        (append (list md-guix-root
-                                                                              md-sys-tmp
-                                                                              fs-guix-root))))
-                                                                        ;; (list fs-guix-root)
+                                          #:dependencies        (list md-guix-root
+                                                                      md-sys-tmp
+                                                                      fs-guix-root)))
              (fs-guix-var        (build-fs "/var" "guix" "var"
                                            #:check?              #t ;; fs-guix-var-check?
                                            #:mount?              #t
                                            #:create-mount-point? #t
                                            #:needed-for-boot?    #t
-                                           #:dependencies        (append (list md-guix-root
-                                                                               md-guix-var
-                                                                               fs-guix-root))))
-                                                                         ;; (list fs-guix-root)
+                                           #:dependencies        (list md-guix-root
+                                                                       md-guix-var
+                                                                       fs-guix-root)))
              (fs-guix-var-cache  (build-fs "/var/cache" "guix" "varScache"
                                            #:check?              #t ;; fs-guix-var-check?
                                            #:mount?              #t
                                            #:create-mount-point? #t
                                            #:needed-for-boot?    #t
-                                           #:dependencies        (append (list md-guix-root
-                                                                               md-guix-var
-                                                                               md-guix-var-cache
-                                                                               fs-guix-root
-                                                                               fs-guix-var))))
-                                                                         ;; (list fs-guix-root
-                                                                         ;;       fs-guix-var)
+                                           #:dependencies        (list md-guix-root
+                                                                       md-guix-var
+                                                                       md-guix-var-cache
+                                                                       fs-guix-root
+                                                                       fs-guix-var)))
              (fs-guix-var-lib    (build-fs "/var/lib" "guix" "varSlib"
                                            #:check?              #t ;; fs-guix-var-check?
                                            #:mount?              #t
                                            #:create-mount-point? #t
                                            #:needed-for-boot?    #t
-                                           #:dependencies        (append (list md-guix-root
-                                                                               md-guix-var
-                                                                               md-guix-var-lib
-                                                                               fs-guix-root
-                                                                               fs-guix-var))))
-                                                                         ;; (list fs-guix-root
-                                                                         ;;       fs-guix-var)
+                                           #:dependencies        (list md-guix-root
+                                                                       md-guix-var
+                                                                       md-guix-var-lib
+                                                                       fs-guix-root
+                                                                       fs-guix-var)))
              (fs-guix-var-log    (build-fs "/var/log" "guix" "varSlog"
                                            #:check?              #t ;; fs-guix-var-check?
                                            #:mount?              #t
                                            #:create-mount-point? #t
                                            #:needed-for-boot?    #t
-                                           #:dependencies        (append (list md-guix-root
-                                                                               md-guix-var
-                                                                               md-guix-var-log
-                                                                               fs-guix-root
-                                                                               fs-guix-var))))
-                                                                         ;; (list fs-guix-root
-                                                                         ;;       fs-guix-var)
+                                           #:dependencies        (list md-guix-root
+                                                                       md-guix-var
+                                                                       md-guix-var-log
+                                                                       fs-guix-root
+                                                                       fs-guix-var)))
              (fs-guix-var-guix   (build-fs "/var/guix" "guix" "varSguix"
                                            #:check?              #t ;; fs-guix-var-check?
                                            #:mount?              #t
                                            #:create-mount-point? #t
                                            #:needed-for-boot?    #t
-                                           #:dependencies        (append (list md-guix-root
-                                                                               md-guix-var
-                                                                               md-guix-var-guix
-                                                                               fs-guix-root
-                                                                               fs-guix-var))))
-                                                                         ;; (list fs-guix-root
-                                                                         ;;       fs-guix-var)
+                                           #:dependencies        (list md-guix-root
+                                                                       md-guix-var
+                                                                       md-guix-var-guix
+                                                                       fs-guix-root
+                                                                       fs-guix-var)))
              (fs-guix-var-tmp   (build-fs "/var/tmp" "guix" "varStmp"
                                           ;; https://unix.stackexchange.com/questions/30489/what-is-the-difference-between-tmp-and-var-tmp
                                           #:check?              #t ;; fs-guix-var-check?
                                           #:mount?              #t
                                           #:create-mount-point? #t
                                           #:needed-for-boot?    #t
-                                          #:dependencies        (append (list md-guix-root
-                                                                              md-guix-var
-                                                                              md-guix-var-tmp
-                                                                              fs-guix-root
-                                                                              fs-guix-var))))
-                                                                        ;; (list fs-guix-root
-                                                                        ;;       fs-guix-var)
+                                          #:dependencies        (list md-guix-root
+                                                                      md-guix-var
+                                                                      md-guix-var-tmp
+                                                                      fs-guix-root
+                                                                      fs-guix-var)))
              (fs-boot-efi        (file-system (mount-point         "/boot/efi")
                                               (device              fs-boot-efi-partition)
                                               (type                "vfat")
@@ -375,11 +361,9 @@
                                               (flags               '(read-only))
                                               ;; (options             "defaults,ro,noauto")
                                               (options             "ro")
-                                              (dependencies        (append (list md-guix-root
-                                                                                 fs-guix-boot
-                                                                                 fs-guix-root))))))
-                                                                           ;; (list fs-guix-boot
-                                                                           ;;       fs-guix-root)
+                                              (dependencies        (list md-guix-root
+                                                                         fs-guix-boot
+                                                                         fs-guix-root)))))
         (let ((devices (list md-guix-root      ;8M
                              md-guix-boot      ;12M
                              md-guix-gnu       ;35G
@@ -390,7 +374,7 @@
                              md-guix-var-guix  ;350M
                              md-guix-var-tmp   ;1G
                              md-guix-swap      ;1G
-                             md-sys-tmp))        ;20G
+                             md-sys-tmp))      ;20G
               (fs (list fs-guix-root
                         fs-guix-boot
                         fs-guix-gnu
@@ -402,9 +386,6 @@
                         fs-guix-var-guix
                         fs-guix-var-tmp
                         fs-boot-efi)))
-          ;; (format #t "Devices: ~a~%" devices)
-          ;; (format #t "File systems: ~a~%" fs)
-
           (values fs-guix-root
                   devices
                   fs)))))
@@ -431,16 +412,18 @@
                                       #:create-mount-point? #t
                                       #:needed-for-boot?    #f
                                       #:dependencies        (append (list md-house-home)
-                                                                    ;; (if fs-root
-                                                                    ;;     (list fs-root)
-                                                                    ;;     (list))
-                                                                    (list)))))
+                                                                    (if fs-root
+                                                                        (list fs-root)
+                                                                        (list))))))
       (let ((devices (list md-house-home))
-            (fs (list fs-house-home)))
+            (fs      (list fs-house-home)))
         ;; (format #t "Devices: ~a~%" devices)
         ;; (format #t "File systems: ~a~%" fs)
         (values devices
                 fs)))))
+
+
+
 
 (define* (lotus-devfs-swap #:key
                            ;; lotus-lvm-dev-fs-builders
@@ -453,6 +436,77 @@
                                                                     #:suffix-seq (lambda () disk-suffix-seq))))
     (values (list (swap-space (target (string-append "/dev/mapper/"
                                                      (build-target "guix" "swap"))))))))
+
+
+;; (define* (lotus-devfs-volumes volume-mappings
+;;                               #:key
+;;                               ;; lotus-lvm-dev-fs-builders
+;;                               (fs-root #f)
+;;                               (disk-serial-id "CHANGEIT")
+;;                               (disk-prefix "vds")
+;;                               (disk-suffix-seq 0))
+
+;;   (define (normalize-mapping entry)
+;;     (match entry
+;;       ;; fully explicit
+;;       (((? string? serial)
+;;         ((((? string? vg) (? string? lv)) ((? string? vgroup) (? string? lvol))) ...)
+;;         rest ...)
+;;        (apply
+;;         (lambda* (#:key
+;;                   (prefix "vds")
+;;                   (seq 0))
+;;           (list serial
+;;                 vg
+;;                 lv
+;;                 vgroup
+;;                 lvol
+;;                 prefix seq))
+;;         rest))
+;;       (((? string? serial)
+;;         ((((? string? vg) (? string? lv))) ...)
+;;         rest ...)
+;;        (apply
+;;         (lambda* (#:key
+;;                   (prefix "vds")
+;;                   (seq 0))
+;;           (list serial
+;;                 vg
+;;                 lv
+;;                 vgroup
+;;                 lvol
+;;                 prefix seq))
+;;         rest))))
+
+
+
+;;   (let ((devices '())
+;;         (filesystems '()))
+;;     (for-each
+;;      (match-lambda
+;;        (serial vg-list lv-list vgrp-list lvol-list (? string? prefix) (? number? seq))
+;;        (begin
+;;          (let-values (((build-md build-fs _x _y) (lotus-lvm-dev-fs-builders (lambda () serial)
+;;                                                                             #:prefix (lambda () prefix)
+;;                                                                             #:suffix-seq (lambda () seq))))
+;;            (map (lambda (vg lv vgroup lvol)
+;;                   (format #t "Mapping: serial=~a, vg=~a, lv=~a, vgroup=~a, lvol=~a, prefix=~a, seq=~a~%"
+;;                           serial vg lv vgroup lvol prefix seq)
+;;                   (let* ((md     (build-md vg lv))
+;;                          (fs     (build-fs (string-append "/" vg "/" lv) vg lv
+;;                                              #:suffix-seq          seq
+;;                                              #:check?              #t ;; (lambda () (fs-check? fs))
+;;                                              #:mount?              #t ;; (lambda () (fs-mount? fs))
+;;                                              #:create-mount-point? #t
+;;                                              #:needed-for-boot?    #f
+;;                                              #:dependencies        (append (list md)
+;;                                                                            (if fs-root
+;;                                                                                (list fs-root)
+;;                                                                                (list))))))
+;;                     (list md fs)))
+;;                 vg-list lv-list vgrp-list lvol-list))))
+;;      (map normalize-mapping
+;;           volume-mappings))))
 
 
 
@@ -493,7 +547,42 @@
                                                  home-fs)
                           #:swap-devices swap-devices
                           #:user-pam-file-systems '())))
+
 
+;; (define* (feature-extra-mapped-file-systems
+;;           #:key
+;;           (rootfs #f)
+;;           (disk-serial-id-system "aaaa"))
+;;   (let*-values (((devices fs) (lotus-devfs-system #:disk-serial-id disk-serial-id-system
+;;                                                   #:fs-boot-efi-partition fs-boot-efi-partition)))
+;;     ;; (assert (list? sys-devices) "sys-devices not list")
+
+;;     ;; (assert (list? home-devices) "home-devices not list")
+;;     ;; (assert (list? sys-fs) "sys-fs not list")
+;;     ;; (assert (list? home-fs) "home-fs not list")
+;;     ;; (for-each (lambda (x)
+;;     ;;             (assert x "sys-device contains #f"))
+;;     ;;           sys-devices)
+;;     ;; (for-each (lambda (x)
+;;     ;;             (assert x "home-device contains #f"))
+;;     ;;           home-devices)
+;;     ;; (for-each (lambda (x)
+;;     ;;             (assert x "sys-fs contains #f"))
+;;     ;;           sys-fs)
+;;     ;; (for-each (lambda (x)
+;;     ;;             (assert x "home-fs contains #f"))
+;;     ;;           home-fs)
+
+;;     ;; (display "Home devices: ")
+;;     ;; (display home-devices)
+;;     ;; (newline)
+
+;;     (feature-file-systems #:mapped-devices (append devices
+;;                                                    devices)
+;;                           #:file-systems (append sys-fs
+;;                                                  home-fs)
+;;                           #:swap-devices swap-devices
+;;                           #:user-pam-file-systems '())))
 
 
 

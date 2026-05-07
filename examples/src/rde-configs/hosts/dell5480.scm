@@ -12,7 +12,7 @@
 ;; TODO: Switch from UUIDs to partition labels For better
 ;; reproducibilty and easier setup.  Grub doesn't support luks2 yet.
 
-(define-public %dell5480-features (iron-lotus-machine "dell5480"
+(define-public %dell5480-features (lotus-metal-machine "dell5480"
                                                       #:kernel linux
                                                       #:initrd microcode-initrd
                                                       #:firmware (list linux-firmware)
