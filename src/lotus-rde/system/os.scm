@@ -190,21 +190,25 @@
                                                                                      "https://nonguix-proxy.ditigal.xyz"
                                                                                      "https://cache-cdn.guix.moe"))))))
 
-        ;; (feature-gnome-desktop-services)
-        ;; (feature-file-database-services)
-        ;; ;; ;; (feature-guix-publish-services)
-        ;; (feature-schedular-services)
-        ;; ;; (feature-unattended-upgrade-services)
-        ;; (feature-disk-services)
-        ;; (feature-privileged-programs-services)
-        ;; ;; (feature-messaging-services)
-        ;; ;; (feature-mail-services)
-        ;; (feature-iio-sensor-proxy-services)
-        ;; ;; (feature-network-manager-services)
+        (feature-gnome-desktop-services)
+        (feature-file-database-services)
+        ;; ;; (feature-guix-publish-services)
+        (feature-schedular-services)
+        ;; (feature-unattended-upgrade-services)
 
-        ;; ;; (feature-dns-services)
-        ;; (feature-pointer-services)
-        ;; (feature-bluetooth-services)
+
+        ;; (feature-disk-services)
+        (feature-privileged-programs-services)
+
+
+        ;; (feature-messaging-services)
+        ;; (feature-mail-services)
+        (feature-iio-sensor-proxy-services)
+        ;; (feature-network-manager-services)
+
+        ;; (feature-dns-services)
+        (feature-pointer-services)
+        (feature-bluetooth-services)
 
         ;; ;; (feature-music-services)
         ;; ;; (feature-printing-services)
