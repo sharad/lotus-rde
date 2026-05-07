@@ -413,7 +413,7 @@
                                         #:create-mount-point? #t
                                         #:needed-for-boot?    #f
                                         #:dependencies        (append (list md-house-home)
-                                                                      (if fs-root
+                                                                      (if #f ;; fs-root
                                                                           (list fs-root)
                                                                           (list))))))
       (let ((devices (list md-house-home))
