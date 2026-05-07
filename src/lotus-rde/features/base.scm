@@ -666,7 +666,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
    (cons*
     (service package-database-service-type)
     (service file-database-service-type
@@ -692,7 +692,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
     (cons*
      (service guix-publish-service-type
               (guix-publish-configuration
@@ -766,7 +766,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
     (cons*
      (service unattended-upgrade-service-type
               (unattended-upgrade-configuration
@@ -793,7 +793,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
     (cons*
      (service udisks-service-type)))
 
@@ -815,7 +815,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
     (cons*
      (simple-service
       'privileged-programs
@@ -852,7 +852,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
     (cons*
      (service bitlbee-service-type
               (bitlbee-configuration
@@ -873,7 +873,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
     (cons*
      (service mail-aliases-service-type
               aliases)
@@ -899,7 +899,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
     (cons*
      (service iio-sensor-proxy-service-type
               (iio-sensor-proxy-configuration
@@ -923,7 +923,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
     (cons*
      (service dnsmasq-service-type
               (dnsmasq-configuration (no-resolv? no-resolv?)
@@ -945,7 +945,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;   (define (get-home-services config)
 ;;     (cons*))
 
-;;   (define (get-system-packages config)
+;;   (define (get-system-services config)
 ;;     (cons*
 ;;      (service network-manager-service-type
 ;;               (network-manager-configuration
@@ -963,7 +963,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;   (define (get-home-services config)
 ;;     (cons*))
 
-;;   (define (get-system-packages config)
+;;   (define (get-system-services config)
 ;;     (cons*
 ;;      (service avahi-service-type)))
 
@@ -979,7 +979,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
     (cons*
      (service gpm-service-type)))
 
@@ -996,7 +996,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
     (cons*
      (service bluetooth-service-type
               (bluetooth-configuration
@@ -1038,7 +1038,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
     (cons*
      (service mpd-service-type
               (mpd-configuration
@@ -1072,7 +1072,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
     (cons*
      (service cups-service-type
               (cups-configuration
@@ -1093,7 +1093,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;   (define (get-home-services config)
 ;;     (cons*))
 
-;;   (define (get-system-packages config)
+;;   (define (get-system-services config)
 ;;     (cons* (service polkit-service-type)))
 
 ;;   (feature
@@ -1111,7 +1111,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;   (define (get-home-services config)
 ;;     (cons*))
 
-;;   (define (get-system-packages config)
+;;   (define (get-system-services config)
 ;;     (cons*
 ;;      (service krb5-service-type
 ;;               (krb5-configuration
@@ -1131,7 +1131,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;   (define (get-home-services config)
 ;;     (cons*))
 
-;;   (define (get-system-packages config)
+;;   (define (get-system-services config)
 ;;     (cons*
 ;;      (service containerd-service-type)
 ;;      (service docker-service-type)
@@ -1154,7 +1154,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
     (cons*
      (service pcscd-service-type
               (pcscd-configuration (pcsc-lite pcsc-lite)
@@ -1177,7 +1177,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-home-services config)
     (cons*))
 
-  (define (get-system-packages config)
+  (define (get-system-services config)
     (cons*
      (service auditd-service-type
               (auditd-configuration
@@ -1208,7 +1208,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;   (define (get-home-services config)
 ;;     (cons*))
 
-;;   (define (get-system-packages config)
+;;   (define (get-system-services config)
 ;;     (cons*
 ;;      (service guix-service-type
 ;;               (guix-configuration
@@ -1244,7 +1244,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;   (define (get-home-services config)
 ;;     (cons*))
 
-;;   (define (get-system-packages config)
+;;   (define (get-system-services config)
 ;;     (cons*
 ;;      (service gdm-service-type
 ;;               (gdm-configuration
@@ -1265,7 +1265,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;   (define (get-home-services config)
 ;;     (cons*))
 
-;;   (define (get-system-packages config)
+;;   (define (get-system-services config)
 ;;     (cons*
 ;;      (service pulseaudio-service-type
 ;;               (pulseaudio-configuration
