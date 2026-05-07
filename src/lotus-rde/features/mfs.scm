@@ -507,7 +507,7 @@
                                                                     #:create-mount-point? #t
                                                                     #:needed-for-boot?    #f
                                                                     #:dependencies        (append (list md)
-                                                                                                  (if fs-root
+                                                                                                  (if #f ;; fs-root
                                                                                                       (list fs-root)
                                                                                                       (list))))))
                                              (list md fs)))
