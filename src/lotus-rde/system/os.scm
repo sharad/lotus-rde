@@ -194,7 +194,7 @@
         (feature-file-database-services)
         ;; ;; (feature-guix-publish-services)
         (feature-schedular-services)
-        (feature-unattended-upgrade-services)
+        ;; (feature-unattended-upgrade-services)
         (feature-disk-services)
         (feature-privileged-programs-services)
         ;; (feature-messaging-services)
