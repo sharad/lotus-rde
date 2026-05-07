@@ -638,7 +638,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
     (list
      (service mate-desktop-service-type
               (mate-desktop-configuration
-                (mate mate)))))
+                (mate-package mate)))))
   (feature
    (name 'mate-desktop-services)
    (values `((mate-desktop . ,mate)))
@@ -903,7 +903,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
 (define* (feature-iio-sensor-proxy-services
           #:key
-          (auto-enable? #t))
+          (iio-sensor-proxy iio-sensor-proxy))
   ;; https://guix.gnu.org/manual/en/html_node/Desktop-Services.html
   (define (get-home-services config)
     (cons*))
@@ -912,7 +912,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
     (cons*
      (service iio-sensor-proxy-service-type
               (iio-sensor-proxy-configuration
-               (auto-enable? auto-enable?)))))
+               (iio-sensor-proxy iio-sensor-proxy)))))
 
   (feature
    (name 'iio-sensor-proxy)
