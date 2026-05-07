@@ -78,16 +78,11 @@
 
 (define %lotus-guix-initrd-modules '())
 
-(define %lotus-nonguix-initrd-modules '("virtio.ko"
-                                        "virtio_balloon.ko"
-                                        "virtio_ring.ko"
-                                        "virtio_blk.ko"
-                                        "virtio_pci.ko"
-                                        ;; https://issues.guix.gnu.org/31887
-                                        "mptbase.ko"
-                                        "mptscsih.ko"
-                                        "mptspi.ko"
-                                        "virtio_net.ko"))
+(define %lotus-nonguix-initrd-modules '("mptbase"
+                                        "mptscsih"
+                                        "mptspi"
+                                        "virtio_net"
+                                        "vmwgfx"))
 
 
 
