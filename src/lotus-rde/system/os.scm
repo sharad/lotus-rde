@@ -197,7 +197,7 @@
         ;; (feature-unattended-upgrade-services)
 
 
-        (feature-disk-services)
+        ;; (feature-disk-services)
         (feature-privileged-programs-services)
 
 

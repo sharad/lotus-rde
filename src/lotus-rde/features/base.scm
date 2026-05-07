@@ -99,7 +99,7 @@
             feature-guix-publish-services
             feature-schedular-services
             feature-unattended-upgrade-services
-            feature-disk-services
+            ;; feature-disk-services
             feature-privileged-programs-services
             feature-messaging-services
             feature-mail-services
@@ -791,20 +791,20 @@ Defaults:%wheel env_keep+=TERMINFO")))))
    (system-services-getter get-system-services)))
 
 
-(define* (feature-disk-services
-          #:key)
-  (define (get-home-services config)
-    (list))
+;; (define* (feature-disk-services
+;;           #:key)
+;;   (define (get-home-services config)
+;;     (list))
 
-  (define (get-system-services config)
-    (list
-     (service udisks-service-type)))
+;;   (define (get-system-services config)
+;;     (list
+;;      (service udisks-service-type)))
 
-  (feature
-   (name 'desktop)
-   (values `())
-   (home-services-getter get-home-services)
-   (system-services-getter get-system-services)))
+;;   (feature
+;;    (name 'desktop)
+;;    (values `())
+;;    (home-services-getter get-home-services)
+;;    (system-services-getter get-system-services)))
 
 
 (define* (feature-privileged-programs-services
