@@ -589,7 +589,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
           #:key
           (gnome gnome))
   (define (get-home-services _)
-    (cons*))
+    (list))
 
   (define (get-system-services _)
     (list
@@ -608,7 +608,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
           #:key
           (xfce xfce))
   (define (get-home-services _)
-    (cons*))
+    (list))
 
   (define (get-system-services _)
     (list
@@ -626,7 +626,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
           #:key
           (mate mate))
   (define (get-home-services _)
-    (cons*))
+    (list))
 
   (define (get-system-services _)
     (list
@@ -644,7 +644,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
           #:key
           (enlightenment enlightenment))
   (define (get-home-services _)
-    (cons*))
+    (list))
 
   (define (get-system-services _)
     (list
@@ -667,16 +667,16 @@ Defaults:%wheel env_keep+=TERMINFO")))))
           (schedule "0 4 * * *")
           (excluded-directories '("/tmp" "/var/tmp" "/gnu/store" "/run")))
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
-   (cons*
+   (list
     (service package-database-service-type)
     (service file-database-service-type
              (file-database-configuration
-              (package              findutils)
-              (schedule             schedule)
-              (excluded-directories excluded-directories)))))
+               (package              findutils)
+               (schedule             schedule)
+               (excluded-directories excluded-directories)))))
   (feature
    (name 'file-database)
    (values `())
@@ -693,10 +693,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
           (cache-bypass-threshold (* 100 1024 1024))
           (ttl (* 1 24 60 60)))
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
-    (cons*
+    (list
      (service guix-publish-service-type
               (guix-publish-configuration
                (advertise?             advertise)
@@ -740,11 +740,11 @@ Defaults:%wheel env_keep+=TERMINFO")))))
            #:user "s"))
 
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
     (let ((jobs (or jobs (list updatedb-job garbage-collector-job idutils-job))))
-      (cons*
+      (list
        (service mcron-service-type
               (mcron-configuration
                (jobs jobs))))))
@@ -767,19 +767,19 @@ Defaults:%wheel env_keep+=TERMINFO")))))
           (maximum-duration 3600)
           (log-file "/var/log/unattended-upgrade.log"))
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
-    (cons*
+    (list
      (service unattended-upgrade-service-type
               (unattended-upgrade-configuration
-               (operating-system-file operating-system-file)
-               (services-to-restart services-to-restart)
-               (channels channels)
-               (schedule schedule)
-               (system-expiration system-expiration)
-               (maximum-duration maximum-duration)
-               (log-file log-file)))))
+                (operating-system-file operating-system-file)
+                (services-to-restart services-to-restart)
+                (channels channels)
+                (schedule schedule)
+                (system-expiration system-expiration)
+                (maximum-duration maximum-duration)
+                (log-file log-file)))))
   ;; https://guix.gnu.org/manual/en/html_node/Unattended-Upgrades.html
   ;; How to mount /boot and that as rw?
   ;; Check also these
@@ -794,10 +794,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 (define* (feature-disk-services
           #:key)
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
-    (cons*
+    (list
      (service udisks-service-type)))
 
   (feature
@@ -816,17 +816,17 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   ;; https://git.sr.ht/~boeg/home/tree/master/.config/guix/system/config.scm
   ;; https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/services/desktop.scm#n1209
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
-    (cons*
+    (list
      (simple-service
       'privileged-programs
       privileged-program-service-type
       (map (lambda (path)
              (privileged-program
-              (program path)
-              (setuid? #t)))
+               (program path)
+               (setuid? #t)))
            paths))))
 
   (feature
@@ -853,10 +853,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   ;;                                                                    '())))
   ;;           (bitlbee (if %lotus-bitlbee-service-use-default? bitlbee bitlbee-purple))))
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
-    (cons*
+    (list
      (service bitlbee-service-type
               (bitlbee-configuration
                (plugins plugins)))))
@@ -874,10 +874,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
                      ("bob"        "bob@example.com" "bob@example2.com"))))
   ;; https://guix.gnu.org/manual/en/html_node/Mail-Services.html
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
-    (cons*
+    (list
      (service mail-aliases-service-type
               aliases)
      (service dovecot-service-type
@@ -900,10 +900,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
           (iio-sensor-proxy iio-sensor-proxy))
   ;; https://guix.gnu.org/manual/en/html_node/Desktop-Services.html
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
-    (cons*
+    (list
      (service iio-sensor-proxy-service-type
               (iio-sensor-proxy-configuration
                (iio-sensor-proxy iio-sensor-proxy)))))
@@ -924,13 +924,14 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   ;; https://jonathansblog.co.uk/using-dnsmasq-as-an-internal-dns-server-to-block-online-adverts
   ;; https://stackoverflow.com/questions/48644841/multiple-addn-hosts-conf-in-dnsmasq
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
-    (cons*
+    (list
      (service dnsmasq-service-type
-              (dnsmasq-configuration (no-resolv? no-resolv?)
-                                     (local-service? local-service?)))))
+              (dnsmasq-configuration
+                (no-resolv? no-resolv?)
+                (local-service? local-service?)))))
 
   (feature
    (name 'dnsmasq)
@@ -946,10 +947,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;           (dns "dnsmasq"))
 ;;   ;; https://guix.gnu.org/manual/en/html_node/Networking-Services.html
 ;;   (define (get-home-services config)
-;;     (cons*))
+;;     (list))
 
 ;;   (define (get-system-services config)
-;;     (cons*
+;;     (list
 ;;      (service network-manager-service-type
 ;;               (network-manager-configuration
 ;;                (vpn-plugins vpn-plugins)
@@ -964,10 +965,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;; (define* (feature-dns-services)
 ;;   ;; https://guix.gnu.org/manual/en/html_node/Avahi-Services.html
 ;;   (define (get-home-services config)
-;;     (cons*))
+;;     (list))
 
 ;;   (define (get-system-services config)
-;;     (cons*
+;;     (list
 ;;      (service avahi-service-type)))
 
 ;;   (feature
@@ -980,10 +981,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 (define* (feature-pointer-services)
   ;; https://guix.gnu.org/manual/en/html_node/GPM-Services.html
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
-    (cons*
+    (list
      (service gpm-service-type)))
 
   (feature
@@ -997,10 +998,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
           #:key (auto-enable? #t))
   ;; https://unix.stackexchange.com/questions/617858/how-to-enable-bluetooth-in-guix
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
-    (cons*
+    (list
      (service bluetooth-service-type
               (bluetooth-configuration
                (auto-enable? auto-enable?)))))
@@ -1039,10 +1040,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
                              (type "pipewire")
                              (enabled?   #f)))))
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
-    (cons*
+    (list
      (service mpd-service-type
               (mpd-configuration
                (auto-update? auto-update?)
@@ -1073,10 +1074,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
   ;; https://guix.gnu.org/manual/en/html_node/CUPS-Services.html
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
-    (cons*
+    (list
      (service cups-service-type
               (cups-configuration
                (web-interface? web-interface?)
@@ -1094,10 +1095,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;           #:key)
 ;;   ;; https://github.com/alezost/guix-config/blob/master/system-config/os-main.scm
 ;;   (define (get-home-services config)
-;;     (cons*))
+;;     (list))
 
 ;;   (define (get-system-services config)
-;;     (cons* (service polkit-service-type)))
+;;     (list (service polkit-service-type)))
 
 ;;   (feature
 ;;    (name 'polkit)
@@ -1112,10 +1113,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;           (allow-weak-crypto? #t)
 ;;           (realms '()))
 ;;   (define (get-home-services config)
-;;     (cons*))
+;;     (list))
 
 ;;   (define (get-system-services config)
-;;     (cons*
+;;     (list
 ;;      (service krb5-service-type
 ;;               (krb5-configuration
 ;;                (default-realm default-realm)
@@ -1132,10 +1133,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;; (define* (feature-container-sevices #:key)
 ;;    ;; https://guix.gnu.org/manual/en/html_node/Container-Services.html
 ;;   (define (get-home-services config)
-;;     (cons*))
+;;     (list))
 
 ;;   (define (get-system-services config)
-;;     (cons*
+;;     (list
 ;;      (service containerd-service-type)
 ;;      (service docker-service-type)
 ;;      (service spice-vdagent-service-type)))
@@ -1155,10 +1156,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
                                   (name "sshd")
                                   (enabled? #t)))))
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
-    (cons*
+    (list
      (service pcscd-service-type
               (pcscd-configuration (pcsc-lite pcsc-lite)
                                    (usb-drivers (list ccid))))
@@ -1178,10 +1179,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
           (configuration-directory #f))
   ;; https://guix.gnu.org/manual/en/html_node/Audit-Services.html
   (define (get-home-services config)
-    (cons*))
+    (list))
 
   (define (get-system-services config)
-    (cons*
+    (list
      (service auditd-service-type
               (auditd-configuration
                (audit audit)
@@ -1209,10 +1210,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;   ;; https://gitlab.com/Efraim/guix-config/blob/master/macbook41_config.scm
 ;;   ;; https://guix.gnu.org/manual/en/html_node/Base-Services.html
 ;;   (define (get-home-services config)
-;;     (cons*))
+;;     (list))
 
 ;;   (define (get-system-services config)
-;;     (cons*
+;;     (list
 ;;      (service guix-service-type
 ;;               (guix-configuration
 ;;                (discover?        discover?)
@@ -1245,10 +1246,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;   ;; https://gitlab.com/Efraim/guix-config/blob/master/macbook41_config.scm)
 ;;   ;; https://issues.guix.info/issue/35674
 ;;   (define (get-home-services config)
-;;     (cons*))
+;;     (list))
 
 ;;   (define (get-system-services config)
-;;     (cons*
+;;     (list
 ;;      (service gdm-service-type
 ;;               (gdm-configuration
 ;;                (xorg-configuration xorg-configuration)
@@ -1266,10 +1267,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;           #:key
 ;;           (script-file (local-file "/etc/guix/default.pa")))
 ;;   (define (get-home-services config)
-;;     (cons*))
+;;     (list))
 
 ;;   (define (get-system-services config)
-;;     (cons*
+;;     (list
 ;;      (service pulseaudio-service-type
 ;;               (pulseaudio-configuration
 ;;                (script-file script-file)))))
