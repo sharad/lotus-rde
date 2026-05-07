@@ -56,6 +56,7 @@
   #:use-module (gnu services)
   #:use-module (gnu services desktop)
   #:use-module (gnu services avahi)
+  #:use-module (gnu services mcron)
   #:use-module (gnu services ssh)
   #:use-module (gnu packages admin)
   #:use-module (gnu packages base)
