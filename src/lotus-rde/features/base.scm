@@ -85,6 +85,13 @@
             feature-loopback-services
 
 
+            feature-gnome-desktop-services
+            feature-xfce-desktop-services
+            feature-mate-desktop-services
+            feature-enlightenment-desktop-services
+
+
+
             feature-file-database-services
             feature-guix-publish-services
             feature-schedular-services
