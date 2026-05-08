@@ -44,7 +44,7 @@ $(PKGEXEC)/%:
 SUDO = sudo
 # Pattern rule: any target that looks like subdir/something
 $(SUDO)/%:
-	sudo $(MAKE) $*
+	sudo --preserve-env=RDE_HOST,RDE_USER,RDE_TARGET $(MAKE) $*
 # Optional: Add a phony declaration if targets aren't actual files
 .PHONY: $(SUDO)/%
 ## -- sudo targets
@@ -68,7 +68,7 @@ $(CMD)/%:
 ## -- sudo targets
 
 
-RDE_HOST ?= $(HOSTNAME)
+RDE_HOST ?= $(shell hostname)
 export RDE_HOST
 RDE_USER ?= $(USER)
 export RDE_USER
