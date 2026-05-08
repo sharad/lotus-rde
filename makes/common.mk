@@ -32,10 +32,10 @@ PKGEXEC = pkg-exec
 # Pattern rule: any target that looks like subdir/something
 $(PKGEXEC)/%:
 	mkdir -p /tmp/guix-build-workspace/build/tmp
-	sudo-run chmod +rx /var/log
-	sudo mount -o remount,rw /gnu
+	chmod +rx /var/log
+	mount -o remount,rw /gnu
 	$(MAKE) $*
-	sudo mount -o remount,ro /gnu
+	mount -o remount,ro /gnu
 # Optional: Add a phony declaration if targets aren't actual files
 .PHONY: $(PKGEXEC)/%
 ## -- pkg-exec targets
@@ -58,14 +58,14 @@ $(SUBDIR)/%:
 .PHONY: $(SUBDIR)/%
 ## -- examples dir targets
 
-## -- sudo targets
+## -- guix subcmd targets
 CMD = cmd
 # Pattern rule: any target that looks like subdir/something
 $(CMD)/%:
 	${GUIX} $* $(GUIX_FLAGS)
 # Optional: Add a phony declaration if targets aren't actual files
 .PHONY: $(CMD)/%
-## -- sudo targets
+## -- guix subcmd targets
 
 
 RDE_HOST ?= $(shell hostname)
@@ -86,7 +86,7 @@ rde/home/reconfigure:
 
 
 /tmp/.cow-store-start:
-	sudo herd start cow-store ${ROOT_MOUNT_POINT}
+	herd start cow-store ${ROOT_MOUNT_POINT}
 	touch /tmp/.cow-store-start
 
 cow-store: /tmp/.cow-store-start
@@ -101,10 +101,10 @@ rde/system/build:
 	build ${CONFIGS}
 
 rde/system/reconfigure:
-	sudo mount -o rw /boot
+	mount -o rw /boot
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	reconfigure ${CONFIGS}
-	sudo umount /boot
+	umount /boot
 
 
 
