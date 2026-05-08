@@ -22,7 +22,20 @@ GUIX = $(GUIXTM) --
 
 
 
+
 ROOT_MOUNT_POINT=/mnt
+
+
+RDE_HOST ?= $(shell hostname)
+export RDE_HOST
+RDE_USER ?= $(USER)
+export RDE_USER
+RDE_TARGET ?= system
+export RDE_TARGET
+
+
+
+
 
 
 
@@ -68,12 +81,16 @@ $(CMD)/%:
 ## -- guix subcmd targets
 
 
-RDE_HOST ?= $(shell hostname)
-export RDE_HOST
-RDE_USER ?= $(USER)
-export RDE_USER
-RDE_TARGET ?= system
-export RDE_TARGET
+
+
+
+
+
+
+
+
+
+
 
 
 rde/home/build:
