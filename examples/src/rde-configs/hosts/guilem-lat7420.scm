@@ -124,7 +124,8 @@
                                                                                    (("vg01" "lv02"))
                                                                                    (("vg02" "lv01"))
                                                                                    (("vg02" "lv02")))
-                                                                                  #:prefix "vds" #:seq 0))
+                                                                                  #:prefix "vds"
+                                                                                  #:seq 0) )
                                                             #:custom-services (feature-custom-services
                                                                                #:feature-name-prefix 'guilem-lat7420-extra
                                                                                #:system-services (list))))

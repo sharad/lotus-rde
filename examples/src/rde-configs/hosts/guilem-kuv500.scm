@@ -119,24 +119,12 @@
                                                                                     "--verbose"
                                                                                     "nosplash"
                                                                                     "debug")
-                                                           ;; (if (and (pair? %lotus-swap-devices)
-                                                           ;;          (> (length %lotus-swap-devices) 0))
-                                                           ;;     (list (string-append "resume="
-                                                           ;;                          (swap-space-target (car %lotus-swap-devices))))
-                                                           ;;     '())
-                                                           ;; #:initrd (lambda (file-systems . rest)
-                                                           ;;            (apply base-initrd file-systems
-                                                           ;;                   #:extra-modules '("virtio.ko"
-                                                           ;;                                     "virtio_balloon.ko"
-                                                           ;;                                     "virtio_ring.ko"
-                                                           ;;                                     "virtio_blk.ko"
-                                                           ;;                                     "virtio_pci.ko"
-                                                           ;;                                     ;; https://issues.guix.gnu.org/31887
-                                                           ;;                                     "mptbase.ko"
-                                                           ;;                                     "mptscsih.ko"
-                                                           ;;                                     "mptspi.ko"
-                                                           ;;                                     "virtio_net.ko")
-                                                           ;;                   rest))
+                                                           #:volume-mappings '( ("s4b83r"
+                                                                                 ((("vg01" "lv01"))
+                                                                                  (("vg02" "lv01"))
+                                                                                  (("vg03" "lv01")))
+                                                                                 #:prefix "vds"
+                                                                                 #:seq 0))
                                                            #:custom-services (feature-custom-services
                                                                               #:feature-name-prefix 'guilem-kuv500-extra
                                                                               #:system-services (list))))
