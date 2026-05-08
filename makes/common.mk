@@ -68,7 +68,7 @@ $(CMD)/%:
 ## -- sudo targets
 
 
-RDE_HOST ?= $(HOST)
+RDE_HOST ?= $(HOSTNAME)
 export RDE_HOST
 RDE_USER ?= $(USER)
 export RDE_USER
