@@ -31,8 +31,8 @@
   #:use-module (rde features system)
   #:use-module (rde features image-viewers)
   #:use-module (rde packages)
-  #:use-module (lotus-rde features base)
-  #:use-module (lotus-rde features mfs)
+  #:use-module (lotus-rde-rde features base)
+  #:use-module (lotus-rde-rde features mfs)
   #:export (lotus-metal-machine
             lotus-metal-machine-minimal))
 

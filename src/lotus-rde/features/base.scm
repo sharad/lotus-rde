@@ -78,7 +78,7 @@
   #:use-module (rde features guile)
   #:use-module (rde features networking)
   #:use-module (rde features system)
-  #:use-module (lotus-rde features mfs)
+  #:use-module (lotus-rde-rde features mfs)
   #:export (feature-login-shell
             ;; feature-lotus-users-group
             feature-lotus-users-groups
