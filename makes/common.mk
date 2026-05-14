@@ -10,11 +10,11 @@ GUIXTM_FLAGS      += --debug=3
 GUIXTM_FLAGS      += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
 GUIXTM_PREFIX_ENV +=
 
-GUIXTM_COMMAND     = guix time-machine -C ${CHANNELS_FILE}
+GUIXTM_COMMAND     = guix time-machine -C ${CHANNELS_FILE} $(GUIXTM_FLAGS)
 
 GUIX_COMMAND      ?= ${GUIXTM_COMMAND}
 
-GUIX_FULL_COMMAND  = $(GUIXTM_PREFIX_ENV) $(GUIX_COMMAND) $(GUIXTM_FLAGS)
+GUIX_FULL_COMMAND  = $(GUIXTM_PREFIX_ENV) $(GUIX_COMMAND)
 
 GUIX_FLAGS        += --verbosity=3
 GUIX_FLAGS        += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
