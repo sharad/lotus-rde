@@ -50,7 +50,7 @@
          (volname (home-secfs-volume-configuration-volname config))
          (mode    (home-secfs-volume-configuration-mode config))
          (sym     (string->symbol (string-append "secfs-" volname)))
-         (base    (string-append home "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/"))
+         (base    (string-append home "/.secfs/")) ;; "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/"
          (dev     (string-append base "enc/volumes/" volname "/secret"))
          (mp      (string-append base "noenc/mountpoints/" volname))
          (cmd     (string-append home "/.bin/secfs-mount"))
@@ -95,8 +95,85 @@
 ;;                  (home-secfs-volume-configuration
 ;;                   (volname "volatile")
 ;;                   (mode "rw"))))
+
+
+(define-record-type* <home-flatpak-app-configuration>
+  home-flatpak-app-configuration make-home-flatpak-app-configuration
+  home-flatpak-app-configuration?
+  (name           home-flatpak-app-configuration-name)
+  (app            home-flatpak-app-configuration-app)
+  (respawn?       home-flatpak-app-configuration-respawn?
+                  (default #f))
+  (respawn-delay  home-flatpak-app-configuration-respawn-delay
+                  (default 10))
+  (respawn-limit  home-flatpak-app-configuration-respawn-limit
+                  (default 300))
+  (requirement    home-flatpak-app-configuration-requirement
+                  (default '())))
 
 
+(define (flatpak-app->shepherd-service config)
+  (let* ((name          (home-flatpak-app-configuration-name config))
+         (app           (home-flatpak-app-configuration-app config))
+         (respawn?      (home-flatpak-app-configuration-respawn? config))
+         (respawn-delay (home-flatpak-app-configuration-respawn-delay config))
+         (respawn-limit (home-flatpak-app-configuration-respawn-limit config))
+         (requirement   (home-flatpak-app-configuration-requirement config))
+         (name-str      (symbol->string name))
+         (log           (shepherd-service-log-file name-str))
+         (dbus-launch   (file-append dbus "/bin/dbus-launch"))
+         (flatpak       (file-append flatpak "/bin/flatpak")))
+
+    (shepherd-service
+     (provision (list name))
+     (requirement requirement)
+     (respawn? respawn?)
+     (respawn-delay respawn-delay)
+     (respawn-limit respawn-limit)
+     (start #~(make-forkexec-constructor
+               (list dbus-launch flatpak "--user" "run" #$app)
+               #:create-session? #t
+               #:log-file #$log))
+     (stop #~(make-cmd-destructor
+              (string-join (list flatpak "kill" #$app) " ")
+              " >> " #$log " 2>&1")))))
+
+
+(define home-flatpak-service-type
+  (service-type
+    (name 'home-flatpak)
+    (extensions
+     (list (service-extension
+            home-shepherd-service-type
+            (lambda (configs)
+              (map flatpak-app->shepherd-service configs)))))
+    (compose concatenate)
+    (extend append)
+    (default-value '())
+    (description
+     "Manages flatpak applications as shepherd services.")))
+
+
+
+;; (simple-service 'my-flatpak-apps
+;;                 home-flatpak-service-type
+;;                 (list
+;;                  (home-flatpak-app-configuration
+;;                   (name 'zoom)
+;;                   (app  "us.zoom.Zoom"))
+
+;;                  (home-flatpak-app-configuration
+;;                   (name 'msteam)
+;;                   (app  "com.github.IsmaelMartinez.teams_for_linux"))
+
+;;                  (home-flatpak-app-configuration
+;;                   (name 'logseq)
+;;                   (app  "com.logseq.Logseq.Locale"))
+
+;;                  (home-flatpak-app-configuration
+;;                   (name 'obsidian)
+;;                   (app  "md.obsidian.Obsidian"))))
+
 
 
 (define-record-type* <home-services-group-configuration>
@@ -269,5 +346,4 @@
 ;;                   (name 'xdelayed-login-session)
 ;;                   (requirement '(xawaken-session
 ;;                                  delayed-login-session)))))
-
-
+

@@ -681,6 +681,42 @@ subject:/home:/) and tag:new}\"'"
     (feature-additional-services)
     (feature-base-packages #:home-packages (list ))
 
+
+    (feature-custom-services
+     #:feature-name-prefix 'my-profile-code
+     #:home-services
+     (list (simple-service 'my-profile-code
+                           home-shell-profile-service-type
+                           (list (plain-file "my-profile"
+                                             "# my existing code here
+# ~/.profile: executed by the command interpreter for login shells.  -*- mode: sh; -*-
+# This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
+# exists.
+# see /usr/share/doc/bash/examples/startup-files for examples.
+# the files are located in the bash-doc package.
+
+# the default umask is set in /etc/profile; for setting the umask
+# for ssh logins, install and configure the libpam-umask package.
+#umask 022
+
+## GUIX
+# Source the system-wide file.
+#
+
+source ~/.rsetup/base/env
+lotus_run_source_profiles_with_loc profile sh
+# if sh_env_utils_real_login_shell_p
+# then
+#     lotus_run_source_profiles_with_loc profile login
+# fi
+lotus_source_profiles_with_loc profile login
+if sh_env_utils_real_login_shell_p
+then
+    lotus_run_profiles_with_loc profile login
+fi
+
+")))))
+
     (if #f
         (feature-user-info #:user-name "s"
                            #:full-name "Sharad Pratap"
