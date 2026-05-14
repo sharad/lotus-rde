@@ -70,6 +70,7 @@
   #:use-module (gnu packages suckless)
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu packages idutils)
+  #:use-module (gnu packages ssh)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
   #:use-module (rde predicates)
@@ -188,7 +189,7 @@ Usage: #:log-file #$(shepherd-service-log-file name)"
                             #:key (rport 2222) (lport 22)
                             #:allow-other-keys)
     #~(make-forkexec-constructor
-       (list "autossh" "-v" "-M" "0" "-N"
+       (list #$(file-append autossh "/bin/autossh") "-v" "-M" "0" "-N"
              "-R" #$(format #f "~d:localhost:~d" rport lport)
              #$inst-name)
        #:log-file #$(shepherd-service-log-file (service-name-fn))))
@@ -212,7 +213,7 @@ Usage: #:log-file #$(shepherd-service-log-file name)"
     (let ((port-args (if (= port 22) '()
                          (list "-p" (number->string port)))))
       #~(make-forkexec-constructor
-         (append (list "ssh" "-v") '#$port-args
+         (append (list #$(file-append openssh "/bin/ssh") "-v") '#$port-args
                  (list "-N"
                        "-R" #$(format #f "~d:localhost:~d" rport lport)
                        #$inst-name))
