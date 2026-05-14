@@ -29,7 +29,11 @@
   #:use-module (guix packages)
   #:use-module (guix gexp)
   #:use-module (rde serializers yaml)
-  #:export ())
+  #:export (home-secfs-service-type
+            home-secfs-volume-configuration
+            secfs-volume->shepherd-service
+            home-services-group-service-type
+            services-group->shepherd-service))
 
 
 
@@ -254,7 +258,7 @@
 ;;                  (home-services-group-configuration
 ;;                   (name 'secfs)
 ;;                   (dependent '(awaken-session-down))
-;;                   (requirement '(secfs-orgp secfs-secure)))
+;;                   (requirement '(secfs-orgp secfs-secure)))))
 
 ;;                  (home-services-group-configuration
 ;;                   (name 'xawaken-session)
