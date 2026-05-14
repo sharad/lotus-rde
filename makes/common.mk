@@ -9,16 +9,19 @@
 GUIXTM_FLAGS      += --debug=3
 GUIXTM_FLAGS      += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
 GUIXTM_PREFIX_ENV +=
+
 GUIXTM_COMMAND     = guix time-machine
 
-GUIXTM             = $(GUIXTM_PREFIX_ENV) $(GUIXTM_COMMAND) -C ${CHANNELS_FILE} $(GUIXTM_FLAGS)
+GUIX_COMMAND      ?= ${GUIXTM_COMMAND}
+
+GUIX_FULL_COMMAND  = $(GUIXTM_PREFIX_ENV) $(GUIX_COMMAND) -C ${CHANNELS_FILE} $(GUIXTM_FLAGS)
 
 GUIX_FLAGS        += --verbosity=3
 GUIX_FLAGS        += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
 GUIX_SYSTEM_FLAGS += $(GUIX_FLAGS) --debug=3
 GUIX_HOME_FLAGS   += $(GUIX_FLAGS) --debug=3
 
-GUIX = $(GUIXTM) --
+GUIX = $(GUIX_FULL_COMMAND) --
 
 
 
@@ -35,7 +38,7 @@ export RDE_TARGET
 
 
 
-
+SUDO_PRESERVE_ENV_VARS = RDE_HOST,RDE_USER,RDE_TARGET,GUIX_COMMAND
 
 
 
@@ -57,7 +60,7 @@ $(PKGEXEC)/%:
 SUDO = sudo
 # Pattern rule: any target that looks like subdir/something
 $(SUDO)/%:
-	sudo --preserve-env=RDE_HOST,RDE_USER,RDE_TARGET $(MAKE) $*
+	sudo --preserve-env=$(SUDO_PRESERVE_ENV_VARS) $(MAKE) $*
 # Optional: Add a phony declaration if targets aren't actual files
 .PHONY: $(SUDO)/%
 ## -- sudo targets
