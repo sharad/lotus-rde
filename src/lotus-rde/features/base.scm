@@ -722,7 +722,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
     ;; job's action as a Scheme procedure.
     #~(job '(next-hour '(3))
            (lambda ()
-             (execl (string-append #$findutils "/bin/updatedb")
+             (execl (file-append findutils "/bin/updatedb")
                     ;; "updatedb"
                     "--prunepaths=`/tmp /var/tmp /gnu/store /run'"))))
 
@@ -736,7 +736,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
     ;; Update the index database as user "charlie" at 12:15PM
     ;; and 19:15PM.  This runs from the user's home directory.
     #~(job '(next-minute-from (next-hour '(12 19)) '(15))
-           (string-append #$idutils "/bin/mkid src")
+           (file-append idutils "/bin/mkid src")
            #:user "s"))
 
   (define (get-home-services config)
