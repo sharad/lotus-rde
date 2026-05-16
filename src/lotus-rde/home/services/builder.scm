@@ -18,6 +18,7 @@
 ;;; along with rde.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (lotus-rde home services builder)
+  #:use-module (srfi srfi-1)
   #:use-module (guix records)
   #:use-module (gnu services)
   #:use-module (gnu services shepherd)
