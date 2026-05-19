@@ -527,7 +527,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
           (elogind elogind)
           (geoclue geoclue)
           (udisks udisks)
-          (upower upower))
+          (upower upower)
+          (nm-vpn-plugins (list network-manager-fortisslvpn
+                                network-manager-openconnect))
+          (nm-dns "dnsmasq"))
   "Provides desktop system services."
   (ensure-pred file-like? avahi)
   (ensure-pred file-like? dbus)
@@ -541,25 +544,31 @@ Defaults:%wheel env_keep+=TERMINFO")))))
                    (home-dbus-configuration (dbus dbus)))))
 
   (define (get-system-services _)
-    (cons*
 
-     ;; (service gnome-desktop-service-type)
 
-     (service avahi-service-type
-              (avahi-configuration (avahi avahi)))
-     (service dbus-root-service-type
-              (dbus-configuration (dbus dbus)))
-     (service elogind-service-type
-              (elogind-configuration (elogind elogind)))
+    (append
+     (modify-services default-desktop-system-services
+       (network-manager-service-type config =>
+                                     (network-manager-configuration (inherit config)
+                                                                    (vpn-plugins nm-vpn-plugins)
+                                                                    (dns nm-dns))))
+     (list (service avahi-service-type
+                    (avahi-configuration (avahi avahi)))
 
-     (service geoclue-service-type
-              (geoclue-configuration (geoclue geoclue)))
-     (service udisks-service-type
-              (udisks-configuration (udisks udisks)))
+           ;; (service gnome-desktop-service-type)
 
-     (service upower-service-type
-              (upower-configuration (upower upower)))
-     default-desktop-system-services))
+           (service dbus-root-service-type
+                    (dbus-configuration (dbus dbus)))
+           (service elogind-service-type
+                    (elogind-configuration (elogind elogind)))
+
+           (service geoclue-service-type
+                    (geoclue-configuration (geoclue geoclue)))
+           (service udisks-service-type
+                    (udisks-configuration (udisks udisks)))
+
+           (service upower-service-type
+                    (upower-configuration (upower upower))))))
 
   (feature
    (name 'desktop-services)

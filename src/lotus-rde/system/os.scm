@@ -154,7 +154,8 @@
         (feature-gnome-desktop-services)
         (feature-file-database-services)
         ;; ;; (feature-guix-publish-services)
-        (feature-schedular-services)
+
+        ;; (feature-schedular-services)
         ;; (feature-unattended-upgrade-services)
 
 
