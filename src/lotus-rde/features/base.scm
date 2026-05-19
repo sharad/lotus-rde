@@ -84,6 +84,7 @@
             feature-lotus-users-groups
             feature-lotus-base-services
             feature-lotus-desktop-services
+            feature-display-manager-services
             feature-logger-services
             feature-loopback-services
 
@@ -140,32 +141,37 @@
    (name 'login-shell)
    (values (make-feature-values login-shell))))
 
-(define* (feature-lotus-users-groups #:key
+(define* (feature-lotus-users-groups user-name
+                                     #:key
                                      (uid 1000)
                                      (gid 1000)
                                      (group "users")
                                      (home-directory "/home/s/hell")
                                      (shell (file-append zsh "/bin/zsh"))
-                                     (supplementary-groups '("wheel" "netdev" "audio" "video" "dialout")))
+                                     (supplementary-groups '("wheel" "netdev" "audio" "video" "dialout"))) ;"docker"
   (feature
    (name 'users-group)
    (system-services-getter
     (lambda (_)
-      (list
-       (simple-service
-        'users-group
-        account-service-type
-        (list
-         (user-group
-           (name group)
-           (id gid))
-         (user-account
-           (name "s")
-           (uid uid)
-           (group group)
-           (home-directory home-directory)
-           (shell shell)
-           (supplementary-groups supplementary-groups)))))))))
+      (let ((user (user-account
+                   (name user-name)
+                   (uid uid)
+                   (group group)
+                   (home-directory home-directory)
+                   (shell shell)
+                   (supplementary-groups supplementary-groups)))
+            (group (user-group
+                    (name group)
+                    (id gid))))
+       (list
+        (simple-service
+         'users-group
+         account-service-type
+         (list group
+               user))))))
+   (values `((user-account-name . ,user-name)
+             (user-account-home-directory . ,home-directory)
+             (user-account-shell . ,shell)))))
 
 (define %lotus-rde-base-system-services1
   (list
@@ -233,18 +239,19 @@
                                        (tty #f) ; automatic
                                        (shepherd-requirement '(syslogd))))
 
-        (service mingetty-service-type (mingetty-configuration
-                                         (tty "tty1")))
-        (service mingetty-service-type (mingetty-configuration
-                                         (tty "tty2")))
-        (service mingetty-service-type (mingetty-configuration
-                                         (tty "tty3")))
-        (service mingetty-service-type (mingetty-configuration
-                                         (tty "tty4")))
-        (service mingetty-service-type (mingetty-configuration
-                                         (tty "tty5")))
-        (service mingetty-service-type (mingetty-configuration
-                                         (tty "tty6")))
+
+        ;; (service mingetty-service-type (mingetty-configuration
+        ;;                                  (tty "tty1")))
+        ;; (service mingetty-service-type (mingetty-configuration
+        ;;                                  (tty "tty2")))
+        ;; (service mingetty-service-type (mingetty-configuration
+        ;;                                  (tty "tty3")))
+        ;; (service mingetty-service-type (mingetty-configuration
+        ;;                                  (tty "tty4")))
+        ;; (service mingetty-service-type (mingetty-configuration
+        ;;                                  (tty "tty5")))
+        ;; (service mingetty-service-type (mingetty-configuration
+        ;;                                  (tty "tty6")))
 
         (service static-networking-service-type
                  (list %loopback-static-networking))
@@ -322,48 +329,33 @@
 
   (define (get-base-system-services cfg)
     (append
-     base-system-services
-     ;; (modify-services base-system-services
-     ;;   (console-font-service-type
-     ;;    config =>
-     ;;    (map (lambda (x)
-     ;;           (cons
-     ;;            (format #f "tty~a" x)
-     ;;            (get-value 'console-font cfg "LatGrkCyr-8x16")))
-     ;;         (iota (get-value 'number-of-ttys cfg 6) 1)))
-     ;;   (guix-service-type
-     ;;    config =>
-     ;;    (guix-configuration
-     ;;     (inherit config)
-     ;;     (privileged? guix-daemon-privileged?)
-     ;;     (extra-options guix-daemon-extra-options)
-     ;;     (http-proxy guix-http-proxy)))
-     ;;   ;; (greetd-service-type
-     ;;   ;;  config =>
-     ;;   ;;  (greetd-configuration
-     ;;   ;;   (terminals
-     ;;   ;;    (map (lambda (x)
-     ;;   ;;           (greetd-terminal-configuration
-     ;;   ;;            (terminal-vt (number->string x))
-     ;;   ;;            (terminal-switch #t)
-     ;;   ;;            (default-session-command
-     ;;   ;;              #~(string-append #$shadow "/bin/login"))))
-     ;;   ;;         (iota (get-value 'number-of-ttys cfg 5) 2)))))
-     ;;   ;; (greetd-service-type
-     ;;   ;;  config =>
-     ;;   ;;  (greetd-configuration
-     ;;   ;;   (terminals
-     ;;   ;;    (map (lambda (x)
-     ;;   ;;           (greetd-terminal-configuration
-     ;;   ;;            (terminal-vt (number->string x))))
-     ;;   ;;         (iota 6 1)))))
-     ;;   (udev-service-type
-     ;;    config =>
-     ;;    (udev-configuration
-     ;;     (inherit config)
-     ;;     (rules (append
-     ;;             udev-rules
-     ;;             (udev-configuration-rules config))))))
+     (modify-services base-system-services
+       ;; (console-font-service-type
+       ;;  config =>
+       ;;  (map (lambda (x)
+       ;;         (cons
+       ;;          (format #f "tty~a" x)
+       ;;          (get-value 'console-font cfg "LatGrkCyr-8x16")))
+       ;;       (iota (get-value 'number-of-ttys cfg 6) 1)))
+       (guix-service-type
+        config =>
+        (guix-configuration
+         (inherit config)
+         (privileged? guix-daemon-privileged?)
+         (extra-options guix-daemon-extra-options)
+         (http-proxy guix-http-proxy)))
+       (udev-service-type
+        config =>
+        (udev-configuration
+         (inherit config)
+         (rules (append
+                 udev-rules
+                 (udev-configuration-rules config))))))
+     (map (lambda (num)
+            (service mingetty-service-type (mingetty-configuration
+                                            (tty (format #f "tty~a" num)))))
+          (iota (get-value 'number-of-ttys cfg 6)
+                1))
      (list
       (simple-service
        'base-preserve-terminfo-variable
@@ -433,7 +425,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   ;; FIXME: Since GDM depends on more dependencies that do not build on i686,
   ;; keep SDDM on it for the time being.
   ;; XXX: When changing login manager, also change set-xorg-configuration
-  (list (service gdm-service-type)
+  (list  ;; (service gdm-service-type)
          ;; (service syslog-service-type)
          ;; (service static-networking-service-type
          ;;          (list %loopback-static-networking))
@@ -577,6 +569,27 @@ Defaults:%wheel env_keep+=TERMINFO")))))
              (dbus . ,dbus)))
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
+
+
+(define* (feature-display-manager-services #:key
+                                           (allow-empty-password? #f)
+                                           (auto-login? #f))
+  (feature
+   (name 'display-manager-services)
+   (values `())
+   (home-services-getter (const '()))
+   (system-services-getter
+    (lambda (config)
+      (let ((user-name (get-value 'user-name config #f))
+            (keyboard-layout (get-value 'keyboard-layout config (keyboard-layout "us" "altgr-intl"))))
+        (list (service gdm-service-type
+                       (gdm-configuration
+                        (xorg-configuration
+                         (xorg-configuration
+                          (keyboard-layout keyboard-layout)))
+                        (allow-empty-passwords? allow-empty-password?)
+                        (auto-login? auto-login?)
+                        (default-user user-account-name)))))))))
 
 
 (define (feature-logger-services)
@@ -821,33 +834,63 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;    (system-services-getter get-system-services)))
 
 
-(define* (feature-privileged-programs-services
+;; (define* (feature-privileged-programs-services
+;;           #:key
+;;           (paths (list (file-append ecryptfs-utils "/sbin/mount.ecryptfs_private")
+;;                        (file-append ecryptfs-utils "/sbin/umount.ecryptfs_private")
+;;                        (file-append xtrlock "/bin/xtrlock")
+;;                        (file-append firejail "/bin/firejail"))))
+;;   ;; https://git.sr.ht/~boeg/home/tree/master/.config/guix/system/config.scm
+;;   ;; https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/services/desktop.scm#n1209
+;;   (define (get-home-services config)
+;;     (list))
+
+;;   (define (get-system-services config)
+;;     (list
+;;      (simple-service
+;;       'privileged-programs
+;;       privileged-program-service-type
+;;       (map (lambda (path)
+;;              (privileged-program
+;;                (program path)
+;;                (setuid? #t)))
+;;            paths))))
+
+;;   (feature
+;;    (name 'privileged-programs)
+;;    (values `())
+;;    (home-services-getter get-home-services)
+;;    (system-services-getter get-system-services)))
+
+
+(define* (feature-privileged-programs-services service-name
           #:key
-          (paths (list (file-append ecryptfs-utils "/sbin/mount.ecryptfs_private")
-                       (file-append ecryptfs-utils "/sbin/umount.ecryptfs_private")
-                       (file-append xtrlock "/bin/xtrlock")
-                       (file-append firejail "/bin/firejail"))))
+          (paths #f))
   ;; https://git.sr.ht/~boeg/home/tree/master/.config/guix/system/config.scm
   ;; https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/services/desktop.scm#n1209
   (define (get-home-services config)
     (list))
 
   (define (get-system-services config)
-    (list
-     (simple-service
-      'privileged-programs
-      privileged-program-service-type
-      (map (lambda (path)
-             (privileged-program
+    (if (and (pair? paths)
+             (> (length paths) 0))
+     (list
+      (simple-service
+       service-name
+       privileged-program-service-type
+       (map (lambda (path)
+              (privileged-program
                (program path)
                (setuid? #t)))
-           paths))))
+            paths)))))
 
   (feature
-   (name 'privileged-programs)
+   (name (string->symbol (string-append "privileged-programs-"
+                                        (symbol->string service-name))))
    (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
+
 
 
 ;; ;; TODO

@@ -732,4 +732,4 @@ fi
                            ;; of minimalistic, less distractive and clean look.  Generally
                            ;; it's not recommended to use it.
                            #:emacs-advanced-user? #f)
-        (feature-lotus-users-groups)))))
+        (feature-lotus-users-groups "s")))))

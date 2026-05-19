@@ -17,6 +17,7 @@
   #:use-module (gnu packages linux)
   #:use-module (gnu packages shells)
   #:use-module (gnu packages gnome)
+  #:use-module (gnu packages xdisorg)
   #:use-module (gnu packages xfce)
   #:use-module (gnu packages mate)
   #:use-module (gnu packages enlightenment)
@@ -103,6 +104,7 @@
                              (kernel linux-libre)
                              (firmware '())
                              (kernel-arguments '())
+                             (keyboard-layout (keyboard-layout "us" "altgr-intl"))
                              (initrd base-initrd)
                              (initrd-modules %lotus-guix-initrd-modules)
                              (custom-services #f)
@@ -110,13 +112,7 @@
                              (parent-dir "/srv/volumes/local")
                              (volume-mappings '()))
 
-  (display "hostname: ")
-  (display (getenv "RDE_SYSINIT"))
-  (display bootloader-targets)
-  (newline)
-
-  (list (feature-keyboard #:keyboard-layout (keyboard-layout "us" "altgr-intl"))
-        (feature-host-info #:host-name hostname
+  (list (feature-host-info #:host-name hostname
            ;; #:locale    (operating-system-locale bare-bone-os)
            ;; ls `guix build tzdata`/share/zoneinfo
            #:timezone timezone)
@@ -126,13 +122,17 @@
                         #:firmware firmware
                         #:kernel-arguments kernel-arguments)
         (feature-bootloader #:bootloader-configuration
-                            (bootloader-configuration (bootloader grub-efi-bootloader)
-                                                      (targets    bootloader-targets)))
+                            (bootloader-configuration
+                              (bootloader grub-efi-bootloader)
+                              (targets    bootloader-targets)))
+        (feature-hidpi)
         ;; (keyboard-layout %lotus-keyboard-layout)
         ;; (menu-entries    %lotus-grub-ubuntu-menuentries)
         ;; Allows to declare specific bootloader configuration,
         ;; grub-efi-bootloader used by default
         ;; (feature-bootloader)
+        (feature-keyboard #:keyboard-layout
+                          keyboard-layout)
         (feature-mapped-file-systems #:disk-serial-id-system disk-serial-id-system
                                      #:disk-serial-id-home disk-serial-id-home
                                      #:fs-boot-efi-partition fs-boot-efi-partition
@@ -143,7 +143,8 @@
 
         ;; (feature-users-group)
         (feature-base-packages #:system-packages
-                               (apply strings->packages %lotus-system-packages))
+                               (apply strings->packages
+                                      %lotus-system-packages))
 
         (feature-ssh-daemon-services)
 
@@ -151,6 +152,8 @@
         ;; (feature-loopback-services)
         (feature-lotus-base-services)
         (feature-lotus-desktop-services)
+        (feature-display-manager-services #:allow-empty-password? #t
+                                          #:auto-login? #f)
         ;; (feature-zsh #:default-shell? #t)
         (feature-login-shell #:login-shell login-shell)
 
@@ -165,7 +168,16 @@
 
 
         ;; (feature-disk-services)
-        (feature-privileged-programs-services)
+        (feature-privileged-programs-services 'firejail
+                                              #:paths
+                                              (list (file-append firejail "/bin/firejail")))
+        (feature-privileged-programs-services 'xtrlock
+                                              #:paths
+                                              (list (file-append xtrlock "/bin/xtrlock")))
+        (feature-privileged-programs-services 'mount-ecryptfs-setuid-helpers
+                                              #:paths
+                                              (list (file-append ecryptfs-utils "/sbin/mount.ecryptfs_private")
+                                                    (file-append ecryptfs-utils "/sbin/umount.ecryptfs_private")))
 
 
         ;; (feature-messaging-services)
@@ -221,14 +233,13 @@
                         #:kernel-arguments kernel-arguments)
         (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader grub-efi-bootloader)
                                                                                  (targets    bootloader-targets)))
-                                                                                 ;; (keyboard-layout %lotus-keyboard-layout)
-                                                                                 ;; (menu-entries    %lotus-grub-ubuntu-menuentries)
+        ;;                                                                          (menu-entries    %lotus-grub-ubuntu-menuentries)
         ;; Allows to declare specific bootloader configuration,
         ;; grub-efi-bootloader used by default
         ;; (feature-bootloader)
         (feature-mapped-file-systems #:disk-serial-id-system disk-serial-id-system
-                                     #:disk-serial-id-home disk-serial-id-home
-                                     #:fs-boot-efi-partition fs-boot-efi-partition)
+                          #:disk-serial-id-home disk-serial-id-home
+                          #:fs-boot-efi-partition fs-boot-efi-partition)
         (feature-base-services)
         (feature-shepherd)))
 
