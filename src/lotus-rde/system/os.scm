@@ -229,8 +229,7 @@
         (feature-mapped-file-systems #:disk-serial-id-system disk-serial-id-system
                                      #:disk-serial-id-home disk-serial-id-home
                                      #:fs-boot-efi-partition fs-boot-efi-partition)
-        (feature-base-services #:guix-substitute-urls %lotus-guix-substitute-urls
-                               #:guix-authorized-keys '())
+        (feature-base-services)
         (feature-shepherd)))
 
 
