@@ -96,9 +96,10 @@
                              (disk-serial-id-system "aaa")
                              (disk-serial-id-home "aaa")
                              (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
-                             (bootloader-targets (match (getenv "RDE_SYSINIT")
-                                                   ("init" fs-boot-efi-partition)
-                                                   (_ '())))
+                             (bootloader-targets (let ((rde-sysinit (getenv "RDE_SYSINIT")))
+                                                   (match rde-sysinit
+                                                     ("init" (list fs-boot-efi-partition))
+                                                     (_ '()))))
                              (kernel linux-libre)
                              (firmware '())
                              (kernel-arguments '())
@@ -109,6 +110,10 @@
                              (parent-dir "/srv/volumes/local")
                              (volume-mappings '()))
 
+  (display "hostname: ")
+  (display (getenv "RDE_SYSINIT"))
+  (display bootloader-targets)
+  (newline)
 
   (list (feature-keyboard #:keyboard-layout (keyboard-layout "us" "altgr-intl"))
         (feature-host-info #:host-name hostname
