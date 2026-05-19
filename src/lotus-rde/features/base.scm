@@ -586,7 +586,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
                           (keyboard-layout keyboard-layout)))
                         (allow-empty-passwords? allow-empty-password?)
                         (auto-login? auto-login?)
-                        (default-user user-account-name)))))))))
+                        (default-user user-name)))))))))
 
 
 (define (feature-logger-services)
