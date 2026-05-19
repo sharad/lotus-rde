@@ -25,6 +25,7 @@
   #:use-module (rde features)
   #:use-module (rde features base)
   #:use-module (rde features guile)
+  #:use-module (rde features keyboard)
   #:use-module (rde features linux)
   #:use-module (rde features networking)
   #:use-module (rde features shells)
