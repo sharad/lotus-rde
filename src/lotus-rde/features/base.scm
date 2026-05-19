@@ -270,7 +270,10 @@
                  (udev-configuration
                    (rules (list lvm2 fuse alsa-utils crda))))
 
-        (service sysctl-service-type)))
+        (service sysctl-service-type)
+        (service special-files-service-type
+                 `(("/bin/sh" ,(file-append bash "/bin/sh"))
+                   ("/usr/bin/env" ,(file-append coreutils "/bin/env"))))))
 
 
 (define %lotus-rde-base-home-services
