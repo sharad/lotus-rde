@@ -54,8 +54,8 @@
                                       "https://nonguix-proxy.ditigal.xyz"
                                       "https://mirror.brielmaier.net"))
 
-(define %lotus-system-packages '("gdm"
-                                 "gpm"
+(define %lotus-system-packages '(;; "gdm"
+                                 ;; "gpm"
                                  "slock" ; need suid
                                  "zsh"
                                  "stumpwm"
