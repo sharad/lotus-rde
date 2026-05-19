@@ -96,7 +96,7 @@
                              (disk-serial-id-system "aaa")
                              (disk-serial-id-home "aaa")
                              (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
-                             (bootloader-targets (match (getenv "RDE_TARGET")
+                             (bootloader-targets (match (getenv "RDE_SYSINIT")
                                                    ("init" fs-boot-efi-partition)
                                                    (_ '())))
                              (kernel linux-libre)

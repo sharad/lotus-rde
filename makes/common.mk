@@ -113,7 +113,7 @@ cow-store: /tmp/.cow-store-start
 
 
 rde/system/init: guix /tmp/.cow-store-start
-	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
+	RDE_SYSINIT=init RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	init ${CONFIGS} ${ROOT_MOUNT_POINT}
 
 rde/system/build:
