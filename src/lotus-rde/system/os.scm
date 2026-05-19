@@ -110,7 +110,12 @@
                              (custom-services #f)
                              (login-shell (file-append zsh "/bin/zsh"))
                              (parent-dir "/srv/volumes/local")
-                             (volume-mappings '()))
+                             (volume-mappings '())
+                             (nm-vpn-plugins (list network-manager-fortisslvpn
+                                                   network-manager-openconnect))
+                             (nm-dns "dnsmasq")
+                             (gdm-auto-login? #t)
+                             (gdm-allow-empty-password? #t))
 
   (list (feature-host-info #:host-name hostname
            ;; #:locale    (operating-system-locale bare-bone-os)
@@ -151,9 +156,10 @@
         ;; (feature-logger-services)
         ;; (feature-loopback-services)
         (feature-lotus-base-services)
-        (feature-lotus-desktop-services)
-        (feature-display-manager-services #:allow-empty-password? #t
-                                          #:auto-login? #f)
+        (feature-lotus-desktop-services #:dns nm-dns
+                                        #:vpn-plugins nm-vpn-plugins)
+        (feature-display-manager-services #:allow-empty-password? gdm-allow-empty-password?
+                                          #:auto-login? gdm-auto-login?)
         ;; (feature-zsh #:default-shell? #t)
         (feature-login-shell #:login-shell login-shell)
 

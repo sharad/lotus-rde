@@ -513,16 +513,15 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 (define* (feature-lotus-desktop-services
           #:key
           (default-desktop-system-services %rde-lotus-desktop-system-services)
-          ;; (default-desktop-system-services %desktop-services)
           (avahi avahi)
           (dbus dbus)
           (elogind elogind)
           (geoclue geoclue)
           (udisks udisks)
           (upower upower)
-          (nm-vpn-plugins (list network-manager-fortisslvpn
-                                network-manager-openconnect))
-          (nm-dns "dnsmasq"))
+          (vpn-plugins (list network-manager-fortisslvpn
+                             network-manager-openconnect))
+          (dns "dnsmasq"))
   "Provides desktop system services."
   (ensure-pred file-like? avahi)
   (ensure-pred file-like? dbus)
@@ -542,8 +541,8 @@ Defaults:%wheel env_keep+=TERMINFO")))))
      (modify-services default-desktop-system-services
        (network-manager-service-type config =>
                                      (network-manager-configuration (inherit config)
-                                                                    (vpn-plugins nm-vpn-plugins)
-                                                                    (dns nm-dns))))
+                                                                    (vpn-plugins vpn-plugins)
+                                                                    (dns dns))))
      (list (service avahi-service-type
                     (avahi-configuration (avahi avahi)))
 
@@ -553,12 +552,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
                     (dbus-configuration (dbus dbus)))
            (service elogind-service-type
                     (elogind-configuration (elogind elogind)))
-
            (service geoclue-service-type
                     (geoclue-configuration (geoclue geoclue)))
            (service udisks-service-type
                     (udisks-configuration (udisks udisks)))
-
            (service upower-service-type
                     (upower-configuration (upower upower))))))
 
@@ -580,7 +577,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
    (home-services-getter (const '()))
    (system-services-getter
     (lambda (config)
-      (let ((user-name (get-value 'user-name config #f))
+      (let ((user-name (get-value 'user-account-name config #f))
             (keyboard-layout (get-value 'keyboard-layout config (keyboard-layout "us" "altgr-intl"))))
         (list (service gdm-service-type
                        (gdm-configuration
