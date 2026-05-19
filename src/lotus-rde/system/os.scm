@@ -111,9 +111,9 @@
                              (login-shell (file-append zsh "/bin/zsh"))
                              (parent-dir "/srv/volumes/local")
                              (volume-mappings '())
+                             (nm-dns "dnsmasq")
                              (nm-vpn-plugins (list network-manager-fortisslvpn
                                                    network-manager-openconnect))
-                             (nm-dns "dnsmasq")
                              (gdm-auto-login? #t)
                              (gdm-allow-empty-password? #t))
 

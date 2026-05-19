@@ -519,9 +519,8 @@ Defaults:%wheel env_keep+=TERMINFO")))))
           (geoclue geoclue)
           (udisks udisks)
           (upower upower)
-          (vpn-plugins (list network-manager-fortisslvpn
-                             network-manager-openconnect))
-          (dns "dnsmasq"))
+          (vpn-plugins '())
+          (dns "default"))
   "Provides desktop system services."
   (ensure-pred file-like? avahi)
   (ensure-pred file-like? dbus)
@@ -541,8 +540,12 @@ Defaults:%wheel env_keep+=TERMINFO")))))
      (modify-services default-desktop-system-services
        (network-manager-service-type config =>
                                      (network-manager-configuration (inherit config)
+                                                                    (network-manager network-manager)
+                                                                    (shepherd-requirement '(wireless-daemon))
+                                                                    (dns dns)
                                                                     (vpn-plugins vpn-plugins)
-                                                                    (dns dns))))
+                                                                    (iwd? #f)  ; TODO: deprecated field, remove.
+                                                                    (extra-configuration-files '()))))
      (list (service avahi-service-type
                     (avahi-configuration (avahi avahi)))
 
