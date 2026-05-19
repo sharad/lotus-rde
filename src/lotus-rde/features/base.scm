@@ -1348,9 +1348,9 @@ Defaults:%wheel env_keep+=TERMINFO")))))
     (list
      (service openssh-service-type
               (openssh-configuration
-               (permit-root-login? #f)
+               ;; (permit-root-login? #f)
                (password-authentication? #f)
-               (pubkey-authentication? #t)
+               ;; (pubkey-authentication? #t)
                (authorized-keys '())))))
 
   (feature
