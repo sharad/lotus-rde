@@ -1355,6 +1355,6 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
   (feature
    (name 'ssh)
-   (values `())
+   ;; (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
