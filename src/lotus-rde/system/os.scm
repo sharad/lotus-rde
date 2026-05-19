@@ -95,7 +95,9 @@
                              (disk-serial-id-system "aaa")
                              (disk-serial-id-home "aaa")
                              (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
-                             (bootloader-targets '())
+                             (bootloader-targets (match (getenv "RDE_TARGET")
+                                                   ("init" fs-boot-efi-partition)
+                                                   (_ '())))
                              (kernel linux-libre)
                              (firmware '())
                              (kernel-arguments '())
@@ -107,17 +109,19 @@
                              (volume-mappings '()))
 
 
-  (list (feature-host-info #:host-name hostname
-                           ;; #:locale    (operating-system-locale bare-bone-os)
-                           ;; ls `guix build tzdata`/share/zoneinfo
-                           #:timezone timezone)
+  (list (feature-keyboard #:keyboard-layout (keyboard-layout "us" "altgr-intl"))
+        (feature-host-info #:host-name hostname
+           ;; #:locale    (operating-system-locale bare-bone-os)
+           ;; ls `guix build tzdata`/share/zoneinfo
+           #:timezone timezone)
         (feature-kernel #:kernel kernel
                         #:initrd initrd
                         #:initrd-modules initrd-modules
                         #:firmware firmware
                         #:kernel-arguments kernel-arguments)
-        (feature-bootloader #:bootloader-configuration (bootloader-configuration (bootloader grub-efi-bootloader)
-                                                                                 (targets    bootloader-targets)))
+        (feature-bootloader #:bootloader-configuration
+                            (bootloader-configuration (bootloader grub-efi-bootloader)
+                                                      (targets    bootloader-targets)))
         ;; (keyboard-layout %lotus-keyboard-layout)
         ;; (menu-entries    %lotus-grub-ubuntu-menuentries)
         ;; Allows to declare specific bootloader configuration,
@@ -135,12 +139,7 @@
         (feature-base-packages #:system-packages
                                (apply strings->packages %lotus-system-packages))
 
-        (feature-custom-services #:feature-name-prefix 'openssh-server-extra
-                                 #:system-services (list
-                                                    ;; (service dhcp-client-service-type)
-                                                    ;; (service network-manager-service-type)
-                                                    ;; (service cloud-init-service-type)
-                                                    (service openssh-service-type)))
+        (feature-ssh-daemon-services)
 
         ;; (feature-logger-services)
         ;; (feature-loopback-services)
