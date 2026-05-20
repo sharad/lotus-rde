@@ -156,8 +156,7 @@
    (name 'login-shell)
    (values (make-feature-values login-shell))))
 
-(define* (feature-lotus-users-groups user-name full-name email
-                                     #:key
+(define* (feature-lotus-users-groups #:key user-name full-name email
                                      (uid 1000)
                                      (gid 1000)
                                      (group "users")
