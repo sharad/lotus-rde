@@ -406,17 +406,20 @@ Usage: #:log-file #$(shepherd-service-log-file name)"
              ;; skip comments/empty
              ((or (string-prefix? "#" line)
                   (string-null? (string-trim line)))
-              (loop)
+              (loop))
 
-              (else
-               (let ((fields (filter (lambda (x)
-                                       (not (string-null? x)))
-                                     (string-split line #\space))))
-                 (if (and (>= (length fields) 2)
-                          (string=? (list-ref fields 1)
-                                    mount-point))
-                     (list-ref fields 0)
-                     (loop)))))))))))
+             (else
+              (let ((fields
+                     (filter
+                      (lambda (x)
+                        (not (string-null? x)))
+                      (string-split line #\space))))
+
+                (if (and (>= (length fields) 2)
+                         (string=? (list-ref fields 1)
+                                   mount-point))
+                    (list-ref fields 0)
+                    (loop))))))))))
 
   ;; Check if mounted read-only
   (define (mount-read-only? mount-point)
