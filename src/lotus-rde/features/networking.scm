@@ -27,7 +27,7 @@
   #:use-module (rde home services i2p)
   #:use-module (gnu services networking)
   #:use-module (gnu system nss)
-  #:use-module (rde system services networking)
+  ;; #:use-module (rde system services networking)
   #:use-module (rde system services accounts)
 
   #:use-module (gnu packages i2p)
