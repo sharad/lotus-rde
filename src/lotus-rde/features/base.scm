@@ -30,6 +30,7 @@
   #:use-module (gnu packages nss)
   #:use-module (gnu packages fonts)
   #:use-module (gnu packages glib)
+  #:use-module (gnu packages gnome)
   #:use-module (gnu packages bash)
   #:use-module (gnu packages base)
   #:use-module (gnu packages linux)
