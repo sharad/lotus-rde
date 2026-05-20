@@ -84,10 +84,10 @@
 
 
 
-(use-modules (gnu home services)
-             (gnu home services shepherd)
-             (shepherd service)
-             (guix gexp))
+;; (use-modules (gnu home services)
+;;              (gnu home services shepherd)
+;;              (shepherd service)
+;;              (guix gexp))
 
 (define (feature-my-user-services)
 
