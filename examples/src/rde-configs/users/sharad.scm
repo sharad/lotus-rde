@@ -686,8 +686,7 @@ subject:/home:/) and tag:new}\"'"
           #:home-services
           (list (simple-service 'my-profile-code
                                 home-shell-profile-service-type
-                                (list (plain-file "my-profile"
-                                                  "# my existing code here
+                                (list "# my existing code here
 # ~/.profile: executed by the command interpreter for login shells.  -*- mode: sh; -*-
 # This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
 # exists.
@@ -714,7 +713,8 @@ then
     lotus_run_profiles_with_loc profile login
 fi
 
-")))))
+")
+                                )))
 
          (if #f
              (feature-user-info #:user-name "s"
