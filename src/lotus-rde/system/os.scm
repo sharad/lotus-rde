@@ -269,8 +269,8 @@
                                      (gdm-auto-login? #t)
                                      (gdm-allow-empty-password? #t))
 
-  (append (feature-xdg)
-          (feature-emacs)
+  (append (list (feature-xdg)
+                (feature-emacs))
           (lotus-metal-machine hostname
                                #:timezone timezone
                                #:locale locale 
