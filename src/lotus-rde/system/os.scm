@@ -124,6 +124,13 @@
   (display "bootloader-targets: ")
   (display bootloader-targets)
   (newline)
+  (display "xyz: ")
+  (display (let ((rde-sysinit (getenv "RDE_SYSINIT")))
+            (match rde-sysinit
+                                                     (#f '())
+                                                     ("init" (list fs-boot-efi-partition))
+                                                     (_ '()))))
+  (newline)
 
   (list (feature-host-info #:host-name hostname
            ;; #:locale    (operating-system-locale bare-bone-os)
