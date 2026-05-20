@@ -117,6 +117,13 @@
                              (gdm-auto-login? #t)
                              (gdm-allow-empty-password? #t))
 
+  (display "RDE_SYSINIT: ")
+  (display (getenv "RDE_SYSINIT"))
+  (newline)
+  (display "bootloader-targets: ")
+  (display bootloader-targets)
+  (newline)
+
   (list (feature-host-info #:host-name hostname
            ;; #:locale    (operating-system-locale bare-bone-os)
            ;; ls `guix build tzdata`/share/zoneinfo
