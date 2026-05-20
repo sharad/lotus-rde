@@ -220,7 +220,11 @@
         ;; (feature-desktop-manager-service)
         ;; (feature-pulseaudio-service)
 
-        ;; (feature-networking #:mdns? #t)
+        (feature-lotus-networking #:mdns? #t
+                                  #:iwd? #t
+                                  #:iwd-autoconnect? #t
+                                  #:dns nm-dns
+                                  #:vpn-plugins nm-vpn-plugins)
         ;; (feature-custom-services #:feature-name-prefix 'extra
         ;;                          #:system-services %desktop-services)
         (feature-shepherd)))
