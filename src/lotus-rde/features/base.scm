@@ -79,7 +79,8 @@
   #:use-module (rde features networking)
   #:use-module (rde features system)
   #:use-module (lotus-rde features mfs)
-  #:export (feature-login-shell
+  #:export (feature-locale-names
+            feature-login-shell
             ;; feature-lotus-users-group
             feature-lotus-users-groups
             feature-lotus-base-services
@@ -134,7 +135,18 @@
 ;; feature-krberos-services))
 
 
-
+(define* (feature-locale-names #:key (locale-names '("en_US"
+                                                     "hi_IN"
+                                                     "ur_PK"
+                                                     "fa_IR"
+                                                     "ar_SA")))
+  (feature
+   (name 'locale-definitions)
+   (values `((locale-definitions . (append ,(map (lambda (locale)
+                                                   (locale-definition (source locale)
+                                                                      (name   (string-append locale "." "utf8"))))
+                                                 locale-names)
+                                           %default-locale-definitions))))))
 
 (define* (feature-login-shell #:key (login-shell #~(string-append #$zsh "/bin/zsh")))
   (feature
@@ -172,54 +184,6 @@
    (values `((user-account-name . ,user-name)
              (user-account-home-directory . ,home-directory)
              (user-account-shell . ,shell)))))
-
-(define %lotus-rde-base-system-services1
-  (list
-   (service greetd-service-type)
-   ;; (service mingetty-service-type
-   ;;          (mingetty-configuration (tty "tty1")))
-   ;; (service mingetty-service-type
-   ;;          (mingetty-configuration (tty "tty2")))
-   ;; (service mingetty-service-type
-   ;;          (mingetty-configuration (tty "tty3")))
-   ;; (service mingetty-service-type
-   ;;          (mingetty-configuration (tty "tty4")))
-   ;; (service mingetty-service-type
-   ;;          (mingetty-configuration (tty "tty5")))
-   ;; (service mingetty-service-type
-   ;;          (mingetty-configuration (tty "tty6")))
-   ;; (service mingetty-service-type
-   ;;          (mingetty-configuration (tty "tty7")))
-   (service virtual-terminal-service-type)
-   (service console-font-service-type '())
-
-   (service static-networking-service-type
-            (list %loopback-static-networking))
-   (service urandom-seed-service-type)
-   (service guix-service-type)
-   (service nscd-service-type)
-
-   (service shepherd-system-log-service-type)
-
-   (service shepherd-timer-service-type)
-   (service shepherd-transient-service-type)
-
-   (service log-rotation-service-type)
-   (service log-cleanup-service-type
-            (log-cleanup-configuration
-             (directory "/var/log/guix/drvs")))
-   (service udev-service-type
-            (udev-configuration
-             (rules (list lvm2 fuse alsa-utils crda))))
-
-   (service sysctl-service-type)
-
-   (service special-files-service-type
-            `(("/bin/sh" ,(file-append bash "/bin/sh"))
-              ("/usr/bin/env" ,(file-append coreutils "/bin/env"))))))
-
-
-
 
 (define %lotus-rde-base-system-services
   ;; https://github.com/lfam/guix/blob/56ad75cdabe759d8cc004a369ae9c845d34ae896/gnu/services/base.scm
@@ -1410,3 +1374,4 @@ Defaults:%wheel env_keep+=TERMINFO")))))
    ;; (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
+

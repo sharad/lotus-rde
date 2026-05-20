@@ -95,6 +95,12 @@
 (define* (lotus-metal-machine hostname
                              #:key
                              (timezone "Asia/Kolkata")
+                             (locale "en_US.utf8")
+                             (locale-names (list "en_US"
+                                                 "hi_IN"
+                                                 "ur_PK"
+                                                 "fa_IR"
+                                                 "ar_SA"))
                              (disk-serial-id-system "aaa")
                              (disk-serial-id-home "aaa")
                              (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
@@ -124,9 +130,9 @@
     (ensure-rw-mount "/boot/efi"))
 
   (list (feature-host-info #:host-name hostname
-           ;; #:locale    (operating-system-locale bare-bone-os)
-           ;; ls `guix build tzdata`/share/zoneinfo
-           #:timezone timezone)
+                           #:locale locale
+                           #:timezone timezone)
+        (feature-locale-names #:locale-names locale-names)
         (feature-kernel #:kernel kernel
                         #:initrd initrd
                         #:initrd-modules initrd-modules
@@ -215,9 +221,9 @@
         ;; (feature-pulseaudio-service)
 
         ;; (feature-networking #:mdns? #t)
-        (feature-shepherd)))
         ;; (feature-custom-services #:feature-name-prefix 'extra
         ;;                          #:system-services %desktop-services)
+        (feature-shepherd)))
 
 
 
