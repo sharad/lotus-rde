@@ -1367,7 +1367,6 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
   (define f-name 'networking)
   (define (get-home-services config)
-
     (list
      (simple-service 'network-manager-applet-package
                      home-profile-service-type
@@ -1392,16 +1391,17 @@ Defaults:%wheel env_keep+=TERMINFO")))))
   (define (get-system-services config)
     (list
      (service network-manager-service-type
-              (network-manager-configuration (network-manager network-manager)
-                                             (shepherd-requirement (if iwd?
-                                                                       '(iwd)
-                                                                       '(wireless-daemon)))
-                                             (dns dns)
-                                             (vpn-plugins vpn-plugins)
-                                             (iwd? (if iwd?
-                                                       '(iwd)
-                                                       #f))
-                                             (extra-configuration-files extra-configuration-files)))
+              (network-manager-configuration
+                (network-manager network-manager)
+                (shepherd-requirement (if iwd?
+                                          '(iwd)
+                                          '(wireless-daemon)))
+                (dns dns)
+                (vpn-plugins vpn-plugins)
+                (iwd? (if iwd?
+                          '(iwd)
+                          #f))
+                (extra-configuration-files extra-configuration-files)))
      (if iwd?
          (service iwd-service-type
                   (iwd-configuration
