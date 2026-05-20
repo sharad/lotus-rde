@@ -156,12 +156,12 @@
    (name 'login-shell)
    (values (make-feature-values login-shell))))
 
-(define* (feature-lotus-users-groups user-name
+(define* (feature-lotus-users-groups user-name full-name email
                                      #:key
                                      (uid 1000)
                                      (gid 1000)
                                      (group "users")
-                                     (home-directory "/home/s/hell")
+                                     (home-directory (format #f "/home/~a" user-name))
                                      (shell (file-append zsh "/bin/zsh"))
                                      (supplementary-groups '("wheel" "netdev" "audio" "video" "dialout"))) ;"docker"
   (feature
@@ -186,7 +186,9 @@
                user))))))
    (values `((user-account-name . ,user-name)
              (user-account-home-directory . ,home-directory)
-             (user-account-shell . ,shell)))))
+             (user-account-shell . ,shell)
+             (full-name . ,full-name)
+             (email . ,email)))))
 
 (define %lotus-rde-base-system-services
   ;; https://github.com/lfam/guix/blob/56ad75cdabe759d8cc004a369ae9c845d34ae896/gnu/services/base.scm
