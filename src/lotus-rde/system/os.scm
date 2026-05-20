@@ -31,6 +31,7 @@
   #:use-module (rde features networking)
   #:use-module (rde features shells)
   #:use-module (rde features system)
+  #:use-module (rde features emacs)
   #:use-module (rde features image-viewers)
   #:use-module (rde packages)
   #:use-module (lotus-rde lib utils)
@@ -229,6 +230,67 @@
         ;; (feature-custom-services #:feature-name-prefix 'extra
         ;;                          #:system-services %desktop-services)
         (feature-shepherd)))
+
+
+
+
+(define* (lotus-experimental-machine hostname
+                                     #:key
+                                     (timezone "Asia/Kolkata")
+                                     (locale "en_US.utf8")
+                                     (locale-names (list "en_US"
+                                                         "hi_IN"
+                                                         "ur_PK"
+                                                         "fa_IR"
+                                                         "ar_SA"))
+                                     (disk-serial-id-system "aaa")
+                                     (disk-serial-id-home "aaa")
+                                     (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
+                                     (bootloader-targets (let ((rde-sysinit (getenv "RDE_SYSINIT")))
+                                                           (match rde-sysinit
+                                                             (#f '())
+                                                             ("init" (list fs-boot-efi-partition))
+                                                             (_ '()))))
+                                     (kernel linux-libre)
+                                     (firmware '())
+                                     (kernel-arguments '())
+                                     (keyboard-layout (keyboard-layout "us" "altgr-intl"))
+                                     (initrd base-initrd)
+                                     (initrd-modules %lotus-guix-initrd-modules)
+                                     (custom-services #f)
+                                     (login-shell (file-append zsh "/bin/zsh"))
+                                     (parent-dir "/srv/volumes/local")
+                                     (volume-mappings '())
+                                     (nm-dns "dnsmasq")
+                                     (nm-vpn-plugins (list network-manager-fortisslvpn
+                                                           network-manager-openconnect))
+                                     (gdm-auto-login? #t)
+                                     (gdm-allow-empty-password? #t))
+
+  (append (feature-emacs)
+          (lotus-metal-machine hostname
+                               #:timezone timezone
+                               #:locale locale 
+                               #:locale-names locale-names
+                               #:disk-serial-id-system disk-serial-id-system
+                               #:disk-serial-id-home disk-serial-id-home
+                               #:fs-boot-efi-partition fs-boot-efi-partition
+                               #:bootloader-targets bootloader-targets
+                               #:kernel kernel
+                               #:firmware firmware
+                               #:kernel-arguments kernel-arguments
+                               #:keyboard-layout keyboard-layout
+                               #:initrd initrd
+                               #:initrd-modules initrd-modules
+                               #:custom-services custom-services
+                               #:login-shell login-shell
+                               #:parent-dir parent-dir
+                               #:volume-mappings volume-mappings
+                               #:nm-dns nm-dns
+                               #:nm-vpn-plugins nm-vpn-plugins
+                               #:gdm-auto-login? gdm-auto-login?
+                               #:gdm-allow-empty-password? gdm-allow-empty-password?)))
+
 
 
 

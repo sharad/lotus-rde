@@ -109,57 +109,6 @@
 
         (list
 
-         ;; -----------------------------------------------------
-         ;; pipewire
-         ;; -----------------------------------------------------
-
-         (shepherd-service
-          (provision '(pipewire))
-
-          (documentation "PipeWire daemon.")
-
-          (start
-           #~(make-forkexec-constructor
-              (list "pipewire")
-              #:log-file
-              (string-append
-               (or (getenv "XDG_STATE_HOME")
-                   (string-append (getenv "HOME")
-                                  "/.local/state"))
-               "/log/pipewire.log")))
-
-          (stop
-           #~(make-kill-destructor))
-
-          (respawn? #t))
-
-
-         ;; -----------------------------------------------------
-         ;; wireplumber
-         ;; -----------------------------------------------------
-
-         (shepherd-service
-          (provision '(wireplumber))
-
-          (requirement '(pipewire))
-
-          (documentation "WirePlumber session manager.")
-
-          (start
-           #~(make-forkexec-constructor
-              (list "wireplumber")
-              #:log-file
-              (string-append
-               (or (getenv "XDG_STATE_HOME")
-                   (string-append (getenv "HOME")
-                                  "/.local/state"))
-               "/log/wireplumber.log")))
-
-          (stop
-           #~(make-kill-destructor))
-
-          (respawn? #t))
-
 
          ;; -----------------------------------------------------
          ;; ssh-agent
@@ -191,37 +140,6 @@
 
           (respawn? #f))
 
-
-         ;; -----------------------------------------------------
-         ;; emacs daemon
-         ;; -----------------------------------------------------
-
-         (shepherd-service
-          (provision '(emacs))
-
-          (requirement '(dbus))
-
-          (documentation "Emacs daemon.")
-
-          (start
-           #~(make-forkexec-constructor
-              (list "emacs"
-                    "--fg-daemon=main")
-
-              #:log-file
-              (string-append
-               (or (getenv "XDG_STATE_HOME")
-                   (string-append (getenv "HOME")
-                                  "/.local/state"))
-               "/log/emacs.log")))
-
-          (stop
-           #~(make-forkexec-destructor
-              (list "emacsclient"
-                    "--eval"
-                    "(kill-emacs)")))
-
-          (respawn? #f))
 
 
          ;; -----------------------------------------------------
