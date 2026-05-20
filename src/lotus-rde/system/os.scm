@@ -33,6 +33,7 @@
   #:use-module (rde features system)
   #:use-module (rde features emacs)
   #:use-module (rde features image-viewers)
+  #:use-module (rde features xdg)
   #:use-module (rde packages)
   #:use-module (lotus-rde lib utils)
   #:use-module (lotus-rde features base)
@@ -267,7 +268,8 @@
                                      (gdm-auto-login? #t)
                                      (gdm-allow-empty-password? #t))
 
-  (append (feature-emacs)
+  (append (feature-xdg)
+          (feature-emacs)
           (lotus-metal-machine hostname
                                #:timezone timezone
                                #:locale locale 
