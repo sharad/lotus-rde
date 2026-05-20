@@ -351,11 +351,7 @@ if [ -f $GUIX_PROFILE/etc/profile ]; then source $GUIX_PROFILE/etc/profile; fi
          ;; ssh-extra-config-service
          ;; i2pd-add-ilita-irc-service
          ;; rde-guix-add-to-shell-profile-service
-         (service home-mpv-service-type
-                  (home-mpv-configuration
-                   (mpv-conf '())
-                   (input-conf '())))
-         mpv-add-user-settings-service
+         ;; mpv-add-user-settings-service
          )))
 
 ;;; User-specific features with personal preferences
@@ -450,6 +446,7 @@ if [ -f $GUIX_PROFILE/etc/profile ]; then source $GUIX_PROFILE/etc/profile; fi
   (append
    ;; all-features-with-custom-kernel-and-substitutes
    (list
+    (feature-mpv)
     (feature-additional-services)
     (feature-user-info
      #:user-name "s"
