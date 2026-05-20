@@ -347,9 +347,9 @@ if [ -f $GUIX_PROFILE/etc/profile ]; then source $GUIX_PROFILE/etc/profile; fi
    #:feature-name-prefix 'sharad
    #:home-services
    (list home-extra-packages-service
-         sway-extra-config-service
-         ssh-extra-config-service
-         i2pd-add-ilita-irc-service
+         ;; sway-extra-config-service
+         ;; ssh-extra-config-service
+         ;; i2pd-add-ilita-irc-service
          ;; rde-guix-add-to-shell-profile-service
          mpv-add-user-settings-service)))
 
@@ -429,14 +429,14 @@ if [ -f $GUIX_PROFILE/etc/profile ]; then source $GUIX_PROFILE/etc/profile; fi
     (feature-xdg
      #:xdg-user-directories-configuration
      (home-xdg-user-directories-configuration
-      (music "$HOME/music")
-      (videos "$HOME/vids")
-      (pictures "$HOME/pics")
-      (documents "$HOME/docs")
-      (download "$HOME/dl")
+      (music "$HOME/Music")
+      (videos "$HOME/Videos")
+      (pictures "$HOME/Pictures")
+      (documents "$HOME/Documents/")
+      (download "$HOME/Downloads/")
       (desktop "$HOME")
-      (publicshare "$HOME")
-      (templates "$HOME")))
+      (publicshare "$HOME/Public")
+      (templates "$HOME/Templates/")))
 
 
     (feature-base-services))))
@@ -445,7 +445,7 @@ if [ -f $GUIX_PROFILE/etc/profile ]; then source $GUIX_PROFILE/etc/profile; fi
   (append
    ;; all-features-with-custom-kernel-and-substitutes
    (list
-    ;; (feature-additional-services)
+    (feature-additional-services)
     (feature-user-info
      #:user-name "s"
      #:full-name "Sharad Pratap"
@@ -676,19 +676,17 @@ subject:/home:/) and tag:new}\"'"
 (define-public %sharad-features
   (append
    ;; all-features-with-custom-kernel-and-substitutes
-   (list)
-   (list
-    (feature-additional-services)
-    (feature-base-packages #:home-packages (list ))
+   (list (feature-additional-services)
+         (feature-base-packages #:home-packages (list ))
 
 
-    (feature-custom-services
-     #:feature-name-prefix 'my-profile-code
-     #:home-services
-     (list (simple-service 'my-profile-code
-                           home-shell-profile-service-type
-                           (list (plain-file "my-profile"
-                                             "# my existing code here
+         (feature-custom-services
+          #:feature-name-prefix 'my-profile-code
+          #:home-services
+          (list (simple-service 'my-profile-code
+                                home-shell-profile-service-type
+                                (list (plain-file "my-profile"
+                                                  "# my existing code here
 # ~/.profile: executed by the command interpreter for login shells.  -*- mode: sh; -*-
 # This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
 # exists.
@@ -717,22 +715,22 @@ fi
 
 ")))))
 
-    (if #f
-        (feature-user-info #:user-name "s"
-                           #:full-name "Sharad Pratap"
-                           #:home-directory "/home/s/hell"
-                           #:email "s@localhost"
-                           ;; #:user-initial-password-hash "$6$abc$yvk.Ln2iQ9WE8ZR5heHDQ31n3tpO3n6t5DfEYtoGBb9C3OU2LVWCNQ6q8UEoC7x8ogVqlfipLvFQJyJ4U8JAf."
-                           ;; "$6$abc$3SAZZQGdvQgAscM2gupP1tC.SqnsaLSPoAnEOb2k6jXMhzQqS1kCSplAJ/vUy2rrnpHtt6frW2Ap5l/tIvDsz."
-                           ;; (crypt "bob" "$6$abc")
-                           #:user-groups '("wheel" "netdev" "audio" "video" "dialout")
+         (if #f
+             (feature-user-info #:user-name "s"
+                                #:full-name "Sharad Pratap"
+                                #:home-directory "/home/s/hell"
+                                #:email "s@localhost"
+                                ;; #:user-initial-password-hash "$6$abc$yvk.Ln2iQ9WE8ZR5heHDQ31n3tpO3n6t5DfEYtoGBb9C3OU2LVWCNQ6q8UEoC7x8ogVqlfipLvFQJyJ4U8JAf."
+                                ;; "$6$abc$3SAZZQGdvQgAscM2gupP1tC.SqnsaLSPoAnEOb2k6jXMhzQqS1kCSplAJ/vUy2rrnpHtt6frW2Ap5l/tIvDsz."
+                                ;; (crypt "bob" "$6$abc")
+                                #:user-groups '("wheel" "netdev" "audio" "video" "dialout")
 
-                           ;; WARNING: This option can reduce the explorability by hiding
-                           ;; some helpful messages and parts of the interface for the sake
-                           ;; of minimalistic, less distractive and clean look.  Generally
-                           ;; it's not recommended to use it.
-                           #:emacs-advanced-user? #f)
-        (feature-lotus-users-groups #:user-name "s"
-                                    #:full-name "Sharad Pratap"
-                                    #:home-directory "/home/s/hell"
-                                    #:email "s@localhost")))))
+                                ;; WARNING: This option can reduce the explorability by hiding
+                                ;; some helpful messages and parts of the interface for the sake
+                                ;; of minimalistic, less distractive and clean look.  Generally
+                                ;; it's not recommended to use it.
+                                #:emacs-advanced-user? #f)
+             (feature-lotus-users-groups #:user-name "s"
+                                         #:full-name "Sharad Pratap"
+                                         #:home-directory "/home/s/hell"
+                                         #:email "s@localhost")))))
