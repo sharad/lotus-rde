@@ -4,6 +4,7 @@
   #:use-module (rde system services admin)
 
   #:use-module (gnu system)
+  #:use-module (gnu system locale)
   #:use-module (gnu system setuid)
   #:use-module (gnu services)
   #:use-module (gnu services admin)
@@ -1403,11 +1404,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
                           #f))
                 (extra-configuration-files extra-configuration-files)))
      (if iwd?
-         ;; (service iwd-service-type
-         ;;          (iwd-configuration
-         ;;            (main-conf
-         ;;             `((Settings ((AutoConnect . ,iwd-autoconnect?)))))))
-         (service wpa-supplicant-service-type)
+         (service iwd-service-type
+                  (iwd-configuration
+                    (main-conf
+                     `((Settings ((AutoConnect . ,iwd-autoconnect?)))))))
          (service wpa-supplicant-service-type))    ;needed by NetworkManager
      (service modem-manager-service-type)
      (service usb-modeswitch-service-type)))
