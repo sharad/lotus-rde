@@ -1408,9 +1408,10 @@ Defaults:%wheel env_keep+=TERMINFO")))))
                   (iwd-configuration
                     (config
                      (iwd-settings
-                       (general
+                       (general-settings
                         (iwd-general-settings
-                          (auto-connect? iwd-autoconnect?)))))))
+                          (extra-options
+                           `((AutoConnect . ,iwd-autoconnect?)))))))))
          (service wpa-supplicant-service-type))    ;needed by NetworkManager
      (service modem-manager-service-type)
      (service usb-modeswitch-service-type)))
