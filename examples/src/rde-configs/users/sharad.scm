@@ -351,7 +351,7 @@ if [ -f $GUIX_PROFILE/etc/profile ]; then source $GUIX_PROFILE/etc/profile; fi
          ;; ssh-extra-config-service
          ;; i2pd-add-ilita-irc-service
          ;; rde-guix-add-to-shell-profile-service
-         ;; mpv-add-user-settings-service
+         mpv-add-user-settings-service
          )))
 
 ;;; User-specific features with personal preferences
