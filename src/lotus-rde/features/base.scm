@@ -6,6 +6,7 @@
   #:use-module (gnu system)
   #:use-module (gnu system locale)
   #:use-module (gnu system setuid)
+  #:use-module (gnu system nss)
   #:use-module (gnu services)
   #:use-module (gnu services admin)
   #:use-module (gnu services shepherd)
