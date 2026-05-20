@@ -20,26 +20,6 @@
                                                                                              "virtio_net"
                                                                                              "vmwgfx")
                                                                                        %base-initrd-modules)
-                                                              #:fs-boot-efi-partition (uuid "4D78-999F" 'fat32)
-                                                              #:bootloader-targets '("/boot/efi")))
-
-
-
-
-
-;; (display %gx2-guix-vmware-features)
-;; (newline)
-
-;; (define-public %gx2-guix-vmware-features
-;;   (list
-;;    (feature-host-info
-;;     #:host-name "gx2")
-
-;;    (feature-file-systems
-;;     #:file-systems '()
-;;     #:mapped-devices '())
-
-;;    (feature-base-services)))
-
+                                                              #:fs-boot-efi-partition (uuid "4D78-999F" 'fat32)))
 
 

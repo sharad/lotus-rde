@@ -5,9 +5,12 @@
   #:use-module (ice-9 popen)
   #:use-module (ice-9 ftw)
   #:use-module (ice-9 threads)
+  #:use-module (ice-9 textual-ports)
+  #:use-module (ice-9 rdelim)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-11)
   #:use-module (srfi srfi-13)
+  #:use-module (system foreign)
   #:use-module (guix gexp)
   #:use-module (guix modules)
   #:use-module (guix build utils)
@@ -369,3 +372,122 @@ Usage: #:log-file #$(shepherd-service-log-file name)"
 
 
 
+(use-modules (srfi srfi-1)
+             (ice-9 textual-ports)
+             (ice-9 popen)
+             (ice-9 rdelim)
+             (system foreign))
+
+
+
+
+
+;; Ensure mount is rw
+(define (ensure-rw mount-point)
+
+  (define MS_REMOUNT 32)
+
+  ;; Find device from /etc/fstab
+  (define (find-device-for mount-point)
+    (call-with-input-file "/etc/fstab"
+      (lambda (port)
+        (let loop ()
+          (let ((line (read-line port 'concat)))
+            (cond
+             ((eof-object? line)
+              #f)
+
+             ;; skip comments/empty
+             ((or (string-prefix? "#" line)
+                  (string-null? (string-trim line)))
+              (loop)
+
+              (else
+               (let ((fields (filter (lambda (x)
+                                       (not (string-null? x)))
+                                     (string-split line #\space))))
+                 (if (and (>= (length fields) 2)
+                          (string=? (list-ref fields 1)
+                                    mount-point))
+                     (list-ref fields 0)
+                     (loop))))))))))
+
+   ;; Check if mounted
+   (define (mounted? mount-point)
+     (call-with-input-file "/proc/mounts"
+       (lambda (port)
+         (let loop ()
+           (let ((line (read-line port 'concat)))
+             (if (eof-object? line)
+                 #f
+                 (let* ((fields (string-split line #\space))
+                        (target (list-ref fields 1)))
+                   (if (string=? target mount-point)
+                       #t
+                       (loop)))))))))
+
+   ;; Check if mounted read-only
+   (define (mount-read-only? mount-point)
+     (call-with-input-file "/proc/mounts"
+       (lambda (port)
+         (let loop ()
+           (let ((line (read-line port 'concat)))
+             (if (eof-object? line)
+                 #f
+                 (let* ((fields (string-split line #\space))
+                        (target (list-ref fields 1))
+                        (opts   (list-ref fields 3)))
+                   (if (string=? target mount-point)
+                       (member "ro"
+                               (string-split opts #\,))
+                       (loop)))))))))
+
+   ;; Find filesystem type using blkid
+   (define (filesystem-type device)
+     (let* ((pipe (open-pipe* OPEN_READ
+                              "blkid"
+                              "-o"
+                              "value"
+                              "-s"
+                              "TYPE"
+                              device))
+            (result (string-trim-right (read-string pipe))))
+       (close-pipe pipe)
+       result))
+
+
+
+
+   (let ((device (find-device-for mount-point)))
+     (if (not device)
+         (error "No device found for mount-point"
+                mount-point)
+
+         (let ((fs-type (filesystem-type device)))
+           (cond
+
+            ;; not mounted
+            ((not (mounted? mount-point))
+             (format #t "Mounting ~a on ~a\n"
+                     device mount-point)
+             (mount device mount-point fs-type 0 "rw"))
+
+            ;; mounted ro
+            ((mount-read-only? mount-point)
+             (format #t "Remounting ~a rw\n"
+                     mount-point)
+             (mount device
+                    mount-point
+                    fs-type
+                    MS_REMOUNT
+                    "rw"))
+
+            ;; already rw
+            (else
+             (format #t "~a already rw\n"
+                    mount-point))))))))
+
+;; Example:
+;; (ensure-rw "/boot/efi")
+
+

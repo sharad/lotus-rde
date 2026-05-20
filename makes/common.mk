@@ -113,8 +113,12 @@ cow-store: /tmp/.cow-store-start
 
 
 rde/system/init: guix /tmp/.cow-store-start
+	mount -o rw /boot
+	mount -o rw /boot/efi
 	RDE_SYSINIT=init RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	init ${CONFIGS} ${ROOT_MOUNT_POINT}
+	umount /boot/efi
+	umount /boot
 
 rde/system/build:
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
