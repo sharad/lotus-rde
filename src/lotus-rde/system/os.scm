@@ -99,6 +99,7 @@
                              (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
                              (bootloader-targets (let ((rde-sysinit (getenv "RDE_SYSINIT")))
                                                    (match rde-sysinit
+                                                     (#f '())
                                                      ("init" (list fs-boot-efi-partition))
                                                      (_ '()))))
                              (kernel linux-libre)
