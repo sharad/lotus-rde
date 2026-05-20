@@ -18,7 +18,9 @@
   #:use-module (gnu system file-systems)
   #:use-module (gnu system uuid)
   #:use-module (gnu packages linux)
-  #:export (lotus-assert))
+  #:export (lotus-assert
+            ensure-rw-mount
+            ensure-umount))
 
 (define (lotus-assert condition . msg)
   (throw-message
@@ -371,19 +373,23 @@ Usage: #:log-file #$(shepherd-service-log-file name)"
 ;;                                    #:requirement '(dbus pipewire)))
 
 
-
-(use-modules (srfi srfi-1)
-             (ice-9 textual-ports)
-             (ice-9 popen)
-             (ice-9 rdelim)
-             (system foreign))
-
-
-
+;; Check if mounted
+(define (mounted? mount-point)
+  (call-with-input-file "/proc/mounts"
+    (lambda (port)
+      (let loop ()
+        (let ((line (read-line port 'concat)))
+          (if (eof-object? line)
+              #f
+              (let* ((fields (string-split line #\space))
+                     (target (list-ref fields 1)))
+                (if (string=? target mount-point)
+                    #t
+                    (loop)))))))))
 
 
 ;; Ensure mount is rw
-(define (ensure-rw mount-point)
+(define (ensure-rw-mount mount-point)
 
   (define MS_REMOUNT 32)
 
@@ -411,20 +417,6 @@ Usage: #:log-file #$(shepherd-service-log-file name)"
                                     mount-point))
                      (list-ref fields 0)
                      (loop))))))))))
-
-   ;; Check if mounted
-   (define (mounted? mount-point)
-     (call-with-input-file "/proc/mounts"
-       (lambda (port)
-         (let loop ()
-           (let ((line (read-line port 'concat)))
-             (if (eof-object? line)
-                 #f
-                 (let* ((fields (string-split line #\space))
-                        (target (list-ref fields 1)))
-                   (if (string=? target mount-point)
-                       #t
-                       (loop)))))))))
 
    ;; Check if mounted read-only
    (define (mount-read-only? mount-point)
@@ -486,6 +478,22 @@ Usage: #:log-file #$(shepherd-service-log-file name)"
             (else
              (format #t "~a already rw\n"
                     mount-point))))))))
+
+
+;; Ensure unmounted
+(define (ensure-umount mount-point)
+  (if (mounted? mount-point)
+
+      (begin
+        (format #t
+                "Unmounting ~a\n"
+                mount-point)
+
+        (umount mount-point))
+
+      (format #t
+              "~a already unmounted\n"
+              mount-point)))
 
 ;; Example:
 ;; (ensure-rw "/boot/efi")

@@ -33,6 +33,7 @@
   #:use-module (rde features system)
   #:use-module (rde features image-viewers)
   #:use-module (rde packages)
+  #:use-module (lotus-rde lib utils)
   #:use-module (lotus-rde features base)
   #:use-module (lotus-rde features mfs)
   #:export (lotus-metal-machine
@@ -118,6 +119,10 @@
                              (gdm-auto-login? #t)
                              (gdm-allow-empty-password? #t))
 
+  (when (> (length bootloader-targets) 0)
+    (ensure-rw-mount "/boot")
+    (ensure-rw-mount "/boot/efi"))
+
   (list (feature-host-info #:host-name hostname
            ;; #:locale    (operating-system-locale bare-bone-os)
            ;; ls `guix build tzdata`/share/zoneinfo
@@ -175,10 +180,10 @@
 
 
         ;; (feature-disk-services)
-        (feature-privileged-programs-services 'firejail
+        (feature-privileged-programs-services 'firejail-setuid-helpers
                                               #:paths
                                               (list (file-append firejail "/bin/firejail")))
-        (feature-privileged-programs-services 'xtrlock
+        (feature-privileged-programs-services 'xtrlock-setuid-helpers
                                               #:paths
                                               (list (file-append xtrlock "/bin/xtrlock")))
         (feature-privileged-programs-services 'mount-ecryptfs-setuid-helpers
