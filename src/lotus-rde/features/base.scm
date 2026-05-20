@@ -1356,7 +1356,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
           #:key
           (dns "default")
           (vpn-plugins '())
-          (extra-configuration-files extra-configuration-files)
+          (extra-configuration-files '())
           (iwd? #t)
           (iwd-autoconnect? #t)
           (network-manager network-manager)
@@ -1412,7 +1412,6 @@ Defaults:%wheel env_keep+=TERMINFO")))))
                         (iwd-general-settings
                           (extra-options
                            `((AutoConnect . ,iwd-autoconnect?)))))))))
-
          (service wpa-supplicant-service-type))    ;needed by NetworkManager
      (service modem-manager-service-type)
      (service usb-modeswitch-service-type)))
