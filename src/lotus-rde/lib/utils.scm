@@ -416,68 +416,68 @@ Usage: #:log-file #$(shepherd-service-log-file name)"
                           (string=? (list-ref fields 1)
                                     mount-point))
                      (list-ref fields 0)
-                     (loop))))))))))
+                     (loop)))))))))))
 
-   ;; Check if mounted read-only
-   (define (mount-read-only? mount-point)
-     (call-with-input-file "/proc/mounts"
-       (lambda (port)
-         (let loop ()
-           (let ((line (read-line port 'concat)))
-             (if (eof-object? line)
-                 #f
-                 (let* ((fields (string-split line #\space))
-                        (target (list-ref fields 1))
-                        (opts   (list-ref fields 3)))
-                   (if (string=? target mount-point)
-                       (member "ro"
-                               (string-split opts #\,))
-                       (loop)))))))))
+  ;; Check if mounted read-only
+  (define (mount-read-only? mount-point)
+    (call-with-input-file "/proc/mounts"
+      (lambda (port)
+        (let loop ()
+          (let ((line (read-line port 'concat)))
+            (if (eof-object? line)
+                #f
+                (let* ((fields (string-split line #\space))
+                       (target (list-ref fields 1))
+                       (opts   (list-ref fields 3)))
+                  (if (string=? target mount-point)
+                      (member "ro"
+                              (string-split opts #\,))
+                      (loop)))))))))
 
-   ;; Find filesystem type using blkid
-   (define (filesystem-type device)
-     (let* ((pipe (open-pipe* OPEN_READ
-                              "blkid"
-                              "-o"
-                              "value"
-                              "-s"
-                              "TYPE"
-                              device))
-            (result (string-trim-right (read-string pipe))))
-       (close-pipe pipe)
-       result))
-
-
+  ;; Find filesystem type using blkid
+  (define (filesystem-type device)
+    (let* ((pipe (open-pipe* OPEN_READ
+                             "blkid"
+                             "-o"
+                             "value"
+                             "-s"
+                             "TYPE"
+                             device))
+           (result (string-trim-right (read-string pipe))))
+      (close-pipe pipe)
+      result))
 
 
-   (let ((device (find-device-for mount-point)))
-     (if (not device)
-         (error "No device found for mount-point"
-                mount-point)
 
-         (let ((fs-type (filesystem-type device)))
-           (cond
 
-            ;; not mounted
-            ((not (mounted? mount-point))
-             (format #t "Mounting ~a on ~a\n"
-                     device mount-point)
-             (mount device mount-point fs-type 0 "rw"))
+  (let ((device (find-device-for mount-point)))
+    (if (not device)
+        (error "No device found for mount-point"
+               mount-point)
 
-            ;; mounted ro
-            ((mount-read-only? mount-point)
-             (format #t "Remounting ~a rw\n"
-                     mount-point)
-             (mount device
-                    mount-point
-                    fs-type
-                    MS_REMOUNT
-                    "rw"))
+        (let ((fs-type (filesystem-type device)))
+          (cond
 
-            ;; already rw
-            (else
-             (format #t "~a already rw\n"
-                    mount-point))))))))
+           ;; not mounted
+           ((not (mounted? mount-point))
+            (format #t "Mounting ~a on ~a\n"
+                    device mount-point)
+            (mount device mount-point fs-type 0 "rw"))
+
+           ;; mounted ro
+           ((mount-read-only? mount-point)
+            (format #t "Remounting ~a rw\n"
+                    mount-point)
+            (mount device
+                   mount-point
+                   fs-type
+                   MS_REMOUNT
+                   "rw"))
+
+           ;; already rw
+           (else
+            (format #t "~a already rw\n"
+                   mount-point)))))))
 
 
 ;; Ensure unmounted
