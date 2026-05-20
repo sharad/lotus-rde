@@ -36,6 +36,7 @@
   #:use-module (lotus-rde lib utils)
   #:use-module (lotus-rde features base)
   #:use-module (lotus-rde features mfs)
+  #:use-module (lotus-rde features networking)
   #:export (lotus-metal-machine
             lotus-metal-machine-minimal))
 
