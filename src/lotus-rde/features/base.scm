@@ -117,8 +117,7 @@
             feature-security-services
             feature-audit-services
             feature-substitutes
-            feature-ssh-daemon-services
-            feature-lotus-networking))
+            feature-ssh-daemon-services))
 ;; feature-file-database-services
 ;; feature-guix-publish-services
 ;; feature-schedular-services
