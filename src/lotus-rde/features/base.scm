@@ -505,15 +505,15 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
 
     (append
-     (modify-services default-desktop-system-services
-       (network-manager-service-type config =>
-                                     (network-manager-configuration (inherit config)
-                                                                    (network-manager network-manager)
-                                                                    (shepherd-requirement '(wireless-daemon))
-                                                                    (dns dns)
-                                                                    (vpn-plugins vpn-plugins)
-                                                                    (iwd? #f)  ; TODO: deprecated field, remove.
-                                                                    (extra-configuration-files '()))))
+     ;; (modify-services default-desktop-system-services
+     ;;   (network-manager-service-type config =>
+     ;;                                 (network-manager-configuration (inherit config)
+     ;;                                                                (network-manager network-manager)
+     ;;                                                                (shepherd-requirement '(wireless-daemon))
+     ;;                                                                (dns dns)
+     ;;                                                                (vpn-plugins vpn-plugins)
+     ;;                                                                (iwd? #f)  ; TODO: deprecated field, remove.
+     ;;                                                                (extra-configuration-files '()))))
      (list (service avahi-service-type
                     (avahi-configuration (avahi avahi)))
 
@@ -528,7 +528,8 @@ Defaults:%wheel env_keep+=TERMINFO")))))
            (service udisks-service-type
                     (udisks-configuration (udisks udisks)))
            (service upower-service-type
-                    (upower-configuration (upower upower))))))
+                    (upower-configuration (upower upower))))
+     default-desktop-system-services))
 
   (feature
    (name 'desktop-services)
