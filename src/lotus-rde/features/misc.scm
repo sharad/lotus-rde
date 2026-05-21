@@ -583,7 +583,6 @@
           '(kpkeys))
             ;; secfs-orgp
             ;; xawaken-session-down
-
          ;; 15 blueman-applet
          (mk/simple-service
           '(blueman-applet)
@@ -696,7 +695,6 @@
                    "/.config/Deskflow/tls/deskflow-server.pem"))
           #:requirements
           '();; xawaken-session-down
-            
           #:respawn? #f)
 
 
@@ -724,7 +722,6 @@
                   "deskflow-server-host:24800")
           #:requirements
           '();; xawaken-session-down
-            
           #:respawn? #f)
 
 
@@ -739,7 +736,6 @@
           #:requirements
           '();; secfs-secure
             ;; xawaken-session-down
-            
           #:respawn? #f)
 
 
@@ -755,7 +751,6 @@
           '(ssh-agent
             keepassxc)
             ;; xawaken-session-down
-            
           #:respawn? #f)
 
 
@@ -773,7 +768,6 @@
           #:requirements
           '(ssh-add)
             ;; awaken-session-down
-            
           #:respawn? #t)
 
          ;; 29 xdg-autostart
