@@ -154,7 +154,7 @@
            (documentation "Attention manager")
            (start
             #~(make-forkexec-constructor
-               (list "attnmgr")
+               (list #$(file-append python-attnmgr "/bin/attnmgr"))
                #:log-file #$(log-file "attnmgr")))
            (stop #~(make-kill-destructor))
            (respawn? #t))
@@ -212,12 +212,10 @@
           (documentation "Music Player Daemon")
           (start
            #~(make-forkexec-constructor
-              (list
-               #$(file-append mpd "/bin/mpd")
-               "--no-daemon"
-               (string-append
-                (getenv "HOME")
-                "/.config/mpd/mpd.conf"))
+              (list #$(file-append mpd "/bin/mpd")
+                    "--no-daemon"
+                    (string-append (getenv "HOME")
+                                   "/.config/mpd/mpd.conf"))
               #:log-file #$(log-file "mpd")))
           (stop #~(make-kill-destructor))
           (respawn? #t))
@@ -230,9 +228,8 @@
           (documentation "ZNC IRC bouncer")
           (start
            #~(make-forkexec-constructor
-              (list
-               #$(file-append znc "/bin/znc")
-               "-f")
+              (list #$(file-append znc "/bin/znc")
+                    "-f")
               #:log-file #$(log-file "znc")))
           (stop #~(make-kill-destructor))
           (respawn? #t))
@@ -247,9 +244,8 @@
                     (list #$(file-append usrhttpd "/bin/usrhttpd")
                           "-H"
                           "0.0.0.0"
-                          (string-append
-                           (getenv "HOME")
-                           "/public_html/sites/default"))
+                          (string-append (getenv "HOME")
+                                         "/public_html/sites/default"))
                     #:log-file #$(log-file "usrhttpd")))
           (stop #~(make-kill-destructor))
           (respawn? #f))
@@ -283,10 +279,9 @@
           (documentation "Prevent suspend temporarily")
           (start
            #~(make-forkexec-constructor
-              (list
-               #$(file-append elogind "/bin/elogind-inhibit")
-               "sleep"
-               "1h")
+              (list #$(file-append elogind "/bin/elogind-inhibit")
+                    "sleep"
+                    "1h")
               #:log-file #$(log-file "keepawaken")))
           (stop #~(make-kill-destructor))
           (respawn? #t)))))))))
@@ -386,30 +381,26 @@
          ;; 1 conky
          (mk/simple-service
           '(conky)
-          #~(list
-             #$(file-append conky "/bin/conky")
-             "-c"
-             (string-append
-              (getenv "HOME")
-              "/.conkyrc/main/conkyrc")))
+          #~(list #$(file-append conky "/bin/conky")
+                  "-c"
+                  (string-append (getenv "HOME")
+                                 "/.conkyrc/main/conkyrc")))
 
 
 
          ;; 2 eww
          (mk/simple-service
           '(eww)
-          #~(list
-             #$(file-append eww "/bin/eww")
-             "daemon"
-             "--no-daemonize"))
+          #~(list #$(file-append eww "/bin/eww")
+                  "daemon"
+                  "--no-daemonize"))
 
 
 
          ;; 3 keynav
          (mk/simple-service
           '(keynav)
-          #~(list
-             #$(file-append keynav "/bin/keynav")))
+          #~(list #$(file-append keynav "/bin/keynav")))
 
 
 
@@ -420,10 +411,9 @@
 
           (start
            #~(make-forkexec-constructor
-              (list
-               #$(file-append xautolock "/bin/xautolock")
-               "-detectsleep"
-               "-resetsaver")
+              (list #$(file-append xautolock "/bin/xautolock")
+                    "-detectsleep"
+                    "-resetsaver")
               #:log-file #$(log-file "xautolock")))
 
           (stop #~(make-kill-destructor))
@@ -438,46 +428,41 @@
              (documentation "Lock now")
              (procedure
               #~(lambda _
-                  (system*
-                   #$(file-append xautolock
-                                  "/bin/xautolock")
-                   "-locknow"))))
+                  (system* #$(file-append xautolock
+                                          "/bin/xautolock")
+                           "-locknow"))))
 
             (shepherd-action
              (name 'vdisable)
              (documentation "Disable xautolock")
              (procedure
               #~(lambda _
-                  (system*
-                   #$(file-append xautolock
-                                  "/bin/xautolock")
-                   "-disable"))))
+                  (system* #$(file-append xautolock
+                                          "/bin/xautolock")
+                           "-disable"))))
 
             (shepherd-action
              (name 'venable)
              (documentation "Enable xautolock")
              (procedure
               #~(lambda _
-                  (system*
-                   #$(file-append xautolock
-                                  "/bin/xautolock")
-                   "-enable")))))))
+                  (system* #$(file-append xautolock
+                                          "/bin/xautolock")
+                           "-enable")))))))
 
 
          ;; 5 autocutsel
          (mk/simple-service
           '(autocutsel)
-          #~(list
-             #$(file-append autocutsel
-                            "/bin/autocutsel")))
+          #~(list #$(file-append autocutsel
+                                 "/bin/autocutsel")))
 
 
 
          ;; 6 picom/compton
          (mk/simple-service
           '(picom)
-          #~(list
-             #$(file-append picom "/bin/picom")))
+          #~(list #$(file-append picom "/bin/picom")))
 
 
 
@@ -499,10 +484,8 @@
          ;; 9 notification
          (mk/simple-service
           '(notification)
-          #~(list
-             (string-append
-              (getenv "HOME")
-              "/.guix-profile/libexec/notification")))
+          #~(list (string-append (getenv "HOME")
+                                 "/.guix-profile/libexec/notification")))
 
 
 
@@ -519,31 +502,27 @@
          ;; 11 ibus-daemon
          (mk/simple-service
           '(ibus-daemon)
-          #~(list
-             #$(file-append ibus "/bin/ibus-daemon")))
+          #~(list #$(file-append ibus "/bin/ibus-daemon")))
 
 
 
          ;; 12 ibus-x11
          (mk/simple-service
           '(ibus-x11)
-          #~(list
-             (string-append
-              (getenv "HOME")
-              "/.setup/guix-config/per-user/s/profiles/01-simple/profiles.d/profile/libexec/ibus-x11")
-             "--kill-daemon"))
+          #~(list (string-append (getenv "HOME")
+                                 "/.setup/guix-config/per-user/s/profiles/01-simple/profiles.d/profile/libexec/ibus-x11")
+                  "--kill-daemon"))
 
 
 
          ;; 13 gnome-keyring
          (mk/simple-service
           '(gnome-keyring)
-          #~(list
-             #$(file-append gnome-keyring
-                            "/bin/gnome-keyring-daemon")
-             "--start"
-             "--foreground"
-             "--components=secrets")
+          #~(list #$(file-append gnome-keyring
+                                 "/bin/gnome-keyring-daemon")
+                  "--start"
+                  "--foreground"
+                  "--components=secrets")
           #:respawn? #f)
 
 
@@ -551,18 +530,15 @@
          ;; 14 keepassxc
          (mk/simple-service
           '(keepassxc)
-          #~(list
-             "/run/privileged/bin/firejail"
-             "--noprofile"
-             "keepassxc"
-             "--minimized"
-             "--keyfile"
-             (string-append
-              (getenv "HOME")
-              "/.key.keyx")
-             (string-append
-              (getenv "HOME")
-              "/.db.kdbx"))
+          #~(list "/run/privileged/bin/firejail"
+                  "--noprofile"
+                  "keepassxc"
+                  "--minimized"
+                  "--keyfile"
+                  (string-append (getenv "HOME")
+                                 "/.key.keyx")
+                  (string-append (getenv "HOME")
+                                 "/.db.kdbx"))
           #:requirements
           '(kpkeys
             secfs-orgp
@@ -573,20 +549,17 @@
          ;; 15 blueman-applet
          (mk/simple-service
           '(blueman-applet)
-          #~(list
-             #$(file-append blueman
-                            "/bin/blueman-applet")))
+          #~(list #$(file-append blueman
+                                 "/bin/blueman-applet")))
 
 
 
          ;; 16 keymap
          (mk/simple-service
           '(keymap)
-          #~(list
-             "xmodmap"
-             (string-append
-              (getenv "HOME")
-              "/.xmodmaprc"))
+          #~(list #$(file-append xmodmap "/bin/xmodmap")
+                  (string-append (getenv "HOME")
+                                 "/.xmodmaprc"))
           #:respawn? #f
           #:one-shot? #t)
 
@@ -595,10 +568,7 @@
          ;; 17 xrdb
          (mk/simple-service
           '(xrdb)
-          #~(list
-             "sh"
-             "-c"
-             "m4 -I ~/.setup/m4 \
+          #~(list "sh" "-c" "m4 -I ~/.setup/m4 \
                  -I ~/.setup/osetup/lib/m4.d \
                  -I ~/.setup/osetup/info/common/m4.d \
                  -I ~/.setup/osetup/info/hosts/${HOST}/m4.d \
@@ -613,9 +583,8 @@
          ;; 18 synclient
          (mk/simple-service
           '(synclient)
-          #~(list
-             "synclient"
-             "TapButton1=1")
+          #~(list "synclient"
+                  "TapButton1=1")
           #:respawn? #f
           #:one-shot? #t)
 
@@ -624,11 +593,10 @@
          ;; 19 annex
          (mk/simple-service
           '(annex)
-          #~(list
-             #$(file-append git "/bin/git")
-             "annex"
-             "daemon"
-             "assistant")
+          #~(list #$(file-append git "/bin/git")
+                  "annex"
+                  "daemon"
+                  "assistant")
           #:requirements
           '(keepassxc
             ssh-add
@@ -640,10 +608,8 @@
          ;; 20 pwr-applet
          (mk/simple-service
           '(pwr-applet)
-          #~(list
-             (string-append
-              (getenv "HOME")
-              "/.bin/pwr-applet"))
+          #~(list (string-append (getenv "HOME")
+                                 "/.bin/pwr-applet"))
           #:respawn? #f)
 
 
@@ -651,10 +617,9 @@
          ;; 21 logind-applet
          (mk/simple-service
           '(logind-applet)
-          #~(list
-             (string-append
-              (getenv "HOME")
-              "/.bin/logind-applet"))
+          #~(list (string-append
+                   (getenv "HOME")
+                   "/.bin/logind-applet"))
           #:respawn? #f)
 
 
@@ -662,17 +627,15 @@
          ;; 22 pasystray
          (mk/simple-service
           '(pasystray)
-          #~(list
-             #$(file-append pasystray
-                            "/bin/pasystray")))
+          #~(list #$(file-append pasystray
+                                 "/bin/pasystray")))
 
 
 
          ;; 23 barrier
          (mk/simple-service
           '(barrier)
-          #~(list
-             #$(file-append barrier "/bin/barrier")
+          #~(list #$(file-append barrier "/bin/barrier")
              "-f"
              "--no-tray"
              "--debug"
@@ -692,30 +655,29 @@
          ;; 24 deskflow-server
          (mk/simple-service
           '(deskflow-server)
-          #~(list
-             "deskflow-core"
-             "server"
-             "--no-daemon"
-             "--debug"
-             "DEBUG1"
-             "--name"
-             (or (getenv "HOST")
-                 "host")
-             "--enable-crypto"
-             "--log"
-             (string-append
-              (getenv "HOME")
-              "/.logs/deskflow-server.log")
-             "--address"
-             "0.0.0.0:24800"
-             "--config"
-             (string-append
-              (getenv "HOME")
-              "/.config/Deskflow/deskflow-server.conf")
-             "--tls-cert"
-             (string-append
-              (getenv "HOME")
-              "/.config/Deskflow/tls/deskflow-server.pem"))
+          #~(list "deskflow-core"
+                  "server"
+                  "--no-daemon"
+                  "--debug"
+                  "DEBUG1"
+                  "--name"
+                  (or (getenv "HOST")
+                      "host")
+                  "--enable-crypto"
+                  "--log"
+                  (string-append
+                   (getenv "HOME")
+                   "/.logs/deskflow-server.log")
+                  "--address"
+                  "0.0.0.0:24800"
+                  "--config"
+                  (string-append
+                   (getenv "HOME")
+                   "/.config/Deskflow/deskflow-server.conf")
+                  "--tls-cert"
+                  (string-append
+                   (getenv "HOME")
+                   "/.config/Deskflow/tls/deskflow-server.pem"))
           #:requirements
           '(xawaken-session-down)
           #:respawn? #f)
@@ -725,25 +687,24 @@
          ;; 25 deskflow-client
          (mk/simple-service
           '(deskflow-client)
-          #~(list
-             "deskflow-core"
-             "client"
-             "--debug"
-             "DEBUG1"
-             "--sync-language"
-             "--name"
-             (or (getenv "HOST")
-                 "host")
-             "--enable-crypto"
-             "--log"
-             (string-append
-              (getenv "HOME")
-              "/.logs/deskflow-client.log")
-             "--tls-cert"
-             (string-append
-              (getenv "HOME")
-              "/.config/Deskflow/tls/deskflow-client.pem")
-             "deskflow-server-host:24800")
+          #~(list "deskflow-core"
+                  "client"
+                  "--debug"
+                  "DEBUG1"
+                  "--sync-language"
+                  "--name"
+                  (or (getenv "HOST")
+                      "host")
+                  "--enable-crypto"
+                  "--log"
+                  (string-append
+                   (getenv "HOME")
+                   "/.logs/deskflow-client.log")
+                  "--tls-cert"
+                  (string-append
+                   (getenv "HOME")
+                   "/.config/Deskflow/tls/deskflow-client.pem")
+                  "deskflow-server-host:24800")
           #:requirements
           '(xawaken-session-down)
           #:respawn? #f)
@@ -753,12 +714,10 @@
          ;; 26 kpkeys
          (mk/simple-service
           '(kpkeys)
-          #~(list
-             "sh"
-             "-c"
-             (string-append
-              (getenv "HOME")
-              "/.bin/kpkeys -s co"))
+          #~(list "sh"
+                  "-c"
+                  (string-append (getenv "HOME")
+                                 "/.bin/kpkeys -s co"))
           #:requirements
           '(secfs-secure
             xawaken-session-down)
@@ -769,12 +728,10 @@
          ;; 27 ssh-add
          (mk/simple-service
           '(ssh-add)
-          #~(list
-             "sh"
-             "-c"
-             (string-append
-              (getenv "HOME")
-              "/.bin/ssh-add-key 4 5"))
+          #~(list "sh"
+                  "-c"
+                  (string-append (getenv "HOME")
+                                 "/.bin/ssh-add-key 4 5"))
           #:requirements
           '(ssh-agent
             keepassxc
@@ -801,8 +758,7 @@
          ;; 29 xdg-autostart
          (mk/simple-service
           '(xdg-autostart)
-          #~(list
-             "xdg-autostart")
+          #~(list "xdg-autostart")
           #:create-session? #t))))))))
 
 
