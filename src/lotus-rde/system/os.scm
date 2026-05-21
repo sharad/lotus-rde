@@ -273,7 +273,7 @@
                 (feature-emacs))
           (lotus-metal-machine hostname
                                #:timezone timezone
-                               #:locale locale 
+                               #:locale locale
                                #:locale-names locale-names
                                #:disk-serial-id-system disk-serial-id-system
                                #:disk-serial-id-home disk-serial-id-home

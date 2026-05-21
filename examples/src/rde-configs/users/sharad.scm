@@ -735,4 +735,5 @@ fi
              (feature-lotus-users-groups #:user-name "s"
                                          #:full-name "Sharad Pratap"
                                          #:home-directory "/home/s/hell"
-                                         #:email "s@localhost")))))
+                                         #:email "s@localhost"))
+         (feature-ssh #:ssh-agent? #t))))
