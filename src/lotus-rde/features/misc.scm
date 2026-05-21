@@ -127,7 +127,7 @@
 
 (define* (feature-lotus-nox-services
           #:key
-          (pkttyagent pkttyagent)
+          (polkit polkit)
           (mpd mpd)
           (znc znc)
           (jupyter jupyter)
@@ -170,7 +170,7 @@
           (documentation "Run pkttyagent")
           (start
            #~(make-forkexec-constructor
-              (list #$(file-append pkttyagent
+              (list #$(file-append polkit
                                    "/bin/pkttyagent"))
               #:log-file #$(log-file "pkttyagent")))
           (stop #~(make-kill-destructor))
