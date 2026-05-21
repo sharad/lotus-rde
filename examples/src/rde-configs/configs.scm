@@ -113,7 +113,7 @@
               ("system" (rde-config-operating-system config))
               (_ #f))))
         (begin
-          (format #t "Invalid RDE_HOST: ~a or RDE_USER: ~a\n" rde-host-features rde-user-fatures)
+          (format #t "Invalid RDE_HOST: ~a or RDE_USER: ~a\n" 'rde-host-features 'rde-user-fatures)
           #f))))
 
 
