@@ -81,7 +81,7 @@
   #:use-module (gnu packages linux)
   ;; #:use-module (shepherd service)
   #:use-module (rde features)
-  ;; #:use-module (rde features predicates)
+  #:use-module (rde features predicates)
 
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
