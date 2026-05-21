@@ -36,6 +36,7 @@
   #:use-module (rde features password-utils)
   #:use-module (rde features presets)
   #:use-module (rde features security-token)
+  #:use-module (rde features ssh)
   #:use-module (rde features sourcehut)
   #:use-module (rde features system)
   #:use-module (rde features terminals)
