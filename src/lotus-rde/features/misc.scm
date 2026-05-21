@@ -36,6 +36,14 @@
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages freedesktop)
   #:use-module (gnu packages polkit)
+  #:use-module (gnu packages mpd)
+  #:use-module (gnu packages jupyter)
+  #:use-module (gnu packages monitoring)
+  #:use-module (gnu packages compton)
+  #:use-module (gnu packages ibus)
+  #:use-module (gnu packages pulseaudio)
+  #:use-module (gnu packages hardware)
+  #:use-module (gnu packages version-control)
   #:use-module (rde packages)
 
   #:use-module (srfi srfi-1)
@@ -109,6 +117,8 @@
   #:use-module (rde features guile)
   #:use-module (rde features networking)
   #:use-module (rde features system)
+  #:use-module (lotus-rde packages python-xyz)
+  #:use-module (lotus-rde packages utils)
   #:use-module (lotus-rde features mfs)
   #:export (feature-lotus-nox-services
             feature-lotus-x-services))
@@ -136,7 +146,7 @@
            (local-file "/home/s/.bin/bluetooth-autoconnect"))
           (power-mon
            (local-file "/home/s/.bin/power-mon"))
-          (usrhttpd usrhttpd))
+          (usrhttpd rust-usrhttpd))
 
 
   (feature
@@ -152,7 +162,7 @@
         'lotus-user-service-packages
         home-profile-service-type
         (list
-         pkttyagent
+         polkit
          mpd
          znc
          jupyter))
@@ -329,20 +339,20 @@
           (gnome-keyring gnome-keyring)
           (blueman blueman)
           (pasystray pasystray)
-          (barrier barrier)
+          ;; (barrier barrier)
           (git git)
           (autossh autossh))
 
 
-  (define (mk/simple-service provision command
-                             #:key
-                             (respawn? #t)
-                             (requirements '())
-                             (one-shot? #f)
-                             (transient? #f)
-                             (create-session? #f)
-                             (documentation "")
-                             (actions '()))
+  (define* (mk/simple-service provision command
+                              #:key
+                              (respawn? #t)
+                              (requirements '())
+                              (one-shot? #f)
+                              ;; (transient? #f)
+                              (create-session? #f)
+                              (documentation "")
+                              (actions '()))
 
     (shepherd-service
       (provision provision)
@@ -361,7 +371,7 @@
 
       (respawn? respawn?)
       (one-shot? one-shot?)
-      (transient? transient?)
+      ;; (transient? transient?)
 
       (actions actions)))
 
@@ -390,7 +400,7 @@
          gnome-keyring
          blueman
          pasystray
-         barrier
+         ;; barrier
          git
          autossh))
 
@@ -570,11 +580,9 @@
                   (string-append (getenv "HOME")
                                  "/.db.kdbx"))
           #:requirements
-          '(kpkeys
-            secfs-orgp
-            xawaken-session-down))
-
-
+          '(kpkeys))
+            ;; secfs-orgp
+            ;; xawaken-session-down
 
          ;; 15 blueman-applet
          (mk/simple-service
@@ -629,8 +637,8 @@
                   "assistant")
           #:requirements
           '(keepassxc
-            ssh-add
-            xawaken-session-down)
+            ssh-add)
+            ;; xawaken-session-down
           #:respawn? #f)
 
 
@@ -660,29 +668,7 @@
           #~(list #$(file-append pasystray
                                  "/bin/pasystray")))
 
-
-
-         ;; 23 barrier
-         (mk/simple-service
-          '(barrier)
-          #~(list #$(file-append barrier "/bin/barrier")
-             "-f"
-             "--no-tray"
-             "--debug"
-             "DEBUG1"
-             "--disable-crypto"
-             "--disable-client-cert-checking"
-             "-c"
-             "~/.config/barrier/barrier.sgc"
-             "--address"
-             "0.0.0.0:3423")
-          #:requirements
-          '(xawaken-session-down)
-          #:respawn? #f)
-
-
-
-         ;; 24 deskflow-server
+         ;; 23 deskflow-server
          (mk/simple-service
           '(deskflow-server)
           #~(list "deskflow-core"
@@ -709,7 +695,8 @@
                    (getenv "HOME")
                    "/.config/Deskflow/tls/deskflow-server.pem"))
           #:requirements
-          '(xawaken-session-down)
+          '();; xawaken-session-down
+            
           #:respawn? #f)
 
 
@@ -736,7 +723,8 @@
                    "/.config/Deskflow/tls/deskflow-client.pem")
                   "deskflow-server-host:24800")
           #:requirements
-          '(xawaken-session-down)
+          '();; xawaken-session-down
+            
           #:respawn? #f)
 
 
@@ -749,8 +737,9 @@
                   (string-append (getenv "HOME")
                                  "/.bin/kpkeys -s co"))
           #:requirements
-          '(secfs-secure
-            xawaken-session-down)
+          '();; secfs-secure
+            ;; xawaken-session-down
+            
           #:respawn? #f)
 
 
@@ -764,8 +753,9 @@
                                  "/.bin/ssh-add-key 4 5"))
           #:requirements
           '(ssh-agent
-            keepassxc
-            xawaken-session-down)
+            keepassxc)
+            ;; xawaken-session-down
+            
           #:respawn? #f)
 
 
@@ -781,8 +771,9 @@
                   "-o" "ControlPersist=no"
                   "proxy-server-fclient")
           #:requirements
-          '(ssh-add
-            awaken-session-down)
+          '(ssh-add)
+            ;; awaken-session-down
+            
           #:respawn? #t)
 
          ;; 29 xdg-autostart

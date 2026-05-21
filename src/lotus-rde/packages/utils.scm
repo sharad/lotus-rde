@@ -1664,7 +1664,7 @@ unavailable."
           (warning (G_ "no Cargo inputs available for '~a'~%") name)
           '()))))
 
-(define-public rust-usrhttpd-v0.1.0
+(define-public rust-usrhttpd
   (package
    (name "rust-usrhttpd")
    (version "v0.1.0")
