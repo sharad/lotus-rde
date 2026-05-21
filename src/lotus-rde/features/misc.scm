@@ -110,7 +110,7 @@
 
 
   (feature
-   (name 'lotus-ng-services)
+   (name 'lotus-nox-services)
 
    (home-services-getter
     (lambda (_)
@@ -336,7 +336,7 @@
       (actions actions)))
 
   (feature
-   (name 'lotus-shepherd-services)
+   (name 'lotus-x-services)
 
    (home-services-getter
     (lambda (_)
