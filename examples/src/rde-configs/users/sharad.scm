@@ -53,7 +53,8 @@
   #:use-module (rde home services wm)
   #:use-module (rde packages aspell)
   #:use-module (rde packages)
-  #:use-module (lotus-rde features base))
+  #:use-module (lotus-rde features base)
+  #:use-module (lotus-rde features misc))
 
 
 ;;; Helpers
@@ -736,4 +737,6 @@ fi
                                          #:full-name "Sharad Pratap"
                                          #:home-directory "/home/s/hell"
                                          #:email "s@localhost"))
-         (feature-ssh #:ssh-agent? #t))))
+         (feature-ssh #:ssh-agent? #t)
+         (feature-lotus-nox-services)
+         (feature-lotus-x-services))))
