@@ -443,9 +443,9 @@ Defaults:%wheel env_keep+=TERMINFO")))))
          ;; NetworkManager and its applet.
         ;; (service network-manager-service-type)
         ;; (service wpa-supplicant-service-type)    ;needed by NetworkManager
-        ;; (simple-service 'network-manager-applet
-        ;;                 profile-service-type
-        ;;                 (list network-manager-applet))
+        (simple-service 'network-manager-applet
+                        profile-service-type
+                        (list network-manager-applet))
         ;; (service modem-manager-service-type)
         ;; (service usb-modeswitch-service-type)
 
