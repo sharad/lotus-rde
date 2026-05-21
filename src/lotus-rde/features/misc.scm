@@ -35,7 +35,7 @@
   #:use-module (gnu packages nfs)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages freedesktop)
-  #:use-module (rde packages polkit)
+  #:use-module (gnu packages polkit)
   #:use-module (rde packages)
 
   #:use-module (srfi srfi-1)
