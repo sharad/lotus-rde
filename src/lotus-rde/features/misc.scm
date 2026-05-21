@@ -71,6 +71,45 @@
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu packages idutils)
   #:use-module (gnu packages ssh)
+
+
+  #:use-module (gnu home services shepherd)
+  #:use-module (gnu home services)
+  #:use-module (gnu packages admin)
+  #:use-module (gnu packages python)
+  #:use-module (gnu packages jupyter)
+  #:use-module (gnu packages music)
+  #:use-module (gnu packages messaging)
+  #:use-module (gnu packages networking)
+  #:use-module (gnu packages linux)
+  #:use-module (shepherd service)
+  #:use-module (rde features)
+  #:use-module (rde features predicates)
+
+  #:use-module (gnu home services)
+  #:use-module (gnu home services shepherd)
+  #:use-module (gnu packages)
+  #:use-module (gnu packages admin)
+  #:use-module (gnu packages audio)
+  #:use-module (gnu packages base)
+  #:use-module (gnu packages freedesktop)
+  #:use-module (gnu packages gnome)
+  #:use-module (gnu packages gtk)
+  #:use-module (gnu packages linux)
+  #:use-module (gnu packages music)
+  #:use-module (gnu packages networking)
+  #:use-module (gnu packages python)
+  #:use-module (gnu packages ssh)
+  #:use-module (gnu packages wm)
+  #:use-module (gnu packages xdisorg)
+  #:use-module (gnu packages xorg)
+  #:use-module (gnu services)
+
+
+
+
+
+
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
   #:use-module (rde predicates)
