@@ -55,7 +55,8 @@
   #:use-module (rde packages aspell)
   #:use-module (rde packages)
   #:use-module (lotus-rde features base)
-  #:use-module (lotus-rde features misc))
+  #:use-module (lotus-rde features misc)
+  #:use-module (lotus-rde features security))
 
 
 ;;; Helpers
