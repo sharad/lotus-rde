@@ -251,7 +251,7 @@
          (flatpak       (file-append flatpak "/bin/flatpak")))
 
     (shepherd-service
-     (provision (list name))
+      (provision (list name))
      (requirement requirement)
      (respawn? respawn?)
      (respawn-delay respawn-delay)
@@ -263,21 +263,52 @@
      ;; (stop #~(make-cmd-destructor
      ;;          (string-join (list #$flatpak "kill" #$app) " ")
      ;;          " >> " #$log " 2>&1"))
-     (stop (with-imported-modules
-               (source-module-closure
-                '((lotus-rde lib utils)))
-             #~(begin
-                 (use-modules
-                  (lotus-rde lib utils))
 
-                 (make-cmd-destructor
-                  (string-join
-                   (list #$flatpak
-                         "kill"
-                         #$app)
-                   " ")
-                  " >> " #$log " 2>&1")))))))
+     ;; (stop (with-imported-modules
+     ;;           (source-module-closure
+     ;;            '((lotus-rde lib utils)))
+     ;;         #~(begin
+     ;;             (use-modules
+     ;;              (lotus-rde lib utils))
 
+     ;;             (make-cmd-destructor
+     ;;              (string-join
+     ;;               (list #$flatpak
+     ;;                     "kill"
+     ;;                     #$app)
+     ;;               " ")
+     ;;              " >> " #$log " 2>&1"))))
+
+     (stop #~(begin
+
+               (define (make-cmd-destructor . command)
+
+                 (let ((system-destructor
+                        (apply make-system-destructor
+                               command))
+
+                       (kill-destructor
+                        (make-kill-destructor)))
+
+                   (lambda (running . args)
+
+                     (apply kill-destructor
+                            running
+                            args)
+
+                     (apply system-destructor
+                            running
+                            args))))
+
+               (make-cmd-destructor
+                (string-join
+                 (list #$flatpak
+                       "kill"
+                       #$app)
+                 " ")
+                " >> "
+                #$log
+                " 2>&1"))))))
 
 (define home-flatpak-service-type
   (service-type
