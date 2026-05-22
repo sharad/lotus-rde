@@ -259,9 +259,20 @@
                (list #$dbus-launch #$flatpak "--user" "run" #$app)
                #:create-session? #t
                #:log-file #$log))
-     (stop #~(make-cmd-destructor
-              (string-join (list #$flatpak "kill" #$app) " ")
-              " >> " #$log " 2>&1")))))
+     ;; (stop #~(make-cmd-destructor
+     ;;          (string-join (list #$flatpak "kill" #$app) " ")
+     ;;          " >> " #$log " 2>&1"))
+     (stop #~(begin
+               (use-modules
+                (lotus-rde lib utils))
+
+               (make-cmd-destructor
+                (string-join
+                 (list #$flatpak
+                       "kill"
+                       #$app)
+                 " ")
+                " >> " #$log " 2>&1"))))))
 
 
 (define home-flatpak-service-type

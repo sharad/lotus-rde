@@ -66,7 +66,6 @@
      #$name
      ".log"))
 
-
 (define (make-cmd-destructor . command)
   (let ((system-destructor (apply make-system-destructor command))
         (kill-destructor   (make-kill-destructor)))
