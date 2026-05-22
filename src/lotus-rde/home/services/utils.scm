@@ -928,35 +928,74 @@ sender='org.bluez'")
 ;; Configuration
 ;; ------------------------------------------------------------
 
+;; (define-configuration/no-serialization
+;;   home-kpkey-configuration
+
+;;   (respawn?
+;;    (boolean #f))
+
+;;   (one-shot?
+;;    (boolean #t))
+
+;;   (create-session?
+;;    (boolean #f))
+
+;;   (secure-mount
+;;    (string
+;;     (string-append
+;;      (getenv "HOME")
+;;      "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/noenc/mountpoints/secure")))
+
+;;   (key-dir
+;;    (string
+;;     (string-append
+;;      (getenv "HOME")
+;;      "/.pi/.kp/mem")))
+
+;;   (gpg-secret
+;;    (string
+;;     (string-append
+;;      (getenv "HOME")
+;;      "/.open-secrets/secret-0.1.key.gpg"))))
+
+
+
 (define-configuration/no-serialization
   home-kpkey-configuration
 
   (respawn?
-   (boolean #f))
+   (boolean #f)
+   "Respawn service.")
 
   (one-shot?
-   (boolean #t))
+   (boolean #t)
+   "Run once.")
 
   (create-session?
-   (boolean #f))
+   (boolean #f)
+   "Create shepherd session.")
 
   (secure-mount
    (string
     (string-append
      (getenv "HOME")
-     "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/noenc/mountpoints/secure")))
+     "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/noenc/mountpoints/secure"))
+   "Secure mount path.")
 
   (key-dir
    (string
     (string-append
      (getenv "HOME")
-     "/.pi/.kp/mem")))
+     "/.pi/.kp/mem"))
+   "Key directory.")
 
   (gpg-secret
    (string
     (string-append
      (getenv "HOME")
-     "/.open-secrets/secret-0.1.key.gpg"))))
+     "/.open-secrets/secret-0.1.key.gpg"))
+   "GPG secret file."))
+
 
 ;; ------------------------------------------------------------
 ;; Program
@@ -1316,40 +1355,50 @@ sender='org.bluez'")
   home-ssh-add-key-configuration
 
   (attr-key
-   (string "rclone-config"))
+   (string "rclone-config")
+   "Attribute key.")
 
   (attr-value
-   (string "rclone-config"))
+   (string "rclone-config")
+   "Attribute value.")
 
   (max-tries
-   (integer 5))
+   (integer 5)
+   "Maximum tries.")
 
   (min-keys-count
-   (integer 4))
+   (integer 4)
+   "Minimum SSH keys required.")
 
   (dialog-timeout
-   (integer 5))
+   (integer 5)
+   "Zenity timeout.")
 
   (wait-count
-   (integer 50))
+   (integer 50)
+   "Retry count while waiting.")
 
   (wait-seconds
-   (integer 2))
+   (integer 2)
+   "Seconds between retries.")
 
   (create-session?
-   (boolean #f))
+   (boolean #f)
+   "Create shepherd session.")
 
   (respawn?
-   (boolean #f))
+   (boolean #f)
+   "Respawn service.")
 
   (one-shot?
-   (boolean #t))
+   (boolean #t)
+   "Run once.")
 
   (mount-base
-   (string
-    (string-append
-     (getenv "HOME")
-     "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/noenc/mountpoints"))))
+   (string (string-append
+            (getenv "HOME")
+            "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/noenc/mountpoints"))
+   "Base mount directory."))
 
 ;; ------------------------------------------------------------
 ;; Program
