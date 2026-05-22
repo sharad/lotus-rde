@@ -47,29 +47,144 @@
     (default "ro")))
 
 (define (secfs-volume->shepherd-service config)
-  (let* ((home    (getenv "HOME"))
-         (volname (home-secfs-volume-configuration-volname config))
-         (mode    (home-secfs-volume-configuration-mode config))
-         (sym     (string->symbol (string-append "secfs-" volname)))
-         (base    (string-append home "/.secfs/")) ;; "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/"
-         (dev     (string-append base "enc/volumes/" volname "/secret"))
-         (mp      (string-append base "noenc/mountpoints/" volname))
-         (cmd     (string-append home "/.bin/secfs-mount"))
-         (log     (shepherd-service-log-file (string-append "secfs-" volname "-" mode))))
+ (define secfs-mount
+    (program-file
+     "secfs-mount"
+     #~(begin
+         (use-modules
+          (srfi srfi-1)
+          (ice-9 match)
+          (ice-9 popen)
+          (ice-9 textual-ports)
+          (ice-9 getopt-long)
+          (ice-9 format)
+          (ice-9 ftw))
 
-    (shepherd-service
-     (provision (list sym))
-     (requirement '(secfs-down))
-     (respawn? #f)
-     (respawn-delay 10)
-     (respawn-limit 2)
-     (stop  #~(make-kill-destructor))
-     (start #~(make-forkexec-constructor
-               (list #$cmd
-                     "-d" #$dev
-                     "-m" #$mp
-                     "-p" #$mode)
-               #:log-file #$log)))))
+         (let ((cryfs #$(file-append cryfs "/bin/cryfs"))
+               (gpg #$(file-append gnupg "/bin/gpg"))
+               (herd #$(file-append shepherd "/bin/herd"))
+               (mv #$(file-append coreutils "/bin/mv"))
+               (mkdir #$(file-append coreutils "/bin/mkdir"))
+               (tail #$(file-append coreutils "/bin/tail"))
+               (timeout #$(file-append coreutils "/bin/timeout"))
+               (sleep #$(file-append coreutils "/bin/sleep"))
+               (HOME (or (getenv "HOME") ""))
+               (SECRETCRYPTFS-PATH (string-append HOME
+                                                  "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs"))
+               (SECRETCRYPTFS-VOLUME (string-append SECRETCRYPTFS-PATH "/enc/volumes"))
+               (SECRETCRYPTFS-MPOINT (string-append SECRETCRYPTFS-PATH "/noenc/mountpoints"))
+               (SECRETCRYPTFS-BASE "secret")
+
+               (args (cdr (command-line)))
+               (component (and (pair? args)
+                               (car args)))
+               (component-perm
+                 (and (> (length args) 1)
+                      (cadr args)))
+               (dev (if component
+                        (string-append SECRETCRYPTFS-VOLUME "/" component "/" SECRETCRYPTFS-BASE)
+                        #f))
+
+               (mount-point (if component
+                                (string-append SECRETCRYPTFS-MPOINT "/" component)
+                                #f))
+
+               (permission (or component-perm "ro"))
+               (password (let* ((port
+                                 (open-input-pipe
+                                  (string-append gpg " --batch --no-tty --pinentry-mode error --decrypt "
+                                                 HOME
+                                                 "/.open-secrets/secret-0.1.key.gpg")))
+                                (txt (get-string-all port)))
+                           (close-port port)
+                           (trim-newline txt))))
+
+
+           (define (fatal fmt . args)
+            (apply format
+                   (current-error-port)
+                   (string-append fmt "\n")
+                   args)
+            (exit 1))
+
+          (define (trim-newline s)
+            (if (and (> (string-length s) 0)
+                     (char=? (string-ref s (- (string-length s) 1))
+                             #\newline))
+                (string-drop-right s 1)
+                s))
+
+          (unless dev
+            (fatal "No component provided"))
+
+          (unless (file-exists? dev)
+            (fatal "Encrypted dir does not exist: ~a" dev))
+
+          (unless (file-exists? mount-point)
+            (mkdir mount-point))
+
+          (when (string-null? password)
+            (fatal "Authentication failed"))
+
+          ;; ------------------------------------------------------------
+          ;; Restart keepassxc if needed
+          ;; ------------------------------------------------------------
+          (when (string=? component "orgp")
+            (system* herd "stop" "keepassxc")
+            (system* herd "restart" "keepassxc"))
+
+          ;; ------------------------------------------------------------
+          ;; Run cryfs
+          ;; ------------------------------------------------------------
+
+          (setenv "CRYFS_FRONTEND" "noninteractive")
+
+          (let ((port (open-pipe* OPEN_WRITE
+                                  cryfs "-f" "-o" (string-append permission
+                                                                 ",subtype=Cryfs")
+                                  "--allow-replaced-filesystem"
+                                  "--config"
+                                  (string-append dev "/cryfs.config")
+                                  dev
+                                  mount-point)))
+            (display password port)
+            (newline port)
+            (force-output port)
+            (close-pipe port))))))
+
+
+
+ (let* ((home    (getenv "HOME"))
+        (volname (home-secfs-volume-configuration-volname config))
+        (mode    (home-secfs-volume-configuration-mode config))
+        (sym     (string->symbol (string-append "secfs-" volname)))
+        (base    (string-append home "/.secfs/")) ;; "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/"
+        (dev     (string-append base "enc/volumes/" volname "/secret"))
+        (mp      (string-append base "noenc/mountpoints/" volname))
+        (cmd     (string-append home "/.bin/secfs-mount"))
+        (log     (shepherd-service-log-file (string-append "secfs-" volname "-" mode))))
+
+   (shepherd-service
+    (provision (list sym))
+    (requirement '(secfs-down))
+    (respawn? #f)
+    (respawn-delay 10)
+    (respawn-limit 2)
+    (stop  #~(make-kill-destructor))
+    ;; (start #~(make-forkexec-constructor
+    ;;           (list #$cmd
+    ;;                 "-d" #$dev
+    ;;                 "-m" #$mp
+    ;;                 "-p" #$mode)
+    ;;           #:log-file #$log))
+    (start #~(make-forkexec-constructor
+              (start #~(make-forkexec-constructor
+                        (list #$secfs-mount
+                              "-d" #$dev
+                              "-m" #$mp
+                              "-p" #$mode)
+                        #:log-file #$log))
+              #:log-file #$log)))))
 
 (define home-secfs-service-type
   (service-type

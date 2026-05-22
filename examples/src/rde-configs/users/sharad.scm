@@ -740,4 +740,7 @@ fi
                                          #:email "s@localhost"))
          (feature-ssh #:ssh-agent? #t)
          (feature-lotus-nox-services)
-         (feature-lotus-x-services))))
+         (feature-lotus-x-services)
+         (feature-msteam)
+         (feature-zoom)
+         (feature-doc-publishing))))
