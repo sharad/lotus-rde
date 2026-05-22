@@ -3,6 +3,9 @@
   #:use-module (rde predicates)
   #:use-module (rde system services admin)
 
+  #:use-module (guix gexp)
+  #:use-module (guix modules)
+
   #:use-module (gnu system)
   #:use-module (gnu system setuid)
   #:use-module (gnu services)
@@ -119,6 +122,7 @@
   #:use-module (rde features system)
   #:use-module (lotus-rde packages python-xyz)
   #:use-module (lotus-rde packages utils)
+  #:use-module (lotus-rde home services builder)
   #:export (feature-lotus-nox-services
             feature-lotus-x-services
             feature-msteam
@@ -128,14 +132,6 @@
 
 
 
-(define (log-file name)
-  #~(string-append
-     (or (getenv "XDG_STATE_HOME")
-         (string-append (getenv "HOME")
-                        "/.local/state"))
-     "/log/"
-     #$name
-     ".log"))
 
 (define* (feature-lotus-nox-services
           #:key
@@ -486,9 +482,8 @@ sender='org.bluez'")
 
 
 
-  (define* (get-home-services)
+  (define (get-home-services config)
     (list
-
        ;; packages
        (simple-service
         'lotus-user-service-packages
@@ -1113,7 +1108,7 @@ sender='org.bluez'")
 
 
 (define* (feature-msteam)
-  (define* (get-home-services)
+  (define* (get-home-services config)
     (list
      (simple-service 'my-flatpak-apps
                      home-flatpak-service-type
@@ -1128,7 +1123,7 @@ sender='org.bluez'")
 
 
 (define* (feature-zoom)
-  (define* (get-home-services)
+  (define* (get-home-services config)
     (list
      (simple-service 'my-flatpak-apps
                      home-flatpak-service-type
@@ -1143,7 +1138,7 @@ sender='org.bluez'")
 
 
 (define* (feature-doc-publishing)
-  (define* (get-home-services)
+  (define* (get-home-services config)
     (list
      (simple-service 'my-flatpak-apps
                      home-flatpak-service-type

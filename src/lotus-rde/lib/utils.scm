@@ -31,15 +31,39 @@
 
 
 
-(define (shepherd-service-log-file name)
-  "Return log file path for shepherd service NAME.
-Usage: #:log-file #$(shepherd-service-log-file name)"
-  (string-append (getenv "HOME") "/.logs/shepherd/" name ".log"))
+;; (define (shepherd-service-log-file name)
+;;   "Return log file path for shepherd service NAME.
+;; Usage: #:log-file #$(shepherd-service-log-file name)"
+;;   (string-append (getenv "HOME") "/.logs/shepherd/" name ".log"))
 
-(define shepherd-service-log-file-gexp
-  ;; Usage: #:log-file (#$shepherd-service-log-file-gexp #$(service-name-fn))
-  #~(lambda (name)
-      (string-append (getenv "HOME") "/.logs/shepherd/" name ".log")))
+;; (define shepherd-service-log-file-gexp
+;;   ;; Usage: #:log-file (#$shepherd-service-log-file-gexp #$(service-name-fn))
+;;   #~(lambda (name)
+;;       (string-append (getenv "HOME") "/.logs/shepherd/" name ".log")))
+
+
+
+;; (define (shepherd-service-log-file name)
+;;   "Return log file path for shepherd service NAME.
+;; Usage: #:log-file #$(shepherd-service-log-file name)"
+;;   (string-append (getenv "HOME") "/.logs/shepherd/" name ".log"))
+
+;; (define shepherd-service-log-file-gexp
+;;   ;; Usage: #:log-file (#$shepherd-service-log-file-gexp #$(service-name-fn))
+;;   #~(lambda (name)
+;;       (string-append (getenv "HOME") "/.logs/shepherd/" name ".log")))
+
+
+(define (log-file name)
+  #~(string-append
+     (or (getenv "XDG_STATE_HOME")
+         (string-append (getenv "HOME")
+                        "/.local/state"))
+     "/log/"
+     #$name
+     ".log"))
+
+
 
 
 (define* (define-spawner-service spawner-service

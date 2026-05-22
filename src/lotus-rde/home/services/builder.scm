@@ -30,9 +30,15 @@
   #:use-module (guix packages)
   #:use-module (guix gexp)
   #:use-module (rde serializers yaml)
+  #:use-module (lotus-rde lib utils)
   #:export (home-secfs-service-type
             home-secfs-volume-configuration
             secfs-volume->shepherd-service
+
+            home-flatpak-service-type
+            home-flatpak-app-configuration
+
+
             home-services-group-service-type
             services-group->shepherd-service))
 
@@ -162,7 +168,7 @@
         (dev     (string-append base "enc/volumes/" volname "/secret"))
         (mp      (string-append base "noenc/mountpoints/" volname))
         (cmd     (string-append home "/.bin/secfs-mount"))
-        (log     (shepherd-service-log-file (string-append "secfs-" volname "-" mode))))
+        (log     (log-file (string-append "secfs-" volname "-" mode))))
 
    (shepherd-service
     (provision (list sym))
@@ -236,7 +242,7 @@
          (respawn-limit (home-flatpak-app-configuration-respawn-limit config))
          (requirement   (home-flatpak-app-configuration-requirement config))
          (name-str      (symbol->string name))
-         (log           (shepherd-service-log-file name-str))
+         (log           (log-file name-str))
          (dbus-launch   (file-append dbus "/bin/dbus-launch"))
          (flatpak       (file-append flatpak "/bin/flatpak")))
 
