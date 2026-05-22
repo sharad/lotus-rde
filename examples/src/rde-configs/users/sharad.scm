@@ -745,7 +745,8 @@ fi
          (feature-zoom)
          (feature-doc-publishing)
          (feature-bluetooth-auto-connect)
-         (feature-power-monitor))))
+         (feature-power-monitor)
+         (feature-secfs))))
 
 
 
