@@ -265,7 +265,7 @@
      ;;          " >> " #$log " 2>&1"))
      (stop (with-imported-modules
                (source-module-closure
-                '((lotus-rde shepherd utils)))
+                '((lotus-rde lib utils)))
              #~(begin
                  (use-modules
                   (lotus-rde lib utils))
