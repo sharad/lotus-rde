@@ -692,32 +692,32 @@
 
 
 
-         ;; 26 kpkeys
-         (mk/simple-service
-          '(kpkeys)
-          #~(list "sh"
-                  "-c"
-                  (string-append (getenv "HOME")
-                                 "/.bin/kpkeys -s co"))
-          #:requirements
-          '();; secfs-secure
-            ;; xawaken-session-down
-          #:respawn? #f)
+         ;; ;; 26 kpkeys
+         ;; (mk/simple-service
+         ;;  '(kpkeys)
+         ;;  #~(list "sh"
+         ;;          "-c"
+         ;;          (string-append (getenv "HOME")
+         ;;                         "/.bin/kpkeys -s co"))
+         ;;  #:requirements
+         ;;  '();; secfs-secure
+         ;;    ;; xawaken-session-down
+         ;;  #:respawn? #f)
 
 
 
-         ;; 27 ssh-add
-         (mk/simple-service
-          '(ssh-add)
-          #~(list "sh"
-                  "-c"
-                  (string-append (getenv "HOME")
-                                 "/.bin/ssh-add-key 4 5"))
-          #:requirements
-          '(ssh-agent
-            keepassxc)
-            ;; xawaken-session-down
-          #:respawn? #f)
+         ;; ;; 27 ssh-add
+         ;; (mk/simple-service
+         ;;  '(ssh-add)
+         ;;  #~(list "sh"
+         ;;          "-c"
+         ;;          (string-append (getenv "HOME")
+         ;;                         "/.bin/ssh-add-key 4 5"))
+         ;;  #:requirements
+         ;;  '(ssh-agent
+         ;;    keepassxc)
+         ;;    ;; xawaken-session-down
+         ;;  #:respawn? #f)
 
 
 

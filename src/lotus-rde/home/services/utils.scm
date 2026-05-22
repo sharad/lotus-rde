@@ -44,7 +44,15 @@
 
             home-power-monitor-configuration
             home-power-monitor-shepherd-services
-            home-power-monitor-service-type))
+            home-power-monitor-service-type
+
+            home-kpkey-configuration
+            home-kpkey-shepherd-services
+            home-kpkey-service-type
+
+            home-ssh-add-key-configuration
+            home-ssh-add-key-shepherd-services
+            home-ssh-add-key-service-type))
 
 
 
@@ -914,6 +922,733 @@ sender='org.bluez'")
 ;;  (home-power-monitor-configuration
 ;;   (poll-interval 15)
 ;;   (notify-level 5)))
+
+
+;; ------------------------------------------------------------
+;; Configuration
+;; ------------------------------------------------------------
+
+(define-configuration/no-serialization
+  home-kpkey-configuration
+
+  (respawn?
+   (boolean #f))
+
+  (one-shot?
+   (boolean #t))
+
+  (create-session?
+   (boolean #f))
+
+  (secure-mount
+   (string
+    (string-append
+     (getenv "HOME")
+     "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/noenc/mountpoints/secure")))
+
+  (key-dir
+   (string
+    (string-append
+     (getenv "HOME")
+     "/.pi/.kp/mem")))
+
+  (gpg-secret
+   (string
+    (string-append
+     (getenv "HOME")
+     "/.open-secrets/secret-0.1.key.gpg"))))
+
+;; ------------------------------------------------------------
+;; Program
+;; ------------------------------------------------------------
+
+(define (kpkey-program config)
+
+  (let ((secure-mount
+         (home-kpkey-configuration-secure-mount
+          config))
+
+        (key-dir
+         (home-kpkey-configuration-key-dir
+          config))
+
+        (gpg-secret
+         (home-kpkey-configuration-gpg-secret
+          config)))
+
+    (program-file
+     "kpkey"
+
+     #~(begin
+
+         (use-modules
+          (srfi srfi-1)
+          (ice-9 match)
+          (ice-9 ftw)
+          (ice-9 format)
+          (ice-9 textual-ports)
+          (ice-9 binary-ports)
+          (ice-9 popen))
+
+         ;; ------------------------------------------------------------
+         ;; Store paths
+         ;; ------------------------------------------------------------
+
+         (define gpg
+           #$(file-append gnupg "/bin/gpg"))
+
+         (define notify-send
+           #$(file-append libnotify "/bin/notify-send"))
+
+         (define zenity
+           #$(file-append zenity "/bin/zenity"))
+
+         (define shred
+           #$(file-append coreutils "/bin/shred"))
+
+         (define herd
+           #$(file-append shepherd "/bin/herd"))
+
+         (define gpgconf
+           #$(file-append gnupg "/bin/gpgconf"))
+
+         ;; ------------------------------------------------------------
+         ;; Config
+         ;; ------------------------------------------------------------
+
+         (define secure-mount
+           #$secure-mount)
+
+         (define key-dir
+           #$key-dir)
+
+         (define gpg-secret
+           #$gpg-secret)
+
+         ;; ------------------------------------------------------------
+         ;; Helpers
+         ;; ------------------------------------------------------------
+
+         (define (notify fmt . args)
+
+           (apply
+            system*
+            notify-send
+            (list
+             (apply format #f fmt args))))
+
+         (define (mounted? path)
+
+           ;; Avoid external df/mount parsing
+           ;; by checking device change.
+
+           (let ((st-root
+                  (stat "/"))
+
+                 (st-path
+                  (false-if-exception
+                   (stat path))))
+
+             (and st-path
+                  (not (= (stat:dev st-root)
+                          (stat:dev st-path))))))
+
+         (define (key-files)
+
+           (filter
+            (lambda (f)
+              (string-suffix? ".keyx" f))
+            (scandir ".")))
+
+         (define (encrypted-key-files)
+
+           (filter
+            (lambda (f)
+              (string-suffix? ".keyx.gpg" f))
+            (scandir ".")))
+
+         (define (decrypt-file file)
+
+           (let* ((target
+                   (string-drop-right file 4))
+
+                  (secret-port
+                   (open-input-pipe
+                    (string-append
+                     gpg
+                     " --batch --quiet --decrypt "
+                     gpg-secret)))
+
+                  (passphrase
+                   (string-trim-right
+                    (get-string-all secret-port)
+                    #\newline)))
+
+             (close-pipe secret-port)
+
+             (system*
+              gpg
+              "--batch"
+              "--yes"
+              "--pinentry-mode"
+              "loopback"
+              "--passphrase"
+              passphrase
+              "--output"
+              target
+              "--decrypt"
+              file)))
+
+         (define (decrypt-files files)
+
+           (for-each
+
+            (lambda (f)
+
+              (unless
+                  (file-exists?
+                   (string-drop-right f 4))
+
+                (decrypt-file f)))
+
+            files))
+
+         ;; ------------------------------------------------------------
+         ;; Commands
+         ;; ------------------------------------------------------------
+
+         (define (checkin)
+
+           (mkdir-p key-dir)
+
+           (chdir key-dir)
+
+           (let ((files
+                  (key-files)))
+
+             (if (null? files)
+
+                 (notify "already checked in")
+
+                 (begin
+
+                   (for-each
+
+                    (lambda (f)
+
+                      (system* shred "-u" f))
+
+                    files)
+
+                   (notify
+                    "Successfully checked in")))))
+
+         (define (checkout)
+
+           (unless (mounted? secure-mount)
+
+             (format
+              (current-error-port)
+              "secure mount not mounted\n")
+
+             (exit 1))
+
+           (mkdir-p key-dir)
+
+           (chdir key-dir)
+
+           ;; ------------------------------------------------------------
+           ;; Symlink encrypted files
+           ;; ------------------------------------------------------------
+
+           (for-each
+
+            (lambda (f)
+
+              (let ((target
+                     (string-append
+                      key-dir
+                      "/"
+                      (basename f))))
+
+                (unless (file-exists? target)
+
+                  (symlink f target))))
+
+            (find-files
+             (string-append
+              (dirname key-dir)
+              "/.keys")
+             "\\.keyx\\.gpg$"))
+
+           ;; ------------------------------------------------------------
+           ;; Decrypt
+           ;; ------------------------------------------------------------
+
+           (decrypt-files
+            (encrypted-key-files))
+
+           (if (null? (key-files))
+
+               (notify
+                "Failed to check out")
+
+               (notify
+                "Successfully checked out"))
+
+           ;; Restart keepassxc
+           (primitive-fork)
+
+           (system*
+            herd
+            "restart"
+            "keepassxc"))
+
+         (define (status)
+
+           (mkdir-p key-dir)
+
+           (chdir key-dir)
+
+           (for-each
+            (lambda (f)
+              (format #t "~a\n" f))
+            (key-files)))
+
+         ;; ------------------------------------------------------------
+         ;; Main
+         ;; ------------------------------------------------------------
+
+         (match (cdr (command-line))
+
+           (("ci")
+            (checkin))
+
+           (("co")
+            (checkout))
+
+           ((or ("st")
+                ("status"))
+            (status))
+
+           (_
+
+            (format
+             (current-error-port)
+             "Usage: kpkey {ci|co|st}\n")
+
+            (exit 1)))))))
+
+;; ------------------------------------------------------------
+;; Shepherd services
+;; ------------------------------------------------------------
+
+(define (home-kpkey-shepherd-services config)
+
+  (let ((kpkey
+         (kpkey-program config))
+
+        (respawn?
+         (home-kpkey-configuration-respawn?
+          config))
+
+        (one-shot?
+         (home-kpkey-configuration-one-shot?
+          config))
+
+        (create-session?
+         (home-kpkey-configuration-create-session?
+          config)))
+
+    (list
+
+     (shepherd-service
+
+      (provision '(kpkey))
+
+      (documentation
+       "KeePassXC key checkout service.")
+
+      (requirement '())
+
+      (respawn? respawn?)
+
+      (one-shot? one-shot?)
+
+      (start
+       #~(make-forkexec-constructor
+          (list #$kpkey "co")
+          #:create-session? #$create-session?
+          #:log-file
+          #$(log-file "kpkey.log")))
+
+      (stop
+       #~(make-kill-destructor))))))
+
+;; ------------------------------------------------------------
+;; Service type
+;; ------------------------------------------------------------
+
+(define home-kpkey-service-type
+
+  (service-type
+   (name 'home-kpkey)
+
+   (extensions
+    (list
+     (service-extension
+      home-shepherd-service-type
+      home-kpkey-shepherd-services)))
+
+   (default-value
+     (home-kpkey-configuration))
+
+   (description
+    "KeePassXC key checkout/checkin service.")))
+
+
+
+;; ------------------------------------------------------------
+;; Configuration
+;; ------------------------------------------------------------
+
+(define-configuration/no-serialization
+  home-ssh-add-key-configuration
+
+  (attr-key
+   (string "rclone-config"))
+
+  (attr-value
+   (string "rclone-config"))
+
+  (max-tries
+   (integer 5))
+
+  (min-keys-count
+   (integer 4))
+
+  (dialog-timeout
+   (integer 5))
+
+  (wait-count
+   (integer 50))
+
+  (wait-seconds
+   (integer 2))
+
+  (create-session?
+   (boolean #f))
+
+  (respawn?
+   (boolean #f))
+
+  (one-shot?
+   (boolean #t))
+
+  (mount-base
+   (string
+    (string-append
+     (getenv "HOME")
+     "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/noenc/mountpoints"))))
+
+;; ------------------------------------------------------------
+;; Program
+;; ------------------------------------------------------------
+
+(define (ssh-add-key-program config)
+
+  (let ((attr-key
+         (home-ssh-add-key-configuration-attr-key
+          config))
+
+        (attr-value
+         (home-ssh-add-key-configuration-attr-value
+          config))
+
+        (max-tries
+         (home-ssh-add-key-configuration-max-tries
+          config))
+
+        (min-keys-count
+         (home-ssh-add-key-configuration-min-keys-count
+          config))
+
+        (dialog-timeout
+         (home-ssh-add-key-configuration-dialog-timeout
+          config))
+
+        (wait-count
+         (home-ssh-add-key-configuration-wait-count
+          config))
+
+        (wait-seconds
+         (home-ssh-add-key-configuration-wait-seconds
+          config))
+
+        (mount-base
+         (home-ssh-add-key-configuration-mount-base
+          config)))
+
+    (program-file
+     "ssh-add-key"
+
+     #~(begin
+
+         (use-modules
+          (ice-9 match)
+          (ice-9 format)
+          (ice-9 popen)
+          (ice-9 textual-ports)
+          (ice-9 ftw)
+          (srfi srfi-1))
+
+         ;; ------------------------------------------------------------
+         ;; Store paths
+         ;; ------------------------------------------------------------
+
+         (define ssh-add
+           #$(file-append openssh "/bin/ssh-add"))
+
+         (define secret-tool
+           #$(file-append libsecret "/bin/secret-tool"))
+
+         (define herd
+           #$(file-append shepherd "/bin/herd"))
+
+         (define zenity
+           #$(file-append zenity "/bin/zenity"))
+
+         ;; ------------------------------------------------------------
+         ;; Config
+         ;; ------------------------------------------------------------
+
+         (define ATTR-KEY
+           #$attr-key)
+
+         (define ATTR-VALUE
+           #$attr-value)
+
+         (define MAX-TRIES
+           #$max-tries)
+
+         (define MIN-KEYS-COUNT
+           #$min-keys-count)
+
+         (define DIALOG-TIMEOUT
+           #$dialog-timeout)
+
+         (define WAIT-COUNT
+           #$wait-count)
+
+         (define WAIT-SECONDS
+           #$wait-seconds)
+
+         (define MP-BASE
+           #$mount-base)
+
+         (define mtrg-orgp
+           (string-append MP-BASE "/orgp"))
+
+         (define mtrg-secure
+           (string-append MP-BASE "/secure"))
+
+         ;; ------------------------------------------------------------
+         ;; Helpers
+         ;; ------------------------------------------------------------
+
+         ;; Better than external df parsing.
+         ;; Compare mount device IDs.
+         (define (mounted? path)
+
+           (let ((st
+                  (false-if-exception
+                   (stat path)))
+
+                 (root
+                  (stat "/")))
+
+             (and st
+                  (not
+                   (= (stat:dev st)
+                      (stat:dev root))))))
+
+         (define (ssh-key-count)
+
+           (let* ((port
+                   (open-input-pipe
+                    (string-append
+                     ssh-add
+                     " -l 2>/dev/null")))
+
+                  (txt
+                   (get-string-all port)))
+
+             (close-pipe port)
+
+             ;; Count lines instead of wc.
+             (length
+              (filter
+               (lambda (x)
+                 (not (string-null? x)))
+               (string-split txt #\newline)))))
+
+         (define (show-warning)
+
+           (system*
+            zenity
+            (string-append
+             "--timeout="
+             (number->string DIALOG-TIMEOUT))
+            "--warning"
+            "--title=Secret Locked or Not Found"
+            "--text=Secret not available. Please unlock the appropriate database in KeePassXC."))
+
+         (define (lookup-secret)
+
+           ;; We only care whether lookup succeeds.
+           ;; No need to capture output.
+           (zero?
+            (system*
+             secret-tool
+             "lookup"
+             ATTR-KEY
+             ATTR-VALUE)))
+
+         ;; ------------------------------------------------------------
+         ;; Wait for mounts
+         ;; ------------------------------------------------------------
+
+         (define (wait-for-mounts)
+
+           (let loop ((count WAIT-COUNT))
+
+             (cond
+
+              ((and (mounted? mtrg-secure)
+                    (mounted? mtrg-orgp))
+
+               #t)
+
+              ((<= count 0)
+
+               #f)
+
+              (else
+
+               (format
+                #t
+                "waiting ~a\n"
+                count)
+
+               (sleep WAIT-SECONDS)
+
+               (loop (- count 1))))))
+
+         ;; ------------------------------------------------------------
+         ;; Main
+         ;; ------------------------------------------------------------
+
+         (if (not (wait-for-mounts))
+
+             (begin
+               (format
+                (current-error-port)
+                "mounts unavailable\n")
+               (exit 1))
+
+             (let loop ((tries 0))
+
+               (when (and (< tries MAX-TRIES)
+                          (< (ssh-key-count)
+                             MIN-KEYS-COUNT))
+
+                 ;; start keepassxc
+                 (system* herd "enable" "keepassxc")
+
+                 (primitive-fork)
+
+                 (system* herd "start" "keepassxc")
+
+                 (sleep 1)
+
+                 (lookup-secret)
+
+                 (sleep 1)
+
+                 (when (< (ssh-key-count)
+                          MIN-KEYS-COUNT)
+
+                   (sleep 5)
+
+                   (show-warning))
+
+                 (loop (+ tries 1)))))))))
+
+;; ------------------------------------------------------------
+;; Shepherd services
+;; ------------------------------------------------------------
+
+(define (home-ssh-add-key-shepherd-services config)
+
+  (let ((program
+         (ssh-add-key-program config))
+
+        (create-session?
+         (home-ssh-add-key-configuration-create-session?
+          config))
+
+        (respawn?
+         (home-ssh-add-key-configuration-respawn?
+          config))
+
+        (one-shot?
+         (home-ssh-add-key-configuration-one-shot?
+          config)))
+
+    (list
+
+     (shepherd-service
+      (provision '(ssh-add-key))
+
+      (documentation
+       "SSH key auto-loading service.")
+
+      (requirement '())
+
+      (respawn? respawn?)
+
+      (one-shot? one-shot?)
+
+      (start
+       #~(make-forkexec-constructor
+          (list #$program)
+          #:create-session? #$create-session?
+          #:log-file
+          #$(log-file "ssh-add-key.log")))
+
+      (stop
+       #~(make-kill-destructor))))))
+
+;; ------------------------------------------------------------
+;; Service type
+;; ------------------------------------------------------------
+
+(define home-ssh-add-key-service-type
+
+  (service-type
+   (name 'home-ssh-add-key)
+
+   (extensions
+    (list
+     (service-extension
+      home-shepherd-service-type
+      home-ssh-add-key-shepherd-services)))
+
+   (default-value
+     (home-ssh-add-key-configuration))
+
+   (description
+    "Automatically unlock and load SSH keys via KeePassXC/libsecret.")))
 
 
 
