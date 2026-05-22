@@ -19,6 +19,7 @@
   #:use-module (gnu system uuid)
   #:use-module (gnu packages linux)
   #:export (log-file
+            make-cmd-destructor
             lotus-assert
             ensure-rw-mount
             ensure-umount))
@@ -66,6 +67,12 @@
      ".log"))
 
 
+(define (make-cmd-destructor . command)
+  (let ((system-destructor (apply make-system-destructor command))
+        (kill-destructor   (make-kill-destructor)))
+    (lambda (running . args)
+      (apply kill-destructor running args)
+      (apply system-destructor running args))))
 
 
 (define* (define-spawner-service spawner-service
