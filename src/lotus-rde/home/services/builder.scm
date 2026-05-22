@@ -181,7 +181,6 @@
    (shepherd-service
     (provision (list sym))
     (requirement '());; secfs-down
-                   
     (respawn? #f)
     (respawn-delay 10)
     (respawn-limit 2)
@@ -193,12 +192,10 @@
     ;;                 "-p" #$mode)
     ;;           #:log-file #$log))
     (start #~(make-forkexec-constructor
-              (start #~(make-forkexec-constructor
-                        (list #$secfs-mount
-                              "-d" #$dev
-                              "-m" #$mp
-                              "-p" #$mode)
-                        #:log-file #$log))
+              (list #$secfs-mount
+                    "-d" #$dev
+                    "-m" #$mp
+                    "-p" #$mode)
               #:log-file #$log)))))
 
 (define home-secfs-service-type
@@ -265,56 +262,6 @@
                (list #$dbus-launch #$flatpak "--user" "run" #$app)
                #:create-session? #t
                #:log-file #$log))
-     ;; (stop #~(make-cmd-destructor
-     ;;          (string-join (list #$flatpak "kill" #$app) " ")
-     ;;          " >> " #$log " 2>&1"))
-
-     ;; (stop (with-imported-modules
-     ;;           (source-module-closure
-     ;;            '((lotus-rde lib utils)))
-     ;;         #~(begin
-     ;;             (use-modules
-     ;;              (lotus-rde lib utils))
-
-     ;;             (make-cmd-destructor
-     ;;              (string-join
-     ;;               (list #$flatpak
-     ;;                     "kill"
-     ;;                     #$app)
-     ;;               " ")
-     ;;              " >> " #$log " 2>&1"))))
-
-     ;; (stop #~(begin
-
-     ;;           (define (make-cmd-destructor . command)
-
-     ;;             (let ((system-destructor
-     ;;                    (apply make-system-destructor
-     ;;                           command))
-
-     ;;                   (kill-destructor
-     ;;                    (make-kill-destructor)))
-
-     ;;               (lambda (running . args)
-
-     ;;                 (apply kill-destructor
-     ;;                        running
-     ;;                        args)
-
-     ;;                 (apply system-destructor
-     ;;                        running
-     ;;                        args))))
-
-     ;;           (make-cmd-destructor
-     ;;            (string-join
-     ;;             (list #$flatpak
-     ;;                   "kill"
-     ;;                   #$app)
-     ;;             " ")
-     ;;            " >> "
-     ;;            #$log
-     ;;            " 2>&1")))
-
 
      (stop #~(let ((make-cmd-destructor
                     (lambda command
