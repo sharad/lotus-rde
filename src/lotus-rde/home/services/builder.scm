@@ -262,17 +262,20 @@
      ;; (stop #~(make-cmd-destructor
      ;;          (string-join (list #$flatpak "kill" #$app) " ")
      ;;          " >> " #$log " 2>&1"))
-     (stop #~(begin
-               (use-modules
-                (lotus-rde lib utils))
+     (stop (with-imported-modules
+               (source-module-closure
+                '((lotus-rde shepherd utils)))
+             #~(begin
+                 (use-modules
+                  (lotus-rde lib utils))
 
-               (make-cmd-destructor
-                (string-join
-                 (list #$flatpak
-                       "kill"
-                       #$app)
-                 " ")
-                " >> " #$log " 2>&1"))))))
+                 (make-cmd-destructor
+                  (string-join
+                   (list #$flatpak
+                         "kill"
+                         #$app)
+                   " ")
+                  " >> " #$log " 2>&1")))))))
 
 
 (define home-flatpak-service-type
