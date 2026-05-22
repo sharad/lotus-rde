@@ -20,7 +20,7 @@
 (define-module (lotus-rde home services builder)
   #:use-module (srfi srfi-1)
   #:use-module (guix gexp)
-  #:use-module (guix modules)
+  ;; #:use-module (guix modules)
   #:use-module (guix records)
   #:use-module (gnu services)
   #:use-module (gnu services dbus)
@@ -279,36 +279,67 @@
      ;;               " ")
      ;;              " >> " #$log " 2>&1"))))
 
-     (stop #~(begin
+     ;; (stop #~(begin
 
-               (define (make-cmd-destructor . command)
+     ;;           (define (make-cmd-destructor . command)
 
-                 (let ((system-destructor
-                        (apply make-system-destructor
-                               command))
+     ;;             (let ((system-destructor
+     ;;                    (apply make-system-destructor
+     ;;                           command))
 
-                       (kill-destructor
-                        (make-kill-destructor)))
+     ;;                   (kill-destructor
+     ;;                    (make-kill-destructor)))
 
-                   (lambda (running . args)
+     ;;               (lambda (running . args)
 
-                     (apply kill-destructor
-                            running
-                            args)
+     ;;                 (apply kill-destructor
+     ;;                        running
+     ;;                        args)
 
-                     (apply system-destructor
-                            running
-                            args))))
+     ;;                 (apply system-destructor
+     ;;                        running
+     ;;                        args))))
+
+     ;;           (make-cmd-destructor
+     ;;            (string-join
+     ;;             (list #$flatpak
+     ;;                   "kill"
+     ;;                   #$app)
+     ;;             " ")
+     ;;            " >> "
+     ;;            #$log
+     ;;            " 2>&1")))
+
+
+     (stop #~(let ((make-cmd-destructor
+
+                    (lambda command
+
+                      (let ((system-destructor
+                             (apply make-system-destructor
+                                    command))
+
+                            (kill-destructor
+                             (make-kill-destructor)))
+
+                        (lambda (running . args)
+
+                          (apply kill-destructor
+                                 running
+                                 args)
+
+                          (apply system-destructor
+                                 running
+                                 args))))))
 
                (make-cmd-destructor
-                (string-join
-                 (list #$flatpak
-                       "kill"
-                       #$app)
-                 " ")
-                " >> "
-                #$log
-                " 2>&1"))))))
+                (string-append
+                 #$flatpak
+                 " kill "
+                 #$app
+                 " >> "
+                 #$log
+                 " 2>&1")))))))
 
 (define home-flatpak-service-type
   (service-type
