@@ -189,15 +189,15 @@
 
 
          ;; attnmgr
-         (shepherd-service
-           (provision '(attnmgr))
-           (documentation "Attention manager")
-           (start
-            #~(make-forkexec-constructor
-               (list #$(file-append python-attnmgr "/bin/attnmgr"))
-               #:log-file #$(log-file "attnmgr")))
-           (stop #~(make-kill-destructor))
-           (respawn? #t))
+         ;; (shepherd-service
+         ;;   (provision '(attnmgr))
+         ;;   (documentation "Attention manager")
+         ;;   (start
+         ;;    #~(make-forkexec-constructor
+         ;;       (list #$(file-append python-attnmgr "/bin/attnmgr"))
+         ;;       #:log-file #$(log-file "attnmgr")))
+         ;;   (stop #~(make-kill-destructor))
+         ;;   (respawn? #t))
 
 
 
