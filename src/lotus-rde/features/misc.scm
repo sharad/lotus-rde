@@ -636,7 +636,7 @@
          ;; 23 deskflow-server
          (mk/simple-service
           '(deskflow-server)
-          #~(list "deskflow-core"
+          #~(list #$deskflow "/bin/deskflow-core"
                   "server"
                   "--no-daemon"
                   "--debug"
@@ -668,7 +668,7 @@
          ;; 25 deskflow-client
          (mk/simple-service
           '(deskflow-client)
-          #~(list "deskflow-core"
+          #~(list #$deskflow "deskflow-core"
                   "client"
                   "--debug"
                   "DEBUG1"
