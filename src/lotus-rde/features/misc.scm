@@ -123,6 +123,7 @@
   #:use-module (lotus-rde packages python-xyz)
   #:use-module (lotus-rde packages utils)
   #:use-module (lotus-rde home services builder)
+  #:use-module (lotus-rde lib utils)
   #:export (feature-lotus-nox-services
             feature-lotus-x-services
             feature-msteam

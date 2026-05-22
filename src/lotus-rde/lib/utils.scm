@@ -18,9 +18,11 @@
   #:use-module (gnu system file-systems)
   #:use-module (gnu system uuid)
   #:use-module (gnu packages linux)
-  #:export (lotus-assert
+  #:export (log-file
+            lotus-assert
             ensure-rw-mount
             ensure-umount))
+
 
 (define (lotus-assert condition . msg)
   (throw-message
