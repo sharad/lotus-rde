@@ -743,4 +743,9 @@ fi
          (feature-lotus-x-services)
          (feature-msteam)
          (feature-zoom)
-         (feature-doc-publishing))))
+         (feature-doc-publishing)
+         (feature-bluetooth-auto-connect)
+         (feature-power-monitor))))
+
+
+

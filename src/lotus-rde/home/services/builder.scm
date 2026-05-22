@@ -256,11 +256,11 @@
      (respawn-delay respawn-delay)
      (respawn-limit respawn-limit)
      (start #~(make-forkexec-constructor
-               (list dbus-launch flatpak "--user" "run" #$app)
+               (list #$dbus-launch #$flatpak "--user" "run" #$app)
                #:create-session? #t
                #:log-file #$log))
      (stop #~(make-cmd-destructor
-              (string-join (list flatpak "kill" #$app) " ")
+              (string-join (list #$flatpak "kill" #$app) " ")
               " >> " #$log " 2>&1")))))
 
 
@@ -300,6 +300,10 @@
 ;;                   (app  "md.obsidian.Obsidian"))))
 
 
+
+
+
+
 
 (define-record-type* <home-services-group-configuration>
   home-services-group-configuration make-home-services-group-configuration

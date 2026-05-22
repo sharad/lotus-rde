@@ -31,12 +31,12 @@
   #:use-module (gnu packages nss)
   #:use-module (gnu packages fonts)
   #:use-module (gnu packages glib)
-  #:use-module (gnu packages bash)
+  ;; #:use-module (gnu packages bash)
   #:use-module (gnu packages base)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages libusb)
   #:use-module (gnu packages nfs)
-  #:use-module (gnu packages gnome)
+  ;; #:use-module (gnu packages gnome)
   #:use-module (gnu packages freedesktop)
   #:use-module (gnu packages polkit)
   #:use-module (gnu packages mpd)
@@ -69,7 +69,7 @@
   #:use-module (gnu services avahi)
   #:use-module (gnu services mcron)
   #:use-module (gnu services ssh)
-  #:use-module (gnu packages admin)
+  ;; #:use-module (gnu packages admin)
   #:use-module (gnu packages base)
   #:use-module (gnu packages avahi)
   #:use-module (gnu packages linux)
@@ -123,12 +123,15 @@
   #:use-module (lotus-rde packages python-xyz)
   #:use-module (lotus-rde packages utils)
   #:use-module (lotus-rde home services builder)
+  #:use-module (lotus-rde home services utils)
   #:use-module (lotus-rde lib utils)
   #:export (feature-lotus-nox-services
             feature-lotus-x-services
             feature-msteam
             feature-zoom
-            feature-doc-publishing))
+            feature-doc-publishing
+            feature-bluetooth-auto-connect
+            feature-power-monitor))
 
 
 
@@ -145,343 +148,6 @@
           (power-mon
            (local-file "/home/s/.bin/power-mon"))
           (usrhttpd rust-usrhttpd))
-
-
-
-  (define bluetooth-auto-connect
-    (with-imported-modules
-        (source-module-closure
-         '((dbus)
-           (dbus mainloop)
-           (oop goops)))
-      (program-file
-       "bluetooth-auto-connect"
-
-       #~(begin
-           (use-modules
-            (srfi srfi-1)
-            (ice-9 match)
-            (ice-9 format)
-            (oop goops)
-            (dbus)
-            (dbus mainloop))
-
-           ;; ------------------------------------------------------------
-           ;; Config
-           ;; ------------------------------------------------------------
-
-           (define daemon?
-             (member "--daemon"
-                     (command-line)))
-
-           (define verbose?
-             (or (member "-v" (command-line))
-                 (member "--verbose"
-                         (command-line))))
-
-           (define (vfmt fmt . args)
-             (when verbose?
-               (apply format #t fmt args)
-               (force-output)))
-
-           ;; ------------------------------------------------------------
-           ;; DBus
-           ;; ------------------------------------------------------------
-
-           (define bus
-             (make-system-dbus-connection))
-
-           (define object-manager
-             (dbus-proxy
-              bus
-              "org.bluez"
-              "/"
-              "org.freedesktop.DBus.ObjectManager"))
-
-           ;; ------------------------------------------------------------
-           ;; Helpers
-           ;; ------------------------------------------------------------
-
-           (define (managed-objects)
-             (object-manager "GetManagedObjects"))
-
-           (define (adapter? interfaces)
-             (assoc-ref interfaces
-                        "org.bluez.Adapter1"))
-
-           (define (device? interfaces)
-             (assoc-ref interfaces
-                        "org.bluez.Device1"))
-
-           (define (powered? adapter)
-             (assoc-ref adapter "Powered"))
-
-           (define (trusted? device)
-             (assoc-ref device "Trusted"))
-
-           (define (connected? device)
-             (assoc-ref device "Connected"))
-
-           ;; ------------------------------------------------------------
-           ;; Connect trusted devices
-           ;; ------------------------------------------------------------
-
-           (define (connect-devices)
-
-             (for-each
-
-              (match-lambda
-
-                ((path . interfaces)
-
-                 (let ((device
-                        (device? interfaces)))
-
-                   (when (and device
-                              (trusted? device)
-                              (not (connected? device)))
-
-                     (vfmt
-                      "connecting ~a\n"
-                      path)
-
-                     (catch #t
-
-                       (lambda ()
-
-                         ((dbus-proxy
-                           bus
-                           "org.bluez"
-                           path
-                           "org.bluez.Device1")
-
-                          "Connect")
-
-                         (format
-                          #t
-                          "connected ~a\n"
-                          path))
-
-                       (lambda (k . a)
-
-                         (format
-                          (current-error-port)
-                          "failed ~a\n"
-                          path)))))))
-
-              (managed-objects)))
-
-           ;; ------------------------------------------------------------
-           ;; React to adapter power-on
-           ;; ------------------------------------------------------------
-
-           (define (properties-changed
-                    interface
-                    changed
-                    invalidated
-                    path)
-
-             (when (and
-                    (string=? interface
-                               "org.bluez.Adapter1")
-
-                    (assoc-ref changed
-                               "Powered"))
-
-               (vfmt
-                "adapter powered on: ~a\n"
-                path)
-
-               (connect-devices)))
-
-           ;; ------------------------------------------------------------
-           ;; Main
-           ;; ------------------------------------------------------------
-
-           ;; Initial connect
-           (connect-devices)
-
-           ;; Daemon mode
-           (when daemon?
-
-             (add-match
-              bus
-              properties-changed
-              "type='signal',\
-interface='org.freedesktop.DBus.Properties',\
-sender='org.bluez'")
-
-             ;; Keep process alive
-             (let loop ()
-               (sleep 3600)
-               (loop)))))))
-
-
-  (define battery-monitor
-   (program-file
-    "battery-monitor"
-    #~(begin
-
-        (use-modules
-         (srfi srfi-1)
-         (ice-9 match)
-         (ice-9 textual-ports)
-         (ice-9 popen)
-         (ice-9 format)
-         (ice-9 ftw))
-
-        ;; ------------------------------------------------------------
-        ;; Store paths
-        ;; ------------------------------------------------------------
-
-        (define notify-send
-          #$(file-append libnotify "/bin/notify-send"))
-
-        (define zenity
-          #$(file-append zenity "/bin/zenity"))
-
-        (define bash
-          #$(file-append bash-minimal "/bin/bash"))
-
-        (define poweroff
-          #$(file-append shepherd "/sbin/poweroff"))
-
-        ;; ------------------------------------------------------------
-        ;; Actions
-        ;; ------------------------------------------------------------
-
-        (define power-low-action
-          `((disposition . "below")
-
-            (5 . ,poweroff)
-
-            (7 . ,(string-append
-                   zenity
-                   " --warning --text "
-                   "\"Battery is only at 7%, will poweroff it at 5%\""))
-
-            (8 . ,(string-append
-                   zenity
-                   " --warning --text "
-                   "\"Battery is only at 8%, will poweroff it at 5%\""))
-
-            (9 . ,(string-append
-                   zenity
-                   " --warning --text "
-                   "\"Battery is only at 9%, will poweroff it at 5%\""))))
-
-        (define power-high-action
-          `((disposition . "above")
-
-            (70 . ,(string-append
-                    notify-send
-                    " 'charge up to 70%'"))))
-
-        ;; ------------------------------------------------------------
-        ;; Battery reading from sysfs
-        ;; ------------------------------------------------------------
-
-        (define battery-capacity-file
-          "/sys/class/power_supply/BAT0/capacity")
-
-        (define (read-status)
-
-          (unless (file-exists? battery-capacity-file)
-            (error
-             "Battery capacity file not found"
-             battery-capacity-file))
-
-          (call-with-input-file
-              battery-capacity-file
-
-            (lambda (port)
-
-              (let ((txt
-                     (string-trim-right
-                      (get-string-all port)
-                      #\newline)))
-
-                (or (string->number txt)
-                    (error
-                     "Invalid battery percentage"
-                     txt))))))
-
-        ;; ------------------------------------------------------------
-        ;; Execute action
-        ;; ------------------------------------------------------------
-
-        (define (execute-action key actions)
-
-          (define notify-percent-factor
-            10)
-
-          (define disposition
-            (assoc-ref actions 'disposition))
-
-          (define action
-            (assoc-ref actions key))
-
-          (cond
-
-           ;; Explicit action
-           ((and action (string? action))
-
-            (system*
-             bash
-             "-c"
-             action))
-
-           ;; Generic notification
-           ((zero? (modulo key notify-percent-factor))
-
-            (system*
-             notify-send
-             (format
-              #f
-              "charged ~a ~a%%"
-              disposition
-              key)))))
-
-        ;; ------------------------------------------------------------
-        ;; Main monitoring loop
-        ;; ------------------------------------------------------------
-
-        (define (take-action)
-
-          (let loop ((prev-charge
-                      (read-status)))
-
-            (let ((curr-charge
-                   (read-status)))
-
-              (cond
-
-               ;; Charging
-               ((> curr-charge prev-charge)
-
-                (execute-action
-                 curr-charge
-                 power-high-action))
-
-               ;; Discharging
-               ((< curr-charge prev-charge)
-
-                (execute-action
-                 curr-charge
-                 power-low-action)))
-
-              (format
-               #t
-               "Battery: ~a% -> ~a%\n"
-               prev-charge
-               curr-charge)
-
-              (sleep 10)
-
-              (loop curr-charge))))
-        (take-action))))
-
-
 
   (define (get-home-services config)
     (list
@@ -527,20 +193,6 @@ sender='org.bluez'")
          ;;   (stop #~(make-kill-destructor))
          ;;   (respawn? #t))
 
-
-
-         ;; power-mon
-         (shepherd-service
-           (provision '(power-mon pm))
-           (documentation "Power monitor")
-           (start
-            #~(make-forkexec-constructor
-               (list #$battery-monitor)
-               #:log-file #$(log-file "pm")))
-           (stop #~(make-kill-destructor))
-           (respawn? #t))
-
-
          ;; udiskie - not required -- use home-udiskie-service-type (rde home services desktop)
          ;; geoclue-service-type is part of feature-desktop-services as system service
          ;; ssh-agent
@@ -552,23 +204,7 @@ sender='org.bluez'")
          ;; emacs;;
 
 
-         ;; (define secfs-orgp (make-secfs-service "orgp"))
-         ;; (define secfs-secure (make-secfs-service "secure"))
-         ;; (define secfs-volatile (make-secfs-service "volatile" "rw"))
 
-
-         ;; bluez-autoconnect
-         (shepherd-service
-          (provision '(bluez-autoconnect))
-          (documentation "Bluetooth autoconnect daemon")
-          (start
-           #~(make-forkexec-constructor
-              (list #$bluetooth-auto-connect
-                    "--verbose"
-                    "--daemon")
-              #:log-file #$(log-file "bt")))
-          (stop #~(make-kill-destructor))
-          (respawn? #t))
 
          ;; mpd
          (shepherd-service
@@ -1161,8 +797,38 @@ sender='org.bluez'")
    (home-services-getter get-home-services)))
 
 
+(define (feature-bluetooth-auto-connect)
+
+  (define (get-home-services config)
+    (list
+     (service
+      home-bluetooth-auto-connect-service-type
+
+      (home-bluetooth-auto-connect-configuration
+       (verbose? #t)
+       (daemon? #t)))))
+
+  (feature
+   (name 'bluetooth-auto-connect)
+   (home-services-getter get-home-services)))
+
+
 
 
 
+(define (feature-power-monitor)
+
+  (define (get-home-services config)
+    (list
+     (service
+      home-power-monitor-service-type
+      (home-power-monitor-configuration
+       (poll-interval 15)
+       (notify-level 5)))))
+
+  (feature
+   (name 'power-monitor)
+   (home-services-getter get-home-services)))
+
 
 
