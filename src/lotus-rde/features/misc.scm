@@ -68,7 +68,7 @@
   #:use-module (gnu services desktop)
   #:use-module (gnu services avahi)
   #:use-module (gnu services mcron)
-  #:use-module (gnu services ssh)
+  ;; #:use-module (gnu services ssh)
   ;; #:use-module (gnu packages admin)
   #:use-module (gnu packages base)
   #:use-module (gnu packages avahi)
@@ -80,7 +80,7 @@
   #:use-module (gnu packages suckless)
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu packages idutils)
-  #:use-module (gnu packages ssh)
+  ;; #:use-module (gnu packages ssh)
 
   #:use-module (gnu home services shepherd)
   #:use-module (gnu home services)

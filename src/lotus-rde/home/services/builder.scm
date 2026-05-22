@@ -29,10 +29,14 @@
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
   #:use-module (guix packages)
+  #:use-module (gnu packages base)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages glib)
   #:use-module (gnu packages freedesktop)
   #:use-module (gnu packages package-management)
+  #:use-module (gnu packages admin)
+  #:use-module (gnu packages gnupg)
+  #:use-module (gnu packages crypto)
   #:use-module (rde serializers yaml)
   #:use-module (lotus-rde lib utils)
   #:export (home-secfs-service-type
@@ -176,7 +180,8 @@
 
    (shepherd-service
     (provision (list sym))
-    (requirement '(secfs-down))
+    (requirement '());; secfs-down
+                   
     (respawn? #f)
     (respawn-delay 10)
     (respawn-limit 2)

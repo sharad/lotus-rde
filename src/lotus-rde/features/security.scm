@@ -145,7 +145,7 @@
      (service home-ssh-add-key-service-type)))
   (feature
    (name 'secfs)
-   (home-services get-home-services)))
+   (home-services-getter get-home-services)))
 
 
 
