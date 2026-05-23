@@ -119,6 +119,7 @@
                                                                                     "--verbose"
                                                                                     "nosplash"
                                                                                     "debug")
+                                                           #:networking-iwd? #f
                                                            #:volume-mappings '( ("s4b83r"
                                                                                  ((("vg01" "lv01"))
                                                                                   (("vg02" "lv01"))

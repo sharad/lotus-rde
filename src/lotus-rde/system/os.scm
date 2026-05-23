@@ -123,6 +123,7 @@
                              (login-shell (file-append zsh "/bin/zsh"))
                              (parent-dir "/srv/volumes/local")
                              (volume-mappings '())
+                             (networking-iwd? #t)
                              (nm-dns "dnsmasq")
                              (nm-vpn-plugins (list network-manager-fortisslvpn
                                                    network-manager-openconnect))
@@ -225,7 +226,7 @@
         ;; (feature-pulseaudio-service)
 
         (feature-lotus-networking #:mdns? #t
-                                  #:iwd? #t
+                                  #:iwd? networking-iwd?
                                   #:iwd-autoconnect? #t
                                   #:dns nm-dns
                                   #:vpn-plugins nm-vpn-plugins)
