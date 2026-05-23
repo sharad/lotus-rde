@@ -948,7 +948,7 @@ want to use it with some other application, feel free, and let me know!")
            eudev))
     (build-system patchelf:patchelf-build-system)
     (arguments `(#:input-lib-mapping '(("out" "lib" "")
-                                       ("nss" "lib/nss"))
+                                       ("nss" "lib/nss"))))
                 ;; #:phases            (modify-phases %standard-phases
                 ;;                       (add-after
                 ;;                           'unpack 'changedir
@@ -1001,7 +1001,7 @@ want to use it with some other application, feel free, and let me know!")
                 ;;                             (chdir (string-append cwd "/source"))
                 ;;                             #t)))
                 ;;                       )
-                ))
+                
     (home-page "https://lighttable.com/")
     (synopsis "Next-generation code editor")
     (description "LightTable is a next-generation code editor that connects you to your code with real-time feedback.")
@@ -1649,10 +1649,10 @@ compressed format}.")
                                     (with-output-to-file (string-append fish-dir "/gocatcli.fish")
                                       (lambda () (invoke bin "completion" "fish")))
                                     #t))))))
-    (home-page "https://github.com/deadc0de6/gocatcli")
-    (synopsis "Command line catalog tool to index and search offline media.")
-    (description "gocatcli gives the ability to navigate, explore and find your files that are stored on external media when those are not connected.")
-    (license #f)))
+   (home-page "https://github.com/deadc0de6/gocatcli")
+   (synopsis "Command line catalog tool to index and search offline media.")
+   (description "gocatcli gives the ability to navigate, explore and find your files that are stored on external media when those are not connected.")
+   (license #f)))
 
 
 (define* (lotus-cargo-inputs name #:key (module '(lotus-rde packages rust-crates)))
@@ -1676,9 +1676,8 @@ unavailable."
            (commit version)))
      (file-name (git-file-name name version))
      (sha256
-      (base32 "0jly2qz3y1s32p1c6gch470n1wczs4243hyfcs9h3xg1xxxvd3m5")
+      (base32 "0jly2qz3y1s32p1c6gch470n1wczs4243hyfcs9h3xg1xxxvd3m5"))))
       ;; (base32 "0000000000000000000000000000000000000000000000000000")
-      )))
    (build-system cargo-build-system)
    (inputs (append (lotus-cargo-inputs 'rust-usrhttpd-v0.1.0)
                    (list python-3)))

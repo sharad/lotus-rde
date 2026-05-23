@@ -183,15 +183,15 @@
 
 
          ;; attnmgr
-         ;; (shepherd-service
-         ;;   (provision '(attnmgr))
-         ;;   (documentation "Attention manager")
-         ;;   (start
-         ;;    #~(make-forkexec-constructor
-         ;;       (list #$(file-append python-attnmgr "/bin/attnmgr"))
-         ;;       #:log-file #$(log-file "attnmgr")))
-         ;;   (stop #~(make-kill-destructor))
-         ;;   (respawn? #t))
+         (shepherd-service
+           (provision '(attnmgr))
+           (documentation "Attention manager")
+           (start
+            #~(make-forkexec-constructor
+               (list #$(file-append python-attnmgr "/bin/attnmgr"))
+               #:log-file #$(log-file "attnmgr")))
+           (stop #~(make-kill-destructor))
+           (respawn? #t))
 
          ;; udiskie - not required -- use home-udiskie-service-type (rde home services desktop)
          ;; geoclue-service-type is part of feature-desktop-services as system service

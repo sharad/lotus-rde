@@ -60,8 +60,8 @@
   (mode     home-secfs-volume-configuration-mode
     (default "ro")))
 
-(define (secfs-volume->shepherd-service config)
- (define secfs-mount
+
+(define secfs-mount
     (program-file
      "secfs-mount"
      #~(begin
@@ -166,7 +166,7 @@
             (force-output port)
             (close-pipe port))))))
 
-
+(define (secfs-volume->shepherd-service config)
 
  (let* ((home    (getenv "HOME"))
         (volname (home-secfs-volume-configuration-volname config))
@@ -198,18 +198,44 @@
                     "-p" #$mode)
               #:log-file #$log)))))
 
+;; (define home-secfs-service-type
+;;   (service-type
+;;     (name 'home-secfs)
+;;     (extensions
+;;      (list (service-extension
+;;             home-shepherd-service-type
+;;             (lambda (configs)
+;;               (map secfs-volume->shepherd-service configs)))))
+;;     (compose concatenate)
+;;     (extend append)
+;;     (default-value '())
+;;     (description "Manages secfs encrypted volume mount services.")))
+
+
 (define home-secfs-service-type
   (service-type
-    (name 'home-secfs)
-    (extensions
-     (list (service-extension
-            home-shepherd-service-type
-            (lambda (configs)
-              (map secfs-volume->shepherd-service configs)))))
-    (compose concatenate)
-    (extend append)
-    (default-value '())
-    (description "Manages secfs encrypted volume mount services.")))
+   (name 'home-secfs)
+
+   (extensions
+    (list
+
+     ;; install binary into profile
+     (service-extension
+      home-profile-service-type
+      (const (list secfs-mount)))
+
+     ;; shepherd services
+     (service-extension
+      home-shepherd-service-type
+      (lambda (configs)
+        (map secfs-volume->shepherd-service
+             configs)))))
+
+   (compose concatenate)
+   (extend append)
+   (default-value '())
+   (description
+    "Manages secfs encrypted volume mount services.")))
 
 
 
