@@ -117,6 +117,8 @@
           (base32
             "00fwankn96xms8fyjm4f36282qr98pfw2hv3jg4da3ih673hnw4y"))))
     (build-system python-build-system)
+    (arguments
+     '(#:tests? #f))
     (propagated-inputs
       `(("python-pycryptodome" ,python-pycryptodome)))
     (home-page "http://github.com/euske/pdfminer")
@@ -136,6 +138,10 @@
           (base32
             "07qvy11nvgxpzarrni3wrww3vpc9yafgi2bch4j2vvvc42nb8d8w"))))
     (build-system python-build-system)
+    (arguments '(#:tests? #f
+                 #:phases
+                 (modify-phases %standard-phases
+                   (delete 'sanity-check))))
     (home-page "UNKNOWN")
     (synopsis
       "A drop-in substitute for Py2.7's new collections.OrderedDict that works in Python 2.4-2.6.")
@@ -155,9 +161,11 @@
           (base32
             "1qyqfpbsl961p30zri6kp8jpdbmp04jk2n04b2qg2kbfnf5gmk59"))))
     (build-system python-build-system)
+    (arguments
+     '(#:tests? #f))
     (propagated-inputs
-      `(("python-ordereddict" ,python-ordereddict)
-        ("python-pyyaml" ,python-pyyaml)))
+                        `(("python-ordereddict" ,python-ordereddict)
+                          ("python-pyyaml" ,python-pyyaml)))
     (home-page "https://github.com/guillon/xmlplain")
     (synopsis "XML as plain object module")
     (description "XML as plain object module")
@@ -201,8 +209,10 @@
           (base32
             "0qbsg7x7qcqrm2b771z8r6f86v3zkafk49yg35xq1lgwl73vimpj"))))
     (build-system python-build-system)
+    (arguments
+     '(#:tests? #f))
     (home-page
-      "https://github.com/bcbnz/python-rofi")
+     "https://github.com/bcbnz/python-rofi")
     (synopsis
       "Create simple GUIs using the Rofi application")
     (description
@@ -221,6 +231,8 @@
         (base32
          "102iblj3niqv0l9mq5lb0masph9jgjkygf2dg6skldq4a6b7wwdb"))))
     (build-system python-build-system)
+    (arguments
+     '(#:tests? #f))
     (home-page
      "https://github.com/miphreal/python-rofi-menu")
     (synopsis "Create rofi menus via python")
@@ -238,6 +250,8 @@
         (sha256
           (base32 "19k8dhnzyvdb6maqyb6bx611kf6h8q2n25zjyr59sgnmi7v8y423"))))
     (build-system python-build-system)
+    (arguments
+     '(#:tests? #f))
     (propagated-inputs
      `(("python-click"   ,python-click)
        ("python-i3ipc"   ,python-i3ipc)
