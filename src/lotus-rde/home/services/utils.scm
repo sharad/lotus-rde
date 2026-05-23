@@ -469,6 +469,13 @@ sender='org.bluez'")
 
    (extensions
     (list
+
+     ;; install binary into profile
+     (service-extension
+      home-profile-service-type
+      (const (list bluetooth-auto-connect)))
+
+
      (service-extension
       home-shepherd-service-type
       home-bluetooth-auto-connect-shepherd-services)))
@@ -908,9 +915,14 @@ sender='org.bluez'")
 
    (extensions
     (list
+     ;; install binary into profile
      (service-extension
-      home-shepherd-service-type
-      home-power-monitor-shepherd-services)))
+      home-profile-service-type
+      (const (list battery-monitor)))
+
+     (service-extension
+       home-shepherd-service-type
+       home-power-monitor-shepherd-services)))
 
    (default-value
      (home-power-monitor-configuration))
@@ -1338,6 +1350,11 @@ sender='org.bluez'")
 
    (extensions
     (list
+     ;; install binary into profile
+     (service-extension
+      home-profile-service-type
+      (const (list kpkey-program)))
+
      (service-extension
       home-shepherd-service-type
       home-kpkey-shepherd-services)))
