@@ -1655,7 +1655,7 @@ compressed format}.")
     (license #f)))
 
 
-(define* (lotus-cargo-inputs name #:key (module '(lotus packages rust-crates)))
+(define* (lotus-cargo-inputs name #:key (module '(lotus-rde packages rust-crates)))
   "Lookup Cargo inputs for NAME defined in MODULE, return an empty list if
 unavailable."
   (let ((lookup (module-ref (resolve-interface module) 'lookup-cargo-inputs)))
