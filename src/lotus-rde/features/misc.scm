@@ -549,7 +549,7 @@
                   (string-append (getenv "HOME")
                                  "/.db.kdbx"))
           #:requirements
-          '(kpkeys))
+          '(kpkey))
             ;; secfs-orgp
             ;; xawaken-session-down
          ;; 15 blueman-applet
