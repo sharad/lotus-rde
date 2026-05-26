@@ -926,7 +926,7 @@ sender='org.bluez'")
    (simple-service
     'ssh-add-key-profile
     home-profile-service-type
-    (list kpkey))
+    (list kpkey kpkeys))
    ;; Add executable into profile
    (simple-service
     'kpkey-profile
