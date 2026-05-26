@@ -38,6 +38,7 @@
   #:use-module (gnu packages freedesktop)
   #:use-module (gnu packages package-management)
   #:use-module (gnu packages version-control)
+  #:use-module (gnu packages haskell-apps)
   #:use-module (gnu packages ssh)
   #:use-module (gnu packages gnupg)
   #:use-module (rde serializers yaml)
