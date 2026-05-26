@@ -818,8 +818,7 @@
 
   (define (get-home-services config)
     (list
-     (service
-      home-power-monitor-service)))
+     home-power-monitor-service))
 
   (feature
    (name 'power-monitor)
@@ -831,8 +830,7 @@
 
   (define (get-home-services config)
     (list
-     (service
-      home-kpkey-service)))
+     home-kpkey-service))
 
   (feature
    (name 'power-monitor)
@@ -844,8 +842,7 @@
 
   (define (get-home-services config)
     (list
-     (service
-      home-ssh-add-key-service)))
+     home-ssh-add-key-service))
 
   (feature
    (name 'power-monitor)
@@ -856,8 +853,7 @@
 
   (define (get-home-services config)
     (list
-     (service
-      home-git-annex-daemon-service)))
+     home-git-annex-daemon-service))
 
   (feature
    (name 'power-monitor)
