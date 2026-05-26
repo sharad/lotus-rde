@@ -926,7 +926,7 @@ sender='org.bluez'")
    (simple-service
     'ssh-add-key-profile
     home-profile-service-type
-    (list kpkey kpkeys))
+    (list kpkey))
    ;; Add executable into profile
    (simple-service
     'kpkey-profile
@@ -939,22 +939,21 @@ sender='org.bluez'")
     home-shepherd-service-type
 
     (list
-
      (shepherd-service
-      (provision '(kpkey))
-      (documentation
-       "KeePassXC key checkout service.")
-      (requirement '())
-      (start
-       #~(make-forkexec-constructor
-          (list #$kpkey "co")
-          #:create-session? #f
-          #:log-file
-          #$(log-file "kpkey.log")))
-      (stop
-       #~(make-kill-destructor))
-      (one-shot? #t)
-      (respawn? #f))))))
+       (provision '(kpkey  kpkeys))
+       (documentation
+        "KeePassXC key checkout service.")
+       (requirement '()
+        (start)
+        #~(make-forkexec-constructor
+           (list #$kpkey "co")
+           #:create-session? #f
+           #:log-file
+           #$(log-file "kpkey.log"))
+        (stop)
+        #~(make-kill-destructor))
+       (one-shot? #t)
+       (respawn? #f))))))
 
 
 ;; ------------------------------------------------------------
