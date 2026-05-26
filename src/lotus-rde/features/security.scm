@@ -140,9 +140,8 @@
                        (volname "volatile")
                        (mode "rw"))))
 
-
-     (service home-kpkey-service-type)
-     (service home-ssh-add-key-service-type)))
+     home-kpkey-service
+     home-ssh-add-key-service))
   (feature
    (name 'secfs)
    (home-services-getter get-home-services)))

@@ -695,17 +695,6 @@
 
 
 
-         ;; ;; 26 kpkeys
-         ;; (mk/simple-service
-         ;;  '(kpkeys)
-         ;;  #~(list "sh"
-         ;;          "-c"
-         ;;          (string-append (getenv "HOME")
-         ;;                         "/.bin/kpkeys -s co"))
-         ;;  #:requirements
-         ;;  '();; secfs-secure
-         ;;    ;; xawaken-session-down
-         ;;  #:respawn? #f)
 
 
 
@@ -824,29 +813,6 @@
    (name 'power-monitor)
    (home-services-getter get-home-services)))
 
-
-
-(define (feature-kpkey)
-
-  (define (get-home-services config)
-    (list
-     home-kpkey-service))
-
-  (feature
-   (name 'power-monitor)
-   (home-services-getter get-home-services)))
-
-
-
-(define (feature-ssh-add-key)
-
-  (define (get-home-services config)
-    (list
-     home-ssh-add-key-service))
-
-  (feature
-   (name 'power-monitor)
-   (home-services-getter get-home-services)))
 
 
 (define (feature-git-annex-daemon)
