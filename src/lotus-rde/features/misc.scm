@@ -131,7 +131,10 @@
             feature-zoom
             feature-doc-publishing
             feature-bluetooth-auto-connect
-            feature-power-monitor))
+            feature-power-monitor
+            feature-kpkey
+            feature-ssh-add-key
+            feature-git-annex-daemon))
 
 
 
@@ -801,12 +804,7 @@
 
   (define (get-home-services config)
     (list
-     (service
-      home-bluetooth-auto-connect-service-type
-
-      (home-bluetooth-auto-connect-configuration
-       (verbose? #t)
-       (daemon? #t)))))
+     home-bluetooth-autoconnect-service))
 
   (feature
    (name 'bluetooth-auto-connect)
@@ -821,14 +819,50 @@
   (define (get-home-services config)
     (list
      (service
-      home-power-monitor-service-type
-      (home-power-monitor-configuration
-       (poll-interval 15)
-       (notify-level 5)))))
+      home-power-monitor-service)))
+
+  (feature
+   (name 'power-monitor)
+   (home-services-getter get-home-services)))
+
+
+
+(define (feature-kpkey)
+
+  (define (get-home-services config)
+    (list
+     (service
+      home-kpkey-service)))
 
   (feature
    (name 'power-monitor)
    (home-services-getter get-home-services)))
 
+
+
+(define (feature-ssh-add-key)
+
+  (define (get-home-services config)
+    (list
+     (service
+      home-ssh-add-key-service)))
+
+  (feature
+   (name 'power-monitor)
+   (home-services-getter get-home-services)))
+
+
+(define (feature-git-annex-daemon)
+
+  (define (get-home-services config)
+    (list
+     (service
+      home-git-annex-daemon-service)))
+
+  (feature
+   (name 'power-monitor)
+   (home-services-getter get-home-services)))
+
+
 
 

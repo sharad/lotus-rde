@@ -37,1688 +37,1830 @@
   #:use-module (gnu packages linux)
   #:use-module (gnu packages freedesktop)
   #:use-module (gnu packages package-management)
+  #:use-module (gnu packages version-control)
   #:use-module (gnu packages ssh)
   #:use-module (gnu packages gnupg)
   #:use-module (rde serializers yaml)
   #:use-module (lotus-rde lib utils)
-  #:export (home-bluetooth-auto-connect-configuration
-            home-bluetooth-auto-connect-shepherd-services
-            home-bluetooth-auto-connect-service-type
+  #:use-module (gnu home services)
+  #:use-module (gnu home services shepherd)
+  #:use-module (gnu packages password-utils)
+  #:use-module (gnu packages wm)
+  #:use-module (gnu services shepherd)
+  #:export (home-bluetooth-autoconnect-service
+            home-power-monitor-service
+            home-kpkey-service
+            home-ssh-add-key-service
+            home-git-annex-daemon-service))
 
-            home-power-monitor-configuration
-            home-power-monitor-shepherd-services
-            home-power-monitor-service-type
-
-            home-kpkey-configuration
-            home-kpkey-shepherd-services
-            home-kpkey-service-type
-
-            home-ssh-add-key-configuration
-            home-ssh-add-key-shepherd-services
-            home-ssh-add-key-service-type))
-
-
-
-
-;; ------------------------------------------------------------
-;; Configuration
-;; ------------------------------------------------------------
-
-(define-configuration/no-serialization
-  home-bluetooth-auto-connect-configuration
-
-  ;; (package
-  ;;  (package guile-dbus)
-  ;;  "Guile DBus package.")
-
-  (verbose?
-   (boolean #t)
-   "Enable verbose logging.")
-
-  (daemon?
-   (boolean #t)
-   "Run in daemon mode."))
 
 ;; ------------------------------------------------------------
 ;; Program
 ;; ------------------------------------------------------------
-
-
-(define bluetooth-auto-connect ;; not being used.
-  (with-imported-modules
-      (source-module-closure
-       '((dbus)
-         (dbus mainloop)
-         (oop goops)))
-    (program-file
-     "bluetooth-auto-connect"
-
-     #~(begin
-         (use-modules
-          (srfi srfi-1)
-          (ice-9 match)
-          (ice-9 format)
-          (oop goops)
-          (dbus)
-          (dbus mainloop))
-
-         ;; ------------------------------------------------------------
-         ;; Config
-         ;; ------------------------------------------------------------
-
-         (define daemon?
-           (member "--daemon"
-                   (command-line)))
-
-         (define verbose?
-           (or (member "-v" (command-line))
-               (member "--verbose"
-                       (command-line))))
-
-         (define (vfmt fmt . args)
-           (when verbose?
-             (apply format #t fmt args)
-             (force-output)))
-
-         ;; ------------------------------------------------------------
-         ;; DBus
-         ;; ------------------------------------------------------------
-
-         (define bus
-           (make-system-dbus-connection))
-
-         (define object-manager
-           (dbus-proxy
-            bus
-            "org.bluez"
-            "/"
-            "org.freedesktop.DBus.ObjectManager"))
-
-         ;; ------------------------------------------------------------
-         ;; Helpers
-         ;; ------------------------------------------------------------
-
-         (define (managed-objects)
-           (object-manager "GetManagedObjects"))
-
-         (define (adapter? interfaces)
-           (assoc-ref interfaces
-                      "org.bluez.Adapter1"))
-
-         (define (device? interfaces)
-           (assoc-ref interfaces
-                      "org.bluez.Device1"))
-
-         (define (powered? adapter)
-           (assoc-ref adapter "Powered"))
-
-         (define (trusted? device)
-           (assoc-ref device "Trusted"))
-
-         (define (connected? device)
-           (assoc-ref device "Connected"))
-
-         ;; ------------------------------------------------------------
-         ;; Connect trusted devices
-         ;; ------------------------------------------------------------
-
-         (define (connect-devices)
-
-           (for-each
-
-            (match-lambda
-
-              ((path . interfaces)
-
-               (let ((device
-                      (device? interfaces)))
-
-                 (when (and device
-                            (trusted? device)
-                            (not (connected? device)))
-
-                   (vfmt
-                    "connecting ~a\n"
-                    path)
-
-                   (catch #t
-
-                     (lambda ()
-
-                       ((dbus-proxy
-                         bus
-                         "org.bluez"
-                         path
-                         "org.bluez.Device1")
-
-                        "Connect")
-
-                       (format
-                        #t
-                        "connected ~a\n"
-                        path))
-
-                     (lambda (k . a)
-
-                       (format
-                        (current-error-port)
-                        "failed ~a\n"
-                        path)))))))
-
-            (managed-objects)))
-
-         ;; ------------------------------------------------------------
-         ;; React to adapter power-on
-         ;; ------------------------------------------------------------
-
-         (define (properties-changed
-                  interface
-                  changed
-                  invalidated
-                  path)
-
-           (when (and
-                  (string=? interface
-                             "org.bluez.Adapter1")
-
-                  (assoc-ref changed
-                             "Powered"))
-
-             (vfmt
-              "adapter powered on: ~a\n"
-              path)
-
-             (connect-devices)))
-
-         ;; ------------------------------------------------------------
-         ;; Main
-         ;; ------------------------------------------------------------
-
-         ;; Initial connect
-         (connect-devices)
-
-         ;; Daemon mode
-         (when daemon?
-
-           (add-match
-            bus
-            properties-changed
-            "type='signal',\
-interface='org.freedesktop.DBus.Properties',\
-sender='org.bluez'")
-
-           ;; Keep process alive
-           (let loop ()
-             (sleep 3600)
-             (loop)))))))
-
-
-(define (bluetooth-auto-connect-program config)
-
-  (let (;; (guile-dbus
-        ;;  (home-bluetooth-auto-connect-configuration-package
-        ;;   config))
-
-        (verbose?
-         (home-bluetooth-auto-connect-configuration-verbose?
-          config))
-
-        (daemon?
-         (home-bluetooth-auto-connect-configuration-daemon?
-          config)))
-
-    ;; (with-extensions
-    ;;     (list guile-dbus))
+(define bluetooth-autoconnect
+  (with-extensions
+      (list guile-dbus)
 
     (with-imported-modules
-          (source-module-closure
-           '((dbus)
-             (dbus mainloop)
-             (oop goops)))
+        (source-module-closure
+         '((dbus)
+           (dbus mainloop)
+           (oop goops)))
 
-        (program-file
-         "bluetooth-auto-connect"
+      (program-file
+       "bluetooth-autoconnect"
+       #~(begin
+           (use-modules
+            (srfi srfi-1)
+            (ice-9 match)
+            (ice-9 format)
+            (oop goops)
+            (dbus)
+            (dbus mainloop))
 
-         #~(begin
-             (use-modules
-              (srfi srfi-1)
-              (ice-9 match)
-              (ice-9 format)
-              (oop goops)
-              (dbus)
-              (dbus mainloop))
+           ;; ------------------------------------------------------------
+           ;; Command line arguments
+           ;; ------------------------------------------------------------
 
-             ;; ------------------------------------------------------------
-             ;; Config
-             ;; ------------------------------------------------------------
+           ;; bluetooth-autoconnect
+           ;; bluetooth-autoconnect --daemon
+           ;; bluetooth-autoconnect --verbose
+           ;; bluetooth-autoconnect --only-audio
+           ;; bluetooth-autoconnect --retry 3
 
-             (define daemon?
-               #$daemon?)
+           (define args
+             (cdr (command-line)))
 
-             (define verbose?
-               #$verbose?)
+           (define daemon?
+             (member "--daemon"
+                     args))
 
-             (define (vfmt fmt . args)
-               (when verbose?
-                 (apply format #t fmt args)
-                 (force-output)))
+           (define verbose?
+             (member "--verbose"
+                     args))
 
-             ;; ------------------------------------------------------------
-             ;; DBus
-             ;; ------------------------------------------------------------
+           (define only-audio?
+             (member "--only-audio"
+                     args))
 
-             (define bus
-               (make-system-dbus-connection))
+           (define retry-count
 
-             (define object-manager
-               (dbus-proxy
-                bus
-                "org.bluez"
-                "/"
-                "org.freedesktop.DBus.ObjectManager"))
+             (let loop ((lst args))
 
-             ;; ------------------------------------------------------------
-             ;; Helpers
-             ;; ------------------------------------------------------------
+               (match lst
 
-             (define (managed-objects)
-               (object-manager "GetManagedObjects"))
+                 (("--retry" value rest ...)
+                  (or (string->number value)
+                      3))
 
-             (define (device? interfaces)
-               (assoc-ref interfaces
-                          "org.bluez.Device1"))
+                 ((_ rest ...)
+                  (loop rest))
 
-             (define (trusted? device)
-               (assoc-ref device "Trusted"))
+                 (_ 3))))
 
-             (define (connected? device)
-               (assoc-ref device "Connected"))
+           ;; ------------------------------------------------------------
+           ;; Helpers
+           ;; ------------------------------------------------------------
 
-             ;; ------------------------------------------------------------
-             ;; Connect devices
-             ;; ------------------------------------------------------------
+           (define (vfmt fmt . args)
 
-             (define (connect-devices)
+             (when verbose?
 
-               (for-each
+               (apply format #t fmt args)
 
-                (match-lambda
+               (force-output)))
 
-                  ((path . interfaces)
+           ;; ------------------------------------------------------------
+           ;; DBus
+           ;; ------------------------------------------------------------
 
-                   (let ((device
-                          (device? interfaces)))
+           (define bus
+             (make-system-dbus-connection))
 
-                     (when (and device
-                                (trusted? device)
-                                (not (connected? device)))
+           (define object-manager
+             (dbus-proxy
+              bus
+              "org.bluez"
+              "/"
+              "org.freedesktop.DBus.ObjectManager"))
 
-                       (vfmt
-                        "connecting ~a\n"
-                        path)
+           ;; ------------------------------------------------------------
+           ;; Device helpers
+           ;; ------------------------------------------------------------
 
-                       (catch #t
+           (define (managed-objects)
 
-                         (lambda ()
+             (object-manager
+              "GetManagedObjects"))
 
-                           ((dbus-proxy
-                             bus
-                             "org.bluez"
-                             path
-                             "org.bluez.Device1")
+           (define (device? interfaces)
 
-                            "Connect")
+             (assoc-ref
+              interfaces
+              "org.bluez.Device1"))
 
-                           (format
-                            #t
-                            "connected ~a\n"
-                            path))
+           (define (trusted? device)
 
-                         (lambda (k . a)
+             (assoc-ref
+              device
+              "Trusted"))
 
-                           (format
-                            (current-error-port)
-                            "failed ~a\n"
-                            path)))))))
+           (define (connected? device)
 
-                (managed-objects)))
+             (assoc-ref
+              device
+              "Connected"))
 
-             ;; ------------------------------------------------------------
-             ;; React to adapter power-on
-             ;; ------------------------------------------------------------
+           (define (audio-device? device)
 
-             (define (properties-changed
-                      interface
-                      changed
-                      invalidated
+             (let ((uuids
+                    (assoc-ref device "UUIDs")))
+
+               (and uuids
+
+                    (any
+
+                     (lambda (uuid)
+
+                       (or
+                        (string-contains uuid
+                                         "110B") ;; Audio Sink
+                        (string-contains uuid
+                                         "110E") ;; A/V Remote
+                        (string-contains uuid
+                                         "111E"))) ;; Handsfree
+
+                     uuids))))
+
+           ;; ------------------------------------------------------------
+           ;; Connect device
+           ;; ------------------------------------------------------------
+
+           (define (connect-device path)
+
+             (let loop ((n retry-count))
+
+               (when (> n 0)
+
+                 (catch #t
+
+                   (lambda ()
+
+                     (vfmt
+                      "connecting ~a\n"
                       path)
 
-               (when (and
-                      (string=? interface
-                                 "org.bluez.Adapter1")
+                     ((dbus-proxy
+                       bus
+                       "org.bluez"
+                       path
+                       "org.bluez.Device1")
 
-                      (assoc-ref changed
-                                 "Powered"))
+                      "Connect")
 
-                 (vfmt
-                  "adapter powered on: ~a\n"
-                  path)
+                     (format
+                      #t
+                      "connected ~a\n"
+                      path))
 
-                 (connect-devices)))
+                   (lambda (k . a)
 
-             ;; ------------------------------------------------------------
-             ;; Main
-             ;; ------------------------------------------------------------
+                     (vfmt
+                      "failed ~a retry ~a\n"
+                      path
+                      n)
 
-             ;; Initial scan
-             (connect-devices)
+                     (sleep 2)
 
-             ;; Daemon mode
-             (when daemon?
+                     (loop (- n 1)))))))
 
-               (add-match
-                bus
-                properties-changed
-                "type='signal',\
+           ;; ------------------------------------------------------------
+           ;; Connect trusted devices
+           ;; ------------------------------------------------------------
+
+           (define (connect-devices)
+
+             (for-each
+
+              (match-lambda
+
+                ((path . interfaces)
+
+                 (let ((device
+                        (device? interfaces)))
+
+                   (when (and device
+                              (trusted? device)
+                              (not (connected? device))
+                              (or (not only-audio?)
+                                  (audio-device? device)))
+
+                     (connect-device path)))))
+
+              (managed-objects)))
+
+           ;; ------------------------------------------------------------
+           ;; Adapter power signal
+           ;; ------------------------------------------------------------
+
+           (define (properties-changed
+                    interface
+                    changed
+                    invalidated
+                    path)
+
+             (when (and
+                    (string=? interface
+                               "org.bluez.Adapter1")
+
+                    (assoc-ref changed
+                               "Powered"))
+
+               (vfmt
+                "adapter powered on ~a\n"
+                path)
+
+               (connect-devices)))
+
+           ;; ------------------------------------------------------------
+           ;; Main
+           ;; ------------------------------------------------------------
+
+           ;; initial connect
+           (connect-devices)
+
+           ;; daemon mode
+           (when daemon?
+
+             (add-match
+              bus
+              properties-changed
+              "type='signal',\
 interface='org.freedesktop.DBus.Properties',\
 sender='org.bluez'")
 
-               ;; Keep process alive
-               (let loop ()
-                 (sleep 3600)
-                 (loop))))))))
+             ;; Keep alive
+             (let loop ()
+
+               (sleep 3600)
+
+               (loop))))))))
 
 ;; ------------------------------------------------------------
-;; Shepherd service
+;; Single instance service
 ;; ------------------------------------------------------------
+(define-public home-bluetooth-autoconnect-service
 
-(define (home-bluetooth-auto-connect-shepherd-services config)
+  (list
 
-  (let ((program
-         (bluetooth-auto-connect-program config)))
+   ;; Add executable into profile
+   (simple-service
+    'bluetooth-autoconnect-profile
+    home-profile-service-type
+    (list bluetooth-autoconnect))
+
+   ;; Singleton shepherd service
+   (simple-service
+    'bluetooth-autoconnect-shepherd
+    home-shepherd-service-type
 
     (list
 
      (shepherd-service
-      (provision '(bluetooth-auto-connect))
+
+      (provision '(bluetooth-autoconnect bt-autoconnect))
 
       (documentation
-       "Automatically connect trusted Bluetooth devices.")
+       "Bluetooth trusted device auto-connect daemon.")
 
       (requirement '(dbus))
 
-      (respawn? #t)
-
       (start
        #~(make-forkexec-constructor
-          (list #$program)
+          (list
+           #$bluetooth-autoconnect
+           "--daemon"
+           "--verbose"
+           "--only-audio"
+           "--retry" "3")
+          #:create-session? #f
           #:log-file
-          #$(log-file "bluetooth-auto-connect.log")))
+          #$(log-file "bluetooth-autoconnect.log")))
 
       (stop
-       #~(make-kill-destructor))))))
+       #~(make-kill-destructor))
 
-;; ------------------------------------------------------------
-;; Service type
-;; ------------------------------------------------------------
+      (respawn? #t)
 
-(define home-bluetooth-auto-connect-service-type
+      (one-shot? #f))))))
 
-  (service-type
-   (name 'home-bluetooth-auto-connect)
-
-   (extensions
-    (list
-
-     ;; install binary into profile
-     (service-extension
-      home-profile-service-type
-      (const (list bluetooth-auto-connect)))
-
-
-     (service-extension
-      home-shepherd-service-type
-      home-bluetooth-auto-connect-shepherd-services)))
-
-   (default-value
-     (home-bluetooth-auto-connect-configuration))
-
-   (description
-    "Automatically connect trusted Bluetooth devices using BlueZ DBus.")))
-
-;; (service
-;;  home-bluetooth-auto-connect-service-type)
-;; (service
-;;  home-bluetooth-auto-connect-service-type
-
-;;  (home-bluetooth-auto-connect-configuration
-;;   (verbose? #t)
-;;   (daemon? #t)))
 
-
-
-
-(define-configuration/no-serialization
-  home-power-monitor-configuration
-
-  (notify-level
-   (integer 10)
-   "Notify every N percentage.")
-
-  (poll-interval
-   (integer 10)
-   "Polling interval in seconds.")
-
-  (battery-path
-   (string "/sys/class/power_supply/BAT0/capacity")
-   "Battery sysfs capacity path."))
 
 ;; ------------------------------------------------------------
 ;; Program
 ;; ------------------------------------------------------------
+(define power-monitor
+  (program-file
+   "power-monitor"
 
+   #~(begin
 
-(define battery-monitor                 ;not being used
- (program-file
-  "battery-monitor"
-  #~(begin
+       (use-modules
+        (ice-9 match)
+        (ice-9 format)
+        (ice-9 textual-ports)
+        (ice-9 ftw)
+        (srfi srfi-1))
 
-      (use-modules
-       (srfi srfi-1)
-       (ice-9 match)
-       (ice-9 textual-ports)
-       (ice-9 popen)
-       (ice-9 format)
-       (ice-9 ftw))
+       ;; ------------------------------------------------------------
+       ;; Store paths
+       ;; ------------------------------------------------------------
 
-      ;; ------------------------------------------------------------
-      ;; Store paths
-      ;; ------------------------------------------------------------
+       (define notify-send
+         #$(file-append libnotify "/bin/notify-send"))
 
-      (define notify-send
-        #$(file-append libnotify "/bin/notify-send"))
+       (define zenity
+         #$(file-append zenity "/bin/zenity"))
 
-      (define zenity
-        #$(file-append zenity "/bin/zenity"))
+       (define poweroff
+         #$(file-append shepherd "/sbin/poweroff"))
 
-      (define bash
-        #$(file-append bash-minimal "/bin/bash"))
+       ;; ------------------------------------------------------------
+       ;; CLI arguments
+       ;; ------------------------------------------------------------
 
-      (define poweroff
-        #$(file-append shepherd "/sbin/poweroff"))
+       ;; power-monitor
+       ;; power-monitor --interval 5
+       ;; power-monitor --low 5
+       ;; power-monitor --high 70
+       ;; power-monitor --no-notify
+       ;; power-monitor --no-poweroff
+       ;; power-monitor --verbose
 
-      ;; ------------------------------------------------------------
-      ;; Actions
-      ;; ------------------------------------------------------------
+       (define args
+         (cdr (command-line)))
 
-      (define power-low-action
-        `((disposition . "below")
+       (define (arg-value flag default)
 
-          (5 . ,poweroff)
+         (let loop ((lst args))
 
-          (7 . ,(string-append
-                 zenity
-                 " --warning --text "
-                 "\"Battery is only at 7%, will poweroff it at 5%\""))
+           (match lst
 
-          (8 . ,(string-append
-                 zenity
-                 " --warning --text "
-                 "\"Battery is only at 8%, will poweroff it at 5%\""))
+             ((flag* value rest ...)
+              (if (string=? flag flag*)
+                  value
+                  (loop (cons value rest))))
 
-          (9 . ,(string-append
-                 zenity
-                 " --warning --text "
-                 "\"Battery is only at 9%, will poweroff it at 5%\""))))
+             (_ default))))
 
-      (define power-high-action
-        `((disposition . "above")
+       (define interval
+         (or
+          (and=> (arg-value "--interval" #f)
+                 string->number)
+          10))
 
-          (70 . ,(string-append
-                  notify-send
-                  " 'charge up to 70%'"))))
+       (define low-threshold
+         (or
+          (and=> (arg-value "--low" #f)
+                 string->number)
+          5))
 
-      ;; ------------------------------------------------------------
-      ;; Battery reading from sysfs
-      ;; ------------------------------------------------------------
+       (define high-threshold
+         (or
+          (and=> (arg-value "--high" #f)
+                 string->number)
+          70))
 
-      (define battery-capacity-file
-        "/sys/class/power_supply/BAT0/capacity")
+       (define notify?
+         (not
+          (member "--no-notify"
+                  args)))
 
-      (define (read-status)
+       (define auto-poweroff?
+         (not
+          (member "--no-poweroff"
+                  args)))
 
-        (unless (file-exists? battery-capacity-file)
-          (error
-           "Battery capacity file not found"
-           battery-capacity-file))
+       (define verbose?
+         (member "--verbose"
+                 args))
 
-        (call-with-input-file
-            battery-capacity-file
+       ;; ------------------------------------------------------------
+       ;; Battery sysfs
+       ;; ------------------------------------------------------------
 
-          (lambda (port)
+       (define battery-capacity-file
+         "/sys/class/power_supply/BAT0/capacity")
 
-            (let ((txt
-                   (string-trim-right
-                    (get-string-all port)
-                    #\newline)))
+       ;; ------------------------------------------------------------
+       ;; Helpers
+       ;; ------------------------------------------------------------
 
-              (or (string->number txt)
-                  (error
-                   "Invalid battery percentage"
-                   txt))))))
+       (define (vfmt fmt . args)
 
-      ;; ------------------------------------------------------------
-      ;; Execute action
-      ;; ------------------------------------------------------------
+         (when verbose?
 
-      (define (execute-action key actions)
+           (apply format #t fmt args)
 
-        (define notify-percent-factor
-          10)
+           (force-output)))
 
-        (define disposition
-          (assoc-ref actions 'disposition))
+       (define (notify fmt . args)
 
-        (define action
-          (assoc-ref actions key))
-
-        (cond
-
-         ;; Explicit action
-         ((and action (string? action))
-
-          (system*
-           bash
-           "-c"
-           action))
-
-         ;; Generic notification
-         ((zero? (modulo key notify-percent-factor))
-
-          (system*
-           notify-send
-           (format
-            #f
-            "charged ~a ~a%%"
-            disposition
-            key)))))
-
-      ;; ------------------------------------------------------------
-      ;; Main monitoring loop
-      ;; ------------------------------------------------------------
-
-      (define (take-action)
-
-        (let loop ((prev-charge
-                    (read-status)))
-
-          (let ((curr-charge
-                 (read-status)))
-
-            (cond
-
-             ;; Charging
-             ((> curr-charge prev-charge)
-
-              (execute-action
-               curr-charge
-               power-high-action))
-
-             ;; Discharging
-             ((< curr-charge prev-charge)
-
-              (execute-action
-               curr-charge
-               power-low-action)))
-
-            (format
-             #t
-             "Battery: ~a% -> ~a%\n"
-             prev-charge
-             curr-charge)
-
-            (sleep 10)
-
-            (loop curr-charge))))
-      (take-action))))
-
-(define (power-monitor-program config)
-
-  (let ((notify-level
-         (home-power-monitor-configuration-notify-level
-          config))
-
-        (poll-interval
-         (home-power-monitor-configuration-poll-interval
-          config))
-
-        (battery-path
-         (home-power-monitor-configuration-battery-path
-          config)))
-
-    (program-file
-     "battery-monitor"
-
-     #~(begin
-
-         (use-modules
-          (srfi srfi-1)
-          (ice-9 match)
-          (ice-9 textual-ports)
-          (ice-9 format)
-          (ice-9 ftw))
-
-         ;; ------------------------------------------------------------
-         ;; Store paths
-         ;; ------------------------------------------------------------
-
-         (define notify-send
-           #$(file-append libnotify "/bin/notify-send"))
-
-         (define zenity
-           #$(file-append zenity "/bin/zenity"))
-
-         (define bash
-           #$(file-append bash-minimal "/bin/bash"))
-
-         (define poweroff
-           #$(file-append shepherd "/sbin/poweroff"))
-
-         ;; ------------------------------------------------------------
-         ;; Config
-         ;; ------------------------------------------------------------
-
-         (define notify-percent-factor
-           #$notify-level)
-
-         (define poll-interval
-           #$poll-interval)
-
-         (define battery-capacity-file
-           #$battery-path)
-
-         ;; ------------------------------------------------------------
-         ;; Actions
-         ;; ------------------------------------------------------------
-
-         (define power-low-action
-           `((disposition . "below")
-
-             (5 . ,poweroff)
-
-             (7 . ,(string-append
-                    zenity
-                    " --warning --text "
-                    "\"Battery is only at 7%, will poweroff it at 5%\""))
-
-             (8 . ,(string-append
-                    zenity
-                    " --warning --text "
-                    "\"Battery is only at 8%, will poweroff it at 5%\""))
-
-             (9 . ,(string-append
-                    zenity
-                    " --warning --text "
-                    "\"Battery is only at 9%, will poweroff it at 5%\""))))
-
-         (define power-high-action
-           `((disposition . "above")
-
-             (70 . ,(string-append
-                     notify-send
-                     " 'charge up to 70%'"))))
-
-         ;; ------------------------------------------------------------
-         ;; Read battery percentage
-         ;; ------------------------------------------------------------
-
-         (define (read-status)
-
-           (unless (file-exists? battery-capacity-file)
-
-             (error
-              "Battery capacity file not found"
-              battery-capacity-file))
-
-           (call-with-input-file
-               battery-capacity-file
-
-             (lambda (port)
-
-               (let ((txt
-                      (string-trim-right
-                       (get-string-all port)
-                       #\newline)))
-
-                 (or (string->number txt)
-
-                     (error
-                      "Invalid battery percentage"
-                      txt))))))
-
-         ;; ------------------------------------------------------------
-         ;; Execute action
-         ;; ------------------------------------------------------------
-
-         (define (execute-action key actions)
-
-           (define disposition
-             (assoc-ref actions 'disposition))
-
-           (define action
-             (assoc-ref actions key))
-
-           (cond
-
-            ;; Explicit action
-            ((and action (string? action))
-
-             (system*
-              bash
-              "-c"
-              action))
-
-            ;; Generic notification
-            ((zero? (modulo key
-                             notify-percent-factor))
-
-             (system*
-              notify-send
-              (format
-               #f
-               "charged ~a ~a%%"
-               disposition
-               key)))))
-
-         ;; ------------------------------------------------------------
-         ;; Main loop
-         ;; ------------------------------------------------------------
-
-         (define (take-action)
-
-           (let loop ((prev-charge
-                       (read-status)))
-
-             (let ((curr-charge
-                    (read-status)))
-
-               (cond
-
-                ;; Charging
-                ((> curr-charge prev-charge)
-
-                 (execute-action
-                  curr-charge
-                  power-high-action))
-
-                ;; Discharging
-                ((< curr-charge prev-charge)
-
-                 (execute-action
-                  curr-charge
-                  power-low-action)))
-
-               (format
-                #t
-                "Battery: ~a%% -> ~a%%\n"
-                prev-charge
-                curr-charge)
-
-               (sleep poll-interval)
-
-               (loop curr-charge))))
-
-         ;; ------------------------------------------------------------
-         ;; Entry
-         ;; ------------------------------------------------------------
-
-         (take-action)))))
-
-;; ------------------------------------------------------------
-;; Shepherd services
-;; ------------------------------------------------------------
-
-(define (home-power-monitor-shepherd-services config)
-
-  (let ((program
-         (power-monitor-program config)))
-
-    (list
-
-     (shepherd-service
-      (provision '(power-monitor pm))
-
-      (documentation
-       "Battery/power monitoring daemon.")
-
-      (requirement '(dbus))
-
-      (respawn? #t)
-
-      (start
-       #~(make-forkexec-constructor
-          (list #$program)
-          #:log-file
-          #$(log-file "power-monitor.log")))
-
-      (stop
-       #~(make-kill-destructor))))))
-
-;; ------------------------------------------------------------
-;; Service type
-;; ------------------------------------------------------------
-
-(define home-power-monitor-service-type
-
-  (service-type
-   (name 'home-power-monitor)
-
-   (extensions
-    (list
-     ;; install binary into profile
-     (service-extension
-      home-profile-service-type
-      (const (list battery-monitor)))
-
-     (service-extension
-       home-shepherd-service-type
-       home-power-monitor-shepherd-services)))
-
-   (default-value
-     (home-power-monitor-configuration))
-
-   (description
-    "Battery/power monitoring daemon service.")))
-
-
-
-;; (service
-;;  home-power-monitor-service-type
-;;  (home-power-monitor-configuration
-;;   (poll-interval 15)
-;;   (notify-level 5)))
-
-
-;; ------------------------------------------------------------
-;; Configuration
-;; ------------------------------------------------------------
-
-;; (define-configuration/no-serialization
-;;   home-kpkey-configuration
-
-;;   (respawn?
-;;    (boolean #f))
-
-;;   (one-shot?
-;;    (boolean #t))
-
-;;   (create-session?
-;;    (boolean #f))
-
-;;   (secure-mount
-;;    (string
-;;     (string-append
-;;      (getenv "HOME")
-;;      "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/noenc/mountpoints/secure")))
-
-;;   (key-dir
-;;    (string
-;;     (string-append
-;;      (getenv "HOME")
-;;      "/.pi/.kp/mem")))
-
-;;   (gpg-secret
-;;    (string
-;;     (string-append
-;;      (getenv "HOME")
-;;      "/.open-secrets/secret-0.1.key.gpg"))))
-
-
-
-(define-configuration/no-serialization
-  home-kpkey-configuration
-
-  (respawn?
-   (boolean #f)
-   "Respawn service.")
-
-  (one-shot?
-   (boolean #t)
-   "Run once.")
-
-  (create-session?
-   (boolean #f)
-   "Create shepherd session.")
-
-  (secure-mount
-   (string
-    (string-append
-     (getenv "HOME")
-     "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/noenc/mountpoints/secure"))
-   "Secure mount path.")
-
-  (key-dir
-   (string
-    (string-append
-     (getenv "HOME")
-     "/.pi/.kp/mem"))
-   "Key directory.")
-
-  (gpg-secret
-   (string
-    (string-append
-     (getenv "HOME")
-     "/.open-secrets/secret-0.1.key.gpg"))
-   "GPG secret file."))
-
-
-;; ------------------------------------------------------------
-;; Program
-;; ------------------------------------------------------------
-
-(define (kpkey-program config)
-
-  (let ((secure-mount
-         (home-kpkey-configuration-secure-mount
-          config))
-
-        (key-dir
-         (home-kpkey-configuration-key-dir
-          config))
-
-        (gpg-secret
-         (home-kpkey-configuration-gpg-secret
-          config)))
-
-    (program-file
-     "kpkey"
-
-     #~(begin
-
-         (use-modules
-          (srfi srfi-1)
-          (ice-9 match)
-          (ice-9 ftw)
-          (ice-9 format)
-          (ice-9 textual-ports)
-          (ice-9 binary-ports)
-          (ice-9 popen))
-
-         ;; ------------------------------------------------------------
-         ;; Store paths
-         ;; ------------------------------------------------------------
-
-         (define gpg
-           #$(file-append gnupg "/bin/gpg"))
-
-         (define notify-send
-           #$(file-append libnotify "/bin/notify-send"))
-
-         (define zenity
-           #$(file-append zenity "/bin/zenity"))
-
-         (define shred
-           #$(file-append coreutils "/bin/shred"))
-
-         (define herd
-           #$(file-append shepherd "/bin/herd"))
-
-         (define gpgconf
-           #$(file-append gnupg "/bin/gpgconf"))
-
-         ;; ------------------------------------------------------------
-         ;; Config
-         ;; ------------------------------------------------------------
-
-         (define secure-mount
-           #$secure-mount)
-
-         (define key-dir
-           #$key-dir)
-
-         (define gpg-secret
-           #$gpg-secret)
-
-         ;; ------------------------------------------------------------
-         ;; Helpers
-         ;; ------------------------------------------------------------
-
-         (define (notify fmt . args)
+         (when notify?
 
            (apply
             system*
             notify-send
             (list
-             (apply format #f fmt args))))
+             (apply format #f fmt args)))))
 
-         (define (mounted? path)
+       (define (read-status)
 
-           ;; Avoid external df/mount parsing
-           ;; by checking device change.
+         (unless (file-exists?
+                  battery-capacity-file)
 
-           (let ((st-root
-                  (stat "/"))
+           (error
+            "Battery capacity file missing"
+            battery-capacity-file))
 
-                 (st-path
-                  (false-if-exception
-                   (stat path))))
+         (call-with-input-file
+             battery-capacity-file
 
-             (and st-path
-                  (not (= (stat:dev st-root)
-                          (stat:dev st-path))))))
+           (lambda (port)
 
-         (define (key-files)
+             (let ((txt
+                    (string-trim-right
+                     (get-string-all port)
+                     #\newline)))
 
-           (filter
-            (lambda (f)
-              (string-suffix? ".keyx" f))
-            (scandir ".")))
+               (or (string->number txt)
 
-         (define (encrypted-key-files)
+                   (error
+                    "Invalid battery value"
+                    txt))))))
 
-           (filter
-            (lambda (f)
-              (string-suffix? ".keyx.gpg" f))
-            (scandir ".")))
+       ;; ------------------------------------------------------------
+       ;; Low battery actions
+       ;; ------------------------------------------------------------
 
-         (define (decrypt-file file)
+       (define (handle-low-battery level)
 
-           (let* ((target
-                   (string-drop-right file 4))
+         (vfmt
+          "low battery ~a%%\n"
+          level)
 
-                  (secret-port
-                   (open-input-pipe
-                    (string-append
-                     gpg
-                     " --batch --quiet --decrypt "
-                     gpg-secret)))
-
-                  (passphrase
-                   (string-trim-right
-                    (get-string-all secret-port)
-                    #\newline)))
-
-             (close-pipe secret-port)
-
-             (system*
-              gpg
-              "--batch"
-              "--yes"
-              "--pinentry-mode"
-              "loopback"
-              "--passphrase"
-              passphrase
-              "--output"
-              target
-              "--decrypt"
-              file)))
-
-         (define (decrypt-files files)
-
-           (for-each
-
-            (lambda (f)
-
-              (unless
-                  (file-exists?
-                   (string-drop-right f 4))
-
-                (decrypt-file f)))
-
-            files))
-
-         ;; ------------------------------------------------------------
-         ;; Commands
-         ;; ------------------------------------------------------------
-
-         (define (checkin)
-
-           (mkdir-p key-dir)
-
-           (chdir key-dir)
-
-           (let ((files
-                  (key-files)))
-
-             (if (null? files)
-
-                 (notify "already checked in")
-
-                 (begin
-
-                   (for-each
-
-                    (lambda (f)
-
-                      (system* shred "-u" f))
-
-                    files)
-
-                   (notify
-                    "Successfully checked in")))))
-
-         (define (checkout)
-
-           (unless (mounted? secure-mount)
-
-             (format
-              (current-error-port)
-              "secure mount not mounted\n")
-
-             (exit 1))
-
-           (mkdir-p key-dir)
-
-           (chdir key-dir)
-
-           ;; ------------------------------------------------------------
-           ;; Symlink encrypted files
-           ;; ------------------------------------------------------------
-
-           (for-each
-
-            (lambda (f)
-
-              (let ((target
-                     (string-append
-                      key-dir
-                      "/"
-                      (basename f))))
-
-                (unless (file-exists? target)
-
-                  (symlink f target))))
-
-            (find-files
-             (string-append
-              (dirname key-dir)
-              "/.keys")
-             "\\.keyx\\.gpg$"))
-
-           ;; ------------------------------------------------------------
-           ;; Decrypt
-           ;; ------------------------------------------------------------
-
-           (decrypt-files
-            (encrypted-key-files))
-
-           (if (null? (key-files))
-
-               (notify
-                "Failed to check out")
-
-               (notify
-                "Successfully checked out"))
-
-           ;; Restart keepassxc
-           (primitive-fork)
+         ;; warnings
+         (when (member level '(9 8 7))
 
            (system*
-            herd
-            "restart"
-            "keepassxc"))
-
-         (define (status)
-
-           (mkdir-p key-dir)
-
-           (chdir key-dir)
-
-           (for-each
-            (lambda (f)
-              (format #t "~a\n" f))
-            (key-files)))
-
-         ;; ------------------------------------------------------------
-         ;; Main
-         ;; ------------------------------------------------------------
-
-         (match (cdr (command-line))
-
-           (("ci")
-            (checkin))
-
-           (("co")
-            (checkout))
-
-           ((or ("st")
-                ("status"))
-            (status))
-
-           (_
-
+            zenity
+            "--warning"
+            "--text"
             (format
-             (current-error-port)
-             "Usage: kpkey {ci|co|st}\n")
+             #f
+             "Battery is only at ~a%%"
+             level)))
 
-            (exit 1)))))))
+         ;; shutdown
+         (when (and auto-poweroff?
+                    (<= level low-threshold))
+
+           (notify
+            "Battery critical: ~a%%"
+            level)
+
+           (sleep 2)
+
+           (system* poweroff)))
+
+       ;; ------------------------------------------------------------
+       ;; High battery actions
+       ;; ------------------------------------------------------------
+
+       (define (handle-high-battery level)
+
+         (vfmt
+          "high battery ~a%%\n"
+          level)
+
+         (when (= level high-threshold)
+
+           (notify
+            "Battery charged to ~a%%"
+            level)))
+
+       ;; ------------------------------------------------------------
+       ;; Main loop
+       ;; ------------------------------------------------------------
+
+       (define (monitor-loop)
+
+         (let loop ((prev-charge
+                     (read-status)))
+
+           (let ((curr-charge
+                  (read-status)))
+
+             (vfmt
+              "Battery ~a%% -> ~a%%\n"
+              prev-charge
+              curr-charge)
+
+             ;; charging
+             (when (> curr-charge
+                      prev-charge)
+
+               (handle-high-battery
+                curr-charge))
+
+             ;; discharging
+             (when (< curr-charge
+                      prev-charge)
+
+               (handle-low-battery
+                curr-charge))
+
+             (sleep interval)
+
+             (loop curr-charge))))
+
+       ;; ------------------------------------------------------------
+       ;; Entry
+       ;; ------------------------------------------------------------
+
+       (monitor-loop))))
 
 ;; ------------------------------------------------------------
-;; Shepherd services
+;; Single instance service
 ;; ------------------------------------------------------------
+(define-public home-power-monitor-service
 
-(define (home-kpkey-shepherd-services config)
+  (list
 
-  (let ((kpkey
-         (kpkey-program config))
+   ;; Add executable to profile
+   (simple-service
+    'power-monitor-profile
+    home-profile-service-type
+    (list power-monitor))
 
-        (respawn?
-         (home-kpkey-configuration-respawn?
-          config))
-
-        (one-shot?
-         (home-kpkey-configuration-one-shot?
-          config))
-
-        (create-session?
-         (home-kpkey-configuration-create-session?
-          config)))
+   ;; Singleton shepherd service
+   (simple-service
+    'power-monitor-shepherd
+    home-shepherd-service-type
 
     (list
 
      (shepherd-service
-
-      (provision '(kpkey kpkeys))
-
+      (provision '(power-monitor pm))
       (documentation
-       "KeePassXC key checkout service.")
-
+       "Battery and power monitoring service.")
       (requirement '())
-
-      (respawn? respawn?)
-
-      (one-shot? one-shot?)
-
       (start
        #~(make-forkexec-constructor
-          (list #$kpkey "co")
-          #:create-session? #$create-session?
+          (list
+           #$power-monitor
+           "--interval" "10"
+           "--low" "5"
+           "--high" "70"
+           "--verbose")
+          #:create-session? #f
           #:log-file
-          #$(log-file "kpkey.log")))
-
+          #$(log-file "power-monitor.log")))
       (stop
-       #~(make-kill-destructor))))))
-
-;; ------------------------------------------------------------
-;; Service type
-;; ------------------------------------------------------------
-
-(define home-kpkey-service-type
-
-  (service-type
-   (name 'home-kpkey)
-
-   (extensions
-    (list
-     ;; install binary into profile
-     (service-extension
-      home-profile-service-type
-      (const (list kpkey-program)))
-
-     (service-extension
-      home-shepherd-service-type
-      home-kpkey-shepherd-services)))
-
-   (default-value
-     (home-kpkey-configuration))
-
-   (description
-    "KeePassXC key checkout/checkin service.")))
-
+       #~(make-kill-destructor))
+      (respawn? #t)
+      (one-shot? #f))))))
 
 
 ;; ------------------------------------------------------------
-;; Configuration
+;; Program
 ;; ------------------------------------------------------------
+(define kpkey
+  (program-file
+   "kpkey"
 
-(define-configuration/no-serialization
-  home-ssh-add-key-configuration
+   #~(begin
 
-  (attr-key
-   (string "rclone-config")
-   "Attribute key.")
+       (use-modules
+        (ice-9 match)
+        (ice-9 format)
+        (ice-9 ftw)
+        (ice-9 popen)
+        (ice-9 textual-ports)
+        (srfi srfi-1))
 
-  (attr-value
-   (string "rclone-config")
-   "Attribute value.")
+       ;; ------------------------------------------------------------
+       ;; Store paths
+       ;; ------------------------------------------------------------
 
-  (max-tries
-   (integer 5)
-   "Maximum tries.")
+       (define gpg
+         #$(file-append gnupg "/bin/gpg"))
 
-  (min-keys-count
-   (integer 4)
-   "Minimum SSH keys required.")
+       (define notify-send
+         #$(file-append libnotify "/bin/notify-send"))
 
-  (dialog-timeout
-   (integer 5)
-   "Zenity timeout.")
+       (define zenity
+         #$(file-append zenity "/bin/zenity"))
 
-  (wait-count
-   (integer 50)
-   "Retry count while waiting.")
+       (define shred
+         #$(file-append coreutils "/bin/shred"))
 
-  (wait-seconds
-   (integer 2)
-   "Seconds between retries.")
+       (define herd
+         #$(file-append shepherd "/bin/herd"))
 
-  (create-session?
-   (boolean #f)
-   "Create shepherd session.")
+       ;; ------------------------------------------------------------
+       ;; Constants
+       ;; ------------------------------------------------------------
 
-  (respawn?
-   (boolean #f)
-   "Respawn service.")
+       (define home
+         (or (getenv "HOME") ""))
 
-  (one-shot?
-   (boolean #t)
-   "Run once.")
+       (define key-dir
+         (string-append home "/.pi/.kp/mem"))
 
-  (mount-base
-   (string (string-append
-            (getenv "HOME")
-            "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/noenc/mountpoints"))
-   "Base mount directory."))
+       (define key-source-dir
+         (string-append home "/.pi/.kp/.keys"))
+
+       (define secret-file
+         (string-append
+          home
+          "/.open-secrets/secret-0.1.key.gpg"))
+
+       (define secure-mount
+         (string-append
+          home
+          "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/noenc/mountpoints/secure"))
+
+       ;; ------------------------------------------------------------
+       ;; Helpers
+       ;; ------------------------------------------------------------
+
+       ;; Better than parsing mount output.
+       ;; Compare device IDs.
+       (define (mounted? path)
+
+         (let ((st
+                (false-if-exception
+                 (stat path)))
+
+               (root
+                (stat "/")))
+
+           (and st
+                (not
+                 (= (stat:dev st)
+                    (stat:dev root))))))
+
+       (define (notify fmt . args)
+
+         (apply
+          system*
+          notify-send
+          (list
+           (apply format #f fmt args))))
+
+       (define (key-files)
+
+         (filter
+          (lambda (f)
+            (string-suffix? ".keyx" f))
+          (scandir ".")))
+
+       (define (encrypted-key-files)
+
+         (filter
+          (lambda (f)
+            (string-suffix? ".keyx.gpg" f))
+          (scandir ".")))
+
+       ;; ------------------------------------------------------------
+       ;; Decrypt file
+       ;; ------------------------------------------------------------
+
+       (define (decrypt-file file)
+
+         ;; Obtain passphrase
+         (let* ((port
+                 (open-input-pipe
+                  (string-append
+                   gpg
+                   " --batch --quiet --decrypt "
+                   secret-file)))
+
+                (passphrase
+                 (string-trim-right
+                  (get-string-all port)
+                  #\newline)))
+
+           (close-pipe port)
+
+           ;; decrypt target
+           (system*
+            gpg
+            "--batch"
+            "--yes"
+            "--pinentry-mode"
+            "loopback"
+            "--passphrase"
+            passphrase
+            "--output"
+            (string-drop-right file 4)
+            "--decrypt"
+            file)))
+
+       ;; ------------------------------------------------------------
+       ;; Checkout
+       ;; ------------------------------------------------------------
+
+       (define (checkout)
+
+         (unless (mounted? secure-mount)
+
+           (format
+            (current-error-port)
+            "secure mount unavailable\n")
+
+           (exit 1))
+
+         (mkdir-p key-dir)
+
+         (chdir key-dir)
+
+         ;; ------------------------------------------------------------
+         ;; Symlink encrypted files
+         ;; ------------------------------------------------------------
+
+         (for-each
+
+          (lambda (f)
+
+            (let ((target
+                   (string-append
+                    key-dir
+                    "/"
+                    (basename f))))
+
+              (unless (file-exists? target)
+
+                (symlink f target))))
+
+          (find-files
+           key-source-dir
+           "\\.keyx\\.gpg$"))
+
+         ;; ------------------------------------------------------------
+         ;; Decrypt files
+         ;; ------------------------------------------------------------
+
+         (for-each
+
+          (lambda (f)
+
+            (unless
+                (file-exists?
+                 (string-drop-right f 4))
+
+              (decrypt-file f)))
+
+          (encrypted-key-files))
+
+         ;; ------------------------------------------------------------
+         ;; Result
+         ;; ------------------------------------------------------------
+
+         (if (null? (key-files))
+
+             (notify
+              "Failed to checkout keys")
+
+             (notify
+              "Successfully checked out keys"))
+
+         ;; restart keepassxc
+         (primitive-fork)
+
+         (system*
+          herd
+          "restart"
+          "keepassxc"))
+
+       ;; ------------------------------------------------------------
+       ;; Checkin
+       ;; ------------------------------------------------------------
+
+       (define (checkin)
+
+         (mkdir-p key-dir)
+
+         (chdir key-dir)
+
+         (let ((files
+                (key-files)))
+
+           (if (null? files)
+
+               (notify
+                "Already checked in")
+
+               (begin
+
+                 (for-each
+
+                  (lambda (f)
+
+                    ;; secure delete
+                    (system*
+                     shred
+                     "-u"
+                     f))
+
+                  files)
+
+                 (notify
+                  "Successfully checked in")))))
+
+       ;; ------------------------------------------------------------
+       ;; Status
+       ;; ------------------------------------------------------------
+
+       (define (status)
+
+         (mkdir-p key-dir)
+
+         (chdir key-dir)
+
+         (for-each
+          (lambda (f)
+            (format #t "~a\n" f))
+          (key-files)))
+
+       ;; ------------------------------------------------------------
+       ;; Main
+       ;; ------------------------------------------------------------
+
+       (match (cdr (command-line))
+
+         (("co")
+          (checkout))
+
+         (("ci")
+          (checkin))
+
+         ((or ("st")
+              ("status"))
+          (status))
+
+         (_
+
+          (format
+           (current-error-port)
+           "Usage: kpkey {co|ci|st}\n")
+
+          (exit 1))))))
+
+;; ------------------------------------------------------------
+;; Single instance service
+;; ------------------------------------------------------------
+(define-public home-kpkey-service
+
+  (list
+   ;; Put executable into profile
+   (simple-service
+    'ssh-add-key-profile
+    home-profile-service-type
+    (list kpkey))
+   ;; Add executable into profile
+   (simple-service
+    'kpkey-profile
+    home-profile-service-type
+    (list kpkey))
+
+   ;; Singleton shepherd service
+   (simple-service
+    'kpkey-shepherd
+    home-shepherd-service-type
+
+    (list
+
+     (shepherd-service
+      (provision '(kpkey))
+      (documentation
+       "KeePassXC key checkout service.")
+      (requirement '())
+      (start
+       #~(make-forkexec-constructor
+          (list #$kpkey "co")
+          #:create-session? #f
+          #:log-file
+          #$(log-file "kpkey.log")))
+      (stop
+       #~(make-kill-destructor))
+      (one-shot? #t)
+      (respawn? #f))))))
+
+
+;; ------------------------------------------------------------
+;; Program
+;; ------------------------------------------------------------
+(define ssh-add-key
+  (program-file
+   "ssh-add-key"
+
+   #~(begin
+
+       (use-modules
+        (ice-9 match)
+        (ice-9 format)
+        (ice-9 popen)
+        (ice-9 textual-ports)
+        (ice-9 ftw)
+        (srfi srfi-1))
+
+       ;; ------------------------------------------------------------
+       ;; Store paths
+       ;; ------------------------------------------------------------
+
+       (define ssh-add
+         #$(file-append openssh "/bin/ssh-add"))
+
+       (define secret-tool
+         #$(file-append libsecret "/bin/secret-tool"))
+
+       (define herd
+         #$(file-append shepherd "/bin/herd"))
+
+       (define zenity
+         #$(file-append zenity "/bin/zenity"))
+
+       ;; ------------------------------------------------------------
+       ;; Command line arguments
+       ;; ------------------------------------------------------------
+
+       ;; ssh-add-key MIN-KEYS MAX-TRIES
+       ;;
+       ;; Examples:
+       ;;
+       ;; ssh-add-key
+       ;; ssh-add-key 4 5
+       ;; ssh-add-key 6 10
+
+       (define args
+         (cdr (command-line)))
+
+       (define min-keys-count
+         (if (>= (length args) 1)
+             (or (string->number
+                  (list-ref args 0))
+                 4)
+             4))
+
+       (define max-tries
+         (if (>= (length args) 2)
+             (or (string->number
+                  (list-ref args 1))
+                 5)
+             5))
+
+       ;; ------------------------------------------------------------
+       ;; Constants
+       ;; ------------------------------------------------------------
+
+       (define wait-count
+         50)
+
+       (define wait-seconds
+         2)
+
+       (define dialog-timeout
+         5)
+
+       (define home
+         (or (getenv "HOME") ""))
+
+       (define mp-base
+         (string-append
+          home
+          "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/noenc/mountpoints"))
+
+       (define mtrg-orgp
+         (string-append mp-base "/orgp"))
+
+       (define mtrg-secure
+         (string-append mp-base "/secure"))
+
+       ;; ------------------------------------------------------------
+       ;; Helpers
+       ;; ------------------------------------------------------------
+
+       ;; Avoid external df/mount parsing.
+       ;; Compare device IDs instead.
+       (define (mounted? path)
+
+         (let ((st
+                (false-if-exception
+                 (stat path)))
+
+               (root
+                (stat "/")))
+
+           (and st
+                (not
+                 (= (stat:dev st)
+                    (stat:dev root))))))
+
+       (define (ssh-key-count)
+
+         (let* ((port
+                 (open-input-pipe
+                  (string-append
+                   ssh-add
+                   " -l 2>/dev/null")))
+
+                (txt
+                 (get-string-all port)))
+
+           (close-pipe port)
+
+           (length
+            (filter
+             (lambda (x)
+               (not (string-null? x)))
+             (string-split txt #\newline)))))
+
+       (define (show-warning)
+
+         (system*
+          zenity
+          (string-append
+           "--timeout="
+           (number->string dialog-timeout))
+          "--warning"
+          "--title=Secret Locked or Not Found"
+          "--text=Unlock KeePassXC database"))
+
+       (define (wait-for-mounts)
+
+         (let loop ((count wait-count))
+
+           (cond
+
+            ((and (mounted? mtrg-secure)
+                  (mounted? mtrg-orgp))
+
+             #t)
+
+            ((<= count 0)
+
+             #f)
+
+            (else
+
+             (sleep wait-seconds)
+
+             (loop (- count 1))))))
+
+       ;; ------------------------------------------------------------
+       ;; Main
+       ;; ------------------------------------------------------------
+
+       (unless (wait-for-mounts)
+
+         (format
+          (current-error-port)
+          "mounts unavailable\n")
+
+         (exit 1))
+
+       (let loop ((tries 0))
+
+         (when (and (< tries max-tries)
+                    (< (ssh-key-count)
+                       min-keys-count))
+
+           ;; ensure keepassxc running
+           (system* herd "enable" "keepassxc")
+
+           (primitive-fork)
+
+           (system* herd "start" "keepassxc")
+
+           (sleep 1)
+
+           ;; trigger secret retrieval
+           (system*
+            secret-tool
+            "lookup"
+            "rclone-config"
+            "rclone-config")
+
+           (sleep 1)
+
+           (when (< (ssh-key-count)
+                    min-keys-count)
+
+             (sleep 5)
+
+             (show-warning))
+
+           (loop (+ tries 1)))))))
+
+;; ------------------------------------------------------------
+;; Single instance shepherd service
+;; ------------------------------------------------------------
+(define-public home-ssh-add-key-service
+
+  (list
+
+   ;; Put executable into profile
+   (simple-service
+    'ssh-add-key-profile
+    home-profile-service-type
+    (list ssh-add-key))
+   ;; Singleton shepherd service
+   (simple-service
+    'ssh-add-key-shepherd
+    home-shepherd-service-type
+    (list
+     (shepherd-service
+      (provision '(ssh-add-key))
+      (documentation "SSH key auto-loader.")
+      (requirement '())
+      (start
+       #~(make-forkexec-constructor
+          (list #$ssh-add-key
+                "4"   ;; minimum keys required
+                "5")  ;; maximum retry count
+          #:create-session? #f
+          #:log-file
+          #$(log-file "ssh-add-key.log")))
+      (stop
+       #~(make-kill-destructor))
+      (one-shot? #t)
+      (respawn? #f))))))
+
+
 
 ;; ------------------------------------------------------------
 ;; Program
 ;; ------------------------------------------------------------
 
-(define (ssh-add-key-program config)
 
-  (let ((attr-key
-         (home-ssh-add-key-configuration-attr-key
-          config))
+(define git-annex-daemon
+  (program-file
+   "git-annex-daemon"
 
-        (attr-value
-         (home-ssh-add-key-configuration-attr-value
-          config))
+   #~(begin
 
-        (max-tries
-         (home-ssh-add-key-configuration-max-tries
-          config))
+       (use-modules
+        (ice-9 match)
+        (ice-9 format)
+        (ice-9 popen)
+        (ice-9 textual-ports)
+        (ice-9 ftw)
+        (ice-9 regex)
+        (srfi srfi-1)
+        (srfi srfi-13))
 
-        (min-keys-count
-         (home-ssh-add-key-configuration-min-keys-count
-          config))
+       ;; ------------------------------------------------------------
+       ;; Store paths
+       ;; ------------------------------------------------------------
 
-        (dialog-timeout
-         (home-ssh-add-key-configuration-dialog-timeout
-          config))
+       (define git
+         #$(file-append git "/bin/git"))
 
-        (wait-count
-         (home-ssh-add-key-configuration-wait-count
-          config))
+       (define git-annex
+         #$(file-append git-annex "/bin/git-annex"))
 
-        (wait-seconds
-         (home-ssh-add-key-configuration-wait-seconds
-          config))
+       (define secret-tool
+         #$(file-append libsecret "/bin/secret-tool"))
 
-        (mount-base
-         (home-ssh-add-key-configuration-mount-base
-          config)))
+       (define notify-send
+         #$(file-append libnotify "/bin/notify-send"))
 
-    (program-file
-     "ssh-add-key"
+       (define zenity
+         #$(file-append zenity "/bin/zenity"))
 
-     #~(begin
+       (define timeout
+         #$(file-append coreutils "/bin/timeout"))
 
-         (use-modules
-          (ice-9 match)
-          (ice-9 format)
-          (ice-9 popen)
-          (ice-9 textual-ports)
-          (ice-9 ftw)
-          (srfi srfi-1))
+       (define pkill
+         #$(file-append procps "/bin/pkill"))
 
-         ;; ------------------------------------------------------------
-         ;; Store paths
-         ;; ------------------------------------------------------------
+       (define ps
+         #$(file-append procps "/bin/ps"))
 
-         (define ssh-add
-           #$(file-append openssh "/bin/ssh-add"))
+       ;; ------------------------------------------------------------
+       ;; Constants
+       ;; ------------------------------------------------------------
 
-         (define secret-tool
-           #$(file-append libsecret "/bin/secret-tool"))
+       (define PROGRAM-INITIAL-WAIT-TIME
+         (* 8 60))
 
-         (define herd
-           #$(file-append shepherd "/bin/herd"))
+       (define RCLONE-PASS-MAX-ATTEMPTS
+         10)
 
-         (define zenity
-           #$(file-append zenity "/bin/zenity"))
+       (define RCLONE-PASS-INTERVAL
+         60)
 
-         ;; ------------------------------------------------------------
-         ;; Config
-         ;; ------------------------------------------------------------
+       (define PPID-AGE-MINS-MAX
+         10)
 
-         (define ATTR-KEY
-           #$attr-key)
+       (define ANNEX-ALLOWED-BRANCH
+         "annex/auto/inbox")
 
-         (define ATTR-VALUE
-           #$attr-value)
+       ;; ------------------------------------------------------------
+       ;; Runtime
+       ;; ------------------------------------------------------------
 
-         (define MAX-TRIES
-           #$max-tries)
+       (define home
+         (or (getenv "HOME") ""))
 
-         (define MIN-KEYS-COUNT
-           #$min-keys-count)
+       (define autostart-file
+         (string-append
+          home
+          "/.config/git-annex/autostart"))
 
-         (define DIALOG-TIMEOUT
-           #$dialog-timeout)
+       (define rclone-config-link
+         (string-append
+          home
+          "/.config/rclone/rclone.conf"))
 
-         (define WAIT-COUNT
-           #$wait-count)
+       ;; ------------------------------------------------------------
+       ;; Helpers
+       ;; ------------------------------------------------------------
 
-         (define WAIT-SECONDS
-           #$wait-seconds)
+       (define (notify fmt . args)
 
-         (define MP-BASE
-           #$mount-base)
+         (apply
+          system*
+          notify-send
+          (list
+           (apply format #f fmt args))))
 
-         (define mtrg-orgp
-           (string-append MP-BASE "/orgp"))
+       (define (error-block fmt . args)
 
-         (define mtrg-secure
-           (string-append MP-BASE "/secure"))
+         (define msg
+           (apply format #f fmt args))
 
-         ;; ------------------------------------------------------------
-         ;; Helpers
-         ;; ------------------------------------------------------------
+         (system*
+          notify-send
+          msg)
 
-         ;; Better than external df parsing.
-         ;; Compare mount device IDs.
-         (define (mounted? path)
+         (system*
+          zenity
+          "--error"
+          "--timeout=10000"
+          "--text"
+          msg))
 
-           (let ((st
-                  (false-if-exception
-                   (stat path)))
+       (define (info-block fmt . args)
 
-                 (root
-                  (stat "/")))
+         (define msg
+           (apply format #f fmt args))
 
-             (and st
-                  (not
-                   (= (stat:dev st)
-                      (stat:dev root))))))
+         (system*
+          notify-send
+          msg)
 
-         (define (ssh-key-count)
+         (system*
+          zenity
+          "--info"
+          "--timeout=10000"
+          "--text"
+          msg))
 
-           (let* ((port
-                   (open-input-pipe
-                    (string-append
-                     ssh-add
-                     " -l 2>/dev/null")))
+       ;; ------------------------------------------------------------
+       ;; Shepherd parent detection
+       ;; ------------------------------------------------------------
 
-                  (txt
-                   (get-string-all port)))
+       (define (process-cmd pid)
 
-             (close-pipe port)
+         (let* ((port
+                 (open-input-pipe
+                  (string-append
+                   ps
+                   " -p "
+                   (number->string pid)
+                   " -o cmd=")))
 
-             ;; Count lines instead of wc.
-             (length
-              (filter
-               (lambda (x)
-                 (not (string-null? x)))
-               (string-split txt #\newline)))))
+                (txt
+                 (string-trim-right
+                  (get-string-all port)
+                  #\newline)))
 
-         (define (show-warning)
+           (close-pipe port)
+
+           txt))
+
+       (define (process-ppid pid)
+
+         (let* ((port
+                 (open-input-pipe
+                  (string-append
+                   ps
+                   " -p "
+                   (number->string pid)
+                   " -o ppid=")))
+
+                (txt
+                 (string-trim-both
+                  (get-string-all port))))
+
+           (close-pipe port)
+
+           (or (string->number txt)
+               0)))
+
+       (define (process-age-mins pid)
+
+         (let* ((port
+                 (open-input-pipe
+                  (string-append
+                   ps
+                   " -p "
+                   (number->string pid)
+                   " -o etimes=")))
+
+                (txt
+                 (string-trim-both
+                  (get-string-all port))))
+
+           (close-pipe port)
+
+           (quotient
+            (or (string->number txt)
+                0)
+            60)))
+
+       (define (find-shepherd-parent)
+
+         (let loop ((pid (getppid)))
+
+           (cond
+
+            ((<= pid 0)
+             #f)
+
+            ((string-contains
+              (process-cmd pid)
+              "/run/current-system/profile/bin/shepherd")
+
+             pid)
+
+            (else
+             (loop
+              (process-ppid pid))))))
+
+       ;; ------------------------------------------------------------
+       ;; Initial wait
+       ;; ------------------------------------------------------------
+
+       (define (sleep-if-parent-not-old)
+
+         (let ((parent
+                (find-shepherd-parent)))
+
+           (when parent
+
+             (let ((age
+                    (process-age-mins parent)))
+
+               (notify
+                "Parent shepherd ~a age ~a mins"
+                parent
+                age)
+
+               (when (< age
+                        PPID-AGE-MINS-MAX)
+
+                 (notify
+                  "Sleeping initial wait")
+
+                 (sleep
+                  PROGRAM-INITIAL-WAIT-TIME))))))
+
+       ;; ------------------------------------------------------------
+       ;; Rclone config
+       ;; ------------------------------------------------------------
+
+       (define rclone-config
+         (false-if-exception
+          (canonicalize-path
+           rclone-config-link)))
+
+       (define rclone-config-dir
+         (and rclone-config
+              (dirname rclone-config)))
+
+       (define (git-dir-clean? dir file)
+
+         (zero?
+          (system*
+           git
+           "-C"
+           dir
+           "diff"
+           "--quiet"
+           "--"
+           file)))
+
+       (define (rclone-config-push)
+
+         (when (and rclone-config-dir
+                    (not
+                     (git-dir-clean?
+                      rclone-config-dir
+                      (basename rclone-config))))
+
+           (notify
+            "Committing rclone config")
 
            (system*
-            zenity
-            (string-append
-             "--timeout="
-             (number->string DIALOG-TIMEOUT))
-            "--warning"
-            "--title=Secret Locked or Not Found"
-            "--text=Secret not available. Please unlock the appropriate database in KeePassXC."))
+            git
+            "-C"
+            rclone-config-dir
+            "add"
+            (basename rclone-config))
 
-         (define (lookup-secret)
+           (system*
+            git
+            "-C"
+            rclone-config-dir
+            "commit"
+            "-m"
+            "rclone.conf modified")
 
-           ;; We only care whether lookup succeeds.
-           ;; No need to capture output.
-           (zero?
-            (system*
-             secret-tool
-             "lookup"
-             ATTR-KEY
-             ATTR-VALUE)))
+           (system*
+            git
+            "-C"
+            rclone-config-dir
+            "push")))
+
+       (define (rclone-config-pull)
+
+         (when rclone-config-dir
+
+           (rclone-config-push)
+
+           (notify
+            "Pulling rclone config")
+
+           (system*
+            git
+            "-C"
+            rclone-config-dir
+            "pull"
+            "--rebase")))
+
+       (define (rclone-config-rebase-abort)
+
+         (when rclone-config-dir
+
+           (system*
+            git
+            "-C"
+            rclone-config-dir
+            "rebase"
+            "--abort")))
+
+       ;; ------------------------------------------------------------
+       ;; Secret retrieval
+       ;; ------------------------------------------------------------
+
+       (define (get-rclone-pass)
+
+         (let* ((port
+                 (open-input-pipe
+                  (string-append
+                   timeout
+                   " 60 "
+                   secret-tool
+                   " lookup rclone-config rclone-config")))
+
+                (txt
+                 (string-trim-right
+                  (get-string-all port)
+                  #\newline)))
+
+           (close-pipe port)
+
+           (and (not (string-null? txt))
+                txt)))
+
+       (define (ensure-rclone-pass)
+
+         (let loop ((attempts 0))
+
+           (cond
+
+            ((>= attempts
+                  RCLONE-PASS-MAX-ATTEMPTS)
+
+             #f)
+
+            ((get-rclone-pass)
+
+             =>
+
+             (lambda (pass)
+
+               (setenv
+                "RCLONE_CONFIG_PASS"
+                pass)
+
+               pass))
+
+            (else
+
+             (notify
+              "Failed to get RCLONE_CONFIG_PASS attempt ~a"
+              attempts)
+
+             (sleep
+              RCLONE-PASS-INTERVAL)
+
+             (system*
+              pkill
+              "-u"
+              (number->string (getuid))
+              "gnome-keyr")
+
+             (info-block
+              "Enable Secret Service for KeepassXC")
+
+             (loop (+ attempts 1))))))
+
+       ;; ------------------------------------------------------------
+       ;; Allowed branches
+       ;; ------------------------------------------------------------
+
+       (define (repo-current-branch repo)
+
+         (let* ((port
+                 (open-input-pipe
+                  (string-append
+                   git
+                   " -C "
+                   repo
+                   " rev-parse --abbrev-ref HEAD")))
+
+                (txt
+                 (string-trim-right
+                  (get-string-all port)
+                  #\newline)))
+
+           (close-pipe port)
+
+           txt))
+
+       (define (allowed-branch? repo)
+
+         (let ((branch
+                (repo-current-branch repo)))
+
+           (or
+            (string=?
+             branch
+             ANNEX-ALLOWED-BRANCH)
+
+            (zero?
+             (system*
+              git
+              "-C"
+              repo
+              "config"
+              "--get-all"
+              "annex-extention.assistant.allowedBranch"
+              branch)))))
+
+       (define (all-allowed-branches?)
+
+         (if (not (file-exists? autostart-file))
+
+             #f
+
+             (call-with-input-file
+                 autostart-file
+
+               (lambda (port)
+
+                 (let loop ((lines
+                             (read-lines port)))
+
+                   (cond
+
+                    ((null? lines)
+                     #t)
+
+                    ((string-null?
+                      (string-trim-both
+                       (car lines)))
+
+                     (loop (cdr lines)))
+
+                    (else
+
+                     (let ((repo
+                            (car lines)))
+
+                       (and
+                        (file-exists?
+                         (string-append repo "/.git"))
+
+                        (allowed-branch? repo)
+
+                        (loop
+                         (cdr lines)))))))))))
+
+       ;; ------------------------------------------------------------
+       ;; Main
+       ;; ------------------------------------------------------------
+
+       (let* ((args
+               (cdr (command-line)))
+
+              (command
+               (if (pair? args)
+                   (car args)
+                   #f)))
+
+         (unless command
+
+           (format
+            (current-error-port)
+            "Usage: git-annex-daemon [assistant|webapp|stop]\n")
+
+           (exit 1))
+
+         (unless (string=? command
+                            "stop")
+
+           (setenv
+            "SSH_AUTH_SOCK"
+            "/run/user/1000/keyring/ssh")
+
+           (sleep-if-parent-not-old)
+
+           (rclone-config-pull)
+
+           (unless (ensure-rclone-pass)
+
+             (error-block
+              "Failed to get RCLONE_CONFIG_PASS")
+
+             (exit 1))
+
+           ;; validate rclone config
+           (unless
+               (zero?
+                (system*
+                 "rclone"
+                 "config"
+                 "show"))
+
+             (error-block
+              "Failed to decrypt rclone config")
+
+             (exit 1)))
 
          ;; ------------------------------------------------------------
-         ;; Wait for mounts
+         ;; Dispatch
          ;; ------------------------------------------------------------
 
-         (define (wait-for-mounts)
+         (match command
 
-           (let loop ((count WAIT-COUNT))
+           ("stop"
 
-             (cond
+            (execl
+             git
+             git
+             "annex"
+             "assistant"
+             "--autostop"
+             "--explain"
+             "--notify-finish"
+             "--notify-start"))
 
-              ((and (mounted? mtrg-secure)
-                    (mounted? mtrg-orgp))
+           ("webapp"
 
-               #t)
+            (unless
+                (all-allowed-branches?)
 
-              ((<= count 0)
+              (error-block
+               "Branch policy violation")
 
-               #f)
+              (exit 1))
 
-              (else
+            (execl
+             git
+             git
+             "annex"
+             "webapp"
+             "-v"
+             "-d"
+             "--explain"
+             "--notify-finish"
+             "--notify-start"))
 
-               (format
-                #t
-                "waiting ~a\n"
-                count)
+           ("assistant"
 
-               (sleep WAIT-SECONDS)
+            (unless
+                (all-allowed-branches?)
 
-               (loop (- count 1))))))
+              (error-block
+               "Branch policy violation")
 
-         ;; ------------------------------------------------------------
-         ;; Main
-         ;; ------------------------------------------------------------
+              (exit 1))
 
-         (if (not (wait-for-mounts))
+            (execl
+             git
+             git
+             "annex"
+             "assistant"
+             "-v"
+             "-d"
+             "--autostart"
+             "--foreground"
+             "--explain"
+             "--notify-finish"
+             "--notify-start"))
 
-             (begin
-               (format
-                (current-error-port)
-                "mounts unavailable\n")
-               (exit 1))
+           (_
 
-             (let loop ((tries 0))
+            (format
+             (current-error-port)
+             "Unknown command ~a\n"
+             command)
 
-               (when (and (< tries MAX-TRIES)
-                          (< (ssh-key-count)
-                             MIN-KEYS-COUNT))
-
-                 ;; start keepassxc
-                 (system* herd "enable" "keepassxc")
-
-                 (primitive-fork)
-
-                 (system* herd "start" "keepassxc")
-
-                 (sleep 1)
-
-                 (lookup-secret)
-
-                 (sleep 1)
-
-                 (when (< (ssh-key-count)
-                          MIN-KEYS-COUNT)
-
-                   (sleep 5)
-
-                   (show-warning))
-
-                 (loop (+ tries 1)))))))))
+            (exit 1)))))))
 
 ;; ------------------------------------------------------------
-;; Shepherd services
+;; Single instance service
 ;; ------------------------------------------------------------
 
-(define (home-ssh-add-key-shepherd-services config)
+(define-public home-git-annex-daemon-service
 
-  (let ((program
-         (ssh-add-key-program config))
+  (list
 
-        (create-session?
-         (home-ssh-add-key-configuration-create-session?
-          config))
+   ;; Add executable into profile
+   (simple-service
+    'git-annex-daemon-profile
+    home-profile-service-type
+    (list git-annex-daemon))
 
-        (respawn?
-         (home-ssh-add-key-configuration-respawn?
-          config))
-
-        (one-shot?
-         (home-ssh-add-key-configuration-one-shot?
-          config)))
+   ;; Singleton shepherd service
+   (simple-service
+    'git-annex-daemon-shepherd
+    home-shepherd-service-type
 
     (list
 
      (shepherd-service
-      (provision '(ssh-add ssh-add-key))
+
+      (provision '(annex git-annex-daemon))
 
       (documentation
-       "SSH key auto-loading service.")
+       "Git Annex daemon service.")
 
-      (requirement '())
+      (requirement
+       '(keepassxc
+         ssh-add
+         xawaken-session-down))
 
-      (respawn? respawn?)
+      (respawn? #f)
 
-      (one-shot? one-shot?)
+      (respawn-delay 600)
+
+      (respawn-limit 10)
 
       (start
        #~(make-forkexec-constructor
-          (list #$program)
-          #:create-session? #$create-session?
+          (list
+           #$git-annex-daemon
+           "assistant"
+           "--verbose")
           #:log-file
-          #$(log-file "ssh-add-key.log")))
+          #$(log-file "annex-assistant.log")))
 
+      ;; Use annex daemon stop
+      ;; instead of kill.
       (stop
-       #~(make-kill-destructor))))))
+       #~(let ((destructor
 
-;; ------------------------------------------------------------
-;; Service type
-;; ------------------------------------------------------------
+                 (make-system-destructor
+                  (string-append
+                   #$git-annex-daemon
+                   " stop"
+                   " >> "
+                   #$(log-file "annex-stop.log")
+                   " 2>&1"))))
 
-(define home-ssh-add-key-service-type
+           (lambda (running . args)
 
-  (service-type
-   (name 'home-ssh-add-key)
+             (apply destructor
+                    running
+                    args))))
 
-   (extensions
-    (list
-     (service-extension
-      home-shepherd-service-type
-      home-ssh-add-key-shepherd-services)))
-
-   (default-value
-     (home-ssh-add-key-configuration))
-
-   (description
-    "Automatically unlock and load SSH keys via KeePassXC/libsecret.")))
+      (one-shot? #f))))))
 
-
-
 
