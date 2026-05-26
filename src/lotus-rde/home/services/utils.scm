@@ -58,10 +58,7 @@
 ;; Program
 ;; ------------------------------------------------------------
 (define bluetooth-autoconnect
-  (with-extensions
-      (list guile-dbus)
-
-    (with-imported-modules
+  (with-imported-modules
         (source-module-closure
          '((dbus)
            (dbus mainloop)
@@ -304,7 +301,7 @@ sender='org.bluez'")
 
                (sleep 3600)
 
-               (loop))))))))
+               (loop)))))))
 
 ;; ------------------------------------------------------------
 ;; Single instance service
