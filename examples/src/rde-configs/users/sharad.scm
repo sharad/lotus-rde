@@ -742,12 +742,12 @@ fi
          (feature-ssh #:ssh-agent? #t)
          (feature-lotus-nox-services)
          (feature-lotus-x-services)
+         (feature-lotus-security)
          (feature-msteam)
          (feature-zoom)
          (feature-doc-publishing)
          (feature-bluetooth-auto-connect)
-         (feature-power-monitor)
-         (feature-secfs))))
+         (feature-power-monitor))))
 
 
 

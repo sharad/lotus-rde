@@ -179,37 +179,24 @@
         (log     (log-file (string-append "secfs-" volname "-" mode))))
 
    (shepherd-service
-    (provision (list sym))
-    (requirement '());; secfs-down
-    (respawn? #f)
-    (respawn-delay 10)
-    (respawn-limit 2)
-    (stop  #~(make-kill-destructor))
-    ;; (start #~(make-forkexec-constructor
-    ;;           (list #$cmd
-    ;;                 "-d" #$dev
-    ;;                 "-m" #$mp
-    ;;                 "-p" #$mode)
-    ;;           #:log-file #$log))
-    (start #~(make-forkexec-constructor
-              (list #$secfs-mount
-                    "-d" #$dev
-                    "-m" #$mp
-                    "-p" #$mode)
-              #:log-file #$log)))))
-
-;; (define home-secfs-service-type
-;;   (service-type
-;;     (name 'home-secfs)
-;;     (extensions
-;;      (list (service-extension
-;;             home-shepherd-service-type
-;;             (lambda (configs)
-;;               (map secfs-volume->shepherd-service configs)))))
-;;     (compose concatenate)
-;;     (extend append)
-;;     (default-value '())
-;;     (description "Manages secfs encrypted volume mount services.")))
+     (provision (list sym))
+     (requirement '());; secfs-down
+     (respawn? #f)
+     (respawn-delay 10)
+     (respawn-limit 2)
+     (stop  #~(make-kill-destructor))
+     ;; (start #~(make-forkexec-constructor
+     ;;           (list #$cmd
+     ;;                 "-d" #$dev
+     ;;                 "-m" #$mp
+     ;;                 "-p" #$mode)
+     ;;           #:log-file #$log))
+     (start #~(make-forkexec-constructor
+               (list #$secfs-mount
+                     "-d" #$dev
+                     "-m" #$mp
+                     "-p" #$mode)
+               #:log-file #$log)))))
 
 
 (define home-secfs-service-type
@@ -218,11 +205,10 @@
 
    (extensions
     (list
-
      ;; install binary into profile
      (service-extension
-      home-profile-service-type
-      (const (list secfs-mount)))
+      home-files-service-type
+      (const `(("bin/secfs-mount" ,secfs-mount))))
 
      ;; shepherd services
      (service-extension
@@ -280,37 +266,37 @@
 
     (shepherd-service
       (provision (list name))
-     (requirement requirement)
-     (respawn? respawn?)
-     (respawn-delay respawn-delay)
-     (respawn-limit respawn-limit)
-     (start #~(make-forkexec-constructor
-               (list #$dbus-launch #$flatpak "--user" "run" #$app)
-               #:create-session? #t
-               #:log-file #$log))
+      (requirement requirement)
+      (respawn? respawn?)
+      (respawn-delay respawn-delay)
+      (respawn-limit respawn-limit)
+      (start #~(make-forkexec-constructor
+                (list #$dbus-launch #$flatpak "--user" "run" #$app)
+                #:create-session? #t
+                #:log-file #$log))
 
-     (stop #~(let ((make-cmd-destructor
-                    (lambda command
-                      (let ((system-destructor
-                             (apply make-system-destructor
-                                    command))
-                            (kill-destructor
-                             (make-kill-destructor)))
-                        (lambda (running . args)
-                          (apply kill-destructor
-                                 running
-                                 args)
-                          (apply system-destructor
-                                 running
-                                 args))))))
+      (stop #~(let ((make-cmd-destructor
+                     (lambda command
+                       (let ((system-destructor
+                              (apply make-system-destructor
+                                     command))
+                             (kill-destructor
+                              (make-kill-destructor)))
+                         (lambda (running . args)
+                           (apply kill-destructor
+                                  running
+                                  args)
+                           (apply system-destructor
+                                  running
+                                  args))))))
 
-               (make-cmd-destructor
-                (string-append #$flatpak
-                               " kill "
-                               #$app
-                               " >> "
-                               #$log
-                               " 2>&1")))))))
+                (make-cmd-destructor
+                 (string-append #$flatpak
+                                " kill "
+                                #$app
+                                " >> "
+                                #$log
+                                " 2>&1")))))))
 
 (define home-flatpak-service-type
   (service-type

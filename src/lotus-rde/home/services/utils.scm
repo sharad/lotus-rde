@@ -314,8 +314,8 @@ sender='org.bluez'")
    ;; Add executable into profile
    (simple-service
     'bluetooth-autoconnect-profile
-    home-profile-service-type
-    (list bluetooth-autoconnect))
+    home-files-service-type
+    `(("bin/bluetooth-autoconnect" ,bluetooth-autoconnect)))
 
    ;; Singleton shepherd service
    (simple-service
@@ -325,32 +325,25 @@ sender='org.bluez'")
     (list
 
      (shepherd-service
-
-      (provision '(bluetooth-autoconnect bt-autoconnect))
-
-      (documentation
-       "Bluetooth trusted device auto-connect daemon.")
-
-      (requirement '(dbus))
-
-      (start
-       #~(make-forkexec-constructor
-          (list
-           #$bluetooth-autoconnect
-           "--daemon"
-           "--verbose"
-           "--only-audio"
-           "--retry" "3")
-          #:create-session? #f
-          #:log-file
-          #$(log-file "bluetooth-autoconnect.log")))
-
-      (stop
-       #~(make-kill-destructor))
-
-      (respawn? #t)
-
-      (one-shot? #f))))))
+       (provision '(bluetooth-autoconnect bt-autoconnect))
+       (documentation
+        "Bluetooth trusted device auto-connect daemon.")
+       (requirement '(dbus))
+       (start
+        #~(make-forkexec-constructor
+           (list
+            #$bluetooth-autoconnect
+            "--daemon"
+            "--verbose"
+            "--only-audio"
+            "--retry" "3")
+           #:create-session? #f
+           #:log-file
+           #$(log-file "bluetooth-autoconnect.log")))
+       (stop
+        #~(make-kill-destructor))
+       (respawn? #t)
+       (one-shot? #f))))))
 
 
 
@@ -594,12 +587,11 @@ sender='org.bluez'")
 (define-public home-power-monitor-service
 
   (list
-
    ;; Add executable to profile
    (simple-service
     'power-monitor-profile
-    home-profile-service-type
-    (list power-monitor))
+    home-files-service-type
+    `(("bin/power-monitor" ,power-monitor)))
 
    ;; Singleton shepherd service
    (simple-service
@@ -607,27 +599,26 @@ sender='org.bluez'")
     home-shepherd-service-type
 
     (list
-
      (shepherd-service
-      (provision '(power-monitor pm))
-      (documentation
-       "Battery and power monitoring service.")
-      (requirement '())
-      (start
-       #~(make-forkexec-constructor
-          (list
-           #$power-monitor
-           "--interval" "10"
-           "--low" "5"
-           "--high" "70"
-           "--verbose")
-          #:create-session? #f
-          #:log-file
-          #$(log-file "power-monitor.log")))
-      (stop
-       #~(make-kill-destructor))
-      (respawn? #t)
-      (one-shot? #f))))))
+       (provision '(power-monitor pm))
+       (documentation
+        "Battery and power monitoring service.")
+       (requirement '())
+       (start
+        #~(make-forkexec-constructor
+           (list
+            #$power-monitor
+            "--interval" "10"
+            "--low" "5"
+            "--high" "70"
+            "--verbose")
+           #:create-session? #f
+           #:log-file
+           #$(log-file "power-monitor.log")))
+       (stop
+        #~(make-kill-destructor))
+       (respawn? #t)
+       (one-shot? #f))))))
 
 
 ;; ------------------------------------------------------------
@@ -924,14 +915,9 @@ sender='org.bluez'")
   (list
    ;; Put executable into profile
    (simple-service
-    'ssh-add-key-profile
-    home-profile-service-type
-    (list kpkey))
-   ;; Add executable into profile
-   (simple-service
     'kpkey-profile
-    home-profile-service-type
-    (list kpkey))
+    home-files-service-type
+    `(("bin/kpkey" ,kpkey)))
 
    ;; Singleton shepherd service
    (simple-service
@@ -940,17 +926,17 @@ sender='org.bluez'")
 
     (list
      (shepherd-service
-       (provision '(kpkey  kpkeys))
+       (provision '(kpkey))
        (documentation
         "KeePassXC key checkout service.")
-       (requirement '()
-        (start)
+       (requirement '())
+       (start
         #~(make-forkexec-constructor
            (list #$kpkey "co")
            #:create-session? #f
            #:log-file
-           #$(log-file "kpkey.log"))
-        (stop)
+           #$(log-file "kpkey.log")))
+       (stop
         #~(make-kill-destructor))
        (one-shot? #t)
        (respawn? #f))))))
@@ -962,7 +948,6 @@ sender='org.bluez'")
 (define ssh-add-key
   (program-file
    "ssh-add-key"
-
    #~(begin
 
        (use-modules
@@ -1170,16 +1155,18 @@ sender='org.bluez'")
 
    ;; Put executable into profile
    (simple-service
-    'ssh-add-key-profile
-    home-profile-service-type
-    (list ssh-add-key))
+    'ssh-add-key-bin
+    home-files-service-type
+    `(("bin/ssh-add-key"
+       ,ssh-add-key)))
+
    ;; Singleton shepherd service
    (simple-service
     'ssh-add-key-shepherd
     home-shepherd-service-type
     (list
      (shepherd-service
-      (provision '(ssh-add-key))
+      (provision '(ssh-add))
       (documentation "SSH key auto-loader.")
       (requirement '())
       (start
@@ -1802,8 +1789,8 @@ sender='org.bluez'")
    ;; Add executable into profile
    (simple-service
     'git-annex-daemon-profile
-    home-profile-service-type
-    (list git-annex-daemon))
+    home-files-service-type
+    `(("bin/git-annex-daemon"  ,git-annex-daemon)))
 
    ;; Singleton shepherd service
    (simple-service

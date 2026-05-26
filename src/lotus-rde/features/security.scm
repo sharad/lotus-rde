@@ -121,27 +121,26 @@
   #:use-module (lotus-rde packages utils)
   #:use-module (lotus-rde home services builder)
   #:use-module (lotus-rde home services utils)
-  #:export (feature-secfs))
+  #:export (feature-lotus-security))
 
 
-(define* (feature-secfs)
+(define* (feature-lotus-security)
   "Configure a simple service that mounts secure filesystems in the home directory."
   ;; (define (get-system-services cfg))
   (define (get-home-services cfg)
-    (list
-     (simple-service 'my-secfs-volumes
-                     home-secfs-service-type
-                     (list
-                      (home-secfs-volume-configuration
-                       (volname "orgp"))
-                      (home-secfs-volume-configuration
-                       (volname "secure"))
-                      (home-secfs-volume-configuration
-                       (volname "volatile")
-                       (mode "rw"))))
-
-     home-kpkey-service
-     home-ssh-add-key-service))
+    (append
+     (list (simple-service 'my-secfs-volumes
+                           home-secfs-service-type
+                           (list
+                            (home-secfs-volume-configuration
+                             (volname "orgp"))
+                            (home-secfs-volume-configuration
+                             (volname "secure"))
+                            (home-secfs-volume-configuration
+                             (volname "volatile")
+                             (mode "rw")))))
+     home-ssh-add-key-service
+     home-kpkey-service))
   (feature
    (name 'secfs)
    (home-services-getter get-home-services)))
