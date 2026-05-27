@@ -130,7 +130,7 @@
             feature-msteam
             feature-zoom
             feature-doc-publishing
-            feature-bluetooth-auto-connect
+            feature-bluetooth-autoconnect
             feature-power-monitor
             feature-kpkey
             feature-ssh-add-key
@@ -146,10 +146,10 @@
           (mpd mpd)
           (znc znc)
           (jupyter jupyter)
-          (bluez-autoconnect
-           (local-file "/home/s/.bin/bluetooth-autoconnect"))
-          (power-mon
-           (local-file "/home/s/.bin/power-mon"))
+          ;; (bluez-autoconnect
+          ;;  (local-file "/home/s/.bin/bluetooth-autoconnect"))
+          ;; (power-mon
+          ;;  (local-file "/home/s/.bin/power-mon"))
           (usrhttpd rust-usrhttpd))
 
   (define (get-home-services config)
@@ -596,19 +596,6 @@
 
 
 
-         ;; 19 annex
-         (mk/simple-service
-          '(annex)
-          #~(list #$(file-append git "/bin/git")
-                  "annex"
-                  "daemon"
-                  "assistant")
-          #:requirements
-          '(keepassxc
-            ssh-add)
-            ;; xawaken-session-down
-          #:respawn? #f)
-
 
 
          ;; 20 pwr-applet
@@ -789,14 +776,13 @@
    (home-services-getter get-home-services)))
 
 
-(define (feature-bluetooth-auto-connect)
+(define (feature-bluetooth-autoconnect)
 
   (define (get-home-services config)
-    (list
-     home-bluetooth-autoconnect-service))
+    home-bluetooth-autoconnect-service)
 
   (feature
-   (name 'bluetooth-auto-connect)
+   (name 'bluetooth-autoconnect)
    (home-services-getter get-home-services)))
 
 
@@ -806,8 +792,7 @@
 (define (feature-power-monitor)
 
   (define (get-home-services config)
-    (list
-     home-power-monitor-service))
+    home-power-monitor-service)
 
   (feature
    (name 'power-monitor)
@@ -818,11 +803,10 @@
 (define (feature-git-annex-daemon)
 
   (define (get-home-services config)
-    (list
-     home-git-annex-daemon-service))
+    home-git-annex-daemon-service)
 
   (feature
-   (name 'power-monitor)
+   (name 'annex)
    (home-services-getter get-home-services)))
 
 

@@ -746,8 +746,9 @@ fi
          (feature-msteam)
          (feature-zoom)
          (feature-doc-publishing)
-         (feature-bluetooth-auto-connect)
-         (feature-power-monitor))))
+         (feature-bluetooth-autoconnect)
+         (feature-power-monitor)
+         (feature-git-annex-daemon))))
 
 
 
