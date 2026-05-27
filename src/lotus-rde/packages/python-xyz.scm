@@ -722,6 +722,7 @@
           (base32
             "0qbsg7x7qcqrm2b771z8r6f86v3zkafk49yg35xq1lgwl73vimpj"))))
     (build-system python-build-system)
+    (native-inputs (list python-setuptools))
     (arguments
      '(#:tests? #f))
     (home-page
@@ -731,6 +732,29 @@
     (description
       "Create simple GUIs using the Rofi application")
     (license license:expat)))
+
+
+;; (define-public python-rofi
+;;   (package
+;;     (name "python-rofi")
+;;     (version "1.0.1")
+;;     (source
+;;      (origin
+;;        (method git-fetch)
+;;        (uri (git-reference
+;;              (url "https://github.com/bcbnz/python-rofi")
+;;              (commit version)))
+;;        (file-name (git-file-name name version))
+;;        (sha256
+;;         (base32 "0l3njiqx1cfq9bddjmngckw53p9i51vx8v33cf3k11cd093rgmjl"))))
+;;     (build-system pyproject-build-system)
+;;     (native-inputs (list python-setuptools))
+;;     (home-page "https://github.com/bcbnz/python-rofi")
+;;     (synopsis "Create simple GUIs using the Rofi application")
+;;     (description "Create simple GUIs using the Rofi application.")
+;;     (license license:expat)))
+
+
 
 (define-public python-rofi-menu
   (package
