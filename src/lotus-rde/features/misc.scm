@@ -741,7 +741,27 @@
          (mk/simple-service
           '(xdg-autostart)
           #~(list "xdg-autostart")
-          #:create-session? #t))))))))
+          #:create-session? #t)
+
+
+
+         (simple-service 'my-service-groups
+                         home-services-group-service-type
+                         (list
+                          (home-services-group-configuration
+                           (name 'secfs)
+                           (dependent '(awaken-session-down))
+                           (requirement '(secfs-orgp secfs-secure)))
+
+                          (home-services-group-configuration
+                           (name 'xawaken-session)
+                           (dependent '(xdelayed-login-session-down))
+                           (requirement '(dbus pipewire)))
+
+                          (home-services-group-configuration
+                           (name 'xdelayed-login-session)
+                           (requirement '(xawaken-session
+                                          delayed-login-session))))))))))))
 
 
 
