@@ -340,7 +340,9 @@ sender='org.bluez'")
        (start
         #~(make-forkexec-constructor
            (list
-            #$bluetooth-autoconnect
+            ;; #$bluetooth-autoconnect
+            (string-append (getenv "HOME")
+                           "/.bin/bluetooth-autoconnect")
             "--daemon"
             "--verbose"
             "--only-audio"
@@ -621,7 +623,9 @@ sender='org.bluez'")
        (start
         #~(make-forkexec-constructor
            (list
-            #$power-monitor
+            ;; #$power-monitor
+            (string-append (getenv "HOME")
+                           "/.bin/power-mon")
             "--interval" "10"
             "--low" "5"
             "--high" "70"
@@ -951,7 +955,9 @@ sender='org.bluez'")
        (requirement '())
        (start
         #~(make-forkexec-constructor
-           (list #$kpkey "co")
+           ;; (list #$kpkey "co")
+           (list (string-append (getenv "HOME")
+                                "/.bin/kpkeys") "co")
            #:create-session? #f
            #:log-file
            #$(log-file "kpkey.log")))
@@ -1195,9 +1201,11 @@ sender='org.bluez'")
       (requirement '())
       (start
        #~(make-forkexec-constructor
-          (list #$ssh-add-key
-                "4"   ;; minimum keys required
-                "5")  ;; maximum retry count
+          (list ;; #$ssh-add-key
+           (string-append (getenv "HOME")
+                          "/.bin/ssh-add-key")
+           "4"   ;; minimum keys required
+           "5")  ;; maximum retry count
           #:create-session? #f
           #:log-file
           #$(log-file "ssh-add-key.log")))
@@ -1864,7 +1872,8 @@ sender='org.bluez'")
 
                  (make-system-destructor
                   (string-append
-                   #$git-annex-daemon
+                   ;; #$git-annex-daemon
+                   (getenv "HOME") "/.bin/git-annex-daemon"
                    " stop"
                    " >> "
                    #$(log-file "annex-stop.log")

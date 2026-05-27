@@ -63,109 +63,217 @@
 
 
 (define secfs-mount-guile
-    (program-file
-     "secfs-mount"
-     #~(begin
-         (use-modules
-          (srfi srfi-1)
-          (ice-9 match)
-          (ice-9 popen)
-          (ice-9 textual-ports)
-          (ice-9 getopt-long)
-          (ice-9 format)
-          (ice-9 ftw))
+  (program-file
+   "secfs-mount"
+   #~(begin
+       (use-modules (ice-9 getopt-long)
+                    (ice-9 popen)
+                    (ice-9 rdelim)
+                    (ice-9 format)
+                    (srfi srfi-1))
 
-         (let ((cryfs #$(file-append cryfs "/bin/cryfs"))
-               (gpg #$(file-append gnupg "/bin/gpg"))
-               (herd #$(file-append shepherd "/bin/herd"))
-               (mv #$(file-append coreutils "/bin/mv"))
-               (mkdir #$(file-append coreutils "/bin/mkdir"))
-               (tail #$(file-append coreutils "/bin/tail"))
-               (timeout #$(file-append coreutils "/bin/timeout"))
-               (sleep #$(file-append coreutils "/bin/sleep"))
-               (HOME (or (getenv "HOME") ""))
-               (SECRETCRYPTFS-PATH (string-append HOME
-                                                  "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs"))
-               (SECRETCRYPTFS-VOLUME (string-append SECRETCRYPTFS-PATH "/enc/volumes"))
-               (SECRETCRYPTFS-MPOINT (string-append SECRETCRYPTFS-PATH "/noenc/mountpoints"))
-               (SECRETCRYPTFS-BASE "secret")
+       ;; ---------- defaults ----------
+       (define fix-mount-issue #f)
+       (define keepasscx-dep-mpbase "orgp")
+       (define keepasscx-dep-mpbase-wait-sec 8)
+       (define default-perm "ro")
 
-               (args (cdr (command-line)))
-               (component (and (pair? args)
-                               (car args)))
-               (component-perm
-                 (and (> (length args) 1)
-                      (cadr args)))
-               (dev (if component
-                        (string-append SECRETCRYPTFS-VOLUME "/" component "/" SECRETCRYPTFS-BASE)
-                        #f))
+       (define home (getenv "HOME"))
 
-               (mount-point (if component
-                                (string-append SECRETCRYPTFS-MPOINT "/" component)
-                                #f))
+       (define secretcryptfs-path
+         (string-append home "/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs"))
+       (define secretcryptfs-volume
+         (string-append secretcryptfs-path "/enc/volumes"))
+       (define secretcryptfs-mpoint
+         (string-append secretcryptfs-path "/noenc/mountpoints"))
+       (define secretcryptfs-base "secret")
 
-               (permission (or component-perm "ro"))
-               (password (let* ((port
-                                 (open-input-pipe
-                                  (string-append gpg " --batch --no-tty --pinentry-mode error --decrypt "
-                                                 HOME
-                                                 "/.open-secrets/secret-0.1.key.gpg")))
-                                (txt (get-string-all port)))
-                           (close-port port)
-                           (trim-newline txt))))
+       ;; ---------- helpers ----------
+       (define (fatal . args)
+         (apply format (current-error-port)
+                (string-append "ERROR: " (string-join (map (lambda (x) "~a") args) " ") "\n")
+                args)
+         (exit 1))
 
+       (define (info . args)
+         (apply format #t
+                (string-append (string-join (map (lambda (x) "~a") args) " ") "\n")
+                args))
 
-           (define (fatal fmt . args)
-            (apply format
-                   (current-error-port)
-                   (string-append fmt "\n")
-                   args)
-            (exit 1))
+       (define (notify . args)
+         (apply format #t
+                (string-append "NOTIFY: " (string-join (map (lambda (x) "~a") args) " ") "\n")
+                args))
 
-          (define (trim-newline s)
-            (if (and (> (string-length s) 0)
-                     (char=? (string-ref s (- (string-length s) 1))
-                             #\newline))
-                (string-drop-right s 1)
-                s))
+       (define (basename* path)
+         (car (last-pair (string-split path #\/))))
 
-          (unless dev
-            (fatal "No component provided"))
+       (define (which* cmd)
+         (let* ((port (open-input-pipe (string-append "which " cmd " 2>/dev/null")))
+                (line (read-line port)))
+           (close-pipe port)
+           (and (not (eof-object? line))
+                (not (string-null? line))
+                line)))
 
-          (unless (file-exists? dev)
-            (fatal "Encrypted dir does not exist: ~a" dev))
+       (define (run-command . args)
+         (apply system* args))
 
-          (unless (file-exists? mount-point)
-            (mkdir mount-point))
+       ;; ---------- show-help ----------
+       (define (show-help pgm)
+         (format #t "mount cryfs filesystem\n")
+         (format #t "~a: [options] [component [permission]]\n" pgm)
+         (format #t "  -h|-?                     show this help\n")
+         (format #t "  -f                        fix mounting issue\n")
+         (format #t "  -v                        verbose\n")
+         (format #t "  -d device_encrypted_dir   Encrypted directory path\n")
+         (format #t "  -m mountdir               Mountpoint directory path\n")
+         (format #t "  -p permission             Permission ro or rw\n")
+         (format #t "  -c configfile             configfile (default device_encrypted_dir/cryfs.config)\n")
+         (exit 0))
 
-          (when (string-null? password)
-            (fatal "Authentication failed"))
+       ;; ---------- main ----------
+       (define (main args)
+         (define pgm (basename* (car args)))
 
-          ;; ------------------------------------------------------------
-          ;; Restart keepassxc if needed
-          ;; ------------------------------------------------------------
-          (when (string=? component "orgp")
-            (system* herd "stop" "keepassxc")
-            (system* herd "restart" "keepassxc"))
+         ;; parse options
+         (define option-spec
+           '((help    (single-char #\h) (value #f))
+             (fix     (single-char #\f) (value #f))
+             (verbose (single-char #\v) (value #f))
+             (dev     (single-char #\d) (value #t))
+             (mp      (single-char #\m) (value #t))
+             (perm    (single-char #\p) (value #t))
+             (cfg     (single-char #\c) (value #t))))
 
-          ;; ------------------------------------------------------------
-          ;; Run cryfs
-          ;; ------------------------------------------------------------
+         (define opts (getopt-long args option-spec))
 
-          (setenv "CRYFS_FRONTEND" "noninteractive")
+         (when (option-ref opts 'help #f)
+           (show-help pgm))
 
-          (let ((port (open-pipe* OPEN_WRITE
-                                  cryfs "-f" "-o" (string-append permission
-                                                                 ",subtype=Cryfs")
-                                  "--allow-replaced-filesystem"
-                                  "--config"
-                                  (string-append dev "/cryfs.config")
-                                  dev
-                                  mount-point)))
-            (display password port)
-            (newline port)
-            (force-output port)
-            (close-pipe port))))))
+         (set! fix-mount-issue (option-ref opts 'fix #f))
+
+         ;; fix-mount-issue mode
+         (when fix-mount-issue
+           (let* ((port  (open-input-pipe "date +%Y%m%d-%H%M%S"))
+                  (ts    (read-line port))
+                  (src   (string-append home "/.local/share/cryfs"))
+                  (dst   (string-append home "/.local/share/cryfs-bkp-" ts)))
+             (close-pipe port)
+             (format #t "moving ~a to ~a\n" src dst)
+             (rename-file src dst)
+             (exit 0)))
+
+         (define dev-opt  (option-ref opts 'dev  #f))
+         (define mp-opt   (option-ref opts 'mp   #f))
+         (define perm-opt (option-ref opts 'perm #f))
+         (define cfg-opt  (option-ref opts 'cfg  #f))
+
+         (define rest (option-ref opts '() '()))
+
+         (define component      (and (pair? rest) (car rest)))
+         (define component-perm (and (pair? rest) (pair? (cdr rest)) (car rest)))
+
+         ;; resolve --dev
+         (define __dev
+           (or dev-opt
+               (and component
+                    (string-append secretcryptfs-volume "/" component "/" secretcryptfs-base))
+               (fatal "device not provided with -d option, exiting")))
+
+         ;; resolve --mp
+         (define __mp
+           (or mp-opt
+               (and component
+                    (string-append secretcryptfs-mpoint "/" component))
+               (fatal "mountpoint not provided with -m option, exiting")))
+
+         ;; resolve --perm
+         (define __perm
+           (or perm-opt
+               component-perm
+               default-perm))
+
+         ;; validate paths
+         (unless (file-exists? __dev)
+           (fatal "device dir" __dev "not exists"))
+
+         (unless (file-exists? __mp)
+           (info "mountpoint dir" __mp "not exists, creating it")
+           (system* "mkdir" "-p" __mp))
+
+         (unless (file-is-directory? __mp)
+           (fatal "mountpoint dir" __mp "not exists"))
+
+         (unless (member __perm '("ro" "rw"))
+           (fatal "permission" __perm "is not one of ro or rw"))
+
+         ;; config
+         (define __cfg
+           (or cfg-opt
+               (string-append __dev "/cryfs.config")))
+
+         ;; display-dev: last 5 path components
+         (define __display-dev
+           (let ((parts (string-split __dev #\/)))
+             (string-join (take-right parts (min 5 (length parts))) "/")))
+
+         ;; check cryfs is available
+         (unless (which* "cryfs")
+           (fatal "cryfs command not found"))
+
+         ;; echo the command (debug)
+         (format #t "cryfs -f -o ~a,subtype=Cryfs,fsname=Cryfs@~a --allow-replaced-filesystem --config ~a/cryfs.config\n"
+                 __perm __display-dev __dev)
+         (format #t "cryfs -f -o ~a,subtype=Cryfs,fsname=Cryfs@~a --allow-replaced-filesystem --config ~a/cryfs.config ~a ~a\n"
+                 __perm __display-dev __dev __dev __mp)
+
+         ;; decrypt gpg password
+         (define pass-port
+           (open-input-pipe
+            (string-append "gpg --batch --no-tty --pinentry-mode error --decrypt "
+                           home "/.open-secrets/secret-0.1.key.gpg 2>/dev/null")))
+         (define pass (read-line pass-port))
+         (close-pipe pass-port)
+
+         (if (and (not (eof-object? pass)) (not (string-null? pass)))
+             (begin
+               (define mpbase (basename* __mp))
+
+               ;; keepassxc dependency handling
+               (if (string=? keepasscx-dep-mpbase mpbase)
+                   (let ((herd-logfile
+                          (string-append home "/.logs/shepherd/secfs-"
+                                         keepasscx-dep-mpbase "-" __perm ".log")))
+                     (when (file-exists? herd-logfile)
+                       (format #t "Checking in ~a log file\n" herd-logfile)
+                       ;; run in background: tail log, wait for "Filesystem started", then restart keepassxc
+                       (let ((pid (primitive-fork)))
+                         (when (zero? pid)
+                           (system
+                            (format #f
+                             "tail -f --lines=0 ~a | timeout ~a grep -m 1 'Filesystem started' && sleep 1 && timeout 2 herd stop keepassxc && sleep 1 && timeout 10 herd restart keepassxc"
+                             herd-logfile keepasscx-dep-mpbase-wait-sec))
+                           (primitive-exit 0)))))
+                   (notify "Not restarting keepassxc as MPBASE=" mpbase))
+
+               (setenv "CRYFS_FRONTEND" "noninteractive")
+
+               (format #t "cryfs -f -o ~a,subtype=Cryfs,fsname=Cryfs@~a --allow-replaced-filesystem --config ~a/cryfs.config ~a ~a\n"
+                       __perm __display-dev __dev __dev __mp)
+
+               ;; run cryfs, piping the password via stdin
+               (let* ((cmd (format #f
+                             "echo ~s | cryfs -f -o ~a,subtype=Cryfs,fsname=Cryfs@~a --allow-replaced-filesystem --config ~a/cryfs.config ~a ~a"
+                             pass __perm __display-dev __dev __dev __mp))
+                      (ret (system cmd)))
+                 (exit (if (zero? ret) 0 1))))
+
+             (begin
+               (format (current-error-port) "Authentication failed, exiting\n")
+               (exit 1))))
+
+       (main (command-line)))))
 
 (define secfs-mount (local-file "scripts/git-annex-daemon"))
 
@@ -195,10 +303,12 @@
      ;;                 "-p" #$mode)
      ;;           #:log-file #$log))
      (start #~(make-forkexec-constructor
-               (list #$secfs-mount
-                     "-d" #$dev
-                     "-m" #$mp
-                     "-p" #$mode)
+               (list ;; #$secfs-mount
+                (string-append (getenv "HOME")
+                               "/.bin/secfs-mount")
+                "-d" #$dev
+                "-m" #$mp
+                "-p" #$mode)
                #:log-file #$log)))))
 
 (define secfs-mount-entry
