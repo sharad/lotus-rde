@@ -49,7 +49,7 @@
 
 
             home-services-group-service-type
-            services-group->shepherd-service))
+            home-services-group-configuration))
 
 
 
