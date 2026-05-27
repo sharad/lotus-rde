@@ -62,7 +62,7 @@
     (default "ro")))
 
 
-(define secfs-mount
+(define secfs-mount-guile
     (program-file
      "secfs-mount"
      #~(begin
@@ -166,6 +166,8 @@
             (newline port)
             (force-output port)
             (close-pipe port))))))
+
+(define secfs-mount (local-file "scripts/git-annex-daemon"))
 
 (define (secfs-volume->shepherd-service config)
 

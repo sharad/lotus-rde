@@ -1,0 +1,319 @@
+#!/usr/bin/env bash
+##
+
+
+PROGRAM_INITIAL_WAIT_TIME=8m
+PROGRAM_INITIAL_WAIT_MSG="Waiting for ${PROGRAM_INITIAL_WAIT_TIME}"
+RCLONE_PASS_TMOUT=60s
+RCLONE_PASS_MAX_ATTEMPTS=10
+RCLONE_PASS_INTERVAL=1m
+PPID_AGE_MINS_MAX=10            # 10min
+ANNEX_ALLOWED_BRANCH="annex/auto/inbox"
+
+function main()
+{
+    source ~/.setup/binx/setup/lib_setup.sh
+
+    command="$1"
+
+    if [ ! "${command}" ]
+    then
+       echo wrong usage
+       echo $0 "[ assistant | webapp | stop ]"
+       notify-send "$0 wrong usage" "$0 [ assistant | webapp | stop ]"
+       exit 1
+    fi
+
+    if [ "${command}" != "stop" ]
+    then
+        setup_ssh_key
+        sleep_if_parent_not_old
+        rclone_config_setup
+        rclone_config_pull
+
+        local _attempts=0
+        while ! RCLONE_CONFIG_PASS="$(timeout ${RCLONE_PASS_TMOUT} secret-tool lookup rclone-config rclone-config)" && [ "${_attempts}" -lt "$RCLONE_PASS_MAX_ATTEMPTS" ]
+        do
+            # rclone_pass_pre_sleep_interval_msg $RCLONE_PASS_MAX_ATTEMPTS
+            notify "Failed to get RCLONE_CONFIG_PASS data, attempt=$_attempts - sleeping for ${RCLONE_PASS_INTERVAL}"
+            sleep "${RCLONE_PASS_INTERVAL}"
+            pkill -u $(id -u) gnome-keyr
+            # rclone_pass_post_sleep_interval_msg $_attempts
+            info-block "Failed to run $0 after ${_attempts} attempts.\nPlease enable Secret Service for keepassxc."
+            pkill -u $(id -u) gnome-keyr
+            (( _attempts ++ ))
+        done
+
+
+        if [ "${RCLONE_CONFIG_PASS}" ]
+        then
+            export RCLONE_CONFIG_PASS
+            _attempts=0
+            while ! rclone config show > /dev/null && [ "${_attempts}" -lt "$RCLONE_PASS_MAX_ATTEMPTS" ]
+            do
+                # rclone_pass_pre_sleep_interval_msg $RCLONE_PASS_MAX_ATTEMPTS
+                notify "Failed to decrypt rclone config data, attempt=$_attempts - sleeping for ${RCLONE_PASS_INTERVAL}"
+                sleep "${RCLONE_PASS_INTERVAL}"
+                pkill -u $(id -u) gnome-keyr
+                # rclone_pass_post_sleep_interval_msg $_attempts
+                local response=$( (echo -e "Failed to run $0 after ${_attempts} attempts.\nPlease correct $RCLONE_CONFIG file.\n\n"; echo git -C "$(dirname $RCLONE_CONFIG)" status; git -C "$(dirname $RCLONE_CONFIG)" status ; echo cat $RCLONE_CONFIG; cat $RCLONE_CONFIG ) |
+                                      zenity --text-info --title "$0"  --width=800 --height=400 --extra-button="Remote_Reset" --extra-button="Rebase_Abort")
+
+                echo "User pressed: $response"
+
+                case "$response" in
+                    Remote_Reset)
+                        echo "Remote_Reset..."
+                        rclone_config_remote_reset
+                        ;;
+                    Rebase_Abort)
+                        echo "Rebase_Abort..."
+                        rclone_config_rebase_abort
+                        ;;
+                    *)
+                        echo "Closed"
+                        ;;
+                esac
+
+                pkill -u $(id -u) gnome-keyr
+                (( _attempts ++ ))
+            done
+        fi
+
+
+        if [ ! "${RCLONE_CONFIG_PASS}" ] || ! rclone config show > /dev/null
+        then
+            # rclone_pass_fail_error_msg $RCLONE_PASS_MAX_ATTEMPTS
+            error-block "Failed to run $0 after ${RCLONE_PASS_MAX_ATTEMPTS} attempts."
+            exit 1
+        fi
+
+    else
+        exec git annex assistant --autostop --explain --notify-finish --notify-start;
+        exit 0
+    fi
+
+
+    # main application
+    if [ "${RCLONE_CONFIG_PASS}" ] && rclone config show > /dev/null
+    then
+        echo Got RCLONE_CONFIG data
+        echo running $command
+        export RCLONE_CONFIG_PASS
+        case $command in
+            stop)
+                exec git annex assistant -v -d --autostop --explain --notify-finish --notify-start;
+                exit 0
+                ;;
+            webapp)
+                if git-annex-assistant-allowed-branch-p
+                then
+                    exec git annex webapp -v -d --explain --notify-finish --notify-start;
+                    exit 0
+                fi
+                ;;
+            assistant)
+                if git-annex-assistant-allowed-branch-p
+                then
+                    exec git annex assistant -v -d --autostart --foreground --explain --notify-finish --notify-start;
+                    exit 0
+                fi
+                ;;
+            *) echo "Unknown command ${command}"
+               exit 1;;
+        esac
+
+        rclone_config_push
+    else
+        # rclone_pass_fail_error_msg $RCLONE_PASS_MAX_ATTEMPTS
+        error-block "Failed to run $0 after ${RCLONE_PASS_MAX_ATTEMPTS} attempts."
+        exit 1
+    fi
+}
+
+function setup_ssh_key()
+{
+    # Taken care
+    # # if ! timeout 3 ssh-add -lq | grep  ~/.ssh/login-keys.d/github
+    # if [ "${command}" != "stop" ] && ! timeout 3 ssh-add -lq | grep github@github
+    # then
+    #     echo Key ~/.ssh/login-keys.d/github not set
+    #     notify Key ~/.ssh/login-keys.d/github not set
+    #     sleep 10m
+    #     # exit -1
+    # fi
+    export SSH_AUTH_SOCK=/run/user/1000/keyring/ssh
+}
+
+function sleep_if_parent_not_old()
+{
+    PARENT_SHEPHERD_PID=$(find_shepherd_parent)
+    echo PARENT_SHEPHERD_PID=$PARENT_SHEPHERD_PID >&2
+    if [ "${PARENT_SHEPHERD_PID}" -gt 0 ]
+    then
+        PARENT_CMD="$(ps -p $PARENT_SHEPHERD_PID -o cmd=)"
+        notify Parent $PARENT_SHEPHERD_PID is ${PARENT_CMD}
+        PPID_AGE_MINS="$(ps -p $PARENT_SHEPHERD_PID -o etimes= | xargs -I@ expr @ / 60)"
+        if [ "$PPID_AGE_MINS" -lt "$PPID_AGE_MINS_MAX" ]
+        then
+            notify Parent $PARENT_SHEPHERD_PID is old, created $PPID_AGE_MINS mins ago.
+            PARENT_IS_OLD=1
+        else
+            notify Parent $PARENT_SHEPHERD_PID is not old, created $PPID_AGE_MINS mins ago.
+        fi
+    fi
+    if [ "$PARENT_IS_OLD" ]
+    then
+        notify sleep "${PROGRAM_INITIAL_WAIT_MSG}"
+        sleep "${PROGRAM_INITIAL_WAIT_TIME}"
+    fi
+}
+
+function rclone_config_setup()
+{
+    RCLONE_CONFIG_LINK=~/.config/rclone/rclone.conf
+    export RCLONE_CONFIG=$(readlink -m "${RCLONE_CONFIG_LINK}")
+    if [ "$RCLONE_CONFIG" ]
+    then
+        export RCLONE_CONFIG_DIR=$(dirname $RCLONE_CONFIG)
+    fi
+}
+
+function rclone_config_pull()
+{
+    rclone_config_setup
+    if [ "$RCLONE_CONFIG_DIR" ]
+    then
+        rclone_config_push
+        notify Pulling rclone config
+        git -C $RCLONE_CONFIG_DIR pull --rebase
+    fi
+}
+
+function rclone_config_remote_reset()
+{
+    rclone_config_setup
+    if [ "$RCLONE_CONFIG_DIR" ]
+    then
+        rclone_config_push
+        notify Pulling rclone config
+        git -C $RCLONE_CONFIG_DIR rebase --abort
+        git -C $RCLONE_CONFIG_DIR remote-reset
+    fi
+}
+
+function rclone_config_rebase_abort()
+{
+    rclone_config_setup
+    if [ "$RCLONE_CONFIG_DIR" ]
+    then
+        rclone_config_push
+        notify Pulling rclone config
+        git -C $RCLONE_CONFIG_DIR rebase --abort
+    fi
+}
+
+
+function rclone_config_push()
+{
+    if [ "$RCLONE_CONFIG_DIR" ] && git -C $RCLONE_CONFIG_DIR diff --quiet -- "$(basename $RCLONE_CONFIG)"
+    then
+        notify Commiting rclone config
+        git -C $RCLONE_CONFIG_DIR add "$(basename $RCLONE_CONFIG)"
+        git -C $RCLONE_CONFIG_DIR commit -m "$(basename $RCLONE_CONFIG) modifed"
+        git -C $RCLONE_CONFIG_DIR push
+    fi
+}
+
+function error-block() {
+    MSG="$*"
+    notify-send "${MSG}"
+    zenity --error         \
+           --title $0      \
+           --timeout=10000 \
+           --text "${MSG}"
+}
+
+function info-block() {
+    MSG="$*"
+    notify-send "${MSG}"
+    zenity --info          \
+           --title $0      \
+           --timeout=10000 \
+           --text "${MSG}"
+}
+
+function git-annex-assistant-allowed-branch-p()
+{
+    local _ANNEX_ALLOWED_BRANCH="${ANNEX_ALLOWED_BRANCH}"
+
+    local autostart_file="$HOME/.config/git-annex/autostart"
+
+    if [ ! -f "$autostart_file" ]
+    then
+        echo "❌ $autostart_file does not exist."
+        return 1
+    fi
+
+    # Read all lines into an array, skipping empty and comment lines
+    mapfile -t repo_dirs < "$autostart_file"
+
+    for repo_dir in "${repo_dirs[@]}"
+    do
+        # # Trim leading/trailing spaces
+        # repo_dir="${repo_dir#"${repo_dir%%[![:space:]]*}"}"
+        # repo_dir="${repo_dir%"${repo_dir##*[![:space:]]}"}"
+
+        # Skip empty lines and comments
+        [ -z "$repo_dir" ] && continue
+        # [[ "$repo_dir" == \#* ]] && continue
+
+        if [ ! -d "$repo_dir/.git" ]
+        then
+            echo "⚠️ Skipping: $repo_dir (not a git repo)"
+            continue
+        fi
+
+        # annex/auto/inbox → Auto-commit branch for new data.
+        # annex/auto/staging → Auto/manual staging for cleaning.
+        # annex/manual/stable → Manual curation only.
+        # annex/topic/physics, topic/law → Topic-focused curation.
+
+        (
+            local current_branch=$(git -C "$repo_dir" rev-parse --abbrev-ref HEAD)
+
+            if [ "$current_branch" = "${_ANNEX_ALLOWED_BRANCH}" ] ||
+                   git -C "$repo_dir" config --get-all annex-extention.assistant.allowedBranch | grep -Fxq "$current_branch"
+            then
+                echo "✅ $repo_dir: current branch '$current_branch' is allowed."
+            else
+                echo "❌ $repo_dir: current branch '$current_branch' is NOT allowed."
+                return 1
+            fi
+        )
+
+    done
+
+    # If all passed, return success
+    return 0
+}
+
+
+function find_shepherd_parent()
+{
+    local PARENTPID=$PPID
+    echo PARENTPID=$PARENTPID >&2
+    while [ "${PARENTPID}" -gt 0 ]
+    do
+        if ps -p "${PARENTPID}" -o cmd= | grep /run/current-system/profile/bin/shepherd >/dev/null 2>&1
+        then
+            break
+        fi
+        PARENTPID=$( ps -p "${PARENTPID}" -o ppid= | tr -d ' ' )
+    done
+    echo ${PARENTPID}
+}
+
+pgm="$(basename $0)"
+main "$@"
+exit 0

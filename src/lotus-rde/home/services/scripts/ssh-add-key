@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+# Dependencies: secret-tool, xclip (for clipboard), zenity (optional GUI prompts)
+
+# Default attribute key
+ATTR_KEY="rclone-config"
+ATTR_VALUE="rclone-config"
+MAX_TRIES=5
+MIN_KEYS_COUNT=4
+DIALOG_TIMEOUT=5
+
+MP_BASE="$HOME/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/noenc/mountpoints"
+mtrg_orgp="${MP_BASE}/orgp"
+mtrg_secure="${MP_BASE}/secure"
+count=50
+wait_for_fs_secs=2s
+
+
+function main()
+{
+    while (( count > 0 )) &&
+              ( command df --output=target "${mtrg_secure}" | tail -1 | xargs test "${mtrg_secure}" != ||
+                    command df --output=target "${mtrg_orgp}" | tail -1 | xargs test "${mtrg_orgp}" != )
+    do
+        echo waiting $count
+        sleep $wait_for_fs_secs
+        (( count -- ))
+    done
+
+    echo waiting $count
+
+    if command df --output=target "${mtrg_secure}" | tail -1 | xargs test "${mtrg_secure}" = &&
+            command df --output=target "${mtrg_orgp}" | tail -1 | xargs test "${mtrg_orgp}" =
+    then
+        local TRIES=0
+        # Loop to find secret until found
+        while (( TRIES < MAX_TRIES )) && ssh-add -l | wc -l | xargs -I@ test @ -lt ${MIN_KEYS_COUNT}
+        do
+            herd enable keypassxc
+            herd start keypassxc &!
+            sleep 1s
+            timeout 5s secret-tool lookup "${ATTR_KEY}" "${ATTR_VALUE}"
+            sleep 1s
+            if ssh-add -l | wc -l | xargs -I@ test @ -lt ${MIN_KEYS_COUNT}
+            then
+                sleep 5s
+                zenity --timeout=${DIALOG_TIMEOUT} \
+                       --warning --title="Secret Locked or Not Found" \
+                       --text="Secret not available. Please unlock the appropriate database in KeePassXC.\n\nRetrying in ${DIALOG_TIMEOUT} seconds..."
+            fi
+            (( TRIES ++ ))
+        done
+    else
+        echo not mounted
+        exit 1
+    fi
+}
+
+main "$@"
+exit 0

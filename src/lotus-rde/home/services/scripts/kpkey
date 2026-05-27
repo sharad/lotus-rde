@@ -1,0 +1,234 @@
+#!/usr/bin/env bash
+
+
+KEYS_COUNT=7
+
+
+function main()
+{
+    pgm=$(basename $0)
+    source ~/.setup/osetup/secretcryptfs/remote-enc/gcr-osetup/lib/lib_secenv.sh
+    source ~/.setup/binx/setup/lib_setup.sh
+
+    NOSERVICE=0
+    NOUIPOPUP=0
+    verbose=0
+
+    while getopts "h?nsv" opt; do
+        case "$opt" in
+            h|\?)
+                show_help
+                exit 0
+                ;;
+            n) NOUIPOPUP=1
+               ;;
+            s) NOSERVICE=1
+               ;;
+            v) verbose=1
+               ;;
+            # c)  __CFG=$OPTARG
+            #     ;;
+            *)
+                echo Invalid argument $opt
+                exit -1;;
+        esac
+    done
+
+    shift $((OPTIND-1))
+
+    command="$1"
+    shift
+
+    local _xtdir=~/.pi/.kp/mem
+    local _xtdir_r="$(readlink -m $_xtdir)"
+    mkdir -p ${_xtdir_r}
+
+    case $command in
+        ci)
+            if cd $_xtdir && [ "$(ls -1 *.keyx | wc -l)" -gt 0 ]
+            then
+                ls -1 *.keyx >&2
+                git -C ~/.pi/.kp status >&2
+
+                # rm -f *.gpg
+                shred *.keyx .shred .*.keyx >&2
+                rm -f *.keyx .*.keyx >&2
+
+                ls -1 *.keyx .*.keyx >&2
+                git -C ~/.pi/.kp status >&2
+                xnotify "Successfully checked in $(pwd)"
+            else
+                xcondnotify already checked in
+            fi
+            run-command $@
+            unset _xtdir
+            ;;
+        co)
+
+            local count=10
+            while (( count > 0 )) &&  ~/.bin/xautolock-mod-islocker-running
+            do
+                sleep 10s
+                (( -- count ))
+            done
+
+            if ~/.bin/xautolock-mod-islocker-running
+            then
+                notify No checking out keys as screen lock is active
+                exit 1
+            fi
+
+            # local mtrg_orgp="$HOME/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/noenc/mountpoints/orgp"
+            local mtrg_secure="$HOME/.repos/git/main/resource/userorg/main/readwrite/private/user/secretcryptfs/noenc/mountpoints/secure"
+            if command df --output=target "${mtrg_secure}" | tail -1 | xargs test "${mtrg_secure}" !=
+            then
+                if [ "${NOSERVICE}" -ne 1 ]
+                then # NOTE: don't run it when started from herd
+                    : herd enable secfs
+                    : herd up secfs
+                fi
+                # smountfs secure >/dev/null 2>&1
+                # # smountfs orgp   >/dev/null 2>&1
+
+                count=30
+                while (( count > 0 )) && command df --output=target "${mtrg_secure}" | tail -1 | xargs test "${mtrg_secure}" !=
+                do
+                    (( count -- ))
+                    sleep 2
+                done
+            fi
+
+            # if command df --output=target "${mtrg_orgp}" | tail -1 | xargs test "${mtrg_orgp}" = &&
+            #         command df --output=target "${mtrg_secure}" | tail -1 | xargs test "${mtrg_secure}" =
+            if command df --output=target "${mtrg_secure}" | tail -1 | xargs test "${mtrg_secure}" =
+            then
+                if cd $_xtdir
+                then
+                    if [ "$(ls -1 *.keyx | wc -l)" -lt $KEYS_COUNT ]
+                    then
+                        ls -1 *.keyxb >&2
+                        git -C ~/.pi/.kp status >&2
+
+                        if [ "$(ls -1 ~/.pi/.kp/.keys/*.keyx.gpg | wc -l)" -gt 0 ]
+                        then
+                            # ln -s .keys/* . >&2
+                            ln -s ../../../../../${HOME}/.pi/.kp/.keys/* . >&2
+                        fi
+                        local to_decrypt_files=()
+                        for kgpg in *.keyx.gpg
+                        do
+                            if [ ! -e $(basename $kgpg .gpg ) ]
+                            then
+                                to_decrypt_files+=($kgpg)
+                            fi
+                        done
+
+                        if [ "${#to_decrypt_files[@]}" -gt 0 ]
+                        then
+                            cache_password "${KEYENCRYPTED_FILE}" 18
+
+                            if ! timeout 3 gpg --batch --no-tty --yes --pinentry-mode error  --decrypt <  ~/.open-secrets/secret-0.1.key.gpg  |
+                                    timeout 2 gpg --batch --no-tty --yes --pinentry-mode error --passphrase-fd 0 --decrypt-files ${to_decrypt_files[*]}
+                            then
+                                timeout 10s herd stop gpg-agent &!
+                                sleep 1s
+                                gpgconf --kill all
+                            else
+                                # notify "Removing all    idlerun 10 kpkeys"
+                                command ps -u $USER x | grep 'idlerun' | grep 'kpkeys co' | cut -c-6| xargs -r kill
+                            fi
+
+                            # timeout 30 gpg --decrypt-files ${to_decrypt_files[*]} < /dev/null
+                            echo Done GPG >&2
+                        fi
+                        echo ls -1 *.keyx >&2
+                        if ls -1 *.keyx >&2
+                        then
+                            xnotify "Successfully checked out"
+                            run-command $@
+                        else
+                            xnotify "Failed to checked out"
+                        fi
+                        echo git -C ~/.pi/.kp status >&2
+                        git -C ~/.pi/.kp status >&2
+                        echo kill-gnome-keyring >&2
+                        kill-gnome-keyring >&2
+
+                        if [ "${NOSERVICE}" -ne 1 ]
+                        then # NOTE: don't run it when started from herd
+                            herd start keepassxc >/dev/null 2>&1
+                        fi
+                    else
+                        xcondnotify already checked out
+                    fi
+                fi
+                unset _xtdir
+            else
+                echo one of secure or orgp not mounted, first mount them >&2
+                command df >&2
+                exit 1
+            fi
+            ;;
+        st*)
+            local _xtdir=~/.pi/.kp/mem
+            if cd $_xtdir
+            then
+                git -C ~/.pi/.kp status
+                if ! ls -1 *.keyx
+                then
+                    exit 1
+                fi
+            fi
+            unset _xtdir
+            ;;
+        *) echo "Unknown command ${command}" >&2
+           exit 1
+           ;;
+    esac
+}
+
+function run-command()
+{
+    if [ $# -gt 0 ]
+    then
+        if which $1 >/dev/null 2>&1
+        then
+            echo running $@
+            $@
+        else
+            echo $1 command not found >&2
+        fi
+    fi
+}
+
+function kill-gnome-keyring()
+{
+    if pgrep -l -u $(id -u) gnome-key
+    then
+        pkill gnome-key
+    fi
+}
+
+function xcondnotify()
+{
+    xnotify $*
+    if  [ ! "$NOUIPOPUP" ] && [ "$TERM" = "dumb" -o ! -t ]
+    then
+        zenity --info --text="$*"
+    else
+        echo $@ >&2
+    fi
+}
+
+function xnotify()
+{
+    if  [ ! "$NOUIPOPUP" ] && [ "$TERM" = "dumb" -o ! -t ]
+    then
+        notify-send "$*"
+    else
+        echo $@ >&2
+    fi
+}
+
+main "$@"
+exit 0

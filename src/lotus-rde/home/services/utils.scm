@@ -59,7 +59,7 @@
 ;; ------------------------------------------------------------
 ;; Program
 ;; ------------------------------------------------------------
-(define bluetooth-autoconnect
+(define bluetooth-autoconnect-guile
   (with-imported-modules
         (source-module-closure
          '((dbus)
@@ -305,8 +305,10 @@ sender='org.bluez'")
 
                (loop)))))))
 
+(define bluetooth-autoconnect (local-file "scripts/bluetooth-autoconnect"))
+
 (define bluetooth-autoconnect-entry
-  (program-file->package "bluetooth-autoconnect"
+  (file->package "bluetooth-autoconnect"
                          bluetooth-autoconnect))
 
 ;; ------------------------------------------------------------
@@ -356,7 +358,7 @@ sender='org.bluez'")
 ;; ------------------------------------------------------------
 ;; Program
 ;; ------------------------------------------------------------
-(define power-monitor
+(define power-monitor-guile
   (program-file
    "power-monitor"
 
@@ -587,9 +589,10 @@ sender='org.bluez'")
 
        (monitor-loop))))
 
+(define power-monitor (local-file "scripts/power-monitor"))
 
 (define power-monitor-entry
-  (program-file->package "power-monitor"
+  (file->package "power-monitor"
                          power-monitor))
 
 ;; ------------------------------------------------------------
@@ -635,7 +638,7 @@ sender='org.bluez'")
 ;; ------------------------------------------------------------
 ;; Program
 ;; ------------------------------------------------------------
-(define kpkey
+(define kpkey-guile
   (program-file
    "kpkey"
 
@@ -918,9 +921,10 @@ sender='org.bluez'")
 
           (exit 1))))))
 
+(define kpkey (local-file "scripts/kpkey"))
 
 (define kpkey-entry
-  (program-file->package "kpkey" kpkey))
+  (file->package "kpkey" kpkey))
 
 ;; ------------------------------------------------------------
 ;; Single instance service
@@ -960,7 +964,7 @@ sender='org.bluez'")
 ;; ------------------------------------------------------------
 ;; Program
 ;; ------------------------------------------------------------
-(define ssh-add-key
+(define ssh-add-key-guile
   (program-file
    "ssh-add-key"
    #~(begin
@@ -1161,8 +1165,10 @@ sender='org.bluez'")
 
            (loop (+ tries 1)))))))
 
+(define ssh-add-key (local-file "scripts/ssh-add-key"))
+
 (define ssh-add-key-entry
-  (program-file->package "ssh-add-key"
+  (file->package "ssh-add-key"
                          ssh-add-key))
 
 ;; ------------------------------------------------------------
@@ -1207,7 +1213,7 @@ sender='org.bluez'")
 ;; ------------------------------------------------------------
 
 
-(define git-annex-daemon
+(define git-annex-daemon-guile
   (program-file
    "git-annex-daemon"
 
@@ -1796,9 +1802,10 @@ sender='org.bluez'")
 
             (exit 1)))))))
 
+(define git-annex-daemon (local-file "scripts/git-annex-daemon"))
 
 (define git-annex-daemon-entry
-  (program-file->package "git-annex-daemon" git-annex-daemon))
+  (file->package "git-annex-daemon" git-annex-daemon))
 
 
 ;; ------------------------------------------------------------
