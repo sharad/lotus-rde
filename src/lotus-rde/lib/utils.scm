@@ -119,6 +119,29 @@
     ;; choose real license later
     (license #f)))
 
+
+
+;; (define (script-file name path)
+
+;;   (let ((content
+;;          (call-with-input-file
+;;              path
+;;            get-string-all)))
+
+;;     (computed-file
+;;      name
+
+;;      #~(begin
+
+;;          (call-with-output-file
+;;              #$output
+
+;;            (lambda (p)
+;;              (display #$content p)))
+
+;;          (chmod #$output #o555)))))
+
+
 (define* (define-spawner-service spawner-service
                                  #:key constructor-fn is-capable-fn?)
 

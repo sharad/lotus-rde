@@ -309,7 +309,7 @@ sender='org.bluez'")
 
 (define bluetooth-autoconnect-entry
   (file->package "bluetooth-autoconnect"
-                         bluetooth-autoconnect))
+                 bluetooth-autoconnect-guile))
 
 ;; ------------------------------------------------------------
 ;; Single instance service
@@ -593,7 +593,7 @@ sender='org.bluez'")
 
 (define power-monitor-entry
   (file->package "power-monitor"
-                         power-monitor))
+                 power-monitor-guile))
 
 ;; ------------------------------------------------------------
 ;; Single instance service
@@ -924,7 +924,7 @@ sender='org.bluez'")
 (define kpkey (local-file "scripts/kpkey"))
 
 (define kpkey-entry
-  (file->package "kpkey" kpkey))
+  (file->package "kpkey" kpkey-guile))
 
 ;; ------------------------------------------------------------
 ;; Single instance service
@@ -1169,7 +1169,7 @@ sender='org.bluez'")
 
 (define ssh-add-key-entry
   (file->package "ssh-add-key"
-                         ssh-add-key))
+                 ssh-add-key-guile))
 
 ;; ------------------------------------------------------------
 ;; Single instance shepherd service
@@ -1805,7 +1805,8 @@ sender='org.bluez'")
 (define git-annex-daemon (local-file "scripts/git-annex-daemon"))
 
 (define git-annex-daemon-entry
-  (file->package "git-annex-daemon" git-annex-daemon))
+  (file->package "git-annex-daemon"
+                 git-annex-daemon-guile))
 
 
 ;; ------------------------------------------------------------
