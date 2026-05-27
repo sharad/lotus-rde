@@ -202,7 +202,7 @@
                #:log-file #$log)))))
 
 (define secfs-mount-entry
-  (program-file->package "secfs-mount" secfs-mount))
+  (file->package "secfs-mount" secfs-mount))
 
 (define home-secfs-service-type
   (service-type
