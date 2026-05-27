@@ -294,7 +294,24 @@
                     "1h")
               #:log-file #$(log-file "keepawaken")))
           (stop #~(make-kill-destructor))
-          (respawn? #t))))))
+          (respawn? #t))))
+
+
+       (simple-service 'tty-service-groups
+                       home-services-group-service-type
+                       (list
+                        (home-services-group-configuration
+                         (name 'awaken-session)
+                         (dependent '(delayed-login-session-down))
+                         (requirement '(dbus pipewire)))
+
+                        (home-services-group-configuration
+                         (name 'delayed-login-session)
+                         (requirement '(awaken-session
+                                        delayed-login-session)))))))
+
+
+
 
   (feature
    (name 'lotus-nox-services)
@@ -741,27 +758,21 @@
          (mk/simple-service
           '(xdg-autostart)
           #~(list "xdg-autostart")
-          #:create-session? #t)
+          #:create-session? #t)))
 
 
+       (simple-service 'x-service-groups
+                       home-services-group-service-type
+                       (list
+                        (home-services-group-configuration
+                         (name 'xawaken-session)
+                         (dependent '(xdelayed-login-session-down))
+                         (requirement '(dbus pipewire)))
 
-         (simple-service 'my-service-groups
-                         home-services-group-service-type
-                         (list
-                          (home-services-group-configuration
-                           (name 'secfs)
-                           (dependent '(awaken-session-down))
-                           (requirement '(secfs-orgp secfs-secure)))
-
-                          (home-services-group-configuration
-                           (name 'xawaken-session)
-                           (dependent '(xdelayed-login-session-down))
-                           (requirement '(dbus pipewire)))
-
-                          (home-services-group-configuration
-                           (name 'xdelayed-login-session)
-                           (requirement '(xawaken-session
-                                          delayed-login-session))))))))))))
+                        (home-services-group-configuration
+                         (name 'xdelayed-login-session)
+                         (requirement '(xawaken-session
+                                        delayed-login-session))))))))))
 
 
 

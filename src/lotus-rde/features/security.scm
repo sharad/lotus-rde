@@ -129,22 +129,32 @@
   ;; (define (get-system-services cfg))
   (define (get-home-services cfg)
     (append
-     (list (simple-service 'my-secfs-volumes
-                           home-secfs-service-type
-                           (list
-                            (home-secfs-volume-configuration
-                             (volname "orgp"))
-                            (home-secfs-volume-configuration
-                             (volname "secure"))
-                            (home-secfs-volume-configuration
-                             (volname "volatile")
-                             (mode "rw")))))
+     (list
+      (simple-service 'my-secfs-volumes
+                      home-secfs-service-type
+                      (list
+                       (home-secfs-volume-configuration
+                        (volname "orgp"))
+                       (home-secfs-volume-configuration
+                        (volname "secure"))
+                       (home-secfs-volume-configuration
+                        (volname "volatile")
+                        (mode "rw"))))
+
+      (simple-service 'secfs-service-groups
+                      home-services-group-service-type
+                      (list
+                       (home-services-group-configuration
+                        (name 'secfs)
+                        (dependent '(awaken-session-down))
+                        (requirement '(secfs-orgp secfs-secure))))))
      home-ssh-add-key-service
      home-kpkey-service))
   (feature
    (name 'secfs)
    (home-services-getter get-home-services)))
 
+
 
 
 
