@@ -739,7 +739,8 @@ fi
                                          #:full-name "Sharad Pratap"
                                          #:home-directory "/home/s/hell"
                                          #:email "s@localhost"))
-         (feature-ssh #:ssh-agent? #t)
+         (feature-xdg)
+         ;; (feature-ssh #:ssh-agent? #t)
          (feature-lotus-nox-services)
          (feature-lotus-x-services)
          (feature-lotus-security)

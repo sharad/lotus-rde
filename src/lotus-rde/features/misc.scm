@@ -176,6 +176,7 @@
          (shepherd-service
           (provision '(pkttyagent))
           (documentation "Run pkttyagent")
+          (auto-start? #f)
           (start
            #~(make-forkexec-constructor
               (list #$(file-append polkit
@@ -189,6 +190,7 @@
          (shepherd-service
            (provision '(attnmgr))
            (documentation "Attention manager")
+           (auto-start? #f)
            (start
             #~(make-forkexec-constructor
                (list #$(file-append python-attnmgr "/bin/attnmgr"))
@@ -213,6 +215,7 @@
          (shepherd-service
           (provision '(mpd))
           (documentation "Music Player Daemon")
+          (auto-start? #f)
           (start
            #~(make-forkexec-constructor
               (list #$(file-append mpd "/bin/mpd")
@@ -229,6 +232,7 @@
          (shepherd-service
           (provision '(znc))
           (documentation "ZNC IRC bouncer")
+          (auto-start? #f)
           (start
            #~(make-forkexec-constructor
               (list #$(file-append znc "/bin/znc")
@@ -243,6 +247,7 @@
          (shepherd-service
           (provision '(usrhttpd))
           (documentation "Simple user http server")
+          (auto-start? #f)
           (start #~(make-forkexec-constructor
                     (list #$(file-append usrhttpd "/bin/usrhttpd")
                           "-H"
@@ -259,6 +264,7 @@
          (shepherd-service
           (provision '(jupyter))
           (documentation "Jupyter notebook server")
+          (auto-start? #f)
           (start
            #~(make-forkexec-constructor
               (list #$(file-append jupyter "/bin/jupyter")
@@ -280,6 +286,7 @@
          (shepherd-service
           (provision '(keepawaken))
           (documentation "Prevent suspend temporarily")
+          (auto-start? #f)
           (start
            #~(make-forkexec-constructor
               (list #$(file-append elogind "/bin/elogind-inhibit")
@@ -321,13 +328,14 @@
                               ;; (transient? #f)
                               (create-session? #f)
                               (documentation "")
-                              (actions '()))
+                              (actions '())
+                              (auto-start? #f))
 
     (shepherd-service
       (provision provision)
       (documentation documentation)
       (requirement requirements)
-
+      (auto-start? auto-start?)
       (start
        #~(make-forkexec-constructor
           #$command
@@ -417,7 +425,7 @@
          (shepherd-service
           (provision '(xautolock))
           (requirement '(xrdb))
-
+          (auto-start? #f)
           (start
            #~(make-forkexec-constructor
               (list #$(file-append xautolock "/bin/xautolock")
@@ -426,12 +434,9 @@
               #:log-file #$(log-file "xautolock")))
 
           (stop #~(make-kill-destructor))
-
           (respawn? #t)
-
           (actions
            (list
-
             (shepherd-action
              (name 'locknow)
              (documentation "Lock now")
@@ -624,66 +629,64 @@
                                  "/bin/pasystray")))
 
          ;; 23 deskflow-server
-         (mk/simple-service
-          '(deskflow-server)
-          #~(list #$deskflow "/bin/deskflow-core"
-                  "server"
-                  "--no-daemon"
-                  "--debug"
-                  "DEBUG1"
-                  "--name"
-                  (or (getenv "HOST")
-                      "host")
-                  "--enable-crypto"
-                  "--log"
-                  (string-append
-                   (getenv "HOME")
-                   "/.logs/deskflow-server.log")
-                  "--address"
-                  "0.0.0.0:24800"
-                  "--config"
-                  (string-append
-                   (getenv "HOME")
-                   "/.config/Deskflow/deskflow-server.conf")
-                  "--tls-cert"
-                  (string-append
-                   (getenv "HOME")
-                   "/.config/Deskflow/tls/deskflow-server.pem"))
-          #:requirements
-          '();; xawaken-session-down
-          #:respawn? #f)
+         (let ((cmd (file-append #$deskflow "/bin/deskflow-core"))
+               (mode "server")
+               (ip  "0.0.0.0")
+               (port "24800"))
+             (shepherd-service
+              (provision '(deskflow-server))
+              (auto-start? #f)
+              (start    (make-forkexec-constructor (list #$cmd #$mode "--no-daemon"
+                                                         ;; "--debug" "INFO"
+                                                         "--debug" "DEBUG1"
+                                                         "--name" (or (getenv "HOST") "host")
+                                                         "--enable-crypto"
+                                                         "--log" (string-append (getenv "HOME") "/.logs/deskflow-server.log")
+                                                         "--address" (string-append #$ip ":" #$port)
+                                                         "--config" (string-append (getenv "HOME") "/.config/Deskflow/deskflow-server.conf")
+                                                         "--tls-cert" (string-append (getenv "HOME") "/.config/Deskflow/tls/deskflow-server.pem"))
+                                                   #:create-session? #f
+                                                   #:log-file #$(log-file "deskflow-server")))
+              (stop     #~(make-kill-destructor))
+              (respawn? #f)
+              (respawn-delay 600)
+              (respawn-limit 1)
+              (requirement '(xawaken-session-down))))
 
 
 
          ;; 25 deskflow-client
-         (mk/simple-service
-          '(deskflow-client)
-          #~(list #$deskflow "deskflow-core"
-                  "client"
-                  "--debug"
-                  "DEBUG1"
-                  "--sync-language"
-                  "--name"
-                  (or (getenv "HOST")
-                      "host")
-                  "--enable-crypto"
-                  "--log"
-                  (string-append
-                   (getenv "HOME")
-                   "/.logs/deskflow-client.log")
-                  "--tls-cert"
-                  (string-append
-                   (getenv "HOME")
-                   "/.config/Deskflow/tls/deskflow-client.pem")
-                  "deskflow-server-host:24800")
-          #:requirements
-          '();; xawaken-session-down
-          #:respawn? #f)
-
-
-
-
-
+         (let ((cmd "deskflow-core")
+               (mode "server")
+               (server  "deskflow-server-host")
+               (port "24800"))
+             (shepherd-service
+              (provision '(deskflow-client))
+              (auto-start? #f)
+              (start #~(lambda ( . args)
+                            (let* ((server (if (pair? args)
+                                               (car args)
+                                               #$server))
+                                   (log-file-loc (string-append "desklow-client" "-" server))
+                                   (constructor (make-forkexec-constructor (list cmd mode "-f"
+                                                                                 ;; "--debug" "INFO"
+                                                                                 "--debug" "DEBUG1"
+                                                                                 "--sync-language"
+                                                                                 "--name" (getenv "HOST")
+                                                                                 "--enable-crypto"
+                                                                                 "--log" (string-append (getenv "HOME") "/.logs/deskflow-client.log")
+                                                                                 ;; "--address" (string-append ip ":" port)
+                                                                                 ;; "-c" (string-append (getenv "HOME") "/.config/Deskflow/deskflow-client.conf")
+                                                                                 "--tls-cert" (string-append (getenv "HOME") "/.config/Deskflow/tls/deskflow-client.pem")
+                                                                                 (string-append server ":" #$port))
+                                                                           #:create-session? #f
+                                                                           #:log-file #$(log-file log-file-loc))))
+                              (apply constructor args))))
+              (stop  #~(make-kill-destructor))
+              (respawn? #f)
+              (respawn-delay 600)
+              (respawn-limit 1)
+              (requirement '(xawaken-session-down))))
 
          ;; ;; 27 ssh-add
          ;; (mk/simple-service
@@ -701,19 +704,36 @@
 
 
          ;; 28 proxy-fclient
-         (mk/simple-service
-          '(proxy-fclient)
-          #~(list #$(file-append autossh
-                                 "/bin/autossh")
-                  "-N" "-S" "none" "-M" "20000"
-                  "-o" "ControlMaster=no"
-                  "-o" "ControlPath=/dev/null"
-                  "-o" "ControlPersist=no"
-                  "proxy-server-fclient")
-          #:requirements
-          '(ssh-add)
-            ;; awaken-session-down
-          #:respawn? #t)
+         (let ((cmd (file-append autossh "/bin/autossh"))
+               (server (car '("proxy-server-fclient"
+                              "proxy-server-fclient-linux"
+                              "proxy-server-fclient-window"))))
+          (shepherd-service
+           (provision '(proxy-fclient))
+           (documentation "proxy-fclient")
+           (requirement '(ssh-add))
+           (auto-start? #f)
+           (start
+            #~(lambda ( . args)
+                      (let* ((server (if (pair? args)
+                                         (car args)
+                                         #$server))
+                             (log-file-loc (string-append "proxy-" server))
+                             (constructor (make-forkexec-constructor (list #$cmd "-N"
+                                                                           "-S" "none"
+                                                                           "-M" "20000"
+                                                                           "-o" "ControlMaster=no"
+                                                                           "-o" "ControlPath=/dev/null"
+                                                                           "-o" "ControlPersist=no"
+                                                                           server)
+                                                                     #:create-session? #f
+                                                                     #:log-file #$(log-file log-file-loc))))
+                        (apply constructor args))))
+           (stop #~(make-kill-destructor))
+           (respawn? #t)
+           (one-shot? #f)
+           ;; (transient? transient?)
+           (actions '())))
 
          ;; 29 xdg-autostart
          (mk/simple-service

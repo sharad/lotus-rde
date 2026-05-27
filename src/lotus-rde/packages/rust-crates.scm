@@ -207,7 +207,7 @@
                                  rust-windows-sys-0.52.0
                                  rust-windows-sys-0.60.2
                                  rust-windows-sys-0.61.2
-                                 rust-windows-targets-0.48.1
+                                 ;; rust-windows-targets-0.48.1
                                  rust-windows-targets-0.52.6
                                  rust-windows-targets-0.53.5
                                  rust-windows-aarch64-gnullvm-0.48.5

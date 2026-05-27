@@ -337,6 +337,7 @@ sender='org.bluez'")
        (documentation
         "Bluetooth trusted device auto-connect daemon.")
        (requirement '(dbus))
+       (auto-start? #f)
        (start
         #~(make-forkexec-constructor
            (list
@@ -349,7 +350,7 @@ sender='org.bluez'")
             "--retry" "3")
            #:create-session? #f
            #:log-file
-           #$(log-file "bluetooth-autoconnect.log")))
+           #$(log-file "bluetooth-autoconnect")))
        (stop
         #~(make-kill-destructor))
        (respawn? #t)
@@ -620,6 +621,7 @@ sender='org.bluez'")
        (documentation
         "Battery and power monitoring service.")
        (requirement '())
+       (auto-start? #f)
        (start
         #~(make-forkexec-constructor
            (list
@@ -632,7 +634,7 @@ sender='org.bluez'")
             "--verbose")
            #:create-session? #f
            #:log-file
-           #$(log-file "power-monitor.log")))
+           #$(log-file "power-monitor")))
        (stop
         #~(make-kill-destructor))
        (respawn? #t)
@@ -948,23 +950,36 @@ sender='org.bluez'")
     home-shepherd-service-type
 
     (list
-     (shepherd-service
-       (provision '(kpkey))
-       (documentation
-        "KeePassXC key checkout service.")
-       (requirement '())
-       (start
-        #~(make-forkexec-constructor
-           ;; (list #$kpkey "co")
-           (list (string-append (getenv "HOME")
-                                "/.bin/kpkeys") "co")
-           #:create-session? #f
-           #:log-file
-           #$(log-file "kpkey.log")))
-       (stop
-        #~(make-kill-destructor))
-       (one-shot? #t)
-       (respawn? #f))))))
+     (let ((cmd (string-append (getenv "HOME") "/.bin/kpkeys")))
+      (shepherd-service
+        (provision '(kpkey))
+        (documentation
+         "KeePassXC key checkout service.")
+        (requirement '())
+        (auto-start? #f)
+        ;; (start
+        ;;  #~(make-forkexec-constructor
+        ;;     ;; (list #$kpkey "co")
+        ;;     (list (string-append (getenv "HOME")
+        ;;                          "/.bin/kpkeys") "co")
+        ;;     #:create-session? #f
+        ;;     #:log-file
+        ;;     #$(log-file "kpkey")))
+        ;; (stop
+        ;;  #~(make-kill-destructor))
+        (start #~(lambda ( . args)
+                   (let* ((cli (string-join (append (list #$cmd "-s") args '("co"))
+                                            " "))
+                          (constructor (make-system-constructor cli " >> " #$(log-file "kpkeys") " 2>&1")))
+                     (format #t "Running ~a~%" cli)
+                     (apply constructor args))))
+        #:stop  (lambda (running . args)
+                  (let* ((cli (string-join (append (list #$cmd "-s") args '("ci")) " "))
+                         (destructor (make-system-destructor cli " >> " #$(log-file "kpkeys") " 2>&1")))
+                    (format #t "Running ~a~%" cli)
+                    (apply destructor running args)))
+        (one-shot? #t)
+        (respawn? #f)))))))
 
 
 ;; ------------------------------------------------------------
@@ -1199,6 +1214,7 @@ sender='org.bluez'")
       (provision '(ssh-add))
       (documentation "SSH key auto-loader.")
       (requirement '())
+      (auto-start? #f)
       (start
        #~(make-forkexec-constructor
           (list ;; #$ssh-add-key
@@ -1208,7 +1224,7 @@ sender='org.bluez'")
            "5")  ;; maximum retry count
           #:create-session? #f
           #:log-file
-          #$(log-file "ssh-add-key.log")))
+          #$(log-file "ssh-add-key")))
       (stop
        #~(make-kill-destructor))
       (one-shot? #t)
@@ -1838,53 +1854,65 @@ sender='org.bluez'")
 
     (list
 
-     (shepherd-service
+     (let ((component (car '("assistant"
+                             "webapp"
+                             "stop")))
+           (cmd (file-append git "/bin/git")))
+      (shepherd-service
+       (provision '(annex git-annex-daemon))
+       (documentation
+        "Git Annex daemon service.")
+       (requirement
+        '(keepassxc
+          ssh-add))
+           ;; xawaken-session-down
+       (respawn? #f)
+       (respawn-delay 600)
+       (respawn-limit 10)
+       (auto-start? #f)
+       ;; (start
+       ;;  #~(make-forkexec-constructor
+       ;;     (list
+       ;;      #$git-annex-daemon
+       ;;      "assistant"
+       ;;      "--verbose")
+       ;;     #:log-file
+       ;;     #$(log-file "annex-assistant")))
+       (start #~(lambda ( . args)
+                  (let* ((component (if (pair? args)
+                                        (car args)
+                                        #$component))
+                         (log-file-loc (string-append "annex" "-" component))
+                         (constructor (make-forkexec-constructor (list #$cmd "annex" "daemon" component)
+                                                                 ;; https://issues.guix.gnu.org/67175
+                                                                 #:log-file #$(log-file log-file-loc))))
+                    (apply constructor args))))
+       ;; Use annex daemon stop
+       ;; instead of kill.
+       ;; (stop
+       ;;  #~(let ((destructor
 
-      (provision '(annex git-annex-daemon))
+       ;;            (make-system-destructor
+       ;;             (string-append
+       ;;              ;; #$git-annex-daemon
+       ;;              (getenv "HOME") "/.bin/git-annex-daemon"
+       ;;              " stop"
+       ;;              " >> "
+       ;;              #$(log-file "annex-stop")
+       ;;              " 2>&1"))))
 
-      (documentation
-       "Git Annex daemon service.")
+       ;;      (lambda (running . args)
 
-      (requirement
-       '(keepassxc
-         ssh-add))
-          ;; xawaken-session-down
-
-      (respawn? #f)
-
-      (respawn-delay 600)
-
-      (respawn-limit 10)
-
-      (start
-       #~(make-forkexec-constructor
-          (list
-           #$git-annex-daemon
-           "assistant"
-           "--verbose")
-          #:log-file
-          #$(log-file "annex-assistant.log")))
-
-      ;; Use annex daemon stop
-      ;; instead of kill.
-      (stop
-       #~(let ((destructor
-
-                 (make-system-destructor
-                  (string-append
-                   ;; #$git-annex-daemon
-                   (getenv "HOME") "/.bin/git-annex-daemon"
-                   " stop"
-                   " >> "
-                   #$(log-file "annex-stop.log")
-                   " 2>&1"))))
-
-           (lambda (running . args)
-
-             (apply destructor
-                    running
-                    args))))
-
-      (one-shot? #f))))))
+       ;;        (apply destructor
+       ;;               running
+       ;;               args))))
+       (stop #~(let* ((component "stop")
+                      (log-file-loc (string-append "annex" "-" component))
+                      (destructor (make-cmd-destructor (string-join (list #$cmd "annex" "daemon" component) " ")
+                                                       " >> "
+                                                       #$(log-file log-file-loc)
+                                                       " 2>&1")))
+                 destructor))
+       (one-shot? #f)))))))
 
 

@@ -295,6 +295,7 @@
      (respawn? #f)
      (respawn-delay 10)
      (respawn-limit 2)
+     (auto-start? #f)
      (stop  #~(make-kill-destructor))
      ;; (start #~(make-forkexec-constructor
      ;;           (list #$cmd
@@ -302,14 +303,28 @@
      ;;                 "-m" #$mp
      ;;                 "-p" #$mode)
      ;;           #:log-file #$log))
-     (start #~(make-forkexec-constructor
-               (list ;; #$secfs-mount
-                (string-append (getenv "HOME")
-                               "/.bin/secfs-mount")
-                "-d" #$dev
-                "-m" #$mp
-                "-p" #$mode)
-               #:log-file #$log)))))
+
+     ;; (start #~(make-forkexec-constructor
+     ;;           (list ;; #$secfs-mount
+     ;;            (string-append (getenv "HOME")
+     ;;                           "/.bin/secfs-mount")
+     ;;            "-d" #$dev
+     ;;            "-m" #$mp
+     ;;            "-p" #$mode)
+     ;;           #:log-file #$log))
+
+     (start #~(lambda ( . args)
+                (let* ((mode (if (pair? args)
+                                 (car args)
+                                 #$mode))
+                       (log-file-loc (string-append "secfs-" #$volname "-" mode))
+                       (constructor (make-forkexec-constructor (list #$cmd
+                                                                     "-d" #$dev
+                                                                     "-m" #$mp
+                                                                     "-p" mode)
+                                                               #:log-file #$(log-file log-file-loc))))
+                  (apply constructor args)))))))
+
 
 (define secfs-mount-entry
   (file->package "secfs-mount" secfs-mount-guile))
@@ -387,10 +402,11 @@
       (respawn? respawn?)
       (respawn-delay respawn-delay)
       (respawn-limit respawn-limit)
+      (auto-start? #f)
       (start #~(make-forkexec-constructor
                 (list #$dbus-launch #$flatpak "--user" "run" #$app)
                 #:create-session? #t
-                #:log-file #$log))
+                #:log-file #$(log-file #$name)))
 
       (stop #~(let ((make-cmd-destructor
                      (lambda command
@@ -476,6 +492,7 @@
     (shepherd-service
      (provision (list name))
      (requirement '())
+     (auto-start? #f)
      (free-form
       #~(let* ((once-started #f)
                (name        '#$name)
