@@ -321,7 +321,7 @@ sender='org.bluez'")
    ;; Put executable into profile
    (simple-service
     'bluetooth-autoconnect-profile
-    home-files-service-type
+    home-profile-service-type
     (list bluetooth-autoconnect-entry))
 
 
@@ -605,7 +605,7 @@ sender='org.bluez'")
    ;; Put executable into profile
    (simple-service
     'power-monitor-profile
-    home-files-service-type
+    home-profile-service-type
     (list power-monitor-entry))
 
    ;; Singleton shepherd service
@@ -938,7 +938,7 @@ sender='org.bluez'")
    ;; Put executable into profile
    (simple-service
     'kpkey-profile
-    home-files-service-type
+    home-profile-service-type
     (list kpkey-entry))
 
    ;; Singleton shepherd service
@@ -1184,7 +1184,7 @@ sender='org.bluez'")
    ;; Put executable into profile
    (simple-service
     'ssh-add-key-profile
-    home-files-service-type
+    home-profile-service-type
     (list ssh-add-key-entry))
 
    ;; Singleton shepherd service
@@ -1818,10 +1818,6 @@ sender='org.bluez'")
 ;; ------------------------------------------------------------
 
 (define-public home-git-annex-daemon-service
-
-
-
-
 
   (list
 
