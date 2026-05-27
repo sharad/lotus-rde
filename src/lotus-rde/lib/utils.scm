@@ -17,7 +17,7 @@
   #:use-module (guix build-system trivial)
   ;; #:use-module (gnu packages)
   ;; #:use-module (gnu packages base)
-  #:use-module (guix build utils)
+  ;; #:use-module (guix build utils)
   #:use-module (gnu system mapped-devices)
   #:use-module (gnu system file-systems)
   #:use-module (gnu system uuid)
