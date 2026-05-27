@@ -216,7 +216,7 @@
      (service-extension
       home-profile-service-type
       (const
-       (manifest fs-mount-entry)))
+       (manifest (list secfs-mount-entry))))
 
      ;; shepherd services
      (service-extension
