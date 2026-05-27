@@ -304,6 +304,12 @@ sender='org.bluez'")
 
                (loop)))))))
 
+(define bluetooth-autoconnect-entry
+  (manifest-entry
+    (name "bluetooth-autoconnect")
+    (version "0")
+    (item bluetooth-autoconnect)))
+
 ;; ------------------------------------------------------------
 ;; Single instance service
 ;; ------------------------------------------------------------
@@ -311,11 +317,12 @@ sender='org.bluez'")
 
   (list
 
-   ;; Add executable into profile
+   ;; Put executable into profile
    (simple-service
     'bluetooth-autoconnect-profile
     home-files-service-type
-    `(("bin/bluetooth-autoconnect" ,bluetooth-autoconnect)))
+    (list bluetooth-autoconnect-entry))
+
 
    ;; Singleton shepherd service
    (simple-service
@@ -581,17 +588,24 @@ sender='org.bluez'")
 
        (monitor-loop))))
 
+
+(define power-monitor-entry
+  (manifest-entry
+    (name "power-monitor")
+    (version "0")
+    (item power-monitor)))
+
 ;; ------------------------------------------------------------
 ;; Single instance service
 ;; ------------------------------------------------------------
 (define-public home-power-monitor-service
 
   (list
-   ;; Add executable to profile
+   ;; Put executable into profile
    (simple-service
     'power-monitor-profile
     home-files-service-type
-    `(("bin/power-monitor" ,power-monitor)))
+    (list power-monitor-entry))
 
    ;; Singleton shepherd service
    (simple-service
@@ -907,6 +921,13 @@ sender='org.bluez'")
 
           (exit 1))))))
 
+
+(define kpkey-entry
+  (manifest-entry
+    (name "kpkey")
+    (version "0")
+    (item kpkey)))
+
 ;; ------------------------------------------------------------
 ;; Single instance service
 ;; ------------------------------------------------------------
@@ -917,7 +938,7 @@ sender='org.bluez'")
    (simple-service
     'kpkey-profile
     home-files-service-type
-    `(("bin/kpkey" ,kpkey)))
+    (list kpkey-entry))
 
    ;; Singleton shepherd service
    (simple-service
@@ -1146,6 +1167,12 @@ sender='org.bluez'")
 
            (loop (+ tries 1)))))))
 
+(define ssh-add-key-entry
+  (manifest-entry
+    (name "ssh-add-key")
+    (version "0")
+    (item ssh-add-key)))
+
 ;; ------------------------------------------------------------
 ;; Single instance shepherd service
 ;; ------------------------------------------------------------
@@ -1155,10 +1182,9 @@ sender='org.bluez'")
 
    ;; Put executable into profile
    (simple-service
-    'ssh-add-key-bin
+    'ssh-add-key-profile
     home-files-service-type
-    `(("bin/ssh-add-key"
-       ,ssh-add-key)))
+    (list ssh-add-key-entry))
 
    ;; Singleton shepherd service
    (simple-service
@@ -1778,19 +1804,31 @@ sender='org.bluez'")
 
             (exit 1)))))))
 
+
+(define git-annex-daemon-entry
+  (manifest-entry
+    (name "git-annex-daemon")
+    (version "0")
+    (item git-annex-daemon)))
+
+
 ;; ------------------------------------------------------------
 ;; Single instance service
 ;; ------------------------------------------------------------
 
 (define-public home-git-annex-daemon-service
 
+
+
+
+
   (list
 
-   ;; Add executable into profile
+   ;; Install into actual profile
    (simple-service
     'git-annex-daemon-profile
-    home-files-service-type
-    `(("bin/git-annex-daemon"  ,git-annex-daemon)))
+    home-profile-service-type
+    (list git-annex-daemon-entry))
 
    ;; Singleton shepherd service
    (simple-service

@@ -198,6 +198,11 @@
                      "-p" #$mode)
                #:log-file #$log)))))
 
+(define secfs-mount-entry
+  (manifest-entry
+    (name "secfs-mount")
+    (version "0")
+    (item secfs-mount)))
 
 (define home-secfs-service-type
   (service-type
@@ -205,10 +210,12 @@
 
    (extensions
     (list
-     ;; install binary into profile
+
+     ;; true profile installation
      (service-extension
-      home-files-service-type
-      (const `(("bin/secfs-mount" ,secfs-mount))))
+      home-profile-service-type
+      (const
+       (list secfs-mount-entry)))
 
      ;; shepherd services
      (service-extension
