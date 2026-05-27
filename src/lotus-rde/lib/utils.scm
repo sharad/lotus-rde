@@ -89,23 +89,28 @@
 
     (arguments
      (list
-      #:imported-modules
-      %gnu-build-system-modules
+      #:modules
+      '((guix build utils))
+      ;; #:imported-modules
+      ;; %gnu-build-system-modules
       #:builder
-      #~(let ((out
-               (assoc-ref %outputs "out")))
+      #~(begin
+          (use-modules
+           (guix build utils))
+          (let ((out
+                 (assoc-ref %outputs "out")))
 
-          ;; mkdir -p equivalent
-          (mkdir
-           (string-append out "/bin"))
+            ;; mkdir -p equivalent
+            (mkdir
+             (string-append out "/bin"))
 
-          ;; install wrapper
-          (symlink
-           #$prog
-           (string-append
-            out
-            "/bin/"
-            #$name)))))
+            ;; install wrapper
+            (symlink
+             #$prog
+             (string-append
+              out
+              "/bin/"
+              #$name))))))
 
     (synopsis name)
     (description name)
