@@ -322,7 +322,7 @@ sender='org.bluez'")
    (simple-service
     'bluetooth-autoconnect-profile
     home-profile-service-type
-    (list bluetooth-autoconnect-entry))
+    (manifest (list bluetooth-autoconnect-entry)))
 
 
    ;; Singleton shepherd service
@@ -606,7 +606,7 @@ sender='org.bluez'")
    (simple-service
     'power-monitor-profile
     home-profile-service-type
-    (list power-monitor-entry))
+    (manifest (list power-monitor-entry)))
 
    ;; Singleton shepherd service
    (simple-service
@@ -939,7 +939,7 @@ sender='org.bluez'")
    (simple-service
     'kpkey-profile
     home-profile-service-type
-    (list kpkey-entry))
+    (manifest (list kpkey-entry)))
 
    ;; Singleton shepherd service
    (simple-service
@@ -1185,7 +1185,7 @@ sender='org.bluez'")
    (simple-service
     'ssh-add-key-profile
     home-profile-service-type
-    (list ssh-add-key-entry))
+    (manifest (list ssh-add-key-entry)))
 
    ;; Singleton shepherd service
    (simple-service
@@ -1825,7 +1825,7 @@ sender='org.bluez'")
    (simple-service
     'git-annex-daemon-profile
     home-profile-service-type
-    (list git-annex-daemon-entry))
+    (manifest (list git-annex-daemon-entry)))
 
    ;; Singleton shepherd service
    (simple-service
