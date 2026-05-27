@@ -1831,8 +1831,8 @@ sender='org.bluez'")
 
       (requirement
        '(keepassxc
-         ssh-add
-         xawaken-session-down))
+         ssh-add))
+          ;; xawaken-session-down
 
       (respawn? #f)
 
