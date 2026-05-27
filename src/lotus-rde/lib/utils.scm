@@ -101,7 +101,7 @@
                  (assoc-ref %outputs "out")))
 
             ;; mkdir -p equivalent
-            (mkdir
+            (mkdir-p
              (string-append out "/bin"))
 
             ;; install wrapper
