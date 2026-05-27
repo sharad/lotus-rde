@@ -840,6 +840,7 @@
                    python-tinydb
                    xprop
                    wmctrl))
+    (native-inputs (list python-setuptools))
     (propagated-inputs (list python-tinydb))
     (home-page "https://github.com/sharad/attnmgr")
     (synopsis "attnmgr")

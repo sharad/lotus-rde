@@ -145,12 +145,12 @@
           (polkit polkit)
           (mpd mpd)
           (znc znc)
-          (jupyter jupyter)
+          (jupyter jupyter))
           ;; (bluez-autoconnect
           ;;  (local-file "/home/s/.bin/bluetooth-autoconnect"))
           ;; (power-mon
           ;;  (local-file "/home/s/.bin/power-mon"))
-          (usrhttpd rust-usrhttpd))
+          ;; (usrhttpd rust-usrhttpd)
 
   (define (get-home-services config)
     (list
@@ -243,20 +243,20 @@
 
 
 
-         ;; usrhttpd
-         (shepherd-service
-          (provision '(usrhttpd))
-          (documentation "Simple user http server")
-          (auto-start? #f)
-          (start #~(make-forkexec-constructor
-                    (list #$(file-append usrhttpd "/bin/usrhttpd")
-                          "-H"
-                          "0.0.0.0"
-                          (string-append (getenv "HOME")
-                                         "/public_html/sites/default"))
-                    #:log-file #$(log-file "usrhttpd")))
-          (stop #~(make-kill-destructor))
-          (respawn? #f))
+         ;; ;; usrhttpd
+         ;; (shepherd-service
+         ;;  (provision '(usrhttpd))
+         ;;  (documentation "Simple user http server")
+         ;;  (auto-start? #f)
+         ;;  (start #~(make-forkexec-constructor
+         ;;            (list #$(file-append usrhttpd "/bin/usrhttpd")
+         ;;                  "-H"
+         ;;                  "0.0.0.0"
+         ;;                  (string-append (getenv "HOME")
+         ;;                                 "/public_html/sites/default"))
+         ;;            #:log-file #$(log-file "usrhttpd")))
+         ;;  (stop #~(make-kill-destructor))
+         ;;  (respawn? #f))
 
 
 
@@ -651,7 +651,8 @@
               (respawn? #f)
               (respawn-delay 600)
               (respawn-limit 1)
-              (requirement '(xawaken-session-down))))
+              ;; (requirement '(xawaken-session-down))
+              (requirement '())))
 
 
 
@@ -686,7 +687,8 @@
               (respawn? #f)
               (respawn-delay 600)
               (respawn-limit 1)
-              (requirement '(xawaken-session-down))))
+              ;; (requirement '(xawaken-session-down))
+              (requirement '())))
 
          ;; ;; 27 ssh-add
          ;; (mk/simple-service
