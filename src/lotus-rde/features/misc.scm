@@ -629,24 +629,24 @@
                                  "/bin/pasystray")))
 
          ;; 23 deskflow-server
-         (let ((cmd (file-append #$deskflow "/bin/deskflow-core"))
+         (let ((cmd (file-append deskflow "/bin/deskflow-server")) ;"deskflow-core"
                (mode "server")
                (ip  "0.0.0.0")
                (port "24800"))
              (shepherd-service
               (provision '(deskflow-server))
               (auto-start? #f)
-              (start    (make-forkexec-constructor (list #$cmd #$mode "--no-daemon"
-                                                         ;; "--debug" "INFO"
-                                                         "--debug" "DEBUG1"
-                                                         "--name" (or (getenv "HOST") "host")
-                                                         "--enable-crypto"
-                                                         "--log" (string-append (getenv "HOME") "/.logs/deskflow-server.log")
-                                                         "--address" (string-append #$ip ":" #$port)
-                                                         "--config" (string-append (getenv "HOME") "/.config/Deskflow/deskflow-server.conf")
-                                                         "--tls-cert" (string-append (getenv "HOME") "/.config/Deskflow/tls/deskflow-server.pem"))
-                                                   #:create-session? #f
-                                                   #:log-file #$(log-file "deskflow-server")))
+              (start    #~(make-forkexec-constructor (list #$cmd #$mode "--no-daemon"
+                                                           ;; "--debug" "INFO"
+                                                           "--debug" "DEBUG1"
+                                                           "--name" (or (getenv "HOST") "host")
+                                                           "--enable-crypto"
+                                                           "--log" (string-append (getenv "HOME") "/.logs/deskflow-server.log")
+                                                           "--address" (string-append #$ip ":" #$port)
+                                                           "--config" (string-append (getenv "HOME") "/.config/Deskflow/deskflow-server.conf")
+                                                           "--tls-cert" (string-append (getenv "HOME") "/.config/Deskflow/tls/deskflow-server.pem"))
+                                                     #:create-session? #f
+                                                     #:log-file #$(log-file "deskflow-server")))
               (stop     #~(make-kill-destructor))
               (respawn? #f)
               (respawn-delay 600)
@@ -656,7 +656,7 @@
 
 
          ;; 25 deskflow-client
-         (let ((cmd "deskflow-core")
+         (let ((cmd (file-append deskflow "/bin/deskflow-server")) ;"deskflow-core"
                (mode "server")
                (server  "deskflow-server-host")
                (port "24800"))
@@ -680,7 +680,7 @@
                                                                                  "--tls-cert" (string-append (getenv "HOME") "/.config/Deskflow/tls/deskflow-client.pem")
                                                                                  (string-append server ":" #$port))
                                                                            #:create-session? #f
-                                                                           #:log-file #$(log-file log-file-loc))))
+                                                                           #:log-file (log-file log-file-loc))))
                               (apply constructor args))))
               (stop  #~(make-kill-destructor))
               (respawn? #f)
@@ -727,7 +727,7 @@
                                                                            "-o" "ControlPersist=no"
                                                                            server)
                                                                      #:create-session? #f
-                                                                     #:log-file #$(log-file log-file-loc))))
+                                                                     #:log-file (log-file log-file-loc))))
                         (apply constructor args))))
            (stop #~(make-kill-destructor))
            (respawn? #t)

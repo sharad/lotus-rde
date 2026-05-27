@@ -973,11 +973,11 @@ sender='org.bluez'")
                           (constructor (make-system-constructor cli " >> " #$(log-file "kpkeys") " 2>&1")))
                      (format #t "Running ~a~%" cli)
                      (apply constructor args))))
-        #:stop  (lambda (running . args)
-                  (let* ((cli (string-join (append (list #$cmd "-s") args '("ci")) " "))
-                         (destructor (make-system-destructor cli " >> " #$(log-file "kpkeys") " 2>&1")))
-                    (format #t "Running ~a~%" cli)
-                    (apply destructor running args)))
+        (stop  #~(lambda (running . args)
+                   (let* ((cli (string-join (append (list #$cmd "-s") args '("ci")) " ")
+                            (destructor (make-system-destructor cli " >> " #$(log-file "kpkeys") " 2>&1"))))
+                     (format #t "Running ~a~%" cli
+                       (apply destructor running args)))))
         (one-shot? #t)
         (respawn? #f)))))))
 
@@ -1885,7 +1885,7 @@ sender='org.bluez'")
                          (log-file-loc (string-append "annex" "-" component))
                          (constructor (make-forkexec-constructor (list #$cmd "annex" "daemon" component)
                                                                  ;; https://issues.guix.gnu.org/67175
-                                                                 #:log-file #$(log-file log-file-loc))))
+                                                                 #:log-file (log-file log-file-loc))))
                     (apply constructor args))))
        ;; Use annex daemon stop
        ;; instead of kill.
@@ -1910,7 +1910,7 @@ sender='org.bluez'")
                       (log-file-loc (string-append "annex" "-" component))
                       (destructor (make-cmd-destructor (string-join (list #$cmd "annex" "daemon" component) " ")
                                                        " >> "
-                                                       #$(log-file log-file-loc)
+                                                       (log-file log-file-loc)
                                                        " 2>&1")))
                  destructor))
        (one-shot? #f)))))))

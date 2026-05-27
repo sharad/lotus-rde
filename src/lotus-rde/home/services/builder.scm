@@ -322,7 +322,7 @@
                                                                      "-d" #$dev
                                                                      "-m" #$mp
                                                                      "-p" mode)
-                                                               #:log-file #$(log-file log-file-loc))))
+                                                               #:log-file (log-file log-file-loc))))
                   (apply constructor args)))))))
 
 
