@@ -17,7 +17,7 @@
   #:use-module (guix build-system trivial)
   ;; #:use-module (gnu packages)
   ;; #:use-module (gnu packages base)
-  ;; #:use-module (guix build utils)
+  #:use-module (guix build utils)
   #:use-module (gnu system mapped-devices)
   #:use-module (gnu system file-systems)
   #:use-module (gnu system uuid)
@@ -78,38 +78,72 @@
       (apply kill-destructor running args)
       (apply system-destructor running args))))
 
+
 (define (program-file->package name prog)
   (package
     (name name)
     (version "0")
     (source #f)
+
     (build-system trivial-build-system)
 
     (arguments
      (list
       #:builder
-      #~(begin
+      #~(let ((out
+               (assoc-ref %outputs "out")))
 
-          (use-modules
-           (guix build utils))
+          ;; mkdir -p equivalent
+          (mkdir
+           (string-append out "/bin"))
 
-          (let ((out
-                 (assoc-ref %outputs "out")))
-
-            (mkdir-p
-             (string-append out "/bin"))
-
-            (symlink
-             #$prog
-             (string-append
-              out
-              "/bin/"
-              #$name))))))
+          ;; install wrapper
+          (symlink
+           #$prog
+           (string-append
+            out
+            "/bin/"
+            #$name)))))
 
     (synopsis name)
     (description name)
     (home-page "")
+
+    ;; choose real license later
     (license #f)))
+
+;; (define (program-file->package name prog)
+;;   (package
+;;     (name name)
+;;     (version "0")
+;;     (source #f)
+;;     (build-system trivial-build-system)
+
+;;     (arguments
+;;      (list
+;;       #:builder
+;;       #~(begin
+
+;;           (use-modules
+;;            (guix build utils))
+
+;;           (let ((out
+;;                  (assoc-ref %outputs "out")))
+
+;;             (mkdir-p
+;;              (string-append out "/bin"))
+
+;;             (symlink
+;;              #$prog
+;;              (string-append
+;;               out
+;;               "/bin/"
+;;               #$name))))))
+
+;;     (synopsis name)
+;;     (description name)
+;;     (home-page "")
+;;     (license #f)))
 
 
 (define* (define-spawner-service spawner-service
