@@ -200,10 +200,7 @@
                #:log-file #$log)))))
 
 (define secfs-mount-entry
-  (manifest-entry
-    (name "secfs-mount")
-    (version "0")
-    (item secfs-mount)))
+  (program-file->package "secfs-mount" secfs-mount))
 
 (define home-secfs-service-type
   (service-type
@@ -216,7 +213,7 @@
      (service-extension
       home-profile-service-type
       (const
-       (manifest (list secfs-mount-entry))))
+       (list secfs-mount-entry)))
 
      ;; shepherd services
      (service-extension

@@ -20,6 +20,7 @@
   #:use-module (gnu packages linux)
   #:export (log-file
             make-cmd-destructor
+            program-file->package
             lotus-assert
             ensure-rw-mount
             ensure-umount))
@@ -72,6 +73,39 @@
     (lambda (running . args)
       (apply kill-destructor running args)
       (apply system-destructor running args))))
+
+(define (program-file->package name prog)
+  (package
+    (name name)
+    (version "0")
+    (source #f)
+    (build-system trivial-build-system)
+
+    (arguments
+     (list
+      #:builder
+      #~(begin
+
+          (use-modules
+           (guix build utils))
+
+          (let ((out
+                 (assoc-ref %outputs "out")))
+
+            (mkdir-p
+             (string-append out "/bin"))
+
+            (symlink
+             #$prog
+             (string-append
+              out
+              "/bin/"
+              #$name))))))
+
+    (synopsis name)
+    (description name)
+    (home-page "")
+    (license #f)))
 
 
 (define* (define-spawner-service spawner-service
