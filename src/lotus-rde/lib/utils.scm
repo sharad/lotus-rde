@@ -89,6 +89,8 @@
 
     (arguments
      (list
+      #:imported-modules
+      %gnu-build-system-modules
       #:builder
       #~(let ((out
                (assoc-ref %outputs "out")))
