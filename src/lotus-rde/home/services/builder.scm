@@ -409,12 +409,6 @@
                 #:log-file (log-file #$name)))
 
       (stop #~(begin
-                 (define (make-cmd-destructor . command)
-                   (let ((system-destructor (apply make-system-destructor command))
-                         (kill-destructor   (make-kill-destructor)))
-                     (lambda (running . args)
-                       (apply kill-destructor running args)
-                       (apply system-destructor running args))))
                  (let ((make-cmd-destructor
                         (lambda command
                           (let ((system-destructor
