@@ -1908,9 +1908,9 @@ sender='org.bluez'")
        ;;               args))))
        (stop (with-imported-modules
                  (source-module-closure
-                   '((lotus-rde lib utils)))
+                   '((lotus-rde lib shepherd-utils)))
                #~(begin
-                  (use-modules (lotus-rde lib utils))
+                  (use-modules (lotus-rde lib shepherd-utils))
                   (let* ((component "stop")
                          (log-file-loc (string-append "annex" "-" component))
                          (destructor (make-cmd-destructor (string-join (list #$cmd "annex" "daemon" component) " ")

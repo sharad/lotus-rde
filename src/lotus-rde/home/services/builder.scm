@@ -410,9 +410,9 @@
 
       (stop (with-imported-modules
                 (source-module-closure
-                 '((lotus-rde lib utils)))
+                 '((lotus-rde lib shepherd-utils)))
              #~(begin
-                 (use-modules (lotus-rde lib utils))
+                 (use-modules (lotus-rde lib shepherd-utils))
                  (let ((make-cmd-destructor
                         (lambda command
                           (let ((system-destructor
