@@ -409,7 +409,7 @@
                 #:log-file (log-file #$name)))
 
       (stop (with-imported-modules
-                (source-module-closurea
+                (source-module-closure
                  '((lotus-rde lib utils)))
              #~(begin
                  (use-modules (lotus-rde lib utils))
