@@ -1,4 +1,5 @@
 (define-module (lotus-rde lib shepherd-utils)
+  #:use-module (gnu services shepherd)
   #:export (;; log-file
             make-cmd-destructor))
 
