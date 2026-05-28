@@ -515,18 +515,14 @@
          ;; 9 notification
          (mk/simple-service
           '(notification)
-          #~(list (string-append (getenv "HOME")
-                                 "/.guix-profile/libexec/notification")))
+          #~(list #$(file-append notifica-daemon "/libexec/notifica-daemon")))
 
 
 
          ;; 10 ibus-portal
          (mk/simple-service
           '(ibus-portal)
-          #~(list
-             (string-append
-              (getenv "HOME")
-              "/.setup/guix-config/per-user/s/profiles/01-simple/profiles.d/profile/libexec/ibus-portal")))
+          #~(list #$(file-append ibus "/libexec/ibus-portal")))
 
 
 
@@ -540,8 +536,7 @@
          ;; 12 ibus-x11
          (mk/simple-service
           '(ibus-x11)
-          #~(list (string-append (getenv "HOME")
-                                 "/.setup/guix-config/per-user/s/profiles/01-simple/profiles.d/profile/libexec/ibus-x11")
+          #~(list #$(file-append ibus "/libexec/ibus-x11")
                   "--kill-daemon"))
 
 
