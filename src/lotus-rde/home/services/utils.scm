@@ -1882,9 +1882,9 @@ sender='org.bluez'")
                                         (car args)
                                         #$component))
                          (log-file-loc (string-append "annex" "-" component))
-                         (constructor (make-forkexec-constructor (list #$cmd "annex" "daemon" component)
+                         (constructor (make-forkexec-constructor (list #$cmd "annex" "daemon" component))))
                                                                  ;; https://issues.guix.gnu.org/67175
-                                                                 #:log-file (log-file log-file-loc))))
+                                                                 ; #:log-file (log-file log-file-loc)
                     (apply constructor args))))
        ;; Use annex daemon stop
        ;; instead of kill.
