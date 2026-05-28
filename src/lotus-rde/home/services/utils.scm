@@ -1870,7 +1870,7 @@ sender='org.bluez'")
        (respawn-limit 10)
        (auto-start? #f)
        (start #~(lambda ( . args)
-                  (let* ((log-file   #$log-file-gexp) 
+                  (let* ((log-file   #$log-file-gexp)
                          (component (if (pair? args)
                                         (car args)
                                         #$component))
@@ -1879,7 +1879,7 @@ sender='org.bluez'")
                                                                  ;; https://issues.guix.gnu.org/67175
                                                                  #:log-file (log-file log-file-loc))))
                     (apply constructor args))))
-       (stop #~(let* ((log-file   #$log-file-gexp) 
+       (stop #~(let* ((log-file   #$log-file-gexp)
                       (make-cmd-destructor #$make-cmd-destructor-gexp)
                       (component "stop")
                       (log-file-loc (string-append "annex" "-" component))
@@ -1890,4 +1890,3 @@ sender='org.bluez'")
                    destructor))
        (one-shot? #f)))))))
 
-

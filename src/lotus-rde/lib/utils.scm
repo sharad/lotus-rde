@@ -168,7 +168,39 @@
 ;;              (display #$content p)))
 
 ;;          (chmod #$output #o555)))))
+
 
+
+(define %shepherd-utils
+  (scheme-file "shepherd-utils.scm"
+    #~(begin
+        (use-modules (ice-9 popen)
+                     (ice-9 rdelim)
+                     (shepherd service))  ; ← make-system-destructor, make-kill-destructor
+
+        (define (log-file name)
+          (let* ((home   (getenv "HOME"))
+                 (logdir (string-append home "/.logs/shepherd/")))
+            (unless (file-exists? logdir)
+              (mkdir logdir))
+            (string-append logdir name ".log")))
+
+        (define (pipe-read cmd)
+          (let* ((p (open-input-pipe cmd))
+                 (s (read-line p)))
+            (close-pipe p)
+            (and (not (eof-object? s))
+                 (not (string-null? (string-trim-right s)))
+                 (string-trim-right s))))
+
+        (define (make-cmd-destructor . command)
+          (let ((system-destructor (apply make-system-destructor command))
+                (kill-destructor   (make-kill-destructor)))
+            (lambda (running . args)
+              (apply kill-destructor running args)
+              (apply system-destructor running args)))))))
+
+
 
 (define* (define-spawner-service spawner-service
                                  #:key constructor-fn is-capable-fn?)
