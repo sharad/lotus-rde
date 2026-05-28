@@ -200,6 +200,12 @@
               (apply kill-destructor running args)
               (apply system-destructor running args)))))))
 
+;;;; Usage
+;; (stop #~(begin
+;;           (load #$%shepherd-utils)
+;;           (make-cmd-destructor
+;;            (string-append #$flatpak-bin " kill " #$app
+;;                           " >> " (log-file #$name-str) " 2>&1"))))
 
 
 (define* (define-spawner-service spawner-service
