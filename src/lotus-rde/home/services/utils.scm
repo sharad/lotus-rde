@@ -1880,20 +1880,7 @@ sender='org.bluez'")
                                                                  #:log-file (log-file log-file-loc))))
                     (apply constructor args))))
        (stop #~(let* ((log-file   #$log-file-gexp) 
-                      (make-cmd-destructor
-                         (lambda command
-                           (let ((system-destructor
-                                  (apply make-system-destructor
-                                         command))
-                                 (kill-destructor
-                                  (make-kill-destructor)))
-                             (lambda (running . args)
-                               (apply kill-destructor
-                                      running
-                                      args)
-                               (apply system-destructor
-                                      running
-                                      args)))))
+                      (make-cmd-destructor #$make-cmd-destructor-gexp)
                       (component "stop")
                       (log-file-loc (string-append "annex" "-" component))
                       (destructor (make-cmd-destructor (string-join (list #$cmd "annex" "daemon" component) " ")

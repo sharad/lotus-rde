@@ -407,23 +407,8 @@
       (start #~(make-forkexec-constructor
                 (list #$dbus-launch #$flatpak "--user" "run" #$app)
                 #:create-session? #t
-                ;; #:log-file (#$log-file-gexp #$name)
                 #:log-file #$log))
-      (stop #~(let ((make-cmd-destructor
-                     (lambda command
-                       (let ((system-destructor
-                              (apply make-system-destructor
-                                     command))
-                             (kill-destructor
-                              (make-kill-destructor)))
-                         (lambda (running . args)
-                           (apply kill-destructor
-                                  running
-                                  args)
-                           (apply system-destructor
-                                  running
-                                  args))))))
-
+      (stop #~(let ((make-cmd-destructor #$make-cmd-destructor-gexp))
                 (make-cmd-destructor
                  (string-append #$flatpak
                                 " kill "
