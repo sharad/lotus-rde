@@ -20,7 +20,7 @@
 (define-module (lotus-rde home services builder)
   #:use-module (srfi srfi-1)
   #:use-module (guix gexp)
-  ;; #:use-module (guix modules)
+  #:use-module (guix modules)
   #:use-module (guix profiles)
   #:use-module (guix records)
   #:use-module (gnu services)
