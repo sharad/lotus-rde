@@ -493,118 +493,207 @@
      (provision (list name))
      (requirement '())
      (auto-start? #f)
+     ;; (free-form
+     ;;  #~(begin
+     ;;      (use-modules (oop goops)          ; for make <service>
+     ;;                   (shepherd service))
+     ;;     (let* ((once-started #f)
+     ;;            (name        '#$name)
+     ;;            (dependent   '#$dependent)
+     ;;            (requirement '#$requirement)
+     ;;            (conflict    '#$conflict)
+     ;;            (up          '#$up)
+     ;;            (down        '#$down))
+
+     ;;       (define (xrun-action-service srv action action-proc retval . args)
+     ;;         (format #t "xrun-action1: ~a args[~a]~%" srv args)
+     ;;         (if (lookup-service-action srv action)
+     ;;             (begin
+     ;;               (format #t "xrun-action2: action [~a] present for ~a~%" action srv)
+     ;;               (apply perform-service-action srv action args))
+     ;;             (begin
+     ;;               (format #t "xrun-action3: action [~a] not present for ~a~%" action srv)
+     ;;               (apply action-proc retval srv args))))
+
+     ;;       (define (xdefine-action action action-proc)
+     ;;         (lambda (retval . args)
+     ;;           (for-each (lambda (sym)
+     ;;                       (let ((srv (lookup-service sym)))
+     ;;                         (apply xrun-action-service
+     ;;                                srv action action-proc retval args)))
+     ;;                     (append requirement (list up down)))
+     ;;           (let ((srv (lookup-service name)))
+     ;;             (apply action-proc retval srv args))))
+
+     ;;       (define (xstop-services services)
+     ;;         (for-each stop-service services))
+
+     ;;       (let ((up-service
+     ;;              (make <service>
+     ;;                #:provides (list up)
+     ;;                #:requires requirement
+     ;;                #:transient? #f
+     ;;                #:one-shot? #f
+     ;;                #:respawn? #f
+     ;;                #:start (lambda args
+     ;;                          (xstop-services conflict)
+     ;;                          #t)
+     ;;                #:stop (lambda args #t)))
+
+     ;;             (down-service
+     ;;              (make <service>
+     ;;                #:provides (list down)
+     ;;                #:requires dependent
+     ;;                #:transient? #f
+     ;;                #:one-shot? #f
+     ;;                #:respawn? #f
+     ;;                #:start (lambda _ #t)
+     ;;                #:stop  (lambda (running . args)
+     ;;                          (xstop-services conflict)
+     ;;                          #t))))
+
+     ;;         (register-services up-service down-service)
+
+     ;;         (make <service>
+     ;;           #:provides (list name)
+     ;;           #:requires '()
+     ;;           #:transient? #f
+     ;;           #:one-shot? #f
+     ;;           #:respawn? #f
+     ;;           #:start (lambda args
+     ;;                     (set! once-started #t)
+     ;;                     (apply start-service up-service args)
+     ;;                     #t)
+     ;;           #:stop  (lambda (running . args)
+     ;;                     (apply stop-service down-service args)
+     ;;                     #t)
+     ;;           #:actions
+     ;;           (make-actions
+     ;;            (up       (xdefine-action 'up
+     ;;                        (lambda (retval srv . args)
+     ;;                          (format #t "Starting service ~a args [~a]~%" srv args)
+     ;;                          (if srv
+     ;;                              (begin (enable-service srv)
+     ;;                                     (apply start-service srv args))
+     ;;                              (format #t "No service ~a~%" name)))))
+     ;;            (down     (xdefine-action 'down
+     ;;                        (lambda (running srv . args)
+     ;;                          (format #t "Stopping service ~a~%" srv)
+     ;;                          (if srv
+     ;;                              (apply stop-service srv args)
+     ;;                              (format #t "No service ~a~%" name)))))
+     ;;            (xenable  (xdefine-action 'xenable
+     ;;                        (lambda (retval srv . args)
+     ;;                          (format #t "Enabling service ~a~%" srv)
+     ;;                          (if srv
+     ;;                              (enable-service srv)
+     ;;                              (format #t "No service ~a~%" name)))))
+     ;;            (xdisable (xdefine-action 'xdisable
+     ;;                        (lambda (retval srv . args)
+     ;;                          (format #t "Disabling service ~a~%" srv)
+     ;;                          (if srv
+     ;;                              (disable-service srv)
+     ;;                              (format #t "No service ~a~%" name)))))
+     ;;            (xstatus  (xdefine-action 'xstatus
+     ;;                        (lambda (retval srv . args)
+     ;;                          (format #t "Service status ~a~%" srv)
+     ;;                          (if srv
+     ;;                              (display-service-status srv)
+     ;;                              (format #t "No service ~a~%" name)))))
+     ;;            (once     (lambda (x)
+     ;;                        (format #t "~a~%"
+     ;;                                (if once-started
+     ;;                                    "true"
+     ;;                                    "false"))))))))))
      (free-form
       #~(begin
-          (use-modules (oop goops)          ; for make <service>
-                       (shepherd service))
-         (let* ((once-started #f)
-                (name        '#$name)
-                (dependent   '#$dependent)
-                (requirement '#$requirement)
-                (conflict    '#$conflict)
-                (up          '#$up)
-                (down        '#$down))
+          (use-modules (shepherd service))   ; service, register-services etc
 
-           (define (xrun-action-service srv action action-proc retval . args)
-             (format #t "xrun-action1: ~a args[~a]~%" srv args)
-             (if (lookup-service-action srv action)
-                 (begin
-                   (format #t "xrun-action2: action [~a] present for ~a~%" action srv)
-                   (apply perform-service-action srv action args))
-                 (begin
-                   (format #t "xrun-action3: action [~a] not present for ~a~%" action srv)
-                   (apply action-proc retval srv args))))
+          (let* ((once-started #f)
+                 (name        '#$name)
+                 (dependent   '#$dependent)
+                 (requirement '#$requirement)
+                 (conflict    '#$conflict)
+                 (up          '#$up)
+                 (down        '#$down))
 
-           (define (xdefine-action action action-proc)
-             (lambda (retval . args)
-               (for-each (lambda (sym)
-                           (let ((srv (lookup-service sym)))
-                             (apply xrun-action-service
-                                    srv action action-proc retval args)))
-                         (append requirement (list up down)))
-               (let ((srv (lookup-service name)))
-                 (apply action-proc retval srv args))))
+            (define (xrun-action-service srv action action-proc retval . args)
+              (format #t "xrun-action1: ~a args[~a]~%" srv args)
+              (if (lookup-service-action srv action)
+                  (apply perform-service-action srv action args)
+                  (apply action-proc retval srv args)))
 
-           (define (xstop-services services)
-             (for-each stop-service services))
+            (define (xdefine-action action action-proc)
+              (lambda (retval . args)
+                (for-each (lambda (sym)
+                            (let ((srv (lookup-service sym)))
+                              (apply xrun-action-service
+                                     srv action action-proc retval args)))
+                          (append requirement (list up down)))
+                (let ((srv (lookup-service name)))
+                  (apply action-proc retval srv args))))
 
-           (let ((up-service
-                  (make <service>
-                    #:provides (list up)
-                    #:requires requirement
-                    #:transient? #f
-                    #:one-shot? #f
-                    #:respawn? #f
-                    #:start (lambda args
-                              (xstop-services conflict)
-                              #t)
-                    #:stop (lambda args #t)))
+            (define (xstop-services services)
+              (for-each stop-service services))
 
-                 (down-service
-                  (make <service>
-                    #:provides (list down)
-                    #:requires dependent
-                    #:transient? #f
-                    #:one-shot? #f
-                    #:respawn? #f
-                    #:start (lambda _ #t)
-                    #:stop  (lambda (running . args)
-                              (xstop-services conflict)
-                              #t))))
+            (let ((up-service
+                   (service (list up)                  ; ← new API
+                     #:requirement requirement
+                     #:transient? #f
+                     #:one-shot? #f
+                     #:respawn? #f
+                     #:start (lambda args
+                               (xstop-services conflict)
+                               #t)
+                     #:stop (lambda args #t)))
 
-             (register-services up-service down-service)
+                  (down-service
+                   (service (list down)                ; ← new API
+                     #:requirement dependent
+                     #:transient? #f
+                     #:one-shot? #f
+                     #:respawn? #f
+                     #:start (lambda _ #t)
+                     #:stop  (lambda (running . args)
+                               (xstop-services conflict)
+                               #t))))
 
-             (make <service>
-               #:provides (list name)
-               #:requires '()
-               #:transient? #f
-               #:one-shot? #f
-               #:respawn? #f
-               #:start (lambda args
-                         (set! once-started #t)
-                         (apply start-service up-service args)
-                         #t)
-               #:stop  (lambda (running . args)
-                         (apply stop-service down-service args)
-                         #t)
-               #:actions
-               (make-actions
-                (up       (xdefine-action 'up
-                            (lambda (retval srv . args)
-                              (format #t "Starting service ~a args [~a]~%" srv args)
-                              (if srv
-                                  (begin (enable-service srv)
-                                         (apply start-service srv args))
-                                  (format #t "No service ~a~%" name)))))
-                (down     (xdefine-action 'down
-                            (lambda (running srv . args)
-                              (format #t "Stopping service ~a~%" srv)
-                              (if srv
-                                  (apply stop-service srv args)
-                                  (format #t "No service ~a~%" name)))))
-                (xenable  (xdefine-action 'xenable
-                            (lambda (retval srv . args)
-                              (format #t "Enabling service ~a~%" srv)
-                              (if srv
-                                  (enable-service srv)
-                                  (format #t "No service ~a~%" name)))))
-                (xdisable (xdefine-action 'xdisable
-                            (lambda (retval srv . args)
-                              (format #t "Disabling service ~a~%" srv)
-                              (if srv
-                                  (disable-service srv)
-                                  (format #t "No service ~a~%" name)))))
-                (xstatus  (xdefine-action 'xstatus
-                            (lambda (retval srv . args)
-                              (format #t "Service status ~a~%" srv)
-                              (if srv
-                                  (display-service-status srv)
-                                  (format #t "No service ~a~%" name)))))
-                (once     (lambda (x)
-                            (format #t "~a~%"
-                                    (if once-started
-                                        "true"
-                                        "false")))))))))))))
+              (register-services (list up-service down-service))
+
+              (service (list name)                     ; ← new API, returned to shepherd
+                #:requirement '()
+                #:transient? #f
+                #:one-shot? #f
+                #:respawn? #f
+                #:start (lambda args
+                          (set! once-started #t)
+                          (apply start-service up-service args)
+                          #t)
+                #:stop  (lambda (running . args)
+                          (apply stop-service down-service args)
+                          #t)
+                #:actions
+                (make-actions
+                 (up       (xdefine-action 'up
+                             (lambda (retval srv . args)
+                               (when srv
+                                 (enable-service srv)
+                                 (apply start-service srv args)))))
+                 (down     (xdefine-action 'down
+                             (lambda (running srv . args)
+                               (when srv (apply stop-service srv args)))))
+                 (xenable  (xdefine-action 'xenable
+                             (lambda (retval srv . args)
+                               (when srv (enable-service srv)))))
+                 (xdisable (xdefine-action 'xdisable
+                             (lambda (retval srv . args)
+                               (when srv (disable-service srv)))))
+                 (xstatus  (xdefine-action 'xstatus
+                             (lambda (retval srv . args)
+                               (when srv (display-service-status srv)))))
+                 (once     (lambda (x)
+                             (format #t "~a~%"
+                                     (if once-started "true" "false")))))))))))))
 
 
 
