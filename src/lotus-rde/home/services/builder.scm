@@ -321,8 +321,8 @@
                        (constructor (make-forkexec-constructor (list #$cmd
                                                                      "-d" #$dev
                                                                      "-m" #$mp
-                                                                     "-p" mode)
-                                                               #:log-file (log-file log-file-loc))))
+                                                                     "-p" mode))))
+                                                                ; #:log-file (log-file log-file-loc)
                   (apply constructor args)))))))
 
 
