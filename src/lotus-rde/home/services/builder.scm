@@ -408,7 +408,7 @@
                 (list #$dbus-launch #$flatpak "--user" "run" #$app)
                 #:create-session? #t
                 ;; #:log-file (#$log-file-gexp #$name)
-                #:log-file log))  ;#:log-file (log-file #$name)
+                #:log-file #$(log-file name-str)))
       (stop #~(let ((make-cmd-destructor
                      (lambda command
                        (let ((system-destructor
@@ -429,7 +429,7 @@
                                 " kill "
                                 #$app
                                 " >> "
-                                #$log
+                                #$(log-file name-str)
                                 " 2>&1")))))))
 
 (define home-flatpak-service-type
