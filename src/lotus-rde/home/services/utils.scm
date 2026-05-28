@@ -1923,8 +1923,8 @@ sender='org.bluez'")
                       (component "stop")
                       (log-file-loc (string-append "annex" "-" component))
                       (destructor (make-cmd-destructor (string-join (list #$cmd "annex" "daemon" component) " ")
-                                                       " >> "
-                                                       (log-file log-file-loc)
+                                                       ;; " >> "
+                                                       ;; (log-file log-file-loc)
                                                        " 2>&1")))
                    destructor))
        (one-shot? #f)))))))
