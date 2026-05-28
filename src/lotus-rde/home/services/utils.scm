@@ -968,16 +968,15 @@ sender='org.bluez'")
         ;; (stop
         ;;  #~(make-kill-destructor))
         (start #~(lambda ( . args)
-                   (let* ((cli (string-join (append (list #$cmd "-s") args '("co"))
-                                            " "))
+                   (let* ((cli (string-join (append (list #$cmd "-s") args '("co")) " "))
                           (constructor (make-system-constructor cli " >> " #$(log-file "kpkeys") " 2>&1")))
                      (format #t "Running ~a~%" cli)
                      (apply constructor args))))
         (stop  #~(lambda (running . args)
-                   (let* ((cli (string-join (append (list #$cmd "-s") args '("ci")) " ")
-                            (destructor (make-system-destructor cli " >> " #$(log-file "kpkeys") " 2>&1"))))
+                   (let* ((cli (string-join (append (list #$cmd "-s") args '("ci")) " "))
+                          (destructor (make-system-destructor cli " >> " #$(log-file "kpkeys") " 2>&1")))
                      (format #t "Running ~a~%" cli
-                       (apply destructor running args)))))
+                             (apply destructor running args)))))
         (one-shot? #t)
         (respawn? #f)))))))
 
