@@ -1907,7 +1907,7 @@ sender='org.bluez'")
        ;;               running
        ;;               args))))
        (stop (with-imported-modules
-                 '(((lotus-rde lib utils) => ,(source-module-closure
+                 `(((lotus-rde lib utils) => ,(source-module-closure
                                                '((lotus-rde lib utils)))))
                #~(begin
                   (use-modules (lotus-rde lib utils))
