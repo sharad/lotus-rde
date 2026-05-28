@@ -25,6 +25,7 @@
   #:export (log-file
             log-file-gexp
             make-cmd-destructor
+            make-cmd-destructor-gexp
             file->package
             ;; lotus-assert
             ensure-rw-mount
@@ -88,6 +89,22 @@
     (lambda (running . args)
       (apply kill-destructor running args)
       (apply system-destructor running args))))
+
+
+(define make-cmd-destructor-gexp
+  #~(lambda command
+      (let ((system-destructor
+             (apply make-system-destructor
+                    command))
+            (kill-destructor
+             (make-kill-destructor)))
+        (lambda (running . args)
+          (apply kill-destructor
+                 running
+                 args)
+          (apply system-destructor
+                 running
+                 args)))))
 
 
 (define (file->package name prog)

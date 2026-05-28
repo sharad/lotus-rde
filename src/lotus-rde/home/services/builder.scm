@@ -408,7 +408,7 @@
                 (list #$dbus-launch #$flatpak "--user" "run" #$app)
                 #:create-session? #t
                 ;; #:log-file (#$log-file-gexp #$name)
-                #:log-file #$(log-file name)))  ;#:log-file (log-file #$name)
+                #:log-file log))  ;#:log-file (log-file #$name)
       (stop #~(let ((make-cmd-destructor
                      (lambda command
                        (let ((system-destructor
