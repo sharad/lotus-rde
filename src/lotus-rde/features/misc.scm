@@ -515,7 +515,7 @@
          ;; 9 notification
          (mk/simple-service
           '(notification)
-          #~(list #$(file-append notifica-daemon "/libexec/notifica-daemon")))
+          #~(list #$(file-append notification-daemon "/libexec/notifica-daemon")))
 
 
 
