@@ -409,8 +409,8 @@
                 #:log-file (log-file #$name)))
 
       (stop (with-imported-modules
-                `(((lotus-rde lib utils) => ,(source-module-closure
-                                              '((lotus-rde lib utils)))))
+                (source-module-closurea
+                 '((lotus-rde lib utils)))
              #~(begin
                  (use-modules (lotus-rde lib utils))
                  (let ((make-cmd-destructor

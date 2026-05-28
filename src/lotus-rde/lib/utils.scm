@@ -25,7 +25,7 @@
   #:export (log-file
             make-cmd-destructor
             file->package
-            lotus-assert
+            ;; lotus-assert
             ensure-rw-mount
             ensure-umount))
 
