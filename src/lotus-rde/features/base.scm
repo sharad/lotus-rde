@@ -1291,7 +1291,16 @@ Defaults:%wheel env_keep+=TERMINFO")))))
                                   "https://substitutes.nonguix.org"
                                   "https://nonguix-proxy.ditigal.xyz"
                                   "https://cache-cdn.guix.moe"))
-          (base-authorized-guix-keys (list (plain-file "cuirass-genenetwork-org.pub"
+          (base-authorized-guix-keys (list (plain-file "substitutes.nonguix.org.pub"
+                                                       "(public-key (ecc (curve Ed25519) (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))")
+                                           (plain-file "nonguix-proxy.ditigal.xyz.pub"
+                                                       "(public-key (ecc (curve Ed25519) (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))")
+                                           (plain-file "cache-cdn.guix.moe-old.pub"
+                                                       "(public-key (ecc (curve Ed25519) (q #374EC58F5F2EC0412431723AF2D527AD626B049D657B5633AAAEBC694F3E33F9#)))")
+                                                                                              ;; New key since 2025-10-29.
+                                           (plain-file "cache-cdn.guix.moe.pub"
+                                                       "(public-key (ecc (curve Ed25519) (q #552F670D5005D7EB6ACF05284A1066E52156B51D75DE3EBD3030CD046675D543#)))")
+                                           (plain-file "cuirass-genenetwork-org.pub"
                                                        "(public-key (ecc (curve Ed25519) (q #11217788B41ADC8D5B8E71BD87EF699C65312EC387752899FE9C888856F5C769#)))")
                                            (plain-file "guix.tobias.gr"
                                                        "(public-key (ecc (curve Ed25519) (q #628CD75C05C78223317092AFDCBE7130D363ACA938114A067F4F9DCF346B59DB#)))")
@@ -1302,16 +1311,8 @@ Defaults:%wheel env_keep+=TERMINFO")))))
                                            (plain-file "berlin.guix.gnu.org"
                                                        "(public-key (ecc (curve Ed25519) (q #8D156F295D24B0D9A86FA5741A840FF2D24F60F7B6C4134814AD55625971B394#)))")
                                            (plain-file "mirror.brielmaier.net"
-                                                       "(public-key (ecc (curve Ed25519) (q #34C318D602FCF6198C5A9F5290A8DB2382D2D0C5478441F8308D24E31BA61633#)))")
-                                           (plain-file "substitutes.nonguix.org.pub"
-                                                       "(public-key (ecc (curve Ed25519) (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))")
-                                           (plain-file "nonguix-proxy.ditigal.xyz.pub"
-                                                       "(public-key (ecc (curve Ed25519) (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))")
-                                           (plain-file "cache-cdn.guix.moe-old.pub"
-                                                       "(public-key (ecc (curve Ed25519) (q #374EC58F5F2EC0412431723AF2D527AD626B049D657B5633AAAEBC694F3E33F9#)))")
-                                                                                              ;; New key since 2025-10-29.
-                                           (plain-file "cache-cdn.guix.moe.pub"
-                                                       "(public-key (ecc (curve Ed25519) (q #552F670D5005D7EB6ACF05284A1066E52156B51D75DE3EBD3030CD046675D543#)))"))))
+                                                       "(public-key (ecc (curve Ed25519) (q #34C318D602FCF6198C5A9F5290A8DB2382D2D0C5478441F8308D24E31BA61633#)))"))))
+
   "Provides substitute URLs and authorized keys for Guix.  The values"
 
   (define (get-home-services _)
