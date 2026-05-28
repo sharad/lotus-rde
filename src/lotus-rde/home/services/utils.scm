@@ -1906,13 +1906,18 @@ sender='org.bluez'")
        ;;        (apply destructor
        ;;               running
        ;;               args))))
-       (stop #~(let* ((component "stop")
-                      (log-file-loc (string-append "annex" "-" component))
-                      (destructor (make-cmd-destructor (string-join (list #$cmd "annex" "daemon" component) " ")
-                                                       " >> "
-                                                       (log-file log-file-loc)
-                                                       " 2>&1")))
-                 destructor))
+       (stop (with-imported-modules
+                 '(((lotus-rde lib utils) => ,(source-module-closure
+                                               '((lotus-rde lib utils)))))
+               #~(begin
+                  (use-modules (lotus-rde lib utils))
+                  (let* ((component "stop")
+                         (log-file-loc (string-append "annex" "-" component))
+                         (destructor (make-cmd-destructor (string-join (list #$cmd "annex" "daemon" component) " ")
+                                                          " >> "
+                                                          (log-file log-file-loc)
+                                                          " 2>&1")))
+                    destructor))))
        (one-shot? #f)))))))
 
 
