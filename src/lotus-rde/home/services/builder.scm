@@ -673,7 +673,7 @@
                           (apply stop-service down-service args)
                           #t)
                 #:actions
-                (make-actions
+                (actions
                  (up       (xdefine-action 'up
                              (lambda (retval srv . args)
                                (when srv
