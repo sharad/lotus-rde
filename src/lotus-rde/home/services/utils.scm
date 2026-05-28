@@ -1869,43 +1869,18 @@ sender='org.bluez'")
        (respawn-delay 600)
        (respawn-limit 10)
        (auto-start? #f)
-       ;; (start
-       ;;  #~(make-forkexec-constructor
-       ;;     (list
-       ;;      #$git-annex-daemon
-       ;;      "assistant"
-       ;;      "--verbose")
-       ;;     #:log-file
-       ;;     #$(log-file "annex-assistant")))
        (start #~(lambda ( . args)
-                  (let* ((component (if (pair? args)
+                  (let* ((log-file   #$log-file-gexp) 
+                         (component (if (pair? args)
                                         (car args)
                                         #$component))
                          (log-file-loc (string-append "annex" "-" component))
-                         (constructor (make-forkexec-constructor (list #$cmd "annex" "daemon" component))))
+                         (constructor (make-forkexec-constructor (list #$cmd "annex" "daemon" component)
                                                                  ;; https://issues.guix.gnu.org/67175
-                                                                 ; #:log-file (log-file log-file-loc)
+                                                                 #:log-file (log-file log-file-loc))))
                     (apply constructor args))))
-       ;; Use annex daemon stop
-       ;; instead of kill.
-       ;; (stop
-       ;;  #~(let ((destructor
-
-       ;;            (make-system-destructor
-       ;;             (string-append
-       ;;              ;; #$git-annex-daemon
-       ;;              (getenv "HOME") "/.bin/git-annex-daemon"
-       ;;              " stop"
-       ;;              " >> "
-       ;;              #$(log-file "annex-stop")
-       ;;              " 2>&1"))))
-
-       ;;      (lambda (running . args)
-
-       ;;        (apply destructor
-       ;;               running
-       ;;               args))))
-       (stop #~(let* ((make-cmd-destructor
+       (stop #~(let* ((log-file   #$log-file-gexp) 
+                      (make-cmd-destructor
                          (lambda command
                            (let ((system-destructor
                                   (apply make-system-destructor
@@ -1922,8 +1897,8 @@ sender='org.bluez'")
                       (component "stop")
                       (log-file-loc (string-append "annex" "-" component))
                       (destructor (make-cmd-destructor (string-join (list #$cmd "annex" "daemon" component) " ")
-                                                       ;; " >> "
-                                                       ;; (log-file log-file-loc)
+                                                       " >> "
+                                                       (log-file log-file-loc)
                                                        " 2>&1")))
                    destructor))
        (one-shot? #f)))))))

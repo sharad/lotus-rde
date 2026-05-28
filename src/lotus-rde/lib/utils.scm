@@ -23,6 +23,7 @@
   #:use-module (gnu system uuid)
   #:use-module (gnu packages linux)
   #:export (log-file
+            log-file-gexp
             make-cmd-destructor
             file->package
             ;; lotus-assert
@@ -70,6 +71,16 @@
      "/log/"
      #$name
      ".log"))
+
+(define log-file-gexp
+  #~(lambda (name)
+      (string-append
+       (or (getenv "XDG_STATE_HOME")
+           (string-append (getenv "HOME")
+                          "/.local/state"))
+       "/log/"
+       name
+       ".log")))
 
 (define (make-cmd-destructor . command)
   (let ((system-destructor (apply make-system-destructor command))

@@ -314,15 +314,16 @@
      ;;           #:log-file #$log))
 
      (start #~(lambda ( . args)
-                (let* ((mode (if (pair? args)
+                (let* ((log-file   #$log-file-gexp)
+                       (mode (if (pair? args)
                                  (car args)
                                  #$mode))
                        (log-file-loc (string-append "secfs-" #$volname "-" mode))
                        (constructor (make-forkexec-constructor (list #$cmd
                                                                      "-d" #$dev
                                                                      "-m" #$mp
-                                                                     "-p" mode))))
-                                                                ; #:log-file (log-file log-file-loc)
+                                                                     "-p" mode)
+                                                               #:log-file (log-file log-file-loc))))
                   (apply constructor args)))))))
 
 
@@ -405,7 +406,9 @@
       (auto-start? #f)
       (start #~(make-forkexec-constructor
                 (list #$dbus-launch #$flatpak "--user" "run" #$app)
-                #:create-session? #t))  ;#:log-file (log-file #$name)
+                #:create-session? #t
+                ;; #:log-file (#$log-file-gexp #$name)
+                #:log-file #$(log-file name)))  ;#:log-file (log-file #$name)
       (stop #~(let ((make-cmd-destructor
                      (lambda command
                        (let ((system-destructor
