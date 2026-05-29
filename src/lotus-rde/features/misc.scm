@@ -145,7 +145,8 @@
           (polkit polkit)
           (mpd mpd)
           (znc znc)
-          (jupyter jupyter))
+          (jupyter jupyter)
+          (usrhttpd rust-usrhttpd))
           ;; (bluez-autoconnect
           ;;  (local-file "/home/s/.bin/bluetooth-autoconnect"))
           ;; (power-mon
@@ -243,20 +244,20 @@
 
 
 
-         ;; ;; usrhttpd
-         ;; (shepherd-service
-         ;;  (provision '(usrhttpd))
-         ;;  (documentation "Simple user http server")
-         ;;  (auto-start? #f)
-         ;;  (start #~(make-forkexec-constructor
-         ;;            (list #$(file-append usrhttpd "/bin/usrhttpd")
-         ;;                  "-H"
-         ;;                  "0.0.0.0"
-         ;;                  (string-append (getenv "HOME")
-         ;;                                 "/public_html/sites/default"))
-         ;;            #:log-file #$(log-file "usrhttpd")))
-         ;;  (stop #~(make-kill-destructor))
-         ;;  (respawn? #f))
+         ;; usrhttpd
+         (shepherd-service
+          (provision '(usrhttpd))
+          (documentation "Simple user http server")
+          (auto-start? #f)
+          (start #~(make-forkexec-constructor
+                    (list #$(file-append usrhttpd "/bin/usrhttpd")
+                          "-H"
+                          "0.0.0.0"
+                          (string-append (getenv "HOME")
+                                         "/public_html/sites/default"))
+                    #:log-file #$(log-file "usrhttpd")))
+          (stop #~(make-kill-destructor))
+          (respawn? #f))
 
 
 
