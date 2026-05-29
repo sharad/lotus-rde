@@ -66,9 +66,8 @@
                                  rust-crc32fast-1.5.0
                                  rust-crypto-common-0.1.7
                                  rust-digest-0.10.7
-                                 rust-dirs-5.0.1
-                                 rust-dirs-sys-0.4.1
-                                 ;; rust-dirs-sys-0.5.0
+                                 rust-dirs-6.0.0
+                                 rust-dirs-sys-0.5.0
                                  rust-equivalent-1.0.2
                                  rust-errno-0.3.14
                                  rust-find-msvc-tools-0.1.9
@@ -148,6 +147,8 @@
                                  rust-scopeguard-1.2.0
                                  rust-sha1-0.10.6
                                  rust-sharded-slab-0.1.7
+                                 rust-shell-words-1.1.1
+                                 rust-shellexpand-3.1.2
                                  rust-shlex-1.3.0
                                  rust-signal-hook-registry-1.4.8
                                  rust-simd-adler32-0.3.8
@@ -234,7 +235,6 @@
                                  rust-windows-x86-64-msvc-0.52.6
                                  rust-windows-x86-64-msvc-0.53.1
                                  rust-winnow-0.7.13
-                                 ;; rust-usrhttpd-0.1.0
                                  rust-utf8-iter-1.0.4
                                  rust-zeroize-1.8.2)))
 
