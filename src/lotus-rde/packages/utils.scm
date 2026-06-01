@@ -1667,7 +1667,8 @@ unavailable."
 (define-public rust-usrhttpd
   (package
    (name "rust-usrhttpd")
-   (version "v0.1.0")
+   ;; (version "v0.1.0")
+   (version "master")
    (source
     (origin
      (method git-fetch)
