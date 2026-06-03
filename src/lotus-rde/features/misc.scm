@@ -363,13 +363,8 @@
 
       (actions actions)))
 
-  (feature
-   (name 'lotus-x-services)
-
-   (home-services-getter
-    (lambda (_)
-
-      (list
+  (define (get-home-services config)
+    (list
 
        ;; packages
        (simple-service
@@ -414,8 +409,6 @@
                   (string-append (getenv "HOME")
                                  "/.conkyrc/main/conkyrc")))
 
-
-
          ;; 2 eww
          (mk/simple-service
           '(eww)
@@ -423,14 +416,10 @@
                   "daemon"
                   "--no-daemonize"))
 
-
-
          ;; 3 keynav
          (mk/simple-service
           '(keynav)
           #~(list #$(file-append keynav "/bin/keynav")))
-
-
 
          ;; 4 xautolock
          (shepherd-service
@@ -475,28 +464,21 @@
                                           "/bin/xautolock")
                            "-enable")))))))
 
-
          ;; 5 autocutsel
          (mk/simple-service
           '(autocutsel)
           #~(list #$(file-append autocutsel
                                  "/bin/autocutsel")))
 
-
-
          ;; 6 picom/compton
          (mk/simple-service
           '(picom)
           #~(list #$(file-append picom "/bin/picom")))
 
-
-
          ;; 7 osdsh
          (mk/simple-service
           '(osdsh)
           #~(list "osdsh"))
-
-
 
          ;; 8 dunst
          (mk/simple-service
@@ -504,36 +486,26 @@
           #~(list
              #$(file-append dunst "/bin/dunst")))
 
-
-
          ;; 9 notification
          (mk/simple-service
           '(notification)
           #~(list #$(file-append notification-daemon "/libexec/notification-daemon")))
-
-
 
          ;; 10 ibus-portal
          (mk/simple-service
           '(ibus-portal)
           #~(list #$(file-append ibus "/libexec/ibus-portal")))
 
-
-
          ;; 11 ibus-daemon
          (mk/simple-service
           '(ibus-daemon)
           #~(list #$(file-append ibus "/bin/ibus-daemon")))
-
-
 
          ;; 12 ibus-x11
          (mk/simple-service
           '(ibus-x11)
           #~(list #$(file-append ibus "/libexec/ibus-x11")
                   "--kill-daemon"))
-
-
 
          ;; 13 gnome-keyring
          (mk/simple-service
@@ -544,8 +516,6 @@
                   "--foreground"
                   "--components=secrets")
           #:respawn? #f)
-
-
 
          ;; 14 keepassxc
          (mk/simple-service
@@ -569,8 +539,6 @@
           #~(list #$(file-append blueman
                                  "/bin/blueman-applet")))
 
-
-
          ;; 16 keymap
          (mk/simple-service
           '(keymap)
@@ -579,8 +547,6 @@
                                  "/.xmodmaprc"))
           #:respawn? #f
           #:one-shot? #t)
-
-
 
          ;; 17 xrdb
          (mk/simple-service
@@ -595,8 +561,6 @@
           #:respawn? #f
           #:one-shot? #t)
 
-
-
          ;; 18 synclient
          (mk/simple-service
           '(synclient)
@@ -605,18 +569,12 @@
           #:respawn? #f
           #:one-shot? #t)
 
-
-
-
-
          ;; 20 pwr-applet
          (mk/simple-service
           '(pwr-applet)
           #~(list (string-append (getenv "HOME")
                                  "/.bin/pwr-applet"))
           #:respawn? #f)
-
-
 
          ;; 21 logind-applet
          (mk/simple-service
@@ -625,8 +583,6 @@
                    (getenv "HOME")
                    "/.bin/logind-applet"))
           #:respawn? #f)
-
-
 
          ;; 22 pasystray
          (mk/simple-service
@@ -659,8 +615,6 @@
               (respawn-limit 1)
               ;; (requirement '(xawaken-session-down))
               (requirement '())))
-
-
 
          ;; 25 deskflow-client
          (let ((cmd (file-append deskflow "/bin/deskflow-server")) ;"deskflow-core"
@@ -709,8 +663,6 @@
          ;;    ;; xawaken-session-down
          ;;  #:respawn? #f)
 
-
-
          ;; 28 proxy-fclient
          (let ((cmd (file-append autossh "/bin/autossh"))
                (server (car '("proxy-server-fclient"
@@ -749,7 +701,6 @@
           #~(list "xdg-autostart")
           #:create-session? #t)))
 
-
        (simple-service 'x-service-groups
                        home-services-group-service-type
                        (list
@@ -761,7 +712,41 @@
                         (home-services-group-configuration
                          (name 'xdelayed-login-session)
                          (requirement '(xawaken-session
-                                        delayed-login-session))))))))))
+                                        delayed-login-session)))))))
+
+  (feature
+   (name 'lotus-x-services)
+   (values `((shepherd-conky conky)
+             (shepherd-eww eww)
+             (shepherd-keynav keynav)
+             (shepherd-xautolock xautolock)
+             (shepherd-autocutsel autocutsel)
+             (shepherd-picom picom)
+             (shepherd-dunst dunst)
+             (shepherd-ibus ibus)
+             (shepherd-gnome-keyring gnome-keyring)
+             (shepherd-blueman blueman)
+             (shepherd-pasystray pasystray)
+             (shepherd-autossh autossh)
+             (shepherd-osdsh osdsh)
+             (shepherd-dunst dunst)
+             (shepherd-notification notification)
+             (shepherd-ibus-portal ibus-portal)
+             (shepherd-ibus-daemon ibus-daemon)
+             (shepherd-ibus-x11 ibus-x11)
+             (shepherd-gnome-keyring gnome-keyring)
+             (shepherd-keepassxc keepassxc)
+             (shepherd-keymap keymap)
+             (shepherd-xrdb xrdb)
+             (shepherd-synclient synclient)
+             (shepherd-pwr-applet pwr-applet)
+             (shepherd-logind-applet logind-applet)
+             (shepherd-pasystray pasystray)
+             (shepherd-deskflow-server deskflow-server)
+             (shepherd-deskflow-client deskflow-client)
+             (shepherd-proxy-fclient proxy-fclient)
+             (shepherd-xdg-autostart xdg-autostart)))
+   (home-services-getter get-home-services)))
 
 
 (define* (feature-lotus-nox-group-services)
@@ -794,7 +779,9 @@
                            (one-shot? #t)
                            (requirement '()))))))))
   (feature
-   (values)
+   (values `((shepherd-awaken-session awaken-session)
+             (shepherd-delayed-login-session delayed-login-session)
+             (shepherd-login login)))
    (name 'lotus-nox-group-services)
    (home-services-getter get-home-services)))
 
@@ -830,7 +817,10 @@
                            (one-shot? #t)
                            (requirement '()))))))))
   (feature
-   (values)
+   (values `((shepherd-xawaken-session awaken-session)
+             (shepherd-xdelayed-login-session xdelayed-login-session)
+             (shepherd-xlogin xlogin)
+             (shepherd-wmlogin wmlogin)))
    (name 'lotus-x-group-services)
    (home-services-getter get-home-services)))
 
@@ -847,6 +837,7 @@
                        (app  "com.github.IsmaelMartinez.teams_for_linux"))))))
 
   (feature
+   (values `((shepherd-msteam msteam)))
    (name 'msteam)
    (home-services-getter get-home-services)))
 
@@ -862,6 +853,7 @@
                        (app  "us.zoom.Zoom"))))))
 
   (feature
+   (values `((shepherd-zoom zoom)))
    (name 'zoom)
    (home-services-getter get-home-services)))
 
@@ -885,6 +877,8 @@
                        (app  "md.obsidian.Obsidian"))))))
 
   (feature
+   (values `((shepherd-logseq logseq)
+             (shepherd-obsidian obsidian)))
    (name 'doc-publishing)
    (home-services-getter get-home-services)))
 
@@ -895,6 +889,7 @@
     home-bluetooth-autoconnect-service)
 
   (feature
+   (values `((shepherd-bluez-autoconnect bluez-autoconnect)))
    (name 'bluetooth-autoconnect)
    (home-services-getter get-home-services)))
 
@@ -908,6 +903,7 @@
     home-power-monitor-service)
 
   (feature
+   (values `((shepherd-power-monitor power-monitor)))
    (name 'power-monitor)
    (home-services-getter get-home-services)))
 
@@ -919,6 +915,7 @@
     home-git-annex-daemon-service)
 
   (feature
+   (values `((shepherd-git-annex git-annex)))
    (name 'annex)
    (home-services-getter get-home-services)))
 
