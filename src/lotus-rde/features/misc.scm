@@ -313,8 +313,6 @@
    (name 'lotus-nox-services)
    (home-services-getter get-home-services)))
 
-
-
 (define* (feature-lotus-x-services
           #:key
           (conky conky)
@@ -764,6 +762,77 @@
                          (name 'xdelayed-login-session)
                          (requirement '(xawaken-session
                                         delayed-login-session))))))))))
+
+
+(define* (feature-lotus-nox-group-services)
+
+  (define (get-home-services config)
+    (let ((awaken-requirements '(dbus pipewire))
+          (delayed-requirements '(awaken-session)))
+      (list
+       ;; shepherd services
+       (simple-service 'tty-service-groups
+                       home-services-group-service-type
+                       (list
+                        (home-services-group-configuration
+                         (name 'awaken-session)
+                         (dependent '(delayed-login-session-down))
+                         (requirement '(dbus pipewire)))
+
+                        (home-services-group-configuration
+                         (name 'delayed-login-session)
+                         (requirement '(awaken-session
+                                        delayed-login-session)))
+
+                        (let ((cmd "echo"))
+                          (shepherd-service
+                           (provision '(login))
+                           (start (make-system-constructor (string-append cmd " started login-service")))
+                                    ;; #:stop     (make-kill-destructor)
+                           (respawn? #f)
+                           (auto-start? #f)
+                           (one-shot? #t)
+                           (requirement '()))))))))
+  (feature
+   (values)
+   (name 'lotus-nox-group-services)
+   (home-services-getter get-home-services)))
+
+
+
+
+(define* (feature-lotus-x-group-services)
+  (define (get-home-services config)
+    (let ((awaken-requirements '(dbus pipewire))
+          (delayed-requirements '(awaken-session)))
+      (list
+       ;; shepherd services
+       (simple-service 'x-service-groups
+                       home-services-group-service-type
+                       (list
+                        (home-services-group-configuration
+                         (name 'xawaken-session)
+                         (dependent '(xdelayed-login-session-down))
+                         (requirement '(dbus pipewire)))
+
+                        (home-services-group-configuration
+                         (name 'xdelayed-login-session)
+                         (requirement '(xawaken-session
+                                        delayed-login-session)))
+
+                        (let ((cmd "echo"))
+                         (shepherd-service
+                           (provision '(xlogin wmlogin))
+                           (start (make-system-constructor (string-append cmd " started login-service")))
+                                    ;; #:stop     (make-kill-destructor)
+                           (respawn? #f)
+                           (auto-start? #f)
+                           (one-shot? #t)
+                           (requirement '()))))))))
+  (feature
+   (values)
+   (name 'lotus-x-group-services)
+   (home-services-getter get-home-services)))
 
 
 
