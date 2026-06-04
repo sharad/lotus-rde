@@ -762,9 +762,36 @@
 (define* (feature-lotus-nox-group-services)
 
   (define (get-home-services config)
-    (let ((awaken-requirements '(dbus pipewire))
-          (delayed-requirements '(awaken-session))
-          (login-requirements '()))
+    (let ((awaken-requirements '(attnmgr
+                                 secfs
+                                 xawaken-session-down))
+          (delayed-requirements '(awaken-session
+                                  xdelayed-login-session-down))
+          (login-requirements '(mcron
+                                pkttyagent
+                                ;; attnmgr
+                                bluez-autoconnect
+                                power-mon
+                                udiskie
+                                geoclue
+                                mpd
+                                ssh-agent
+                                gpg-agent
+                                ;; pulseaudio
+                                pipewire
+                                pipewire-pulse
+                                wireplumber
+                                ;; secfs-orgp
+                                ;; secfs-secure
+                                ;; secfs-volatile
+                                ;; secfs
+                                znc
+                                ;; emacs
+                                ;; usrhttpd
+                                ;; jupyter
+                                ;; keepawaken
+                                awaken-session
+                                delayed-login-session)))
       (list
        ;; shepherd services
        (simple-service 'tty-service-groups
@@ -772,13 +799,14 @@
                        (list
                         (home-services-group-configuration
                          (name 'awaken-session)
-                         (dependent '(delayed-login-session-down))
+                         (dependent '(xawaken-session-down
+                                      delayed-login-session-down))
                          (requirement (get-active-requirements config awaken-requirements)))
 
                         (home-services-group-configuration
                          (name 'delayed-login-session)
-                         (requirement '(awaken-session
-                                        delayed-login-session)))
+                         (dependent '(xdelayed-login-session-down))
+                         (requirement (get-active-requirements config delayed-requirements)))
 
                         (let ((cmd "echo"))
                           (shepherd-service
@@ -801,10 +829,63 @@
 
 (define* (feature-lotus-x-group-services)
   (define (get-home-services config)
-    (let ((xawaken-requirements '(dbus pipewire))
-          (xdelayed-requirements '(awaken-session))
-          (xlogin-requirements '())
-          (wmlogin-requirements '()))
+    (let ((xawaken-requirements '(awaken-session
+                                  proxy-fclient
+                                  deskflow-server ;; barrier
+                                  annex
+                                  kpkeys
+                                  ssh-add
+                                  keepassxc
+                                  xdelayed-login-session-down))
+          (xdelayed-requirements '(xawaken-session xdelayed-login-session))
+          (xlogin-requirements '(autocutsel
+                                 dunst
+                                 ;; emacs
+                                 keymap
+                                 keynav
+                                 redshift
+                                 synclient
+                                 xrdb
+                                 xautolock
+                                 deskflow-server))
+          (wmlogin-requirements '( ;; redshift
+                                  ;; polkit-gnome-agent
+                                  conky
+                                  eww
+                                  keynav
+                                  xautolock
+                                  autocutsel
+                                  ;; compton
+                                  ;; osdsh
+                                  dunst
+                                  notification
+                                  ;; gnome-keyring
+                                  nm-applet
+                                  blueman-applet
+                                  ibus-portal
+                                  ibus-daemon
+                                  ibus-x11
+                                  keymap
+                                  xrdb
+                                  synclient
+                                  ;; annex
+                                  ;; keepassxc
+                                  pwr-applet
+                                  logind-applet
+                                  pasystray
+                                  ;; deskflow-server ;; barrier
+                                  ;; deskflow-client
+                                  ;; kpkeys
+                                  ;; ssh-add
+                                  ;; proxy-fclient
+                                  ;; logseq
+                                  ;; msteam
+                                  ;; obsidian
+                                  ;; zoom
+                                  xdg-autostart
+                                  xawaken-session
+                                  xdelayed-login-session
+                                  login-service)))
       (list
        ;; shepherd services
        (simple-service 'x-service-groups
@@ -817,8 +898,7 @@
 
                         (home-services-group-configuration
                          (name 'xdelayed-login-session)
-                         (requirement '(xawaken-session
-                                        delayed-login-session)))
+                         (requirement xdelayed-requirements))
 
                         (let ((cmd "echo"))
                          (shepherd-service
