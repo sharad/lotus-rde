@@ -205,7 +205,8 @@
      ;; "glib:bin"
 
      ;; "ffmpeg"
-     "ripgrep" "curl"))))
+     "ripgrep"
+     "curl"))))
 
 (define (wallpaper url hash)
   (origin
