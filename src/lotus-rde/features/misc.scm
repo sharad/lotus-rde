@@ -725,7 +725,6 @@
              (shepherd-dunst dunst)
              (shepherd-ibus ibus)
              (shepherd-blueman blueman)
-             (shepherd-pasystray pasystray)
              (shepherd-autossh autossh)
              (shepherd-osdsh osdsh)
              (shepherd-notification notification)
