@@ -724,7 +724,6 @@
              (shepherd-picom picom)
              (shepherd-dunst dunst)
              (shepherd-ibus ibus)
-             (shepherd-gnome-keyring gnome-keyring)
              (shepherd-blueman blueman)
              (shepherd-pasystray pasystray)
              (shepherd-autossh autossh)
