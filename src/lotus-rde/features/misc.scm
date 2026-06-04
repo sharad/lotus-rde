@@ -749,11 +749,22 @@
    (home-services-getter get-home-services)))
 
 
+
+
+
+(define (get-active-requirements config requirements)
+  (filter (lambda (req)
+            (let ((shepherd-req (intern (string-append "shepherd-" (symbol->string req)))))
+              (get-value config shepherd-req #f)))
+          requirements))
+
+
 (define* (feature-lotus-nox-group-services)
 
   (define (get-home-services config)
     (let ((awaken-requirements '(dbus pipewire))
-          (delayed-requirements '(awaken-session)))
+          (delayed-requirements '(awaken-session))
+          (login-requirements '()))
       (list
        ;; shepherd services
        (simple-service 'tty-service-groups
@@ -762,7 +773,7 @@
                         (home-services-group-configuration
                          (name 'awaken-session)
                          (dependent '(delayed-login-session-down))
-                         (requirement '(dbus pipewire)))
+                         (requirement (get-active-requirements config awaken-requirements)))
 
                         (home-services-group-configuration
                          (name 'delayed-login-session)
@@ -777,7 +788,7 @@
                            (respawn? #f)
                            (auto-start? #f)
                            (one-shot? #t)
-                           (requirement '()))))))))
+                           (requirement (get-active-requirements config login-requirements)))))))))
   (feature
    (values `((shepherd-awaken-session awaken-session)
              (shepherd-delayed-login-session delayed-login-session)
@@ -790,8 +801,10 @@
 
 (define* (feature-lotus-x-group-services)
   (define (get-home-services config)
-    (let ((awaken-requirements '(dbus pipewire))
-          (delayed-requirements '(awaken-session)))
+    (let ((xawaken-requirements '(dbus pipewire))
+          (xdelayed-requirements '(awaken-session))
+          (xlogin-requirements '())
+          (wmlogin-requirements '()))
       (list
        ;; shepherd services
        (simple-service 'x-service-groups
@@ -800,7 +813,7 @@
                         (home-services-group-configuration
                          (name 'xawaken-session)
                          (dependent '(xdelayed-login-session-down))
-                         (requirement '(dbus pipewire)))
+                         (requirement (get-active-requirements config xawaken-requirements)))
 
                         (home-services-group-configuration
                          (name 'xdelayed-login-session)
@@ -809,13 +822,24 @@
 
                         (let ((cmd "echo"))
                          (shepherd-service
-                           (provision '(xlogin wmlogin))
-                           (start (make-system-constructor (string-append cmd " started login-service")))
+                           (provision '(xlogin))
+                           (start (make-system-constructor (string-append cmd " started xlogin-service")))
                                     ;; #:stop     (make-kill-destructor)
                            (respawn? #f)
                            (auto-start? #f)
                            (one-shot? #t)
-                           (requirement '()))))))))
+                           (requirement (get-active-requirements config xlogin-requirements))))
+
+
+                        (let ((cmd "echo"))
+                          (shepherd-service
+                           (provision '(wmlogin))
+                           (start (make-system-constructor (string-append cmd " started wmlogin-service")))
+                           ;; #:stop     (make-kill-destructor)
+                           (respawn? #f)
+                           (auto-start? #f)
+                           (one-shot? #t)
+                           (requirement (get-active-requirements config wmlogin-requirements)))))))))
   (feature
    (values `((shepherd-xawaken-session awaken-session)
              (shepherd-xdelayed-login-session xdelayed-login-session)

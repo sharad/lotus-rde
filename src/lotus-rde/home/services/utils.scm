@@ -333,7 +333,7 @@ sender='org.bluez'")
     (list
 
      (shepherd-service
-       (provision '(bluetooth-autoconnect bt-autoconnect))
+       (provision '(bluez-autoconnect bluetooth-autoconnect bt-autoconnect))
        (documentation
         "Bluetooth trusted device auto-connect daemon.")
        (requirement '(dbus))

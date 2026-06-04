@@ -152,6 +152,10 @@
      home-kpkey-service))
   (feature
    (name 'secfs)
+   (values `((shepherd-secfs-orgp secfs-orgp)
+             (shepherd-secfs-secure secfs-secure)
+             (shepherd-secfs-volatile secfs-volatile)
+             (shepherd-secfs secfs)))
    (home-services-getter get-home-services)))
 
 
