@@ -729,7 +729,6 @@
              (shepherd-pasystray pasystray)
              (shepherd-autossh autossh)
              (shepherd-osdsh osdsh)
-             (shepherd-dunst dunst)
              (shepherd-notification notification)
              (shepherd-ibus-portal ibus-portal)
              (shepherd-ibus-daemon ibus-daemon)
