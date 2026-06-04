@@ -127,6 +127,8 @@
   #:use-module (lotus-rde lib utils)
   #:export (feature-lotus-nox-services
             feature-lotus-x-services
+            feature-lotus-nox-group-services
+            feature-lotus-x-group-services
             feature-msteam
             feature-zoom
             feature-doc-publishing

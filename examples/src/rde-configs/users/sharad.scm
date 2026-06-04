@@ -743,6 +743,8 @@ fi
          ;; (feature-ssh #:ssh-agent? #t)
          (feature-lotus-nox-services)
          (feature-lotus-x-services)
+         (feature-lotus-nox-group-services)
+         (feature-lotus-x-group-services)
          (feature-lotus-security)
          (feature-msteam)
          (feature-zoom)
