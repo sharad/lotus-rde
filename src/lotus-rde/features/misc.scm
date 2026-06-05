@@ -292,24 +292,7 @@
                     "1h")
               #:log-file #$(log-file "keepawaken")))
           (stop #~(make-kill-destructor))
-          (respawn? #t))))
-
-
-       (simple-service 'tty-service-groups
-                       home-services-group-service-type
-                       (list
-                        (home-services-group-configuration
-                         (name 'awaken-session)
-                         (dependent '(delayed-login-session-down))
-                         (requirement '(dbus pipewire)))
-
-                        (home-services-group-configuration
-                         (name 'delayed-login-session)
-                         (requirement '(awaken-session
-                                        delayed-login-session)))))))
-
-
-
+          (respawn? #t))))))
 
   (feature
    (name 'lotus-nox-services)
