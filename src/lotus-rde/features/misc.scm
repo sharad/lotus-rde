@@ -754,7 +754,7 @@
 (define (get-active-requirements config requirements)
   (filter (lambda (req)
             (let ((shepherd-req (string->symbol (string-append "shepherd-" (symbol->string req)))))
-              (get-value config shepherd-req #f)))
+              (get-value shepherd-req config #f)))
           requirements))
 
 
