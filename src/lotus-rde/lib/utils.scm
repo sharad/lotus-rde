@@ -178,12 +178,21 @@
                      (ice-9 rdelim)
                      (shepherd service))  ; ← make-system-destructor, make-kill-destructor
 
+        ;; (define (log-file name)
+        ;;   (let* ((home   (getenv "HOME"))
+        ;;          (logdir (string-append home "/.logs/shepherd/")))
+        ;;     (unless (file-exists? logdir)
+        ;;       (mkdir logdir))
+        ;;     (string-append logdir name ".log")))
+
         (define (log-file name)
-          (let* ((home   (getenv "HOME"))
-                 (logdir (string-append home "/.logs/shepherd/")))
-            (unless (file-exists? logdir)
-              (mkdir logdir))
-            (string-append logdir name ".log")))
+          (string-append
+           (or (getenv "XDG_STATE_HOME")
+               (string-append (getenv "HOME")
+                              "/.local/state"))
+           "/log/"
+           name
+           ".log"))
 
         (define (pipe-read cmd)
           (let* ((p (open-input-pipe cmd))
