@@ -580,10 +580,8 @@
            (lambda (configs)
              (for-each
               (lambda (x)
-                (format #t "TYPE=~a VALUE=~s~%"
-                        (record-type-name
-                         (record-rtd x))
-                        x))
+                (display x)
+                (newline))
               configs)
              (map services-group->shepherd-service configs)))))
    (compose concatenate)
