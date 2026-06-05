@@ -752,7 +752,7 @@ fi
          ;; (feature-zoom)
          ;; (feature-doc-publishing)
          ;; (feature-bluetooth-autoconnect)
-         (feature-power-monitor)
+         ;; (feature-power-monitor)
 
 
          ;; (feature-git-annex-daemon)
