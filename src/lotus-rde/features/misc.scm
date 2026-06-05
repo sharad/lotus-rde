@@ -898,7 +898,7 @@
                          (name 'xdelayed-login-session)
                          (requirement xdelayed-requirements))))
 
-       shepherd services
+       ;; shepherd services
        (let ((cmd "echo"))
         (shepherd-service
           (provision '(xlogin))
