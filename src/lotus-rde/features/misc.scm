@@ -295,6 +295,13 @@
           (respawn? #t))))))
 
   (feature
+   (values `((shepherd-pkttyagent pkttyagent)
+             (shepherd-attnmgr attnmgr)
+             (shepherd-mpd mpd)
+             (shepherd-znc znc)
+             (shepherd-jupyter jupyter)
+             (shepherd-usrhttpd usrhttpd)
+             (shepherd-keepawaken keepawaken)))
    (name 'lotus-nox-services)
    (home-services-getter get-home-services)))
 
