@@ -701,20 +701,7 @@
          (mk/simple-service
           '(xdg-autostart)
           #~(list "xdg-autostart")
-          #:create-session? #t)))
-
-       (simple-service 'x-service-groups
-                       home-services-group-service-type
-                       (list
-                        (home-services-group-configuration
-                         (name 'xawaken-session)
-                         (dependent '(xdelayed-login-session-down))
-                         (requirement '(dbus pipewire)))
-
-                        (home-services-group-configuration
-                         (name 'xdelayed-login-session)
-                         (requirement '(xawaken-session
-                                        delayed-login-session)))))))
+          #:create-session? #t)))))
 
   (feature
    (name 'lotus-x-services)
