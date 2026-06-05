@@ -784,15 +784,21 @@
                          (dependent '(xdelayed-login-session-down))
                          (requirement (get-active-requirements config delayed-requirements)))))
 
-       (let ((cmd "echo"))
-            (shepherd-service
+
+       (simple-service
+        'login-services
+        home-shepherd-service-type
+        (list
+         (let ((cmd "echo"))
+           (shepherd-service
              (provision '(login))
              (start #~(make-system-constructor (string-append #$cmd " started login-service")))
-                      ;; #:stop     (make-kill-destructor)
+             ;; #:stop     (make-kill-destructor)
              (respawn? #f)
              (auto-start? #f)
              (one-shot? #t)
-             (requirement (get-active-requirements config login-requirements)))))))
+             (requirement (get-active-requirements config login-requirements)))))))))
+
   (feature
    (values `((shepherd-awaken-session awaken-session)
              (shepherd-delayed-login-session delayed-login-session)
@@ -875,27 +881,32 @@
                          (name 'xdelayed-login-session)
                          (requirement xdelayed-requirements))))
 
-       ;; shepherd services
-       (let ((cmd "echo"))
-        (shepherd-service
-          (provision '(xlogin))
-          (start #~(make-system-constructor (string-append cmd " started xlogin-service")))
-                   ;; #:stop     (make-kill-destructor)
-          (respawn? #f)
-          (auto-start? #f)
-          (one-shot? #t)
-          (requirement (get-active-requirements config xlogin-requirements))))
+       (simple-service
+        'xlogin-services
+        home-shepherd-service-type
+        (list
+         ;; shepherd services
+         (let ((cmd "echo"))
+          (shepherd-service
+           (provision '(xlogin))
+           (start #~(make-system-constructor (string-append cmd " started xlogin-service")))
+                    ;; #:stop     (make-kill-destructor)
+           (respawn? #f)
+           (auto-start? #f)
+           (one-shot? #t)
+           (requirement (get-active-requirements config xlogin-requirements))))
 
 
-       (let ((cmd "echo"))
-         (shepherd-service
-          (provision '(wmlogin))
-          (start #~(make-system-constructor (string-append cmd " started wmlogin-service")))
-          ;; #:stop     (make-kill-destructor)
-          (respawn? #f)
-          (auto-start? #f)
-          (one-shot? #t)
-          (requirement (get-active-requirements config wmlogin-requirements)))))))
+         (let ((cmd "echo"))
+           (shepherd-service
+            (provision '(wmlogin))
+            (start #~(make-system-constructor (string-append cmd " started wmlogin-service")))
+            ;; #:stop     (make-kill-destructor)
+            (respawn? #f)
+            (auto-start? #f)
+            (one-shot? #t)
+            (requirement (get-active-requirements config wmlogin-requirements)))))))))
+
   (feature
    (values `((shepherd-xawaken-session awaken-session)
              (shepherd-xdelayed-login-session xdelayed-login-session)
