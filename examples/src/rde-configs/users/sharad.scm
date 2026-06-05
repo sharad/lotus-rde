@@ -742,21 +742,17 @@ fi
                                          #:email "s@localhost"))
          (feature-xdg)
          ;; (feature-ssh #:ssh-agent? #t)
-         ;; (feature-lotus-nox-services)
-         ;; (feature-lotus-x-services)
-         ;; (feature-lotus-nox-group-services)
-         ;; (feature-lotus-x-group-services)
-
-         ;; (feature-lotus-security)
-         ;; (feature-msteam)
-         ;; (feature-zoom)
-         ;; (feature-doc-publishing)
-         ;; (feature-bluetooth-autoconnect)
-         ;; (feature-power-monitor)
-
-
-         ;; (feature-git-annex-daemon)
-         )))
+         (feature-lotus-nox-services)
+         (feature-lotus-x-services)
+         (feature-lotus-nox-group-services)
+         (feature-lotus-x-group-services)
+         (feature-lotus-security)
+         (feature-msteam)
+         (feature-zoom)
+         (feature-doc-publishing)
+         (feature-bluetooth-autoconnect)
+         (feature-power-monitor)
+         (feature-git-annex-daemon))))
 
 
 
