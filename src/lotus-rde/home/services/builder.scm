@@ -278,7 +278,6 @@
 (define secfs-mount (local-file "scripts/git-annex-daemon"))
 
 (define (secfs-volume->shepherd-service config)
-
  (let* ((home    (getenv "HOME"))
         (volname (home-secfs-volume-configuration-volname config))
         (mode    (home-secfs-volume-configuration-mode config))
@@ -474,7 +473,6 @@
          (name-str    (symbol->string name))
          (up          (string->symbol (string-append name-str "-up")))
          (down        (string->symbol (string-append name-str "-down"))))
-
     (shepherd-service
      (provision (list name))
      (requirement '())
@@ -569,8 +567,6 @@
                              (format #t "~a~%"
                                      (if once-started "true" "false")))))))))))))
 
-
-
 (define home-services-group-service-type
   (service-type
    (name 'home-services-group)
@@ -578,20 +574,13 @@
     (list (service-extension
            home-shepherd-service-type
            (lambda (configs)
-             (map
-              ;; services-group->shepherd-service
-              (lambda (cfg)
-                (if (home-services-group-configuration? cfg)
-                    (services-group->shepherd-service cfg)
-                    cfg))
-              configs)))))
+             (map services-group->shepherd-service
+                  configs)))))
    (compose concatenate)
    (extend append)
    (default-value '())
    (description
     "Manages groups of dependent shepherd services with up/down/xenable/xdisable actions.")))
-
-
 
 ;; (simple-service 'my-service-groups
 ;;                 home-services-group-service-type
