@@ -810,7 +810,7 @@
                         (let ((cmd "echo"))
                           (shepherd-service
                            (provision '(login))
-                           (start (make-system-constructor (string-append cmd " started login-service")))
+                           (start #~(make-system-constructor (string-append #$cmd " started login-service")))
                                     ;; #:stop     (make-kill-destructor)
                            (respawn? #f)
                            (auto-start? #f)
@@ -902,7 +902,7 @@
                         (let ((cmd "echo"))
                          (shepherd-service
                            (provision '(xlogin))
-                           (start (make-system-constructor (string-append cmd " started xlogin-service")))
+                           (start #~(make-system-constructor (string-append cmd " started xlogin-service")))
                                     ;; #:stop     (make-kill-destructor)
                            (respawn? #f)
                            (auto-start? #f)
@@ -913,7 +913,7 @@
                         (let ((cmd "echo"))
                           (shepherd-service
                            (provision '(wmlogin))
-                           (start (make-system-constructor (string-append cmd " started wmlogin-service")))
+                           (start #~(make-system-constructor (string-append cmd " started wmlogin-service")))
                            ;; #:stop     (make-kill-destructor)
                            (respawn? #f)
                            (auto-start? #f)
