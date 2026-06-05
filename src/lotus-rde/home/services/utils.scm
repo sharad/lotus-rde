@@ -1862,7 +1862,7 @@ sender='org.bluez'")
        (documentation
         "Git Annex daemon service.")
        (requirement
-        '(keepassxc
+        '( ;; keepassxc
           ssh-add))
            ;; xawaken-session-down
        (respawn? #f)
