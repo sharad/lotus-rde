@@ -789,15 +789,14 @@
         'login-services
         home-shepherd-service-type
         (list
-         (let ((cmd "echo"))
-           (shepherd-service
-             (provision '(login))
-             (start #~(make-system-constructor (string-append #$cmd " started login-service")))
-             ;; #:stop     (make-kill-destructor)
-             (respawn? #f)
-             (auto-start? #f)
-             (one-shot? #t)
-             (requirement (get-active-requirements config login-requirements)))))))))
+         (shepherd-service
+           (provision '(login))
+           (start #~(make-system-constructor "echo started login-service"))
+           ;; #:stop     (make-kill-destructor)
+           (respawn? #f)
+           (auto-start? #f)
+           (one-shot? #t)
+           (requirement (get-active-requirements config login-requirements))))))))
 
   (feature
    (values `((shepherd-awaken-session awaken-session)
@@ -886,26 +885,22 @@
         home-shepherd-service-type
         (list
          ;; shepherd services
-         (let ((cmd "echo"))
-          (shepherd-service
+         (shepherd-service
            (provision '(xlogin))
-           (start #~(make-system-constructor (string-append cmd " started xlogin-service")))
-                    ;; #:stop     (make-kill-destructor)
+           (start #~(make-system-constructor "echo started xlogin-service"))
+           ;; #:stop     (make-kill-destructor)
            (respawn? #f)
            (auto-start? #f)
            (one-shot? #t)
-           (requirement (get-active-requirements config xlogin-requirements))))
-
-
-         (let ((cmd "echo"))
-           (shepherd-service
-            (provision '(wmlogin))
-            (start #~(make-system-constructor (string-append cmd " started wmlogin-service")))
+           (requirement (get-active-requirements config xlogin-requirements)))
+         (shepherd-service
+           (provision '(wmlogin))
+           (start #~(make-system-constructor "echo started wmlogin-service"))
             ;; #:stop     (make-kill-destructor)
-            (respawn? #f)
-            (auto-start? #f)
-            (one-shot? #t)
-            (requirement (get-active-requirements config wmlogin-requirements)))))))))
+           (respawn? #f)
+           (auto-start? #f)
+           (one-shot? #t)
+           (requirement (get-active-requirements config wmlogin-requirements))))))))
 
   (feature
    (values `((shepherd-xawaken-session awaken-session)
