@@ -579,14 +579,14 @@
            home-shepherd-service-type
            (lambda (configs)
              (map
-              ;; services-group->shepherd-service
-              (lambda (cfg)
-                (if (home-services-group-configuration? cfg)
-                    (services-group->shepherd-service cfg)
-                    cfg))
+              services-group->shepherd-service
+              ;; (lambda (cfg)
+              ;;   (if (home-services-group-configuration? cfg)
+              ;;       (services-group->shepherd-service cfg)
+              ;;       cfg))
               configs)))))
-   (compose concatenate)
-   (extend append)
+   ;; (compose concatenate)
+   ;; (extend append)
    (default-value '())
    (description
     "Manages groups of dependent shepherd services with up/down/xenable/xdisable actions.")))
