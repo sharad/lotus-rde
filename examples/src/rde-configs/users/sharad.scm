@@ -742,7 +742,7 @@ fi
                                          #:email "s@localhost"))
          (feature-xdg)
          ;; (feature-ssh #:ssh-agent? #t)
-         (feature-lotus-nox-services)
+         ;; (feature-lotus-nox-services)
          ;; (feature-lotus-x-services)
          ;; (feature-lotus-nox-group-services)
          ;; (feature-lotus-x-group-services)
