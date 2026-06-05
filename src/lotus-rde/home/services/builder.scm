@@ -578,12 +578,13 @@
     (list (service-extension
            home-shepherd-service-type
            (lambda (configs)
-             (for-each
-              (lambda (x)
-                (display x)
-                (newline))
-              configs)
-             (map services-group->shepherd-service configs)))))
+             (map
+              ;; services-group->shepherd-service
+              (lambda (cfg)
+                (if (home-services-group-configuration? cfg)
+                    (services-group->shepherd-service cfg)
+                    cfg))
+              configs)))))
    (compose concatenate)
    (extend append)
    (default-value '())
