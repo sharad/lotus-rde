@@ -483,9 +483,9 @@
 
           (let* ((once-started #f)
                  (name        '#$name)
-                 (dependent   #$dependent)
-                 (requirement #$requirement)
-                 (conflict    #$conflict)
+                 (dependent   (quote #$dependent))
+                 (requirement (quote #$requirement))
+                 (conflict    (quote #$conflict))
                  (up          '#$up)
                  (down        '#$down))
 
