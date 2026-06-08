@@ -482,12 +482,12 @@
           (use-modules (shepherd service))   ; service, register-services etc
 
           (let* ((once-started #f)
-                 (name        '#$name)
-                 (dependent   '#$dependent)
-                 (requirement '#$requirement)
-                 (conflict    '#$conflict)
-                 (up          '#$up)
-                 (down        '#$down))
+                 (name        #$name)
+                 (dependent   #$dependent)
+                 (requirement #$requirement)
+                 (conflict    #$conflict)
+                 (up          #$up)
+                 (down        #$down))
 
             (format #t "name ~a - requirement ~a ~%" name requirement)
             (display requirement)
