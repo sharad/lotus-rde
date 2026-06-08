@@ -260,6 +260,10 @@
           (default-authorized-guix-keys #f)
           (guix-substitute-urls #f)
           (guix-authorized-keys #f)
+          (guix-daemon-discover? #t)
+          (guix-daemon-build-accounts 10)
+          (guix-daemon-authorize-key? #t)
+          (guix-daemon-authorize-tmpdir #f)
           (guix-daemon-extra-options
            (list "--gc-keep-derivations=yes" "--gc-keep-outputs=yes"))
           (guix-daemon-privileged? #t)
@@ -306,6 +310,10 @@
         config =>
         (guix-configuration
          (inherit config)
+         (discover? guix-daemon-discover?)
+         (build-accounts guix-daemon-build-accounts)
+         ;; (authorize-key? guix-daemon-authorize-key?)
+         (tmpdir         guix-daemon-authorize-tmpdir)
          (privileged? guix-daemon-privileged?)
          (extra-options guix-daemon-extra-options)
          (http-proxy guix-http-proxy)))

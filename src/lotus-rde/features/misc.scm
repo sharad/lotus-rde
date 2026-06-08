@@ -945,23 +945,29 @@
    (home-services-getter get-home-services)))
 
 
-(define* (feature-doc-publishing)
+(define* (feature-doc-publishing #:key
+                                 (pandoc #f)
+                                 (logseq #t)
+                                 (obsidian #t))
   (define* (get-home-services config)
     (list
      (simple-service 'my-flatpak-apps
                      home-flatpak-service-type
                      (list
-                      ;; (home-flatpak-app-configuration
-                      ;;  (name 'pandoc)
-                      ;;  (app  "io.github.jgm.pandoc"))
+                      (when pandoc
+                          (home-flatpak-app-configuration
+                           (name 'pandoc)
+                           (app  "io.github.jgm.pandoc")))
 
-                      (home-flatpak-app-configuration
-                       (name 'logseq)
-                       (app  "com.logseq.Logseq.Locale"))
+                      (when logseq
+                       (home-flatpak-app-configuration
+                        (name 'logseq)
+                        (app  "com.logseq.Logseq.Locale")))
 
-                      (home-flatpak-app-configuration
-                       (name 'obsidian)
-                       (app  "md.obsidian.Obsidian"))))))
+                      (when obsidian
+                       (home-flatpak-app-configuration
+                        (name 'obsidian)
+                        (app  "md.obsidian.Obsidian")))))))
 
   (feature
    (values `((shepherd-logseq logseq)
