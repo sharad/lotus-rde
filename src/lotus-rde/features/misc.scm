@@ -777,14 +777,12 @@
                          (name 'awaken-session)
                          (dependent '(xawaken-session-down
                                       delayed-login-session-down))
-                         (requirement awaken-requirements)) ;(get-active-requirements config awaken-requirements)
+                         (requirement (get-active-requirements config awaken-requirements)))
 
                         (home-services-group-configuration
                          (name 'delayed-login-session)
                          (dependent '(xdelayed-login-session-down))
-                         (requirement delayed-requirements)))) ;(get-active-requirements config delayed-requirements)
-
-
+                         (requirement (get-active-requirements config delayed-requirements)))))
        (simple-service
         'login-services
         home-shepherd-service-type
@@ -875,7 +873,7 @@
                         (home-services-group-configuration
                          (name 'xawaken-session)
                          (dependent '(xdelayed-login-session-down))
-                         (requirement xawaken-requirements)) ;; (get-active-requirements config xawaken-requirements)
+                         (requirement (get-active-requirements config xawaken-requirements)))
 
                         (home-services-group-configuration
                          (name 'xdelayed-login-session)
