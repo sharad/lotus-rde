@@ -46,6 +46,7 @@
 
             home-flatpak-service-type
             home-flatpak-app-configuration
+            home-flatpak-app-configuration?
 
 
             home-services-group-service-type

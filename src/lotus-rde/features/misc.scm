@@ -938,22 +938,22 @@
     (list
      (simple-service 'my-flatpak-apps
                      home-flatpak-service-type
-                     (list
-                      (when pandoc
-                          (home-flatpak-app-configuration
-                           (name 'pandoc)
-                           (app  "io.github.jgm.pandoc")))
+                     (filter home-flatpak-app-configuration?
+                             (list
+                              (when pandoc
+                                (home-flatpak-app-configuration
+                                 (name 'pandoc)
+                                 (app  "io.github.jgm.pandoc")))
 
-                      (when logseq
-                       (home-flatpak-app-configuration
-                        (name 'logseq)
-                        (app  "com.logseq.Logseq.Locale")))
+                              (when logseq
+                                (home-flatpak-app-configuration
+                                 (name 'logseq)
+                                 (app  "com.logseq.Logseq.Locale")))
 
-                      (when obsidian
-                       (home-flatpak-app-configuration
-                        (name 'obsidian)
-                        (app  "md.obsidian.Obsidian")))))))
-
+                              (when obsidian
+                                (home-flatpak-app-configuration
+                                 (name 'obsidian)
+                                 (app  "md.obsidian.Obsidian"))))))))
   (feature
    (values `((shepherd-pandoc ,(when pandoc 'pandoc))
              (shepherd-logseq ,(when logseq 'logseq))
