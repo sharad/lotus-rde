@@ -479,8 +479,8 @@
             "\nBUILD:\n name=~s\n dep=~s\n req=~s\n conf=~s up=~s down=~s\n"
             name
             dependent
-            requirement
-            conflict
+            group-requirement
+            group-conflict
             up
             down)
 
