@@ -752,7 +752,7 @@ fi
          (feature-doc-publishing)
          (feature-bluetooth-autoconnect)
          (feature-power-monitor)
-         (feature-git-annex-daemon))))
+         (feature-git-annex-daemon))))  ;(feature-emacs)
 
 
 

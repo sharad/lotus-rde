@@ -269,10 +269,7 @@
                                                            network-manager-openconnect))
                                      (gdm-auto-login? #t)
                                      (gdm-allow-empty-password? #t))
-
-  (append (list ;; (feature-xdg)
-                (feature-emacs))
-          (lotus-metal-machine hostname
+  (lotus-metal-machine hostname
                                #:timezone timezone
                                #:locale locale
                                #:locale-names locale-names
@@ -293,10 +290,7 @@
                                #:nm-dns nm-dns
                                #:nm-vpn-plugins nm-vpn-plugins
                                #:gdm-auto-login? gdm-auto-login?
-                               #:gdm-allow-empty-password? gdm-allow-empty-password?)))
-
-
-
+                               #:gdm-allow-empty-password? gdm-allow-empty-password?))
 
 (define* (lotus-metal-machine-minimal hostname
                                 #:key
