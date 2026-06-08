@@ -620,6 +620,7 @@
                             (let* ((server (if (pair? args)
                                                (car args)
                                                #$server))
+                                   (log-file   #$log-file-gexp)
                                    (log-file-loc (string-append "desklow-client" "-" server))
                                    (constructor (make-forkexec-constructor (list cmd mode "-f"
                                                                                  ;; "--debug" "INFO"
@@ -657,6 +658,7 @@
                       (let* ((server (if (pair? args)
                                          (car args)
                                          #$server))
+                             (log-file   #$log-file-gexp)
                              (log-file-loc (string-append "proxy-" server))
                              (constructor (make-forkexec-constructor (list #$cmd "-N"
                                                                            "-S" "none"
