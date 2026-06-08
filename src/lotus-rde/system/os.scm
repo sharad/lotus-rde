@@ -45,19 +45,6 @@
 
 
 
-(define %lotus-guix-substitute-urls '(;; "https://ci.guix.gnu.org"
-                                      ;; "https://bayfront.guixsd.org"
-                                      ;; "http://guix.genenetwork.org" -- Backtrace
-                                      ;; "https://berlin.guixsd.org"
-                                      "https://cuirass.genenetwork.org"
-                                      "https://guix.tobias.gr"
-                                      "https://bordeaux.guix.gnu.org"
-                                      "https://ci.guix.info/"
-                                      "https://berlin.guix.gnu.org"
-                                      "https://cache-cdn.guix.moe"
-                                      "https://substitutes.nonguix.org"
-                                      "https://nonguix-proxy.ditigal.xyz"
-                                      "https://mirror.brielmaier.net"))
 
 (define %lotus-system-packages '(;; "gdm"
                                  ;; "gpm"
@@ -160,9 +147,6 @@
                                      #:fs-boot-efi-partition fs-boot-efi-partition
                                      #:parent-dir parent-dir
                                      #:volume-mappings volume-mappings)
-        ;; (feature-base-services #:guix-substitute-urls %lotus-guix-substitute-urls
-        ;;                        #:guix-authorized-keys '())
-
         ;; (feature-users-group)
         (feature-base-packages #:system-packages
                                (apply strings->packages
@@ -270,27 +254,27 @@
                                      (gdm-auto-login? #t)
                                      (gdm-allow-empty-password? #t))
   (lotus-metal-machine hostname
-                               #:timezone timezone
-                               #:locale locale
-                               #:locale-names locale-names
-                               #:disk-serial-id-system disk-serial-id-system
-                               #:disk-serial-id-home disk-serial-id-home
-                               #:fs-boot-efi-partition fs-boot-efi-partition
-                               #:bootloader-targets bootloader-targets
-                               #:kernel kernel
-                               #:firmware firmware
-                               #:kernel-arguments kernel-arguments
-                               #:keyboard-layout keyboard-layout
-                               #:initrd initrd
-                               #:initrd-modules initrd-modules
-                               #:custom-services custom-services
-                               #:login-shell login-shell
-                               #:parent-dir parent-dir
-                               #:volume-mappings volume-mappings
-                               #:nm-dns nm-dns
-                               #:nm-vpn-plugins nm-vpn-plugins
-                               #:gdm-auto-login? gdm-auto-login?
-                               #:gdm-allow-empty-password? gdm-allow-empty-password?))
+                       #:timezone timezone
+                       #:locale locale
+                       #:locale-names locale-names
+                       #:disk-serial-id-system disk-serial-id-system
+                       #:disk-serial-id-home disk-serial-id-home
+                       #:fs-boot-efi-partition fs-boot-efi-partition
+                       #:bootloader-targets bootloader-targets
+                       #:kernel kernel
+                       #:firmware firmware
+                       #:kernel-arguments kernel-arguments
+                       #:keyboard-layout keyboard-layout
+                       #:initrd initrd
+                       #:initrd-modules initrd-modules
+                       #:custom-services custom-services
+                       #:login-shell login-shell
+                       #:parent-dir parent-dir
+                       #:volume-mappings volume-mappings
+                       #:nm-dns nm-dns
+                       #:nm-vpn-plugins nm-vpn-plugins
+                       #:gdm-auto-login? gdm-auto-login?
+                       #:gdm-allow-empty-password? gdm-allow-empty-password?))
 
 (define* (lotus-metal-machine-minimal hostname
                                 #:key
@@ -321,8 +305,8 @@
         ;; grub-efi-bootloader used by default
         ;; (feature-bootloader)
         (feature-mapped-file-systems #:disk-serial-id-system disk-serial-id-system
-                          #:disk-serial-id-home disk-serial-id-home
-                          #:fs-boot-efi-partition fs-boot-efi-partition)
+                                     #:disk-serial-id-home disk-serial-id-home
+                                     #:fs-boot-efi-partition fs-boot-efi-partition)
         (feature-base-services)
         (feature-shepherd)))
 
