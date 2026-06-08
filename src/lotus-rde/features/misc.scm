@@ -777,12 +777,12 @@
                          (name 'awaken-session)
                          (dependent '(xawaken-session-down
                                       delayed-login-session-down))
-                         (requirement (get-active-requirements config awaken-requirements)))
+                         (requirement awaken-requirements)) ;(get-active-requirements config awaken-requirements)
 
                         (home-services-group-configuration
                          (name 'delayed-login-session)
                          (dependent '(xdelayed-login-session-down))
-                         (requirement (get-active-requirements config delayed-requirements)))))
+                         (requirement delayed-requirements)))) ;(get-active-requirements config delayed-requirements)
 
 
        (simple-service
