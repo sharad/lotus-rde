@@ -642,19 +642,6 @@
               ;; (requirement '(xawaken-session-down))
               (requirement '())))
 
-         ;; ;; 27 ssh-add
-         ;; (mk/simple-service
-         ;;  '(ssh-add)
-         ;;  #~(list "sh"
-         ;;          "-c"
-         ;;          (string-append (getenv "HOME")
-         ;;                         "/.bin/ssh-add-key 4 5"))
-         ;;  #:requirements
-         ;;  '(ssh-agent
-         ;;    keepassxc)
-         ;;    ;; xawaken-session-down
-         ;;  #:respawn? #f)
-
          ;; 28 proxy-fclient
          (let ((cmd (file-append autossh "/bin/autossh"))
                (server (car '("proxy-server-fclient"
@@ -968,8 +955,9 @@
                         (app  "md.obsidian.Obsidian")))))))
 
   (feature
-   (values `((shepherd-logseq logseq)
-             (shepherd-obsidian obsidian)))
+   (values `((shepherd-pandoc ,(when pandoc 'pandoc))
+             (shepherd-logseq ,(when logseq 'logseq))
+             (shepherd-obsidian ,(when obsidian 'obsidian))))
    (name 'doc-publishing)
    (home-services-getter get-home-services)))
 
