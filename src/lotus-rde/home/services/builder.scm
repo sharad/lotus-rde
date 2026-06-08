@@ -473,6 +473,18 @@
          (name-str    (symbol->string name))
          (up          (string->symbol (string-append name-str "-up")))
          (down        (string->symbol (string-append name-str "-down"))))
+
+
+    (format #t
+            "\nBUILD:\n name=~s\n dep=~s\n req=~s\n conf=~s up=~s down=~s\n"
+            name
+            dependent
+            requirement
+            conflict
+            up
+            down)
+
+
     (shepherd-service
      (provision (list name))
      (requirement '())
