@@ -718,8 +718,8 @@ then
     lotus_run_profiles_with_loc profile login
 fi
 
-")
-                                )))
+"
+                                      ))))
 
          (if #f
              (feature-user-info #:user-name "s"
