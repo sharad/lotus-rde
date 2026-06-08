@@ -474,17 +474,6 @@
          (up          (string->symbol (string-append name-str "-up")))
          (down        (string->symbol (string-append name-str "-down"))))
 
-
-    (format #t
-            "\nBUILD:\n name=~s\n dep=~s\n req=~s\n conf=~s up=~s down=~s\n"
-            name
-            dependent
-            group-requirement
-            group-conflict
-            up
-            down)
-
-
     (shepherd-service
      (provision (list name))
      (requirement '())
@@ -492,13 +481,6 @@
      (free-form
       #~(begin
           (use-modules (shepherd service))   ; service, register-services etc
-
-
-          (format #t "\nRAW VALUES\n")
-          (format #t "name       = ~s\n" '#$name)
-          (format #t "dependent  = ~s\n" '#$dependent)
-          (format #t "requirement= ~s\n" '#$group-requirement)
-          (format #t "conflict   = ~s\n" '#$group-conflict)
 
           (let* ((once-started #f)
                  (name        '#$name)
