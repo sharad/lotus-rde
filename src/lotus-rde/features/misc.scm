@@ -810,15 +810,16 @@
 
 (define* (feature-lotus-x-group-services)
   (define (get-home-services config)
-    (let ((xawaken-requirements '(awaken-session
-                                  proxy-fclient
+    (let ((xawaken-requirements '(proxy-fclient
                                   deskflow-server ;; barrier
                                   annex
                                   kpkeys
                                   ssh-add
                                   keepassxc
+                                  awaken-session
                                   xdelayed-login-session-down))
-          (xdelayed-requirements '(xawaken-session xdelayed-login-session))
+          (xdelayed-requirements '(xawaken-session
+                                   delayed-login-session))
           (xlogin-requirements '(autocutsel
                                  dunst
                                  ;; emacs
@@ -874,7 +875,7 @@
                         (home-services-group-configuration
                          (name 'xawaken-session)
                          (dependent '(xdelayed-login-session-down))
-                         (requirement (get-active-requirements config xawaken-requirements)))
+                         (requirement xawaken-requirements)) ;; (get-active-requirements config xawaken-requirements)
 
                         (home-services-group-configuration
                          (name 'xdelayed-login-session)
