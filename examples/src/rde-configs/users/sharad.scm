@@ -742,6 +742,18 @@ fi
                                          #:email "s@localhost"))
          (feature-xdg)
          (feature-ssh #:ssh-agent? #t)
+
+         ;; (feature-gnupg
+         ;;  ;; #:gpg-primary-key
+         ;;  #:gpg-ssh-agent? #f
+         ;;  ;; #:ssh-keys '()
+         ;;  ;; #:pinentry-flavor 'qt
+         ;;  ;; #:default-ttl 86400
+         ;;  ;; #:gpg-extra-config '()
+         ;;  ;; #:gpg-agent-extra-config '()
+         ;;  )
+
+
          (feature-lotus-nox-services)
          (feature-lotus-x-services)
          (feature-lotus-nox-group-services)
