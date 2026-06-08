@@ -493,6 +493,13 @@
       #~(begin
           (use-modules (shepherd service))   ; service, register-services etc
 
+
+          (format #t "\nRAW VALUES\n")
+          (format #t "name       = ~s\n" '#$name)
+          (format #t "dependent  = ~s\n" '#$dependent)
+          (format #t "requirement= ~s\n" '#$requirement)
+          (format #t "conflict   = ~s\n" '#$conflict)
+
           (let* ((once-started #f)
                  (name        '#$name)
                  (dependent   (quote #$dependent))
