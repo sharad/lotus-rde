@@ -43,6 +43,8 @@
   #:use-module (gnu packages jupyter)
   #:use-module (gnu packages monitoring)
   #:use-module (gnu packages compton)
+  #:use-module (gnu packages emacs)
+  #:use-module (gnu packages gnupg)
   #:use-module (gnu packages ibus)
   #:use-module (gnu packages pulseaudio)
   #:use-module (gnu packages hardware)
@@ -145,12 +147,13 @@
 (define* (feature-lotus-nox-services
           #:key
           (emacs emacs)
+          (openssh openssh-sans-x)
+          (gnupg gnupg)
           (polkit polkit)
           (mpd mpd)
           (znc znc)
           (jupyter jupyter)
           (usrhttpd rust-usrhttpd))
-
   (define (get-home-services config)
     (list
        ;; packages
@@ -172,100 +175,105 @@
 
          (shepherd-service
           (provision '(emacs))
-          (start
-           #~(let* ((make-env (lambda (name value)
-                                (string-append name "=" value)))
-                    (server "spacemacs")
-                    (env (default-environment-variables))
-                    (xdg-runtime-dir (getenv "XDG_RUNTIME_DIR"))
-                    (emacs-runtime-dir (if (and xdg-runtime-dir
-                                                (file-exists? xdg-runtime-dir))
-                                           (string-append xdg-runtime-dir
-                                                          "/emacs")
-                                           (string-append (getenv "HOME")
-                                                          "/.emacs.d")))
-
-                    (emacs-runtime-dir-server (string-append emacs-runtime-dir
-                                                             "/server"))
-                    (emacs-envs (list (make-env "EMACS_SERVER_HOST" "0.0.0.0")
-                                      (make-env "EMACS_RUNTIME_DIR" emacs-runtime-dir)
-                                      (make-env "EMACS_SERVER_AUTH_DIR" emacs-runtime-dir-server)
-                                      (make-env "EMACS_SERVER_SOCKET_DIR" emacs-runtime-dir-server)
-                                      (make-env "EMACS_SERVER_DIR" emacs-runtime-dir-server)))
-                    (make-forkexec-constructor (list #$(file-append emacs "/bin/emacs") (format #f "--fg-daemon=~a" server))
-                                               #:log-file
-                                               #$(log-file "emacs")
-                                               #:environment-variables (append emacs-envs env))))
-           (stop #~(let* ((xdg-runtime-dir (getenv "XDG_RUNTIME_DIR"))
+          (start #~(let* ((make-env (lambda (name value)
+                                      (string-append name "=" value)))
                           (server "spacemacs")
+                          (env (default-environment-variables))
+                          (xdg-runtime-dir (getenv "XDG_RUNTIME_DIR"))
                           (emacs-runtime-dir (if (and xdg-runtime-dir
                                                       (file-exists? xdg-runtime-dir))
                                                  (string-append xdg-runtime-dir
                                                                 "/emacs")
                                                  (string-append (getenv "HOME")
                                                                 "/.emacs.d")))
-                          (server-dir (string-append emacs-runtime-dir
-                                                     "/server"))
-                          (make-cmd-destructor #$make-cmd-destructor-gexp))
-                     (make-cmd-destructor (format #f "emacsclient -f ~a --eval \"(kill-emacs)\" >> ~a 2>&1"
-                                                  (string-append server-dir "/" server)
-                                                  #$(log-file "emacs")))))
-           (respawn? #f)))
-
-
+                          (emacs-runtime-dir-server (string-append emacs-runtime-dir
+                                                                   "/server"))
+                          (emacs-envs (list (make-env "EMACS_SERVER_HOST" "0.0.0.0")
+                                            (make-env "EMACS_RUNTIME_DIR" emacs-runtime-dir)
+                                            (make-env "EMACS_SERVER_AUTH_DIR" emacs-runtime-dir-server)
+                                            (make-env "EMACS_SERVER_SOCKET_DIR" emacs-runtime-dir-server)
+                                            (make-env "EMACS_SERVER_DIR" emacs-runtime-dir-server))))
+                     (make-forkexec-constructor (list #$(file-append emacs "/bin/emacs") (format #f "--fg-daemon=~a" server))
+                                                #:log-file
+                                                #$(log-file "emacs")
+                                                #:environment-variables (append emacs-envs env))))
+          (stop #~(let* ((xdg-runtime-dir (getenv "XDG_RUNTIME_DIR"))
+                                (server "spacemacs")
+                                (emacs-runtime-dir (if (and xdg-runtime-dir
+                                                            (file-exists? xdg-runtime-dir))
+                                                       (string-append xdg-runtime-dir
+                                                                      "/emacs")
+                                                       (string-append (getenv "HOME")
+                                                                      "/.emacs.d")))
+                                (server-dir (string-append emacs-runtime-dir
+                                                           "/server"))
+                                (make-cmd-destructor #$make-cmd-destructor-gexp))
+                           (make-cmd-destructor (format #f "emacsclient -f ~a --eval \"(kill-emacs)\" >> ~a 2>&1"
+                                                        (string-append server-dir "/" server)
+                                                        #$(log-file "emacs")))))
+          (respawn? #f))
          (shepherd-service
           (provision '(ssh-agent))
           (requirement '())
           (respawn? #f)
-          (start
-           #~(lambda args
-               (let* ((cmd "ssh-agent")
-                      ;; runtime
-                      (uid (number->string (passwd:uid (getpwuid (getlogin)))))
-                      (rundir (string-append "/run/user/"
-                                             uid))
-                      (auth-sock-envar (or (getenv "SSH_AUTH_SOCK")
-                                           ""))
-                      (auth-sock-default-envar (or (getenv "SSH_AUTH_SOCK_DEFAULT") ""))
-                      (auth-sock (cond
-                                  ((not (string-null?
-                                         auth-sock-envar))
-                                   auth-sock-envar)
-                                  ((not (string-null?
-                                         auth-sock-default-envar))
-                                   auth-sock-default-envar)
-                                  (else
-                                   (string-append rundir "/keyring/ssh"))))
-                      (constructor (make-forkexec-constructor
-                                    (list #$(file-append openssh "/bin/ssh-agent") "-D" "-a" auth-sock)
-                                    #:log-file
-                                    #$(log-file "ssh-agent"))))
-                 (lambda ( . args)
-                   (when auth-sock
-                     (let ((auth-sock-dir (dirname auth-sock)))
-                       (unless (file-exists? auth-sock-dir)
-                         (mkdir auth-sock-dir))))
-                   (apply constructor args))))
-
-           (stop #~(make-kill-destructor))
-           (actions
-            (clear
-             #~(lambda (running . args)
-                 (let* ((port (open-pipe* OPEN_READ #$(file-append openssh "/bin/ssh-add") "-D"))
-                        (output (read-string port)))
-                   (close-pipe port)
-                   (display output))))
-            (ls #~(lambda (running . args)
-                    (let* ((port (open-pipe* OPEN_READ #$(file-append openssh "/bin/ssh-add") "-l"))
-                           (output (read-string port)))
-                      (close-pipe port)
-                      (display output))))
-            (lock #~(lambda (running . args)
-                      (system (string-append #$(file-append xterm "/bin/xterm") "-e '" #$(file-append openssh "/bin/ssh-add") " -x'"))))
-            (unlock #~(lambda (running . args)
-                        (system (string-append #$(file-append xterm "/bin/xterm") "-e '" #$(file-append openssh "/bin/ssh-add") " -X'")))))))
-
-
+          (start #~(lambda args
+                     (let* ((uid (number->string (passwd:uid (getpwuid (getlogin)))))
+                            (rundir (string-append "/run/user/"
+                                                   uid))
+                            (auth-sock-envar (or (getenv "SSH_AUTH_SOCK")
+                                                 ""))
+                            (auth-sock-default-envar (or (getenv "SSH_AUTH_SOCK_DEFAULT") ""))
+                            (auth-sock (cond
+                                        ((not (string-null?
+                                               auth-sock-envar))
+                                         auth-sock-envar)
+                                        ((not (string-null?
+                                               auth-sock-default-envar))
+                                         auth-sock-default-envar)
+                                        (else
+                                         (string-append rundir "/keyring/ssh"))))
+                            (constructor (make-forkexec-constructor
+                                          (list #$(file-append openssh "/bin/ssh-agent") "-D" "-a" auth-sock)
+                                          #:log-file
+                                          #$(log-file "ssh-agent"))))
+                       (lambda ( . args)
+                         (when auth-sock
+                           (let ((auth-sock-dir (dirname auth-sock)))
+                             (unless (file-exists? auth-sock-dir)
+                               (mkdir auth-sock-dir))))
+                         (apply constructor args)))))
+          (stop #~(make-kill-destructor))
+          (actions
+           ((shepherd-action
+             (name 'clear)
+             (documentation "Clear ssh agent keys.")
+             (procedure
+              #~(lambda (running . args)
+                  (let* ((port (open-pipe* OPEN_READ #$(file-append openssh "/bin/ssh-add") "-D"))
+                         (output (read-string port)))
+                    (close-pipe port)
+                    (display output)))))
+            (shepherd-action
+             (name 'ls)
+             (documentation "List ssh agent keys.")
+             (procedure
+              #~(lambda (running . args)
+                  (let* ((port (open-pipe* OPEN_READ #$(file-append openssh "/bin/ssh-add") "-l"))
+                         (output (read-string port)))
+                    (close-pipe port)
+                    (display output)))))
+            (shepherd-action
+             (name 'lock)
+             (documentation "Lock ssh agent.")
+             (procedure
+              #~(lambda (running . args)
+                  (system (string-append #$(file-append xterm "/bin/xterm") "-e '" #$(file-append openssh "/bin/ssh-add") " -x'")))))
+            (shepherd-action
+             (name 'unlock)
+             (documentation "Unlock ssh agent.")
+             (procedure
+              #~(lambda (running . args)
+                  (system (string-append #$(file-append xterm "/bin/xterm") "-e '" #$(file-append openssh "/bin/ssh-add") " -X'"))))))))
          (shepherd-service
           (provision '(gpg-agent))
           (respawn? #t)
@@ -287,47 +295,74 @@
                        constructor)))
           (stop #~(make-system-destructor (string-append #$(file-append gnupg "gpgconf") " --kill all >> "
                                                          #$(log-file "gpg-agent")
-                                                         " 2>&1 "))
+                                                         " 2>&1 ")))
           (actions
-           (clear #~(lambda (running . args)
-                      "Clear gpg agent cache."
-                      (format #t "Clearing gpg agent cache\n")
-                      (fork+exec-command (list #$(file-append gnupg "gpg-connect-agent")
-                                               "reloadagent"
-                                         "/bye")
-                                   #:log-file (log-file "gpg-agent"))))
-           (lscomp #~(lambda (running . args)
-                       (let* ((port (open-pipe* OPEN_READ #$(file-append gnupg "gpgconf") "--list-components"))
-                              (output (read-string port)))
-                         (close-pipe port)
-                         (display output))))
-           (config-agent #~(lambda (running . args)
-                             (let* ((port (open-pipe* OPEN_READ #$(file-append gnupg "gpgconf") "--list-options" "gpg-agent"))
-                                    (output (read-string port)))
-                               (close-pipe port)
-                               (display output))))
-           (config-gpg #~(lambda (running . args)
-                           (let* ((port (open-pipe* OPEN_READ #$(file-append gnupg "gpgconf") "--list-options" "gpg"))
-                                  (output (read-string port)))
-                             (close-pipe port)
-                             (display output))))
-           (ls #~(lambda (running . args)
-                   (let* ((port (open-pipe* OPEN_READ #$(file-append gnupg "gpg-connect-agent") "keyinfo" "--list" "/bye"))
-                          (output (read-string port)))
-                     (close-pipe port)
-                     (display output))))
-           (list #~(lambda (running . args)
-                     (let* ((port (open-pipe* OPEN_READ #$(file-append gnupg "gpg") "--list-secret-keys" "--with-keygrip"))
-                            (output (read-string port)))
-                       (close-pipe port)
-                       (display output))))
-           (reload #~(lambda (running . args)
-                       "Reload gpg agent config."
-                       (format #t "Reloading gpg agent\n")
-                       (fork+exec-command (list #$(file-append gnupg "gpgconf") "--reload" "gpg-agent")
-                                          #:log-file #$(log-file "gpg-agent"))))))
-
-
+           (list
+            (shepherd-action
+             (name 'clear)
+             (documentation "Clear gpg agent cache.")
+             (procedure
+              #~(lambda (running . args)
+                  "Clear gpg agent cache."
+                  (format #t "Clearing gpg agent cache\n")
+                  (fork+exec-command (list #$(file-append gnupg "gpg-connect-agent")
+                                           "reloadagent"
+                                           "/bye")
+                                     #:log-file (log-file "gpg-agent")))))
+            (shepherd-action
+             (name 'lscomp)
+             (documentation "List gpg components.")
+             (procedure
+              #~(lambda (running . args)
+                  (let* ((port (open-pipe* OPEN_READ #$(file-append gnupg "gpgconf") "--list-components"))
+                         (output (read-string port)))
+                    (close-pipe port)
+                    (display output)))))
+            (shepherd-action
+             (name 'config-agent)
+             (documentation "Show gpg agent config.")
+             (procedure
+              #~(lambda (running . args)
+                  (let* ((port (open-pipe* OPEN_READ #$(file-append gnupg "gpgconf") "--list-options" "gpg-agent"))
+                         (output (read-string port)))
+                    (close-pipe port)
+                    (display output)))))
+            (shepherd-action
+             (name 'config-gpg)
+             (documentation "Show gpg config.")
+             (procedure
+              #~(lambda (running . args)
+                  (let* ((port (open-pipe* OPEN_READ #$(file-append gnupg "gpgconf") "--list-options" "gpg"))
+                         (output (read-string port)))
+                    (close-pipe port)
+                    (display output)))))
+            (shepherd-action
+             (name 'ls)
+             (documentation "List gpg keys.")
+             (procedure
+              #~(lambda (running . args)
+                  (let* ((port (open-pipe* OPEN_READ #$(file-append gnupg "gpg-connect-agent") "keyinfo" "--list" "/bye"))
+                         (output (read-string port)))
+                    (close-pipe port)
+                    (display output)))))
+            (shepherd-action
+             (name 'list)
+             (documentation "List gpg secret keys with keygrip.")
+             (procedure
+              #~(lambda (running . args)
+                  (let* ((port (open-pipe* OPEN_READ #$(file-append gnupg "gpg") "--list-secret-keys" "--with-keygrip"))
+                         (output (read-string port)))
+                    (close-pipe port)
+                    (display output)))))
+            (shepherd-action
+             (name 'reload)
+             (documentation "Reload gpg agent config.")
+             (procedure
+              #~(lambda (running . args)
+                  "Reload gpg agent config."
+                  (format #t "Reloading gpg agent\n")
+                  (fork+exec-command (list #$(file-append gnupg "gpgconf") "--reload" "gpg-agent")
+                                     #:log-file #$(log-file "gpg-agent"))))))))
          ;; pkttyagent
          (shepherd-service
           (provision '(pkttyagent))
@@ -340,8 +375,6 @@
               #:log-file #$(log-file "pkttyagent")))
           (stop #~(make-kill-destructor))
           (respawn? #t))
-
-
          ;; attnmgr
          (shepherd-service
            (provision '(attnmgr))
@@ -364,9 +397,6 @@
          ;; wireplumber;;
          ;; emacs;;
 
-
-
-
          ;; mpd
          (shepherd-service
           (provision '(mpd))
@@ -381,9 +411,6 @@
               #:log-file #$(log-file "mpd")))
           (stop #~(make-kill-destructor))
           (respawn? #t))
-
-
-
          ;; znc
          (shepherd-service
           (provision '(znc))
@@ -396,9 +423,6 @@
               #:log-file #$(log-file "znc")))
           (stop #~(make-kill-destructor))
           (respawn? #t))
-
-
-
          ;; usrhttpd
          (shepherd-service
           (provision '(usrhttpd))
@@ -413,9 +437,6 @@
                     #:log-file #$(log-file "usrhttpd")))
           (stop #~(make-kill-destructor))
           (respawn? #f))
-
-
-
          ;; jupyter
          (shepherd-service
           (provision '(jupyter))
@@ -435,9 +456,6 @@
               #:log-file #$(log-file "jupyter")))
           (stop #~(make-kill-destructor))
           (respawn? #f))
-
-
-
          ;; keepawaken
          (shepherd-service
           (provision '(keepawaken))
@@ -451,9 +469,12 @@
               #:log-file #$(log-file "keepawaken")))
           (stop #~(make-kill-destructor))
           (respawn? #t))))))
-
   (feature
-   (values `((shepherd-pkttyagent pkttyagent)
+   (values `(
+             (shepherd-emacs emacs)
+             (shepherd-ssh-agent ssh-agent)
+             (shepherd-gpg-agent gpg-agent)
+             (shepherd-pkttyagent pkttyagent)
              (shepherd-attnmgr attnmgr)
              (shepherd-mpd mpd)
              (shepherd-znc znc)
@@ -465,9 +486,6 @@
 
 (define* (feature-lotus-x-services
           #:key
-          (emacs emacs)
-          (ssh-agent ssh-agent)
-          (gpg-agent gpg-agent)
           (conky conky)
           (eww eww)
           (keynav keynav)
@@ -564,7 +582,7 @@
 
          (shepherd-service
           (provision '(conky))
-          (docqumentation "")
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
