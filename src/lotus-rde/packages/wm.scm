@@ -57,4 +57,3 @@
    (license license:ibmpl1.0)))
 
 
-stumpwm-gnome

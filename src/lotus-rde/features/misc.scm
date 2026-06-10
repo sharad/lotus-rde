@@ -174,7 +174,7 @@
         (list
 
          (shepherd-service
-          (provision '(emacs))
+          (provision '(emacs-lotus))
           (start #~(let* ((make-env (lambda (name value)
                                       (string-append name "=" value)))
                           (server "spacemacs")
@@ -196,21 +196,22 @@
                      (make-forkexec-constructor (list #$(file-append emacs "/bin/emacs") (format #f "--fg-daemon=~a" server))
                                                 #:log-file
                                                 #$(log-file "emacs")
-                                                #:environment-variables (append emacs-envs env))))
+                                                #:environment-variables (append emacs-envs
+                                                                                env))))
           (stop #~(let* ((xdg-runtime-dir (getenv "XDG_RUNTIME_DIR"))
-                                (server "spacemacs")
-                                (emacs-runtime-dir (if (and xdg-runtime-dir
-                                                            (file-exists? xdg-runtime-dir))
-                                                       (string-append xdg-runtime-dir
-                                                                      "/emacs")
-                                                       (string-append (getenv "HOME")
+                         (server "spacemacs")
+                         (emacs-runtime-dir (if (and xdg-runtime-dir
+                                                     (file-exists? xdg-runtime-dir))
+                                                (string-append xdg-runtime-dir
+                                                               "/emacs")
+                                                (string-append (getenv "HOME")
                                                                       "/.emacs.d")))
-                                (server-dir (string-append emacs-runtime-dir
+                         (server-dir (string-append emacs-runtime-dir
                                                            "/server"))
-                                (make-cmd-destructor #$make-cmd-destructor-gexp))
-                           (make-cmd-destructor (format #f "emacsclient -f ~a --eval \"(kill-emacs)\" >> ~a 2>&1"
-                                                        (string-append server-dir "/" server)
-                                                        #$(log-file "emacs")))))
+                         (make-cmd-destructor #$make-cmd-destructor-gexp))
+                    (make-cmd-destructor (format #f "emacsclient -f ~a --eval \"(kill-emacs)\" >> ~a 2>&1"
+                                                 (string-append server-dir "/" server)
+                                                 #$(log-file "emacs")))))
           (respawn? #f))
          (shepherd-service
           (provision '(ssh-agent))
@@ -472,7 +473,7 @@
           (respawn? #t))))))
   (feature
    (values `(
-             (shepherd-emacs emacs)
+             (shepherd-emacs-lotus emacs-lotus)
              (shepherd-ssh-agent ssh-agent)
              (shepherd-gpg-agent gpg-agent)
              (shepherd-pkttyagent pkttyagent)
@@ -1241,7 +1242,7 @@
                                 ;; secfs-volatile
                                 ;; secfs
                                 znc
-                                ;; emacs
+                                emacs-lotus
                                 ;; usrhttpd
                                 ;; jupyter
                                 ;; keepawaken

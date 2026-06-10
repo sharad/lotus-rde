@@ -51,7 +51,7 @@
                                  "slock" ; need suid
                                  "zsh"
                                  "stumpwm"
-                                 "stumpwm-gnome"
+                                 ;; "stumpwm-gnome"
                                  "sbcl"
                                  "sbcl-stumpwm-cpu"
                                  "sbcl-stumpwm-mem"
