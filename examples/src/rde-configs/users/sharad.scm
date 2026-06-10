@@ -740,7 +740,8 @@ fi
                                          #:full-name "Sharad Pratap"
                                          #:home-directory "/home/s/hell"
                                          #:email "s@localhost"))
-         (feature-xdg)
+         ;;(feature-emacs)
+         ;; (feature-xdg)
          ;; (feature-ssh #:ssh-agent? #t)
 
          ;; (feature-gnupg
@@ -764,7 +765,7 @@ fi
          (feature-doc-publishing)
          (feature-bluetooth-autoconnect)
          (feature-power-monitor)
-         (feature-git-annex-daemon))))  ;(feature-emacs)
+         (feature-git-annex-daemon))))
 
 
 

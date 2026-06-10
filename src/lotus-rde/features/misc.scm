@@ -174,7 +174,7 @@
         (list
 
          (shepherd-service
-          (provision '(emacs))
+          (provision '(emacsx))
           (start #~(let* ((make-env (lambda (name value)
                                       (string-append name "=" value)))
                           (server "spacemacs")
@@ -244,7 +244,8 @@
                          (apply constructor args)))))
           (stop #~(make-kill-destructor))
           (actions
-           ((shepherd-action
+           (list
+            (shepherd-action
              (name 'clear)
              (documentation "Clear ssh agent keys.")
              (procedure
