@@ -492,6 +492,9 @@
 
 (define* (feature-lotus-x-services
           #:key
+          (emacs emacs)
+          (ssh-agent ssh-agent)
+          (gpg-agent gpg-agent)
           (conky conky)
           (eww eww)
           (keynav keynav)
