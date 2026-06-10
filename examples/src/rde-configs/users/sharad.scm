@@ -741,7 +741,7 @@ fi
                                          #:home-directory "/home/s/hell"
                                          #:email "s@localhost"))
          (feature-xdg)
-         (feature-ssh #:ssh-agent? #t)
+         ;; (feature-ssh #:ssh-agent? #t)
 
          ;; (feature-gnupg
          ;;  ;; #:gpg-primary-key
