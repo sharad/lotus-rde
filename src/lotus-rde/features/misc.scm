@@ -173,38 +173,25 @@
          (shepherd-service
           (provision '(emacs))
           (start
-           #~(let* ((make-env
-                     (lambda (name value)
-                       (string-append name "=" value)))
+           #~(let* ((make-env (lambda (name value)
+                                (string-append name "=" value)))
                     (server "spacemacs")
                     (env (default-environment-variables))
                     (xdg-runtime-dir (getenv "XDG_RUNTIME_DIR"))
                     (emacs-runtime-dir (if (and xdg-runtime-dir
                                                 (file-exists? xdg-runtime-dir))
-                                           (string-append
-                                            xdg-runtime-dir
-                                            "/emacs")
-                                           (string-append
-                                            (getenv "HOME")
-                                            "/.emacs.d")))
+                                           (string-append xdg-runtime-dir
+                                                          "/emacs")
+                                           (string-append (getenv "HOME")
+                                                          "/.emacs.d")))
 
                     (emacs-runtime-dir-server (string-append emacs-runtime-dir
                                                              "/server"))
-                    (emacs-envs (list (make-env
-                                       "EMACS_SERVER_HOST"
-                                       "0.0.0.0")
-                                      (make-env
-                                       "EMACS_RUNTIME_DIR"
-                                       emacs-runtime-dir)
-                                      (make-env
-                                       "EMACS_SERVER_AUTH_DIR"
-                                       emacs-runtime-dir-server)
-                                      (make-env
-                                       "EMACS_SERVER_SOCKET_DIR"
-                                       emacs-runtime-dir-server)
-                                      (make-env
-                                       "EMACS_SERVER_DIR"
-                                       emacs-runtime-dir-server)))
+                    (emacs-envs (list (make-env "EMACS_SERVER_HOST" "0.0.0.0")
+                                      (make-env "EMACS_RUNTIME_DIR" emacs-runtime-dir)
+                                      (make-env "EMACS_SERVER_AUTH_DIR" emacs-runtime-dir-server)
+                                      (make-env "EMACS_SERVER_SOCKET_DIR" emacs-runtime-dir-server)
+                                      (make-env "EMACS_SERVER_DIR" emacs-runtime-dir-server)))
                     (make-forkexec-constructor (list #$(file-append emacs "/bin/emacs") (format #f "--fg-daemon=~a" server))
                                                #:log-file
                                                #$(log-file "emacs")
@@ -213,18 +200,16 @@
                           (server "spacemacs")
                           (emacs-runtime-dir (if (and xdg-runtime-dir
                                                       (file-exists? xdg-runtime-dir))
-                                                 (string-append
-                                                  xdg-runtime-dir
-                                                  "/emacs")
-                                                 (string-append
-                                                  (getenv "HOME")
-                                                  "/.emacs.d")))
+                                                 (string-append xdg-runtime-dir
+                                                                "/emacs")
+                                                 (string-append (getenv "HOME")
+                                                                "/.emacs.d")))
                           (server-dir (string-append emacs-runtime-dir
-                                                     "/server")))
-                     (#$make-cmd-destructor-gexp (format #f
-                                                         "emacsclient -f ~a --eval \"(kill-emacs)\" >> ~a 2>&1"
-                                                         (string-append server-dir "/" server)
-                                                         #$(log-file "emacs")))))
+                                                     "/server"))
+                          (make-cmd-destructor #$make-cmd-destructor-gexp))
+                     (make-cmd-destructor (format #f "emacsclient -f ~a --eval \"(kill-emacs)\" >> ~a 2>&1"
+                                                  (string-append server-dir "/" server)
+                                                  #$(log-file "emacs")))))
            (respawn? #f)))
 
 
@@ -250,11 +235,9 @@
                                          auth-sock-default-envar))
                                    auth-sock-default-envar)
                                   (else
-                                   (string-append
-                                    rundir
-                                    "/keyring/ssh"))))
+                                   (string-append rundir "/keyring/ssh"))))
                       (constructor (make-forkexec-constructor
-                                    (list "ssh-agent" "-D" "-a" auth-sock)
+                                    (list #$(file-append openssh "/bin/ssh-agent") "-D" "-a" auth-sock)
                                     #:log-file
                                     #$(log-file "ssh-agent"))))
                  (lambda ( . args)
@@ -267,92 +250,82 @@
            (stop #~(make-kill-destructor))
            (actions
             (clear
-             (lambda (running . args)
-               (let* ((port (open-pipe* OPEN_READ "ssh-add" "-D"))
-                      (output (read-string port)))
-                 (close-pipe port)
-                 (display output))))
-            (ls (lambda (running . args)
-                  (let* ((port (open-pipe* OPEN_READ "ssh-add" "-l"))
-                         (output (read-string port)))
-                    (close-pipe port)
-                    (display output))))
-            (lock (lambda (running . args)
-               (system "xterm -e 'ssh-add -x'")))
-            (unlock (lambda (running . args)
-                      (system "xterm -e 'ssh-add -X'"))))))
+             #~(lambda (running . args)
+                 (let* ((port (open-pipe* OPEN_READ #$(file-append openssh "/bin/ssh-add") "-D"))
+                        (output (read-string port)))
+                   (close-pipe port)
+                   (display output))))
+            (ls #~(lambda (running . args)
+                    (let* ((port (open-pipe* OPEN_READ #$(file-append openssh "/bin/ssh-add") "-l"))
+                           (output (read-string port)))
+                      (close-pipe port)
+                      (display output))))
+            (lock #~(lambda (running . args)
+                      (system (string-append #$(file-append xterm "/bin/xterm") "-e '" #$(file-append openssh "/bin/ssh-add") " -x'"))))
+            (unlock #~(lambda (running . args)
+                        (system (string-append #$(file-append xterm "/bin/xterm") "-e '" #$(file-append openssh "/bin/ssh-add") " -X'")))))))
 
 
          (shepherd-service
           (provision '(gpg-agent))
           (respawn? #t)
           (start #~(lambda args
-                     (let* ((cmd "gpg-agent")
-                            (uid (number->string (passwd:uid (getpwuid (getlogin)))))
+                     (let* ((uid (number->string (passwd:uid (getpwuid (getlogin)))))
                             (rundir (string-append "/run/user/" uid "/"))
                             (homedir (getenv "HOME"))
                             (gpg-homedir (string-append homedir "/.gnupg"))
                             (gpg-rundir (string-append rundir "gnupg/"))
-                            (constructor (make-system-constructor (string-append
-                                                       cmd
-                                                       " --homedir "
-                                                       gpg-homedir
-                                                       " --use-standard-socket --daemon"
-                                                       " >> "
-                                                       #$(log-file "gpg-agent")
-                                                       " 2>&1"))))
+                            (constructor (make-system-constructor (string-append #$(file-append gnupg "/bin/gpg-agent")
+                                                                                 " --homedir "
+                                                                                 gpg-homedir
+                                                                                 " --use-standard-socket --daemon"
+                                                                                 " >> "
+                                                                                 #$(log-file "gpg-agent")
+                                                                                 " 2>&1"))))
                        (unless (file-exists? rundir)
                          (mkdir rundir))
                        constructor)))
-          (stop #~(make-system-destructor "gpgconf --kill all >> "
-                                          #$(log-file "gpg-agent")
-                                          " 2>&1 "))
+          (stop #~(make-system-destructor (string-append #$(file-append gnupg "gpgconf") " --kill all >> "
+                                                         #$(log-file "gpg-agent")
+                                                         " 2>&1 "))
           (actions
-           (clear
-            (lambda (running . args)
-              "Clear gpg agent cache."
-              (format #t "Clearing gpg agent cache\n")
-              (fork+exec-command '("gpg-connect-agent"
-                                   "reloadagent"
-                                   "/bye")
-                                 #:log-file
-                                 (log-file "gpg-agent"))))
-           (lscomp
-            (lambda (running . args)
-              (let* ((port (open-pipe* OPEN_READ "gpgconf"
-                                       "--list-components"))
-                     (output (read-string port)))
-                (close-pipe port)
-                (display output))))
-           (config-agent
-            (lambda (running . args)
-              (let* ((port (open-pipe* OPEN_READ "gpgconf" "--list-options" "gpg-agent"))
-                     (output (read-string port)))
-                (close-pipe port)
-                (display output))))
-           (config-gpg (lambda (running . args)
-                         (let* ((port (open-pipe* OPEN_READ "gpgconf" "--list-options" "gpg"))
-                                (output (read-string port)))
-                           (close-pipe port)
-                           (display output))))
-           (ls (lambda (running . args)
-                 (let* ((port (open-pipe* OPEN_READ "gpg-connect-agent" "keyinfo --list" "/bye"))
-
-                        (output (read-string port)))
-                (close-pipe port)
-                (display output))))
-           (list
-            (lambda (running . args)
-              (let* ((port (open-pipe* OPEN_READ "gpg" "--list-secret-keys" "--with-keygrip"))
-                     (output (read-string port)))
-                (close-pipe port)
-                (display output))))
-           (reload
-            (lambda (running . args)
-              "Reload gpg agent config."
-              (format #t "Reloading gpg agent\n")
-              (fork+exec-command '("gpgconf" "--reload" "gpg-agent")
-                                 #:log-file (log-file "gpg-agent"))))))
+           (clear #~(lambda (running . args)
+                      "Clear gpg agent cache."
+                      (format #t "Clearing gpg agent cache\n")
+                      (fork+exec-command (list #$(file-append gnupg "gpg-connect-agent")
+                                               "reloadagent"
+                                         "/bye")
+                                   #:log-file (log-file "gpg-agent"))))
+           (lscomp #~(lambda (running . args)
+                       (let* ((port (open-pipe* OPEN_READ #$(file-append gnupg "gpgconf") "--list-components"))
+                              (output (read-string port)))
+                         (close-pipe port)
+                         (display output))))
+           (config-agent #~(lambda (running . args)
+                             (let* ((port (open-pipe* OPEN_READ #$(file-append gnupg "gpgconf") "--list-options" "gpg-agent"))
+                                    (output (read-string port)))
+                               (close-pipe port)
+                               (display output))))
+           (config-gpg #~(lambda (running . args)
+                           (let* ((port (open-pipe* OPEN_READ #$(file-append gnupg "gpgconf") "--list-options" "gpg"))
+                                  (output (read-string port)))
+                             (close-pipe port)
+                             (display output))))
+           (ls #~(lambda (running . args)
+                   (let* ((port (open-pipe* OPEN_READ #$(file-append gnupg "gpg-connect-agent") "keyinfo" "--list" "/bye"))
+                          (output (read-string port)))
+                     (close-pipe port)
+                     (display output))))
+           (list #~(lambda (running . args)
+                     (let* ((port (open-pipe* OPEN_READ #$(file-append gnupg "gpg") "--list-secret-keys" "--with-keygrip"))
+                            (output (read-string port)))
+                       (close-pipe port)
+                       (display output))))
+           (reload #~(lambda (running . args)
+                       "Reload gpg agent config."
+                       (format #t "Reloading gpg agent\n")
+                       (fork+exec-command (list #$(file-append gnupg "gpgconf") "--reload" "gpg-agent")
+                                          #:log-file #$(log-file "gpg-agent"))))))
 
 
          ;; pkttyagent
