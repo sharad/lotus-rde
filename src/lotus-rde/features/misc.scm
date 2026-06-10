@@ -144,6 +144,7 @@
 
 (define* (feature-lotus-nox-services
           #:key
+          (emacs emacs)
           (polkit polkit)
           (mpd mpd)
           (znc znc)
@@ -168,6 +169,190 @@
         home-shepherd-service-type
 
         (list
+
+         (shepherd-service
+          (provision '(emacs))
+          (start
+           #~(let* ((make-env
+                     (lambda (name value)
+                       (string-append name "=" value)))
+                    (server "spacemacs")
+                    (env (default-environment-variables))
+                    (xdg-runtime-dir (getenv "XDG_RUNTIME_DIR"))
+                    (emacs-runtime-dir (if (and xdg-runtime-dir
+                                                (file-exists? xdg-runtime-dir))
+                                           (string-append
+                                            xdg-runtime-dir
+                                            "/emacs")
+                                           (string-append
+                                            (getenv "HOME")
+                                            "/.emacs.d")))
+
+                    (emacs-runtime-dir-server (string-append emacs-runtime-dir
+                                                             "/server"))
+                    (emacs-envs (list (make-env
+                                       "EMACS_SERVER_HOST"
+                                       "0.0.0.0")
+                                      (make-env
+                                       "EMACS_RUNTIME_DIR"
+                                       emacs-runtime-dir)
+                                      (make-env
+                                       "EMACS_SERVER_AUTH_DIR"
+                                       emacs-runtime-dir-server)
+                                      (make-env
+                                       "EMACS_SERVER_SOCKET_DIR"
+                                       emacs-runtime-dir-server)
+                                      (make-env
+                                       "EMACS_SERVER_DIR"
+                                       emacs-runtime-dir-server)))
+                    (make-forkexec-constructor (list #$(file-append emacs "/bin/emacs") (format #f "--fg-daemon=~a" server))
+                                               #:log-file
+                                               #$(log-file "emacs")
+                                               #:environment-variables (append emacs-envs env))))
+           (stop #~(let* ((xdg-runtime-dir (getenv "XDG_RUNTIME_DIR"))
+                          (server "spacemacs")
+                          (emacs-runtime-dir (if (and xdg-runtime-dir
+                                                      (file-exists? xdg-runtime-dir))
+                                                 (string-append
+                                                  xdg-runtime-dir
+                                                  "/emacs")
+                                                 (string-append
+                                                  (getenv "HOME")
+                                                  "/.emacs.d")))
+                          (server-dir (string-append emacs-runtime-dir
+                                                     "/server")))
+                     (#$make-cmd-destructor-gexp (format #f
+                                                         "emacsclient -f ~a --eval \"(kill-emacs)\" >> ~a 2>&1"
+                                                         (string-append server-dir "/" server)
+                                                         #$(log-file "emacs")))))
+           (respawn? #f)))
+
+
+         (shepherd-service
+          (provision '(ssh-agent))
+          (requirement '())
+          (respawn? #f)
+          (start
+           #~(lambda args
+               (let* ((cmd "ssh-agent")
+                      ;; runtime
+                      (uid (number->string (passwd:uid (getpwuid (getlogin)))))
+                      (rundir (string-append "/run/user/"
+                                             uid))
+                      (auth-sock-envar (or (getenv "SSH_AUTH_SOCK")
+                                           ""))
+                      (auth-sock-default-envar (or (getenv "SSH_AUTH_SOCK_DEFAULT") ""))
+                      (auth-sock (cond
+                                  ((not (string-null?
+                                         auth-sock-envar))
+                                   auth-sock-envar)
+                                  ((not (string-null?
+                                         auth-sock-default-envar))
+                                   auth-sock-default-envar)
+                                  (else
+                                   (string-append
+                                    rundir
+                                    "/keyring/ssh"))))
+                      (constructor (make-forkexec-constructor
+                                    (list "ssh-agent" "-D" "-a" auth-sock)
+                                    #:log-file
+                                    #$(log-file "ssh-agent"))))
+                 (lambda ( . args)
+                   (when auth-sock
+                     (let ((auth-sock-dir (dirname auth-sock)))
+                       (unless (file-exists? auth-sock-dir)
+                         (mkdir auth-sock-dir))))
+                   (apply constructor args))))
+
+           (stop #~(make-kill-destructor))
+           (actions
+            (clear
+             (lambda (running . args)
+               (let* ((port (open-pipe* OPEN_READ "ssh-add" "-D"))
+                      (output (read-string port)))
+                 (close-pipe port)
+                 (display output))))
+            (ls (lambda (running . args)
+                  (let* ((port (open-pipe* OPEN_READ "ssh-add" "-l"))
+                         (output (read-string port)))
+                    (close-pipe port)
+                    (display output))))
+            (lock (lambda (running . args)
+               (system "xterm -e 'ssh-add -x'")))
+            (unlock (lambda (running . args)
+                      (system "xterm -e 'ssh-add -X'"))))))
+
+
+         (shepherd-service
+          (provision '(gpg-agent))
+          (respawn? #t)
+          (start #~(lambda args
+                     (let* ((cmd "gpg-agent")
+                            (uid (number->string (passwd:uid (getpwuid (getlogin)))))
+                            (rundir (string-append "/run/user/" uid "/"))
+                            (homedir (getenv "HOME"))
+                            (gpg-homedir (string-append homedir "/.gnupg"))
+                            (gpg-rundir (string-append rundir "gnupg/"))
+                            (constructor (make-system-constructor (string-append
+                                                       cmd
+                                                       " --homedir "
+                                                       gpg-homedir
+                                                       " --use-standard-socket --daemon"
+                                                       " >> "
+                                                       #$(log-file "gpg-agent")
+                                                       " 2>&1"))))
+                       (unless (file-exists? rundir)
+                         (mkdir rundir))
+                       constructor)))
+          (stop #~(make-system-destructor "gpgconf --kill all >> "
+                                          #$(log-file "gpg-agent")
+                                          " 2>&1 "))
+          (actions
+           (clear
+            (lambda (running . args)
+              "Clear gpg agent cache."
+              (format #t "Clearing gpg agent cache\n")
+              (fork+exec-command '("gpg-connect-agent"
+                                   "reloadagent"
+                                   "/bye")
+                                 #:log-file
+                                 (log-file "gpg-agent"))))
+           (lscomp
+            (lambda (running . args)
+              (let* ((port (open-pipe* OPEN_READ "gpgconf"
+                                       "--list-components"))
+                     (output (read-string port)))
+                (close-pipe port)
+                (display output))))
+           (config-agent
+            (lambda (running . args)
+              (let* ((port (open-pipe* OPEN_READ "gpgconf" "--list-options" "gpg-agent"))
+                     (output (read-string port)))
+                (close-pipe port)
+                (display output))))
+           (config-gpg (lambda (running . args)
+                         (let* ((port (open-pipe* OPEN_READ "gpgconf" "--list-options" "gpg"))
+                                (output (read-string port)))
+                           (close-pipe port)
+                           (display output))))
+           (ls (lambda (running . args)
+                 (let* ((port (open-pipe* OPEN_READ "gpg-connect-agent" "keyinfo --list" "/bye"))
+
+                        (output (read-string port)))
+                (close-pipe port)
+                (display output))))
+           (list
+            (lambda (running . args)
+              (let* ((port (open-pipe* OPEN_READ "gpg" "--list-secret-keys" "--with-keygrip"))
+                     (output (read-string port)))
+                (close-pipe port)
+                (display output))))
+           (reload
+            (lambda (running . args)
+              "Reload gpg agent config."
+              (format #t "Reloading gpg agent\n")
+              (fork+exec-command '("gpgconf" "--reload" "gpg-agent")
+                                 #:log-file (log-file "gpg-agent"))))))
 
 
          ;; pkttyagent
@@ -323,37 +508,37 @@
           (autossh autossh))
 
 
-  (define* (mk/simple-service provision command
-                              #:key
-                              (respawn? #t)
-                              (requirements '())
-                              (one-shot? #f)
-                              ;; (transient? #f)
-                              (create-session? #f)
-                              (documentation "")
-                              (actions '())
-                              (auto-start? #f))
+  ;; (define* (mk/simple-service provision command
+  ;;                             #:key
+  ;;                             (respawn? #t)
+  ;;                             (requirements '())
+  ;;                             (one-shot? #f)
+  ;;                             ;; (transient? #f)
+  ;;                             (create-session? #f)
+  ;;                             (documentation "")
+  ;;                             (actions '())
+  ;;                             (auto-start? #f))
+  ;;
+  ;;   (shepherd-service
+  ;;     (provision provision)
+  ;;     (documentation documentation)
+  ;;     (requirement requirements)
+  ;;     (auto-start? auto-start?)
+  ;;     (start
+  ;;      #~(make-forkexec-constructor
+  ;;         #$command
+  ;;         #:create-session? #$create-session?
+  ;;         #:log-file #$(log-file
+  ;;                       (symbol->string
+  ;;                        (car provision)))))
+  ;;
+  ;;     (stop #~(make-kill-destructor))
+  ;;
+  ;;     (respawn? respawn?)
+  ;;     (one-shot? one-shot?)
+  ;;     ;; (transient? transient?)
+  ;;     (actions actions)))
 
-    (shepherd-service
-      (provision provision)
-      (documentation documentation)
-      (requirement requirements)
-      (auto-start? auto-start?)
-      (start
-       #~(make-forkexec-constructor
-          #$command
-          #:create-session? #$create-session?
-          #:log-file #$(log-file
-                        (symbol->string
-                         (car provision)))))
-
-      (stop #~(make-kill-destructor))
-
-      (respawn? respawn?)
-      (one-shot? one-shot?)
-      ;; (transient? transient?)
-
-      (actions actions)))
 
   (define (get-home-services config)
     (list
@@ -394,24 +579,73 @@
          ;; nm-applet -- nm-applet
 
          ;; 1 conky
-         (mk/simple-service
-          '(conky)
-          #~(list #$(file-append conky "/bin/conky")
-                  "-c"
-                  (string-append (getenv "HOME")
-                                 "/.conkyrc/main/conkyrc")))
+         ;; (mk/simple-service
+         ;;  '(conky)
+         ;;  #~(list #$(file-append conky "/bin/conky")
+         ;;          "-c"
+         ;;          (string-append (getenv "HOME")
+         ;;                         "/.conkyrc/main/conkyrc")))
+
+         (shepherd-service
+          (provision '(conky))
+          (docqumentation "")
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list #$(file-append conky "/bin/conky")
+                    "-c"
+                    (string-append (getenv "HOME")
+                                   "/.conkyrc/main/conkyrc"))
+              #:create-session? #f
+              #:log-file #$(log-file
+                            (symbol->string
+                             (car provision)))))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
 
          ;; 2 eww
-         (mk/simple-service
-          '(eww)
-          #~(list #$(file-append eww "/bin/eww")
-                  "daemon"
-                  "--no-daemonize"))
+         ;; (mk/simple-service
+         ;;  '(eww)
+         ;;  #~(list #$(file-append eww "/bin/eww")
+         ;;          "daemon"
+         ;;          "--no-daemonize"))
+
+         (shepherd-service
+          (provision '(eww))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list #$(file-append eww "/bin/eww")
+                    "daemon"
+                    "--no-daemonize")
+              #:create-session? #f
+              #:log-file #$(log-file "eww")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
 
          ;; 3 keynav
-         (mk/simple-service
-          '(keynav)
-          #~(list #$(file-append keynav "/bin/keynav")))
+         ;; (mk/simple-service
+         ;;  '(keynav)
+         ;;  #~(list #$(file-append keynav "/bin/keynav")))
+         (shepherd-service
+          (provision '(keynav))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list #$(file-append keynav "/bin/keynav"))
+              #:create-session? #f
+              #:log-file #$(log-file "keynav")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
+
 
          ;; 4 xautolock
          (shepherd-service
@@ -457,130 +691,378 @@
                            "-enable")))))))
 
          ;; 5 autocutsel
-         (mk/simple-service
-          '(autocutsel)
-          #~(list #$(file-append autocutsel
-                                 "/bin/autocutsel")))
+         ;; (mk/simple-service
+         ;;  '(autocutsel)
+         ;;  #~(list #$(file-append autocutsel
+         ;;                         "/bin/autocutsel")))
+         (shepherd-service
+          (provision '(autocutsel))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list #$(file-append autocutsel
+                                   "/bin/autocutsel"))
+              #:create-session? #f
+              #:log-file #$(log-file "autocutsel")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
 
          ;; 6 picom/compton
-         (mk/simple-service
-          '(picom)
-          #~(list #$(file-append picom "/bin/picom")))
+         ;; (mk/simple-service
+         ;;  '(picom)
+         ;;  #~(list #$(file-append picom "/bin/picom")))
+         (shepherd-service
+          (provision '(picom))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list #$(file-append picom "/bin/picom"))
+              #:create-session? #f
+              #:log-file #$(log-file "picom")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
 
          ;; 7 osdsh
-         (mk/simple-service
-          '(osdsh)
-          #~(list "osdsh"))
+         ;; (mk/simple-service
+         ;;  '(osdsh)
+         ;;  #~(list "osdsh"))
+         (shepherd-service
+          (provision '(osdsh))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list "osdsh")
+              #:create-session? #f
+              #:log-file #$(log-file "osdsh")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
 
          ;; 8 dunst
-         (mk/simple-service
-          '(dunst)
-          #~(list
-             #$(file-append dunst "/bin/dunst")))
+         ;; (mk/simple-service
+         ;;  '(dunst)
+         ;;  #~(list
+         ;;     #$(file-append dunst "/bin/dunst")))
+         (shepherd-service
+          (provision '(dunst))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list
+               #$(file-append dunst "/bin/dunst"))
+              #:create-session? #f
+              #:log-file #$(log-file "dunst")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
 
          ;; 9 notification
-         (mk/simple-service
-          '(notification)
-          #~(list #$(file-append notification-daemon "/libexec/notification-daemon")))
+         ;; (mk/simple-service
+         ;;  '(notification)
+         ;;  #~(list #$(file-append notification-daemon "/libexec/notification-daemon")))
+         (shepherd-service
+          (provision '(notification))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list #$(file-append notification-daemon "/libexec/notification-daemon"))
+              #:create-session? #f
+              #:log-file #$(log-file "notification")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
 
          ;; 10 ibus-portal
-         (mk/simple-service
-          '(ibus-portal)
-          #~(list #$(file-append ibus "/libexec/ibus-portal")))
+         ;; (mk/simple-service
+         ;;  '(ibus-portal)
+         ;;  #~(list #$(file-append ibus "/libexec/ibus-portal")))
+         (shepherd-service
+          (provision '(ibus-portal))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list #$(file-append ibus "/libexec/ibus-portal"))
+              #:create-session? #f
+              #:log-file #$(log-file "ibus-portal")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
 
          ;; 11 ibus-daemon
-         (mk/simple-service
-          '(ibus-daemon)
-          #~(list #$(file-append ibus "/bin/ibus-daemon")))
+         ;; (mk/simple-service
+         ;;  '(ibus-daemon)
+         ;;  #~(list #$(file-append ibus "/bin/ibus-daemon")))
+         (shepherd-service
+          (provision '(ibus-daemon))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list #$(file-append ibus "/bin/ibus-daemon"))
+              #:create-session? #f
+              #:log-file #$(log-file "ibus-daemon")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
 
          ;; 12 ibus-x11
-         (mk/simple-service
-          '(ibus-x11)
-          #~(list #$(file-append ibus "/libexec/ibus-x11")
-                  "--kill-daemon"))
+         ;; (mk/simple-service
+         ;;  '(ibus-x11)
+         ;;  #~(list #$(file-append ibus "/libexec/ibus-x11")
+         ;;          "--kill-daemon"))
+         (shepherd-service
+          (provision '(ibus-x11))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list #$(file-append ibus "/libexec/ibus-x11")
+                    "--kill-daemon")
+              #:create-session? #f
+              #:log-file #$(log-file "ibus-x11")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
 
          ;; 13 gnome-keyring
-         (mk/simple-service
-          '(gnome-keyring)
-          #~(list #$(file-append gnome-keyring
-                                 "/bin/gnome-keyring-daemon")
-                  "--start"
-                  "--foreground"
-                  "--components=secrets")
-          #:respawn? #f)
+         ;; (mk/simple-service
+         ;;  '(gnome-keyring)
+         ;;  #~(list #$(file-append gnome-keyring
+         ;;                         "/bin/gnome-keyring-daemon")
+         ;;          "--start"
+         ;;          "--foreground"
+         ;;          "--components=secrets")
+         ;;  #:respawn? #f)
+         (shepherd-service
+          (provision '(gnome-keyring))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list #$(file-append gnome-keyring
+                                   "/bin/gnome-keyring-daemon")
+                    "--start"
+                    "--foreground"
+                    "--components=secrets")
+              #:create-session? #f
+              #:log-file #$(log-file "gnome-keyring")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
 
          ;; 14 keepassxc
-         (mk/simple-service
-          '(keepassxc)
-          #~(list "/run/privileged/bin/firejail"
-                  "--noprofile"
-                  "keepassxc"
-                  "--minimized"
-                  "--keyfile"
-                  (string-append (getenv "HOME")
-                                 "/.key.keyx")
-                  (string-append (getenv "HOME")
-                                 "/.db.kdbx"))
-          #:requirements
-          '(kpkey))
-            ;; secfs-orgp
-            ;; xawaken-session-down
+         ;; (mk/simple-service
+         ;;  '(keepassxc)
+         ;;  #~(list "/run/privileged/bin/firejail"
+         ;;          "--noprofile"
+         ;;          "keepassxc"
+         ;;          "--minimized"
+         ;;          "--keyfile"
+         ;;          (string-append (getenv "HOME")
+         ;;                         "/.key.keyx")
+         ;;          (string-append (getenv "HOME")
+         ;;                         "/.db.kdbx"))
+         ;;  #:requirements
+         ;;  '(kpkey))
+         (shepherd-service
+          (provision '(keepassxc))
+          ;; (documentation documentation)
+          (requirement '(kpkey))
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list "/run/privileged/bin/firejail"
+                    "--noprofile"
+                    "keepassxc"
+                    "--minimized"
+                    "--keyfile"
+                    (string-append (getenv "HOME")
+                                   "/.key.keyx")
+                    (string-append (getenv "HOME")
+                                   "/.db.kdbx"))
+              #:create-session? #f
+              #:log-file #$(log-file "keepassxc")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
          ;; 15 blueman-applet
-         (mk/simple-service
-          '(blueman-applet)
-          #~(list #$(file-append blueman
-                                 "/bin/blueman-applet")))
+         ;; (mk/simple-service
+         ;;  '(blueman-applet)
+         ;;  #~(list #$(file-append blueman
+         ;;                         "/bin/blueman-applet")))
+         (shepherd-service
+          (provision '(blueman-applet))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list #$(file-append blueman
+                                   "/bin/blueman-applet"))
+              #:create-session? #f
+              #:log-file #$(log-file "blueman-applet")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
 
          ;; 16 keymap
-         (mk/simple-service
-          '(keymap)
-          #~(list #$(file-append xmodmap "/bin/xmodmap")
-                  (string-append (getenv "HOME")
-                                 "/.xmodmaprc"))
-          #:respawn? #f
-          #:one-shot? #t)
+         ;; (mk/simple-service
+         ;;  '(keymap)
+         ;;  #~(list #$(file-append xmodmap "/bin/xmodmap")
+         ;;          (string-append (getenv "HOME")
+         ;;                         "/.xmodmaprc"))
+         ;;  #:respawn? #f
+         ;;  #:one-shot? #t)
+         (shepherd-service
+          (provision '(keymap))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list #$(file-append xmodmap "/bin/xmodmap")
+                    (string-append (getenv "HOME")
+                                   "/.xmodmaprc"))
+              #:create-session? #f
+              #:log-file #$(log-file "keymap")))
+          (stop #~(make-kill-destructor))
+          (respawn? #f)
+          (one-shot? #t))
 
          ;; 17 xrdb
-         (mk/simple-service
-          '(xrdb)
-          #~(list "sh" "-c" "m4 -I ~/.setup/m4 \
+         ;; (mk/simple-service
+         ;;  '(xrdb)
+         ;;  #~(list "sh" "-c" "m4 -I ~/.setup/m4 \
+         ;;         -I ~/.setup/osetup/lib/m4.d \
+         ;;         -I ~/.setup/osetup/info/common/m4.d \
+         ;;         -I ~/.setup/osetup/info/hosts/${HOST}/m4.d \
+         ;;         -I ~/.Xresources \
+         ;;         ~/.Xresources/init 2>/dev/null \
+         ;;         | xrdb -merge -")
+         ;;  #:respawn? #f
+         ;;  #:one-shot? #t)
+         (shepherd-service
+          (provision '(xrdb))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list "sh" "-c" "m4 -I ~/.setup/m4 \
                  -I ~/.setup/osetup/lib/m4.d \
                  -I ~/.setup/osetup/info/common/m4.d \
                  -I ~/.setup/osetup/info/hosts/${HOST}/m4.d \
                  -I ~/.Xresources \
                  ~/.Xresources/init 2>/dev/null \
                  | xrdb -merge -")
-          #:respawn? #f
-          #:one-shot? #t)
+              #:create-session? #f
+              #:log-file #$(log-file "")))
+          (stop #~(make-kill-destructor))
+          (respawn? #f)
+          (one-shot? #t))
 
          ;; 18 synclient
-         (mk/simple-service
-          '(synclient)
-          #~(list "synclient"
-                  "TapButton1=1")
-          #:respawn? #f
-          #:one-shot? #t)
+         ;; (mk/simple-service
+         ;;  '(synclient)
+         ;;  #~(list "synclient"
+         ;;          "TapButton1=1")
+         ;;  #:respawn? #f
+         ;;  #:one-shot? #t)
+         (shepherd-service
+          (provision '(synclient))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list "synclient"
+                    "TapButton1=1")
+              #:create-session? #f
+              #:log-file #$(log-file "synclient")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
 
          ;; 20 pwr-applet
-         (mk/simple-service
-          '(pwr-applet)
-          #~(list (string-append (getenv "HOME")
-                                 "/.bin/pwr-applet"))
-          #:respawn? #f)
+         ;; (mk/simple-service
+         ;;  '(pwr-applet)
+         ;;  #~(list (string-append (getenv "HOME")
+         ;;                         "/.bin/pwr-applet"))
+         ;;  #:respawn? #f)
+         (shepherd-service
+          (provision '(pwr-applet))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list (string-append (getenv "HOME")
+                                   "/.bin/pwr-applet"))
+              #:create-session? #f
+              #:log-file #$(log-file "pwr-applet")))
+          (stop #~(make-kill-destructor))
+          (respawn? #f)
+          (one-shot? #f))
 
          ;; 21 logind-applet
-         (mk/simple-service
-          '(logind-applet)
-          #~(list (string-append
-                   (getenv "HOME")
-                   "/.bin/logind-applet"))
-          #:respawn? #f)
+         ;; (mk/simple-service
+         ;;  '(logind-applet)
+         ;;  #~(list (string-append
+         ;;           (getenv "HOME")
+         ;;           "/.bin/logind-applet"))
+         ;;  #:respawn? #f)
+         (shepherd-service
+          (provision '(logind-applet))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list (string-append
+                     (getenv "HOME")
+                     "/.bin/logind-applet"))
+              #:create-session? #f
+              #:log-file #$(log-file "logind-applet")))
+          (stop #~(make-kill-destructor))
+          (respawn? #f)
+          (one-shot? #f))
 
          ;; 22 pasystray
-         (mk/simple-service
-          '(pasystray)
-          #~(list #$(file-append pasystray
-                                 "/bin/pasystray")))
+         ;; (mk/simple-service
+         ;;  '(pasystray)
+         ;;  #~(list #$(file-append pasystray
+         ;;                         "/bin/pasystray")))
+         (shepherd-service
+          (provision '(pasystray))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list #$(file-append pasystray
+                                   "/bin/pasystray"))
+              #:create-session? #f
+              #:log-file #$(log-file "pasystray")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))
 
          ;; 23 deskflow-server
          (let ((cmd (file-append deskflow "/bin/deskflow-server")) ;"deskflow-core"
@@ -677,10 +1159,23 @@
            (actions '())))
 
          ;; 29 xdg-autostart
-         (mk/simple-service
-          '(xdg-autostart)
-          #~(list "xdg-autostart")
-          #:create-session? #t)))))
+         ;; (mk/simple-service
+         ;;  '(xdg-autostart)
+         ;;  #~(list "xdg-autostart")
+         ;;  #:create-session? #t)
+         (shepherd-service
+          (provision '(xdg-autostart))
+          ;; (documentation documentation)
+          (requirement '())
+          (auto-start? #f)
+          (start
+           #~(make-forkexec-constructor
+              (list "xdg-autostart")
+              #:create-session? #t
+              #:log-file #$(log-file "xdg-autostart")))
+          (stop #~(make-kill-destructor))
+          (respawn? #t)
+          (one-shot? #f))))))
 
   (feature
    (name 'lotus-x-services)
