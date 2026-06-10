@@ -174,7 +174,7 @@
         (list
 
          (shepherd-service
-          (provision '(emacsx))
+          (provision '(emacs))
           (start #~(let* ((make-env (lambda (name value)
                                       (string-append name "=" value)))
                           (server "spacemacs")
