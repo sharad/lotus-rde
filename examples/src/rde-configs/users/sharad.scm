@@ -680,18 +680,17 @@ subject:/home:/) and tag:new}\"'"
 
 
 (define-public %sharad-features
-  (append
-   ;; all-features-with-custom-kernel-and-substitutes
-   (list (feature-additional-services)
-         (feature-base-packages #:home-packages (list ))
+  ;; all-features-with-custom-kernel-and-substitutes
+  (list (feature-additional-services)
+        (feature-base-packages #:home-packages (list ))
 
 
-         (feature-custom-services
-          #:feature-name-prefix 'my-profile-code
-          #:home-services
-          (list (simple-service 'my-profile-code
-                                home-shell-profile-service-type
-                                (list "# my existing code here
+        (feature-custom-services
+         #:feature-name-prefix 'my-profile-code
+         #:home-services
+         (list (simple-service 'my-profile-code
+                               home-shell-profile-service-type
+                               (list "# my existing code here
 # ~/.profile: executed by the command interpreter for login shells.  -*- mode: sh; -*-
 # This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
 # exists.
@@ -719,53 +718,53 @@ then
 fi
 
 "
-                                      ))))
+                                     ))))
 
-         (if #f
-             (feature-user-info #:user-name "s"
-                                #:full-name "Sharad Pratap"
-                                #:home-directory "/home/s/hell"
-                                #:email "s@localhost"
-                                ;; #:user-initial-password-hash "$6$abc$yvk.Ln2iQ9WE8ZR5heHDQ31n3tpO3n6t5DfEYtoGBb9C3OU2LVWCNQ6q8UEoC7x8ogVqlfipLvFQJyJ4U8JAf."
-                                ;; "$6$abc$3SAZZQGdvQgAscM2gupP1tC.SqnsaLSPoAnEOb2k6jXMhzQqS1kCSplAJ/vUy2rrnpHtt6frW2Ap5l/tIvDsz."
-                                ;; (crypt "bob" "$6$abc")
-                                #:user-groups '("wheel" "netdev" "audio" "video" "dialout")
+        (if #f
+            (feature-user-info #:user-name "s"
+                               #:full-name "Sharad Pratap"
+                               #:home-directory "/home/s/hell"
+                               #:email "s@localhost"
+                               ;; #:user-initial-password-hash "$6$abc$yvk.Ln2iQ9WE8ZR5heHDQ31n3tpO3n6t5DfEYtoGBb9C3OU2LVWCNQ6q8UEoC7x8ogVqlfipLvFQJyJ4U8JAf."
+                               ;; "$6$abc$3SAZZQGdvQgAscM2gupP1tC.SqnsaLSPoAnEOb2k6jXMhzQqS1kCSplAJ/vUy2rrnpHtt6frW2Ap5l/tIvDsz."
+                               ;; (crypt "bob" "$6$abc")
+                               #:user-groups '("wheel" "netdev" "audio" "video" "dialout")
 
-                                ;; WARNING: This option can reduce the explorability by hiding
-                                ;; some helpful messages and parts of the interface for the sake
-                                ;; of minimalistic, less distractive and clean look.  Generally
-                                ;; it's not recommended to use it.
-                                #:emacs-advanced-user? #f)
-             (feature-lotus-users-groups #:user-name "s"
-                                         #:full-name "Sharad Pratap"
-                                         #:home-directory "/home/s/hell"
-                                         #:email "s@localhost"))
-         ;;(feature-emacs)
-         ;; (feature-xdg)
-         ;; (feature-ssh #:ssh-agent? #t)
+                               ;; WARNING: This option can reduce the explorability by hiding
+                               ;; some helpful messages and parts of the interface for the sake
+                               ;; of minimalistic, less distractive and clean look.  Generally
+                               ;; it's not recommended to use it.
+                               #:emacs-advanced-user? #f)
+            (feature-lotus-users-groups #:user-name "s"
+                                        #:full-name "Sharad Pratap"
+                                        #:home-directory "/home/s/hell"
+                                        #:email "s@localhost"))
+        ;;(feature-emacs)
+        ;; (feature-xdg)
+        ;; (feature-ssh #:ssh-agent? #t)
 
-         ;; (feature-gnupg
-         ;;  ;; #:gpg-primary-key
-         ;;  #:gpg-ssh-agent? #f
-         ;;  ;; #:ssh-keys '()
-         ;;  ;; #:pinentry-flavor 'qt
-         ;;  ;; #:default-ttl 86400
-         ;;  ;; #:gpg-extra-config '()
-         ;;  ;; #:gpg-agent-extra-config '()
-         ;;  )
+        ;; (feature-gnupg
+        ;;  ;; #:gpg-primary-key
+        ;;  #:gpg-ssh-agent? #f
+        ;;  ;; #:ssh-keys '()
+        ;;  ;; #:pinentry-flavor 'qt
+        ;;  ;; #:default-ttl 86400
+        ;;  ;; #:gpg-extra-config '()
+        ;;  ;; #:gpg-agent-extra-config '()
+        ;;  )
 
 
-         (feature-lotus-nox-services)
-         (feature-lotus-x-services)
-         (feature-lotus-nox-group-services)
-         (feature-lotus-x-group-services)
-         (feature-lotus-security)
-         (feature-msteam)
-         (feature-zoom)
-         (feature-doc-publishing)
-         (feature-bluetooth-autoconnect)
-         (feature-power-monitor)
-         (feature-git-annex-daemon))))
+        (feature-lotus-nox-services)
+        (feature-lotus-x-services)
+        (feature-lotus-nox-group-services)
+        (feature-lotus-x-group-services)
+        (feature-lotus-security)
+        (feature-msteam)
+        (feature-zoom)
+        (feature-doc-publishing)
+        (feature-bluetooth-autoconnect)
+        (feature-power-monitor)
+        (feature-git-annex-daemon)))
 
 
 
