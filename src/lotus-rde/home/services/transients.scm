@@ -34,6 +34,7 @@
   #:use-module (lotus-rde lib utils)
   #:export (home-ssh-tunnel-service-type
             home-autossh-tunnel-service-type
+            home-ssh-gpg-tunnel-service-type
             home-spawner-service-type
             <home-spawner-configuration>
             make-home-spawner-configuration
@@ -84,63 +85,42 @@
         (documentation "herd spawn <spawner> <inst-name> [key val ...]")
         (procedure
          #~(lambda (running . args)
-             (match args
-               ((inst-name . vargs)
-                (let* ((svc-sym (string->symbol
-                                 (string-append "transient-"
-                                                #$(symbol->string spawner-name)
-                                                "-" inst-name)))
-                       (existing (lookup-service svc-sym)))
-                  (if (and existing (service-running? existing))
-                      (format #t "Already running: ~a\n" svc-sym)
-                      (if (not (#$capable?))
-                          (format #t "Error: not capable\n")
-                          (let ((svc (make <service>
-                                       #:provides (list svc-sym)
-                                       #:requires '()
-                                       #:transient? #t
-                                       #:respawn? #f
-                                       #:start (apply (#$constructor)
-                                                      inst-name
-                                                      (lambda () (symbol->string svc-sym))
-                                                      vargs)
-                                       #:stop (make-kill-destructor))))
-                            (register-services svc)
-                            (start-service svc)
-                            (format #t "Started: ~a\n" svc-sym))))))
-               (_ (format #t "Usage: herd spawn ~a <inst-name>\n"
-                          '#$spawner-name))))))
-
-
-         ;; #~(lambda* (running . args)
-         ;;     (match args
-         ;;       ((inst-name . vargs)
-         ;;        (let* ((kw-args  (strings->keyword-args vargs))
-         ;;               (svc-name (service-sym inst-name #:transient? (plist-ref kw-args #:transient? #t))))
-         ;;          (format #t "spawn: svc-name = ~a\n" svc-name)
-         ;;          (if (not (is-capable-fn?))
-         ;;              (begin
-         ;;                (format #t "Error: Not able to run this service.\n")
-         ;;                #f)
-         ;;              (if (not (service-running-safe? svc-name))
-         ;;                  (let ((svc (apply make-spawner-service inst-name kw-args)))
-         ;;                    (register-services (list svc))
-         ;;                    (apply start-service svc vargs)
-         ;;                    (format #t "Started new service: ~a\n" svc-name))
-         ;;                  (format #t "Service ~a already running.\n" svc-name)))))
-         ;;       (_
-         ;;        (begin
-         ;;          (format #t "Usage: herd spawn ~s <inst-name>\n" spawner-service)
-         ;;          #f))))
-
+             (if (null? args)
+                 (let ((inst-name (car args))
+                       (vargs (cdr args)))
+                     (let* ((svc-sym (string->symbol (string-append "transient-"
+                                                                    #$(symbol->string spawner-name)
+                                                                    "-" inst-name)))
+                            (existing (lookup-service svc-sym)))
+                       (if (and existing
+                                (service-running? existing))
+                           (format #t "Already running: ~a\n" svc-sym)
+                           (if (not (#$capable?))
+                               (format #t "Error: not capable\n")
+                               (let ((svc (make <service>
+                                            #:provides (list svc-sym)
+                                            #:requires '()
+                                            #:transient? #t
+                                            #:respawn? #f
+                                            #:start (apply (#$constructor)
+                                                           inst-name
+                                                           (lambda () (symbol->string svc-sym))
+                                                           vargs)
+                                            #:stop (make-kill-destructor))))
+                                 (register-services svc)
+                                 (start-service svc)
+                                 (format #t "Started: ~a\n" svc-sym)))))
+                     (format #t "Usage: herd spawn ~a <inst-name>\n"
+                             '#$spawner-name))))))
 
        (shepherd-action
         (name 'destroy)
         (documentation "herd destroy <spawner> <inst-name>")
         (procedure
          #~(lambda (running . args)
-             (match args
-               ((inst-name . vargs)
+             (if (null? args)
+               (let ((inst-name (car args))
+                     (vargs (cdr args)))
                 (let* ((svc-sym (string->symbol
                                  (string-append "transient-"
                                                 #$(symbol->string spawner-name)
@@ -153,8 +133,8 @@
                           (stop-service svc))
                         (deregister-service svc-sym)
                         (format #t "Destroyed: ~a\n" svc-sym)))))
-               (_ (format #t "Usage: herd destroy ~a <inst-name>\n"
-                          '#$spawner-name))))))
+               (format #t "Usage: herd destroy ~a <inst-name>\n"
+                       '#$spawner-name)))))
 
        (shepherd-action
         (name 'list)
@@ -215,8 +195,7 @@
                                                                               lport)
                                                                  inst-name)
                                                                 #:log-file (#$log-file-gexp (service-name-fn)))))
-               (capable? #~(lambda ()
-                             #t))))))))
+               (capable? #~(const #t))))))))
    (default-value #f)
    (description "Autossh tunnel spawner for guix home.")))
 
@@ -252,14 +231,47 @@
                                                                            inst-name))
                                                                   #:log-file (#$log-file-gexp (service-name-fn))))))
                (capable?
-                #~(lambda ()
-                    (let* ((p    (open-input-pipe "command -v ssh"))
-                           (line (read-line p)))
-                      (close-port p)
-                      (and (string? line)
-                           (not (string-null? line))))))))))))
+                #~(const #t))))))))
    (default-value #f)
    (description "SSH tunnel spawner for guix home.")))
+
+
+(define home-ssh-gpg-tunnel-service-type
+  (service-type
+   (name 'home-ssh-gpg-tunnel)
+   (extensions
+    (list (service-extension
+           home-spawner-service-type
+           (lambda (_)
+             (list
+              (home-spawner-configuration
+               (name 'ssh-gpg-tunnel)
+               (constructor-gexp #~(lambda* (inst-name
+                                             service-name-fn
+                                             #:key
+                                             (rsock "/run/user/1000/gnupg/S.gpg-agent")
+                                             (lsock "/run/user/1000/gnupg/S.gpg-agent")
+                                             (port 22)
+                                             #:allow-other-keys)
+                                     (let ((port-args
+                                            (if (= port 22)
+                                                '()
+                                                (list "-p" (number->string port))))
+                                           (cmd
+                                            #$(file-append openssh "/bin/ssh")))
+                                       (make-forkexec-constructor (append (list cmd "-v")
+                                                                          port-args
+                                                                          (list "-N"
+                                                                                "-R"
+                                                                                (format #f "~s:localhost:~s" rsock lsock)
+                                                                                "-o" "StreamLocalBindUnlink=yes"
+                                                                                inst-name))
+                                                                  #:log-file (#$log-file-gexp (service-name-fn))))))
+               (capable?
+                #~(const #t))))))))
+   (default-value #f)
+   (description "SSH tunnel spawner for guix home.")))
+
 
 
 

@@ -493,9 +493,9 @@
                  (up          '#$up)
                  (down        '#$down))
 
-            (format #t "name ~a - requirement ~a ~%" name requirement)
-            (display requirement)
-            (newline)
+            ;; (format #t "name ~a - requirement ~a ~%" name requirement)
+            ;; (display requirement)
+            ;; (newline)
 
             (define (xrun-action-service srv action action-proc retval . args)
               (format #t "xrun-action1: ~a args[~a]~%" srv args)

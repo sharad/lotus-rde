@@ -502,42 +502,8 @@
           (git git)
           (autossh autossh))
 
-
-  ;; (define* (mk/simple-service provision command
-  ;;                             #:key
-  ;;                             (respawn? #t)
-  ;;                             (requirements '())
-  ;;                             (one-shot? #f)
-  ;;                             ;; (transient? #f)
-  ;;                             (create-session? #f)
-  ;;                             (documentation "")
-  ;;                             (actions '())
-  ;;                             (auto-start? #f))
-  ;;
-  ;;   (shepherd-service
-  ;;     (provision provision)
-  ;;     (documentation documentation)
-  ;;     (requirement requirements)
-  ;;     (auto-start? auto-start?)
-  ;;     (start
-  ;;      #~(make-forkexec-constructor
-  ;;         #$command
-  ;;         #:create-session? #$create-session?
-  ;;         #:log-file #$(log-file
-  ;;                       (symbol->string
-  ;;                        (car provision)))))
-  ;;
-  ;;     (stop #~(make-kill-destructor))
-  ;;
-  ;;     (respawn? respawn?)
-  ;;     (one-shot? one-shot?)
-  ;;     ;; (transient? transient?)
-  ;;     (actions actions)))
-
-
   (define (get-home-services config)
     (list
-
        ;; packages
        (simple-service
         'lotus-shepherd-packages
@@ -559,9 +525,6 @@
          git
          autossh))
 
-
-
-
        ;; shepherd services
        (simple-service
         'lotus-user-services
@@ -574,13 +537,6 @@
          ;; nm-applet -- nm-applet
 
          ;; 1 conky
-         ;; (mk/simple-service
-         ;;  '(conky)
-         ;;  #~(list #$(file-append conky "/bin/conky")
-         ;;          "-c"
-         ;;          (string-append (getenv "HOME")
-         ;;                         "/.conkyrc/main/conkyrc")))
-
          (shepherd-service
           (provision '(conky))
           (documentation "")
@@ -601,15 +557,9 @@
           (one-shot? #f))
 
          ;; 2 eww
-         ;; (mk/simple-service
-         ;;  '(eww)
-         ;;  #~(list #$(file-append eww "/bin/eww")
-         ;;          "daemon"
-         ;;          "--no-daemonize"))
-
          (shepherd-service
           (provision '(eww))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -624,12 +574,9 @@
           (one-shot? #f))
 
          ;; 3 keynav
-         ;; (mk/simple-service
-         ;;  '(keynav)
-         ;;  #~(list #$(file-append keynav "/bin/keynav")))
          (shepherd-service
           (provision '(keynav))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -686,13 +633,9 @@
                            "-enable")))))))
 
          ;; 5 autocutsel
-         ;; (mk/simple-service
-         ;;  '(autocutsel)
-         ;;  #~(list #$(file-append autocutsel
-         ;;                         "/bin/autocutsel")))
          (shepherd-service
           (provision '(autocutsel))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -706,12 +649,9 @@
           (one-shot? #f))
 
          ;; 6 picom/compton
-         ;; (mk/simple-service
-         ;;  '(picom)
-         ;;  #~(list #$(file-append picom "/bin/picom")))
          (shepherd-service
           (provision '(picom))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -724,12 +664,9 @@
           (one-shot? #f))
 
          ;; 7 osdsh
-         ;; (mk/simple-service
-         ;;  '(osdsh)
-         ;;  #~(list "osdsh"))
          (shepherd-service
           (provision '(osdsh))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -742,13 +679,9 @@
           (one-shot? #f))
 
          ;; 8 dunst
-         ;; (mk/simple-service
-         ;;  '(dunst)
-         ;;  #~(list
-         ;;     #$(file-append dunst "/bin/dunst")))
          (shepherd-service
           (provision '(dunst))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -762,12 +695,9 @@
           (one-shot? #f))
 
          ;; 9 notification
-         ;; (mk/simple-service
-         ;;  '(notification)
-         ;;  #~(list #$(file-append notification-daemon "/libexec/notification-daemon")))
          (shepherd-service
           (provision '(notification))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -780,12 +710,9 @@
           (one-shot? #f))
 
          ;; 10 ibus-portal
-         ;; (mk/simple-service
-         ;;  '(ibus-portal)
-         ;;  #~(list #$(file-append ibus "/libexec/ibus-portal")))
          (shepherd-service
           (provision '(ibus-portal))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -798,12 +725,9 @@
           (one-shot? #f))
 
          ;; 11 ibus-daemon
-         ;; (mk/simple-service
-         ;;  '(ibus-daemon)
-         ;;  #~(list #$(file-append ibus "/bin/ibus-daemon")))
          (shepherd-service
           (provision '(ibus-daemon))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -816,13 +740,9 @@
           (one-shot? #f))
 
          ;; 12 ibus-x11
-         ;; (mk/simple-service
-         ;;  '(ibus-x11)
-         ;;  #~(list #$(file-append ibus "/libexec/ibus-x11")
-         ;;          "--kill-daemon"))
          (shepherd-service
           (provision '(ibus-x11))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -836,17 +756,9 @@
           (one-shot? #f))
 
          ;; 13 gnome-keyring
-         ;; (mk/simple-service
-         ;;  '(gnome-keyring)
-         ;;  #~(list #$(file-append gnome-keyring
-         ;;                         "/bin/gnome-keyring-daemon")
-         ;;          "--start"
-         ;;          "--foreground"
-         ;;          "--components=secrets")
-         ;;  #:respawn? #f)
          (shepherd-service
           (provision '(gnome-keyring))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -863,22 +775,9 @@
           (one-shot? #f))
 
          ;; 14 keepassxc
-         ;; (mk/simple-service
-         ;;  '(keepassxc)
-         ;;  #~(list "/run/privileged/bin/firejail"
-         ;;          "--noprofile"
-         ;;          "keepassxc"
-         ;;          "--minimized"
-         ;;          "--keyfile"
-         ;;          (string-append (getenv "HOME")
-         ;;                         "/.key.keyx")
-         ;;          (string-append (getenv "HOME")
-         ;;                         "/.db.kdbx"))
-         ;;  #:requirements
-         ;;  '(kpkey))
          (shepherd-service
           (provision '(keepassxc))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '(kpkey
                          secfs-orgp
                          ;; secfs-secure
@@ -902,13 +801,9 @@
           (respawn? #t)
           (one-shot? #f))
          ;; 15 blueman-applet
-         ;; (mk/simple-service
-         ;;  '(blueman-applet)
-         ;;  #~(list #$(file-append blueman
-         ;;                         "/bin/blueman-applet")))
          (shepherd-service
           (provision '(blueman-applet))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -922,16 +817,9 @@
           (one-shot? #f))
 
          ;; 16 keymap
-         ;; (mk/simple-service
-         ;;  '(keymap)
-         ;;  #~(list #$(file-append xmodmap "/bin/xmodmap")
-         ;;          (string-append (getenv "HOME")
-         ;;                         "/.xmodmaprc"))
-         ;;  #:respawn? #f
-         ;;  #:one-shot? #t)
          (shepherd-service
           (provision '(keymap))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -946,20 +834,9 @@
           (one-shot? #t))
 
          ;; 17 xrdb
-         ;; (mk/simple-service
-         ;;  '(xrdb)
-         ;;  #~(list "sh" "-c" "m4 -I ~/.setup/m4 \
-         ;;         -I ~/.setup/osetup/lib/m4.d \
-         ;;         -I ~/.setup/osetup/info/common/m4.d \
-         ;;         -I ~/.setup/osetup/info/hosts/${HOST}/m4.d \
-         ;;         -I ~/.Xresources \
-         ;;         ~/.Xresources/init 2>/dev/null \
-         ;;         | xrdb -merge -")
-         ;;  #:respawn? #f
-         ;;  #:one-shot? #t)
          (shepherd-service
           (provision '(xrdb))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -978,15 +855,9 @@
           (one-shot? #t))
 
          ;; 18 synclient
-         ;; (mk/simple-service
-         ;;  '(synclient)
-         ;;  #~(list "synclient"
-         ;;          "TapButton1=1")
-         ;;  #:respawn? #f
-         ;;  #:one-shot? #t)
          (shepherd-service
           (provision '(synclient))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -1000,14 +871,9 @@
           (one-shot? #f))
 
          ;; 20 pwr-applet
-         ;; (mk/simple-service
-         ;;  '(pwr-applet)
-         ;;  #~(list (string-append (getenv "HOME")
-         ;;                         "/.bin/pwr-applet"))
-         ;;  #:respawn? #f)
          (shepherd-service
           (provision '(pwr-applet))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -1021,15 +887,9 @@
           (one-shot? #f))
 
          ;; 21 logind-applet
-         ;; (mk/simple-service
-         ;;  '(logind-applet)
-         ;;  #~(list (string-append
-         ;;           (getenv "HOME")
-         ;;           "/.bin/logind-applet"))
-         ;;  #:respawn? #f)
          (shepherd-service
           (provision '(logind-applet))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -1044,13 +904,9 @@
           (one-shot? #f))
 
          ;; 22 pasystray
-         ;; (mk/simple-service
-         ;;  '(pasystray)
-         ;;  #~(list #$(file-append pasystray
-         ;;                         "/bin/pasystray")))
          (shepherd-service
           (provision '(pasystray))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -1157,13 +1013,9 @@
            (actions '())))
 
          ;; 29 xdg-autostart
-         ;; (mk/simple-service
-         ;;  '(xdg-autostart)
-         ;;  #~(list "xdg-autostart")
-         ;;  #:create-session? #t)
          (shepherd-service
           (provision '(xdg-autostart))
-          ;; (documentation documentation)
+          (documentation "")
           (requirement '())
           (auto-start? #f)
           (start
@@ -1499,8 +1351,12 @@
   (define (get-home-services config)
     (list
      (service home-ssh-tunnel-service-type)
-     (service home-autossh-tunnel-service-type)))
+     (service home-autossh-tunnel-service-type)
+     (service home-ssh-gpg-tunnel-service-type)))
   (feature
-   (values `())
+   (values `((shepherd-ssh-tunnel ssh-tunnel)
+             (shepherd-autossh-tunnel autossh-tunnel)
+             (shepherd-ssh-gpg-tunnel ssh-gpg-tunnel)))
    (name 'ssh-transient)
    (home-services-getter get-home-services)))
+
