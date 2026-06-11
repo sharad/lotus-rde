@@ -172,7 +172,6 @@
         home-shepherd-service-type
 
         (list
-
          (shepherd-service
           (provision '(emacs-lotus))
           (start #~(let* ((make-env (lambda (name value)
@@ -880,7 +879,11 @@
          (shepherd-service
           (provision '(keepassxc))
           ;; (documentation documentation)
-          (requirement '(kpkey))
+          (requirement '(kpkey
+                         secfs-orgp
+                         ;; secfs-secure
+                         ;; secfs
+                         xawaken-session-down))
           (auto-start? #f)
           (start
            #~(make-forkexec-constructor
@@ -1083,8 +1086,7 @@
               (respawn? #f)
               (respawn-delay 600)
               (respawn-limit 1)
-              ;; (requirement '(xawaken-session-down))
-              (requirement '())))
+              (requirement '(xawaken-session-down))))
 
          ;; 25 deskflow-client
          (let ((cmd (file-append deskflow "/bin/deskflow-server")) ;"deskflow-core"
@@ -1118,8 +1120,7 @@
               (respawn? #f)
               (respawn-delay 600)
               (respawn-limit 1)
-              ;; (requirement '(xawaken-session-down))
-              (requirement '())))
+              (requirement '(xawaken-session-down))))
 
          ;; 28 proxy-fclient
          (let ((cmd (file-append autossh "/bin/autossh"))
@@ -1129,7 +1130,8 @@
           (shepherd-service
            (provision '(proxy-fclient))
            (documentation "proxy-fclient")
-           (requirement '(ssh-add))
+           (requirement '(ssh-add
+                          awaken-session-down))
            (auto-start? #f)
            (start
             #~(lambda ( . args)
@@ -1291,7 +1293,7 @@
     (let ((xawaken-requirements '(proxy-fclient
                                   deskflow-server ;; barrier
                                   annex
-                                  kpkeys
+                                  kpkey
                                   ssh-add
                                   keepassxc
                                   awaken-session
@@ -1335,7 +1337,7 @@
                                   pasystray
                                   ;; deskflow-server ;; barrier
                                   ;; deskflow-client
-                                  ;; kpkeys
+                                  ;; kpkey
                                   ;; ssh-add
                                   ;; proxy-fclient
                                   ;; logseq

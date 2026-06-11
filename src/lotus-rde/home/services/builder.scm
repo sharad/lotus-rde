@@ -291,7 +291,7 @@
 
    (shepherd-service
      (provision (list sym))
-     (requirement '());; secfs-down
+     (requirement '(secfs-down));; secfs-down
      (respawn? #f)
      (respawn-delay 10)
      (respawn-limit 2)

@@ -955,18 +955,10 @@ sender='org.bluez'")
         (provision '(kpkey))
         (documentation
          "KeePassXC key checkout service.")
-        (requirement '())
+        (requirement '(secfs-secure
+                       ;; secfs
+                       xawaken-session-down))
         (auto-start? #f)
-        ;; (start
-        ;;  #~(make-forkexec-constructor
-        ;;     ;; (list #$kpkey "co")
-        ;;     (list (string-append (getenv "HOME")
-        ;;                          "/.bin/kpkeys") "co")
-        ;;     #:create-session? #f
-        ;;     #:log-file
-        ;;     #$(log-file "kpkey")))
-        ;; (stop
-        ;;  #~(make-kill-destructor))
         (start #~(lambda ( . args)
                    (let* ((cli (string-join (append (list #$cmd "-s") args '("co")) " "))
                           (constructor (make-system-constructor cli " >> " #$(log-file "kpkeys") " 2>&1")))
@@ -1212,7 +1204,12 @@ sender='org.bluez'")
      (shepherd-service
       (provision '(ssh-add))
       (documentation "SSH key auto-loader.")
-      (requirement '())
+      (requirement '(ssh-agent
+                     ;; secfs
+                     ;; kpkey
+                     keepassxc
+                     ;; ssh-agent
+                     xawaken-session-down))
       (auto-start? #f)
       (start
        #~(make-forkexec-constructor
@@ -1862,9 +1859,10 @@ sender='org.bluez'")
        (documentation
         "Git Annex daemon service.")
        (requirement
-        '( ;; keepassxc
-          ssh-add))
-           ;; xawaken-session-down
+        '(keepassxc
+          ssh-add
+          ;; ssh-agent
+          xawaken-session-down))
        (respawn? #f)
        (respawn-delay 600)
        (respawn-limit 10)
