@@ -46,7 +46,8 @@
   #:use-module (guix i18n)
 
 
-
+  #:use-module (rde packages guile-xyz)
+  #:use-module (gnu packages guile)
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-11)
   #:use-module (guix gexp)
