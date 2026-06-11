@@ -31,6 +31,7 @@
   #:use-module (guix packages)
   #:use-module (guix gexp)
   #:use-module (rde serializers yaml)
+  #:use-module (lotus-rde lib utils)
   #:export (home-ssh-tunnel-service-type
             home-autossh-tunnel-service-type
             home-spawner-service-type
@@ -110,6 +111,29 @@
                (_ (format #t "Usage: herd spawn ~a <inst-name>\n"
                           '#$spawner-name))))))
 
+
+         ;; #~(lambda* (running . args)
+         ;;     (match args
+         ;;       ((inst-name . vargs)
+         ;;        (let* ((kw-args  (strings->keyword-args vargs))
+         ;;               (svc-name (service-sym inst-name #:transient? (plist-ref kw-args #:transient? #t))))
+         ;;          (format #t "spawn: svc-name = ~a\n" svc-name)
+         ;;          (if (not (is-capable-fn?))
+         ;;              (begin
+         ;;                (format #t "Error: Not able to run this service.\n")
+         ;;                #f)
+         ;;              (if (not (service-running-safe? svc-name))
+         ;;                  (let ((svc (apply make-spawner-service inst-name kw-args)))
+         ;;                    (register-services (list svc))
+         ;;                    (apply start-service svc vargs)
+         ;;                    (format #t "Started new service: ~a\n" svc-name))
+         ;;                  (format #t "Service ~a already running.\n" svc-name)))))
+         ;;       (_
+         ;;        (begin
+         ;;          (format #t "Usage: herd spawn ~s <inst-name>\n" spawner-service)
+         ;;          #f))))
+
+
        (shepherd-action
         (name 'destroy)
         (documentation "herd destroy <spawner> <inst-name>")
@@ -174,46 +198,25 @@
              (list
               (home-spawner-configuration
                (name 'autossh-tunnel)
-               ;; (constructor
-               ;;  (lambda* (inst-name service-name-fn
-               ;;                      #:key (rport 2222) (lport 22)
-               ;;                      #:allow-other-keys)
-               ;;    #~(make-forkexec-constructor
-               ;;       (list #$(file-append autossh "/bin/autossh")
-               ;;             "-v" "-M" "0" "-N"
-               ;;             "-R" #$(format #f "~d:localhost:~d" rport lport)
-               ;;             #$inst-name)
-               ;;       #:log-file #$(shepherd-service-log-file
-               ;;                     (service-name-fn)))))
-               (constructor-gexp
-                #~(lambda* (inst-name
-                            service-name-fn
-                            #:key
-                            (rport 2222)
-                            (lport 22)
-                            #:allow-other-keys)
-                    (make-forkexec-constructor
-                     (list #$(file-append autossh "/bin/autossh")
-                           "-v"
-                           "-M"
-                           "0"
-                           "-N"
-                           "-R"
-                           (format #f "~d:localhost:~d"
-                                   rport
-                                   lport)
-                      inst-name)
-
-                     #:log-file
-                     (shepherd-service-log-file
-                      (service-name-fn)))))
-               (capable?
-                #~(lambda ()
-                    (let* ((p    (open-input-pipe "command -v autossh"))
-                           (line (read-line p)))
-                      (close-port p)
-                      (and (string? line)
-                           (not (string-null? line))))))))))))
+               (constructor-gexp #~(lambda* (inst-name
+                                             service-name-fn
+                                             #:key
+                                             (rport 2222)
+                                             (lport 22)
+                                             #:allow-other-keys)
+                                     (make-forkexec-constructor (list #$(file-append autossh "/bin/autossh")
+                                                                      "-v"
+                                                                      "-M"
+                                                                      "0"
+                                                                      "-N"
+                                                                      "-R"
+                                                                      (format #f "~d:localhost:~d"
+                                                                              rport
+                                                                              lport)
+                                                                 inst-name)
+                                                                #:log-file (#$log-file-gexp (service-name-fn)))))
+               (capable? #~(lambda ()
+                             #t))))))))
    (default-value #f)
    (description "Autossh tunnel spawner for guix home.")))
 
@@ -228,46 +231,26 @@
              (list
               (home-spawner-configuration
                (name 'ssh-tunnel)
-               ;; (constructor
-               ;;  (lambda* (inst-name service-name-fn
-               ;;                      #:key (rport 2222) (lport 22) (port 22)
-               ;;                      #:allow-other-keys)
-               ;;    (let ((port-args (if (= port 22) '()
-               ;;                         (list "-p" (number->string port)))))
-               ;;      #~(make-forkexec-constructor
-               ;;         (append (list #$(file-append openssh "/bin/ssh") "-v")
-               ;;                 '#$port-args
-               ;;                 (list "-N"
-               ;;                       "-R" #$(format #f "~d:localhost:~d" rport lport)
-               ;;                       #$inst-name))
-               ;;         #:log-file #$(shepherd-service-log-file
-               ;;                       (service-name-fn))))))
-
-
-               (constructor-gexp
-                #~(lambda* (inst-name
-                            service-name-fn
-                            #:key
-                            (rport 2222)
-                            (lport 22)
-                            (port 22)
-                            #:allow-other-keys)
-                    (let ((port-args
-                           (if (= port 22)
-                               '()
-                               (list "-p" (number->string port))))
-                          (cmd
-                           #$(file-append openssh "/bin/ssh")))
-                      (make-forkexec-constructor
-                       (append (list cmd "-v")
-                               port-args
-                               (list "-N"
-                                     "-R"
-                                     (format #f "~d:localhost:~d" rport lport)
-                                inst-name))
-                       #:log-file
-                       (shepherd-service-log-file
-                        (service-name-fn))))))
+               (constructor-gexp #~(lambda* (inst-name
+                                             service-name-fn
+                                             #:key
+                                             (rport 2222)
+                                             (lport 22)
+                                             (port 22)
+                                             #:allow-other-keys)
+                                     (let ((port-args
+                                            (if (= port 22)
+                                                '()
+                                                (list "-p" (number->string port))))
+                                           (cmd
+                                            #$(file-append openssh "/bin/ssh")))
+                                       (make-forkexec-constructor (append (list cmd "-v")
+                                                                          port-args
+                                                                          (list "-N"
+                                                                                "-R"
+                                                                                (format #f "~d:localhost:~d" rport lport)
+                                                                           inst-name))
+                                                                  #:log-file (#$log-file-gexp (service-name-fn))))))
                (capable?
                 #~(lambda ()
                     (let* ((p    (open-input-pipe "command -v ssh"))

@@ -766,7 +766,8 @@ fi
         (feature-bluetooth-autoconnect)
         (feature-power-monitor)
         (feature-git-annex-daemon)
-        (feature-ssh-transient)))
+        ;; (feature-ssh-transient)
+        ))
 
 
 
