@@ -1888,3 +1888,194 @@ sender='org.bluez'")
                    destructor))
        (one-shot? #f)))))))
 
+
+(define-record-type* <deskflow-configuration>
+  deskflow-configuration
+  make-deskflow-configuration
+  deskflow-configuration?
+  (type
+   deskflow-configuration-type
+   (default 'server))
+  (server
+   deskflow-configuration-server
+   (default "deskflow-server-host"))
+  (ip
+   deskflow-configuration-ip
+   (default "0.0.0.0"))
+
+  (port
+   deskflow-configuration-port
+   (default "24800"))
+
+  (auto-start?
+   deskflow-configuration-auto-start?
+   (default #f))
+
+  (install-package?
+   deskflow-configuration-install-package?
+   (default #t))
+
+  (generate-config?
+   deskflow-configuration-generate-config?
+   (default #t))
+
+  (tls-cert
+   deskflow-configuration-tls-cert
+   (default #f))
+
+  (requirement
+   deskflow-configuration-requirement
+   (default '()))
+
+  (respawn?
+   deskflow-configuration-respawn?
+   (default #f))
+
+  (respawn-delay
+   deskflow-configuration-respawn-delay
+   (default 600))
+
+  (respawn-limit
+   deskflow-configuration-respawn-limit
+   (default 1)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; PROFILE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (deskflow-profile cfg)
+
+  (if (deskflow-configuration-install-package? cfg)
+      (list deskflow)
+      '()))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; XDG CONFIG
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (deskflow-xdg cfg)
+  (if (deskflow-configuration-generate-config? cfg)
+      (append
+       (list
+        `(,(string-append
+            "Deskflow/"
+            (symbol->string
+             (deskflow-configuration-type cfg))
+            ".conf")
+          ,(plain-file
+            "deskflow.conf"
+            (string-append
+             "port="
+             (deskflow-configuration-port cfg)
+             "\n"))))
+       (if (deskflow-configuration-tls-cert cfg)
+           (list
+            `("Deskflow/tls/deskflow.pem"
+              ,(deskflow-configuration-tls-cert cfg)))
+           '()))
+      '()))
+
+(define (deskflow-shepherd cfg)
+  (let* ((type
+          (deskflow-configuration-type cfg))
+         (cmd
+          (file-append
+           deskflow
+           "/bin/deskflow-server"))
+         (service-name
+          (string->symbol
+           (string-append
+            "deskflow-"
+            (symbol->string type)))))
+    (list
+     (shepherd-service
+      (provision
+       (list service-name))
+      (auto-start?
+       (deskflow-configuration-auto-start? cfg))
+      (requirement
+       (deskflow-configuration-requirement cfg))
+      (respawn?
+       (deskflow-configuration-respawn? cfg))
+      (respawn-delay
+       (deskflow-configuration-respawn-delay cfg))
+      (respawn-limit
+       (deskflow-configuration-respawn-limit cfg))
+      (start
+       (if (eq? type 'server)
+           ;; SERVER
+           #~(make-forkexec-constructor
+              (list
+               #$cmd
+               "server"
+               "--no-daemon"
+               "--enable-crypto"
+               "--name"
+               (or
+                (getenv "HOST")
+                "host")
+               "--log"
+               (string-append
+                (getenv "HOME")
+                "/.logs/deskflow-server.log")
+               "--address"
+               (string-append
+                #$(deskflow-configuration-ip cfg)
+                ":"
+                #$(deskflow-configuration-port cfg))
+               "--config"
+               (string-append
+                (getenv "HOME")
+                "/.config/Deskflow/server.conf"))
+              #:create-session? #f)
+
+           ;; CLIENT
+           #~(lambda args
+               ((make-forkexec-constructor
+                 (list
+                  #$cmd
+                  "client"
+                  "-f"
+                  "--enable-crypto"
+                  "--name"
+                  (or
+                   (getenv "HOST")
+                   "host")
+                  "--log"
+                  (string-append
+                   (getenv "HOME")
+                   "/.logs/deskflow-client.log")
+                  (string-append
+                   (if (pair? args)
+                    (car args)
+                    #$(deskflow-configuration-server cfg))
+                   ":"
+                   #$(deskflow-configuration-port cfg)))
+                 #:create-session? #f)
+                args))))
+      (stop
+       #~(make-kill-destructor))))))
+
+(define deskflow-service-type
+  (service-type
+   (name
+    'deskflow)
+   (extensions
+    (list
+     (service-extension
+      home-profile-service-type
+      deskflow-profile)
+     (service-extension
+      home-shepherd-service-type
+      deskflow-shepherd)
+     (service-extension
+      home-xdg-configuration-files-service-type
+      deskflow-xdg)))
+   (default-value
+     (deskflow-configuration))
+   (description
+    "Deskflow home service.")))
+
+

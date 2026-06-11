@@ -1064,7 +1064,7 @@
           (one-shot? #f))
 
          ;; 23 deskflow-server
-         (let ((cmd (file-append deskflow "/bin/deskflow-server")) ;"deskflow-core"
+         (let ((cmd (file-append deskflow "/bin/deskflow")) ;"deskflow-core"
                (mode "server")
                (ip  "0.0.0.0")
                (port "24800"))
@@ -1089,7 +1089,7 @@
               (requirement '(xawaken-session-down))))
 
          ;; 25 deskflow-client
-         (let ((cmd (file-append deskflow "/bin/deskflow-server")) ;"deskflow-core"
+         (let ((cmd (file-append deskflow "/bin/deskflow")) ;"deskflow-core"
                (mode "server")
                (server  "deskflow-server-host")
                (port "24800"))
