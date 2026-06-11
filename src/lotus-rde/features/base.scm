@@ -1363,7 +1363,22 @@ Defaults:%wheel env_keep+=TERMINFO")))))
    (system-services-getter get-system-services)))
 
 
-
+(define (rde-patch-shepherd shepherd)
+  (package
+    (inherit shepherd)
+    (source
+     (origin
+       (inherit (package-source shepherd))
+       (patches
+        (parameterize
+            ((%patch-path %rde-patch-path))
+          (search-patches
+           "shepherd-set-user-log-dir-to-XDG_STATE_HOME-log.patch")))))
+    ;; See #77795 guix upstream bug.
+    (arguments
+     (substitute-keyword-arguments (package-arguments shepherd)
+       ((#:tests? enabled? #f)
+        #f)))))
 
 (define* (feature-lotus-shepherd
           #:key
