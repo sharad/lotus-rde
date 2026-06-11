@@ -136,9 +136,8 @@
             feature-doc-publishing
             feature-bluetooth-autoconnect
             feature-power-monitor
-            feature-kpkey
-            feature-ssh-add-key
-            feature-git-annex-daemon))
+            feature-git-annex-daemon
+            feature-ssh-transient))
 
 
 
@@ -1493,3 +1492,14 @@
    (name 'annex)
    (home-services-getter get-home-services)))
 
+
+
+(define* (feature-ssh-transient)
+  (define (get-home-services config)
+    (list
+     (service home-autossh-tunnel-service-type)
+     (service home-ssh-tunnel-service-type)))
+  (feature
+   (values `())
+   (name 'ssh-transient)
+   (home-services-getter get-home-services)))
