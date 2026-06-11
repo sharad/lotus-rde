@@ -50,7 +50,7 @@
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-11)
   #:use-module (guix gexp)
-  #:use-module (gnu packages)
+  #:use-module (guix packages)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
   #:use-module (gnu system accounts)
