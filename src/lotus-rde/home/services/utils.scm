@@ -1983,7 +1983,7 @@ sender='org.bluez'")
          (cmd
           (file-append
            deskflow
-           "/bin/deskflow-server"))
+           "/bin/deskflow-core"))
          (service-name
           (string->symbol
            (string-append
