@@ -1368,7 +1368,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
 (define* (feature-lotus-shepherd
           #:key
-          (shepherd (((@@ (rde features guile) rde-patch-shepherd) shepherd-1.0))))
+          (shepherd ((@@ (rde features guile) rde-patch-shepherd) shepherd-1.0)))
   "Configure tooling and environment for GNU Shepherd."
   (ensure-pred file-like? shepherd)
 
