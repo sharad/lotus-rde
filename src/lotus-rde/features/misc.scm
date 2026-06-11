@@ -117,6 +117,7 @@
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
   #:use-module (rde predicates)
+  #:use-module (rde home services emacs)
   #:use-module (rde features)
   #:use-module (rde features base)
   #:use-module (rde features guile)
@@ -169,7 +170,7 @@
        (service
         home-emacs-service-type
         (home-emacs-configuration
-         (server-name "spacemacs")))
+         (emacs-servers '(spacemacs))))
 
        ;; shepherd services
        (simple-service
