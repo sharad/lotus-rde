@@ -2007,54 +2007,46 @@ sender='org.bluez'")
        (if (eq? type 'server)
            ;; SERVER
            #~(make-forkexec-constructor
-              (list
-               #$cmd
-               "server"
-               "--no-daemon"
-               "--enable-crypto"
-               "--name"
-               (or
-                (getenv "HOST")
-                "host")
-               "--log"
-               (string-append
-                (getenv "HOME")
-                "/.logs/deskflow-server.log")
-               "--address"
-               (string-append
-                #$(deskflow-configuration-ip cfg)
-                ":"
-                #$(deskflow-configuration-port cfg))
-               "--config"
-               (string-append
-                (getenv "HOME")
-                "/.config/Deskflow/server.conf"))
-              #:create-session? #f)
+              (list #$cmd #$type
+                    "--no-daemon"
+                    "--enable-crypto"
+                    "--name"
+                    (or
+                     (getenv "HOST")
+                     "host")
+                    "--log" #$(log-file "deskflow-server")
+                    "--address"
+                    (string-append
+                     #$(deskflow-configuration-ip cfg)
+                     ":"
+                     #$(deskflow-configuration-port cfg))
+                    "--config"
+                    (string-append
+                     (getenv "HOME")
+                     "/.config/Deskflow/server.conf"))
+              #:create-session? #f
+              #:log-file #$(log-file "deskflow-server"))
 
            ;; CLIENT
-           #~(lambda args
-               ((make-forkexec-constructor
-                 (list
-                  #$cmd
-                  "client"
-                  "-f"
-                  "--enable-crypto"
-                  "--name"
-                  (or
-                   (getenv "HOST")
-                   "host")
-                  "--log"
-                  (string-append
-                   (getenv "HOME")
-                   "/.logs/deskflow-client.log")
-                  (string-append
-                   (if (pair? args)
-                    (car args)
-                    #$(deskflow-configuration-server cfg))
-                   ":"
-                   #$(deskflow-configuration-port cfg)))
-                 #:create-session? #f)
-                args))))
+           #~(lambda ( . args)
+                     (let* ((server (if (pair? args)
+                                        (car args)
+                                        #$(deskflow-configuration-server cfg)))
+                            (port #$(deskflow-configuration-port cfg))
+                            (log-file   #$log-file-gexp)
+                            (log-file-loc (string-append "desklow-client" "-" server))
+                            (constructor (make-forkexec-constructor (list #$cmd #$type "-f"
+                                                                          ;; "--debug" "INFO"
+                                                                          "--debug" "DEBUG1"
+                                                                          "--sync-language"
+                                                                          "--name" (or (getenv "HOST") "host")
+                                                                          "--enable-crypto"
+                                                                          "--log" (log-file log-file-loc)
+                                                                          "--tls-cert" (string-append (getenv "HOME") "/.config/Deskflow/tls/deskflow-client.pem")
+                                                                          (string-append server ":" port))
+                                                                    #:create-session? #f
+                                                                    #:log-file (log-file log-file-loc))))
+                       (apply constructor args)))))
       (stop
        #~(make-kill-destructor))))))
 

@@ -1076,7 +1076,7 @@
                                                            "--debug" "DEBUG1"
                                                            "--name" (or (getenv "HOST") "host")
                                                            "--enable-crypto"
-                                                           "--log" (string-append (getenv "HOME") "/.logs/deskflow-server.log")
+                                                           "--log" #$(log-file "deskflow-server")
                                                            "--address" (string-append #$ip ":" #$port)
                                                            "--config" (string-append (getenv "HOME") "/.config/Deskflow/deskflow-server.conf")
                                                            "--tls-cert" (string-append (getenv "HOME") "/.config/Deskflow/tls/deskflow-server.pem"))
@@ -1090,7 +1090,7 @@
 
          ;; 25 deskflow-client
          (let ((cmd (file-append deskflow "/bin/deskflow-core"))
-               (mode "server")
+               (mode "client")
                (server  "deskflow-server-host")
                (port "24800"))
              (shepherd-service
@@ -1108,7 +1108,7 @@
                                                                                  "--sync-language"
                                                                                  "--name" (getenv "HOST")
                                                                                  "--enable-crypto"
-                                                                                 "--log" (string-append (getenv "HOME") "/.logs/deskflow-client.log")
+                                                                                 "--log" (log-file log-file-loc)
                                                                                  ;; "--address" (string-append ip ":" port)
                                                                                  ;; "-c" (string-append (getenv "HOME") "/.config/Deskflow/deskflow-client.conf")
                                                                                  "--tls-cert" (string-append (getenv "HOME") "/.config/Deskflow/tls/deskflow-client.pem")
