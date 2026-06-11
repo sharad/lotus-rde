@@ -117,7 +117,8 @@
             feature-security-services
             feature-audit-services
             feature-substitutes
-            feature-ssh-daemon-services))
+            feature-ssh-daemon-services
+            feature-lotus-shepherd))
 ;; feature-file-database-services
 ;; feature-guix-publish-services
 ;; feature-schedular-services
@@ -1360,4 +1361,59 @@ Defaults:%wheel env_keep+=TERMINFO")))))
    ;; (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
+
+
+
+
+(define* (feature-lotus-shepherd
+          #:key
+          (shepherd (rde-patch-shepherd shepherd-1.0)))
+  "Configure tooling and environment for GNU Shepherd."
+  (ensure-pred file-like? shepherd)
+
+  (define f-name 'shepherd)
+
+  (define (get-home-services config)
+    "Return home services related to Guile."
+    (list
+     (service home-shepherd-service-type
+              (home-shepherd-configuration
+               (shepherd
+                ((package-input-rewriting/spec
+                  `(("guile" . ,(const (get-value 'guile config guile-3.0)))))
+                 (get-value 'shepherd config)))
+               (auto-start? #f)
+               (daemonize? #f)))))
+
+;;      (rde-elisp-configuration-service
+;;       f-name
+;;       config
+;;       `((with-eval-after-load 'info-look
+;;           (info-lookup-add-help
+;;            :mode 'scheme-mode
+;;            :regexp "[^()`',\"        \n]+"
+;;            :ignore-case t
+;;            :doc-spec '(("(shepherd) Procedure and Macro Index" nil nil nil)
+;;                        ("(shepherd) Variable Index" nil nil nil)))))
+;;       #:keywords '(guile)
+;;       #:summary "Configure Shepherd-related packages"
+;;       #:commentary "\
+;; Provide interactive and functional programming environment for Shepherd.")
+
+  (feature
+   (name f-name)
+   (values `((,f-name . ,shepherd)
+             (shepherd-launch
+              . ,(program-file
+                  "launch-shepherd"
+                  #~(let* ((state-dir (or (getenv "XDG_STATE_HOME")
+                                          (format #f "~a/.local/state"
+                                                  (getenv "HOME"))))
+                           (log-dir (string-append state-dir "/log")))
+                      ((@ (guix build utils) mkdir-p) log-dir)
+                      (system*
+                       #$(file-append shepherd "/bin/shepherd")
+                       "--logfile"
+                       (string-append log-dir "/shepherd.log")))))))
+   (home-services-getter get-home-services)))
 

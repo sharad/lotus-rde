@@ -216,7 +216,8 @@
                                   #:vpn-plugins nm-vpn-plugins)
         ;; (feature-custom-services #:feature-name-prefix 'extra
         ;;                          #:system-services %desktop-services)
-        (feature-shepherd)))
+        ;; (feature-shepherd)
+        (feature-lotus-shepherd)))
 
 
 
