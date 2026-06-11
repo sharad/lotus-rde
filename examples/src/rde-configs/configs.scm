@@ -98,23 +98,57 @@
       val))
 
   (let* ((rde-host-features (env-features->symbol "RDE_HOST"))
-         (rde-user-fatures  (env-features->symbol "RDE_USER")))
+         (rde-user-features  (env-features->symbol "RDE_USER")))
 
     (format #t "RDE_TARGET: ~a\n" (getenv "RDE_TARGET"))
 
     (if (and rde-host-features
-             rde-user-fatures)
+             rde-user-features)
         (let ((config (lotus-make-rde-config #:features
                                              (append rde-host-features
-                                                     rde-user-fatures))))
+                                                     rde-user-features))))
 
           ;; (format #t "Config features: ~a\n" (rde-config-features config))
           ;; (format #t "Config emacs: ~a\n" (get-value 'emacs config))
 
+          ;; (for-each
+          ;;  (lambda (svc)
+          ;;    (display (service-type-name
+          ;;              (service-kind svc)))
+          ;;    (newline))
+          ;;  (rde-config-home-services config))
 
-          (for-each (lambda (service)
-                      (format #t "Service: ~a\n" service))
-                    (rde-config-home-services config))
+          (format #t "HOST features\n")
+
+
+          (for-each (lambda (f)
+                      (format #t "Feature name: ~a\n" (feature-name f))
+                      (for-each (lambda (svc)
+                                  (when (service? svc)
+                                    (display "        ")
+                                    (display (service-type-name
+                                              (service-kind svc)))
+                                    (newline)))
+                                ((feature-home-services-getter f) config)))
+                    rde-host-features)
+
+
+          (format #t "USER features\n")
+
+          (for-each (lambda (f)
+                      (format #t "Feature name: ~a\n" (feature-name f))
+                      (for-each (lambda (svc)
+                                  (when (service? svc)
+                                    (display "        ")
+                                    (display (service-type-name
+                                              (service-kind svc)))
+                                    (newline)))
+                                ((feature-home-services-getter f) config)))
+                    rde-user-features)
+
+          ;; (for-each (lambda (service)
+          ;;             (format #t "Service: ~a\n" service))
+          ;;           (rde-config-home-services config))
 
           (let ((rde-target (getenv "RDE_TARGET")))
             (match rde-target
@@ -122,7 +156,7 @@
               ("system" (rde-config-operating-system config))
               (_ #f))))
         (begin
-          (format #t "Invalid RDE_HOST: ~a or RDE_USER: ~a\n" 'rde-host-features 'rde-user-fatures)
+          (format #t "Invalid RDE_HOST: ~a or RDE_USER: ~a\n" 'rde-host-features 'rde-user-features)
           #f))))
 
 

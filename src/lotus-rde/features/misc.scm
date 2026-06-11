@@ -166,6 +166,11 @@
          znc
          jupyter))
 
+       (service
+        home-emacs-service-type
+        (home-emacs-configuration
+         (server-name "spacemacs")))
+
        ;; shepherd services
        (simple-service
         'lotus-user-shepherd-services
@@ -1096,7 +1101,7 @@
                                 ;; secfs-volatile
                                 ;; secfs
                                 znc
-                                emacs-lotus
+                                ;; emacs-lotus
                                 ;; usrhttpd
                                 ;; jupyter
                                 ;; keepawaken
