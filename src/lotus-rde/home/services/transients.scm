@@ -27,24 +27,47 @@
   #:use-module (gnu home services shepherd)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages freedesktop)
+  #:use-module (gnu packages ssh)
   #:use-module (guix packages)
   #:use-module (guix gexp)
   #:use-module (rde serializers yaml)
-  #:export ())
+  #:export (home-ssh-tunnel-service-type
+            home-autossh-tunnel-service-type
+            home-spawner-service-type
+            <home-spawner-configuration>
+            make-home-spawner-configuration
+            home-spawner-configuration?
+            home-spawner-configuration-name
+            home-spawner-configuration-constructor
+            home-spawner-configuration-capable?))
+
+
+;; (define-record-type* <home-spawner-configuration>
+;;   home-spawner-configuration make-home-spawner-configuration
+;;   home-spawner-configuration?
+;;   (name          home-spawner-configuration-name)          ;; symbol e.g. 'autossh-tunnel
+;;   (constructor   home-spawner-configuration-constructor)   ;; procedure: (inst-name svc-name-fn . kwargs) → gexp
+;;   (capable?      home-spawner-configuration-capable?       ;; gexp: #~(lambda () bool)
+;;                  (default #~(lambda () #t))))
 
 
 (define-record-type* <home-spawner-configuration>
-  home-spawner-configuration make-home-spawner-configuration
+  home-spawner-configuration
+  make-home-spawner-configuration
   home-spawner-configuration?
-  (name          home-spawner-configuration-name)          ;; symbol e.g. 'autossh-tunnel
-  (constructor   home-spawner-configuration-constructor)   ;; procedure: (inst-name svc-name-fn . kwargs) → gexp
-  (capable?      home-spawner-configuration-capable?       ;; gexp: #~(lambda () bool)
-                 (default #~(lambda () #t))))
+  (name
+   home-spawner-configuration-name)
+  ;; gexp evaluating to procedure
+  (constructor-gexp
+   home-spawner-configuration-constructor-gexp)
+  (capable?
+   home-spawner-configuration-capable?
+   (default #~(lambda () #t))))
 
 
 (define (spawner-config->shepherd-service config)
   (let* ((spawner-name (home-spawner-configuration-name config))
-         (constructor  (home-spawner-configuration-constructor config))
+         (constructor  (home-spawner-configuration-constructor-gexp config))
          (capable?     (home-spawner-configuration-capable? config)))
 
     (shepherd-service
@@ -76,7 +99,7 @@
                                        #:requires '()
                                        #:transient? #t
                                        #:respawn? #f
-                                       #:start (apply #$constructor
+                                       #:start (apply (#$constructor)
                                                       inst-name
                                                       (lambda () (symbol->string svc-sym))
                                                       vargs)
@@ -151,17 +174,39 @@
              (list
               (home-spawner-configuration
                (name 'autossh-tunnel)
-               (constructor
-                (lambda* (inst-name service-name-fn
-                                    #:key (rport 2222) (lport 22)
-                                    #:allow-other-keys)
-                  #~(make-forkexec-constructor
+               ;; (constructor
+               ;;  (lambda* (inst-name service-name-fn
+               ;;                      #:key (rport 2222) (lport 22)
+               ;;                      #:allow-other-keys)
+               ;;    #~(make-forkexec-constructor
+               ;;       (list #$(file-append autossh "/bin/autossh")
+               ;;             "-v" "-M" "0" "-N"
+               ;;             "-R" #$(format #f "~d:localhost:~d" rport lport)
+               ;;             #$inst-name)
+               ;;       #:log-file #$(shepherd-service-log-file
+               ;;                     (service-name-fn)))))
+               (constructor-gexp
+                #~(lambda* (inst-name
+                            service-name-fn
+                            #:key
+                            (rport 2222)
+                            (lport 22)
+                            #:allow-other-keys)
+                    (make-forkexec-constructor
                      (list #$(file-append autossh "/bin/autossh")
-                           "-v" "-M" "0" "-N"
-                           "-R" #$(format #f "~d:localhost:~d" rport lport)
-                           #$inst-name)
-                     #:log-file #$(shepherd-service-log-file
-                                   (service-name-fn)))))
+                           "-v"
+                           "-M"
+                           "0"
+                           "-N"
+                           "-R"
+                           (format #f "~d:localhost:~d"
+                                   rport
+                                   lport)
+                      inst-name)
+
+                     #:log-file
+                     (shepherd-service-log-file
+                      (service-name-fn)))))
                (capable?
                 #~(lambda ()
                     (let* ((p    (open-input-pipe "command -v autossh"))
@@ -183,20 +228,46 @@
              (list
               (home-spawner-configuration
                (name 'ssh-tunnel)
-               (constructor
-                (lambda* (inst-name service-name-fn
-                                    #:key (rport 2222) (lport 22) (port 22)
-                                    #:allow-other-keys)
-                  (let ((port-args (if (= port 22) '()
-                                       (list "-p" (number->string port)))))
-                    #~(make-forkexec-constructor
-                       (append (list #$(file-append openssh "/bin/ssh") "-v")
-                               '#$port-args
+               ;; (constructor
+               ;;  (lambda* (inst-name service-name-fn
+               ;;                      #:key (rport 2222) (lport 22) (port 22)
+               ;;                      #:allow-other-keys)
+               ;;    (let ((port-args (if (= port 22) '()
+               ;;                         (list "-p" (number->string port)))))
+               ;;      #~(make-forkexec-constructor
+               ;;         (append (list #$(file-append openssh "/bin/ssh") "-v")
+               ;;                 '#$port-args
+               ;;                 (list "-N"
+               ;;                       "-R" #$(format #f "~d:localhost:~d" rport lport)
+               ;;                       #$inst-name))
+               ;;         #:log-file #$(shepherd-service-log-file
+               ;;                       (service-name-fn))))))
+
+
+               (constructor-gexp
+                #~(lambda* (inst-name
+                            service-name-fn
+                            #:key
+                            (rport 2222)
+                            (lport 22)
+                            (port 22)
+                            #:allow-other-keys)
+                    (let ((port-args
+                           (if (= port 22)
+                               '()
+                               (list "-p" (number->string port))))
+                          (cmd
+                           #$(file-append openssh "/bin/ssh")))
+                      (make-forkexec-constructor
+                       (append (list cmd "-v")
+                               port-args
                                (list "-N"
-                                     "-R" #$(format #f "~d:localhost:~d" rport lport)
-                                     #$inst-name))
-                       #:log-file #$(shepherd-service-log-file
-                                     (service-name-fn))))))
+                                     "-R"
+                                     (format #f "~d:localhost:~d" rport lport)
+                                inst-name))
+                       #:log-file
+                       (shepherd-service-log-file
+                        (service-name-fn))))))
                (capable?
                 #~(lambda ()
                     (let* ((p    (open-input-pipe "command -v ssh"))

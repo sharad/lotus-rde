@@ -125,6 +125,7 @@
   #:use-module (lotus-rde packages python-xyz)
   #:use-module (lotus-rde packages utils)
   #:use-module (lotus-rde home services builder)
+  #:use-module (lotus-rde home services transients)
   #:use-module (lotus-rde home services utils)
   #:use-module (lotus-rde lib utils)
   #:export (feature-lotus-nox-services
@@ -1497,8 +1498,8 @@
 (define* (feature-ssh-transient)
   (define (get-home-services config)
     (list
-     (service home-autossh-tunnel-service-type)
-     (service home-ssh-tunnel-service-type)))
+     (service home-ssh-tunnel-service-type)
+     (service home-autossh-tunnel-service-type)))
   (feature
    (values `())
    (name 'ssh-transient)
