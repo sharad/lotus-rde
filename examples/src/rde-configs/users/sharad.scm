@@ -47,7 +47,7 @@
   #:use-module (rde features wm)
   #:use-module (rde features xdg)
   #:use-module (rde features)
-  #:use-module (rde home services emacs)
+  ;; #:use-module (rde home services emacs)
   #:use-module (rde home services i2p)
   #:use-module (rde home services shells)
   #:use-module (rde home services video)

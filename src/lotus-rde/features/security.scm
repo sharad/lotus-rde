@@ -157,7 +157,6 @@
              (shepherd-secfs-volatile secfs-volatile)
              (shepherd-secfs secfs)))
    (home-services-getter get-home-services)))
-
 
 
 

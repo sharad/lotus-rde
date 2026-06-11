@@ -31,7 +31,7 @@
   #:use-module (rde features networking)
   #:use-module (rde features shells)
   #:use-module (rde features system)
-  #:use-module (rde features emacs)
+  ;; #:use-module (rde features emacs)
   #:use-module (rde features image-viewers)
   #:use-module (rde features xdg)
   #:use-module (rde packages)
@@ -84,38 +84,38 @@
 
 
 (define* (lotus-metal-machine hostname
-                             #:key
-                             (timezone "Asia/Kolkata")
-                             (locale "en_US.utf8")
-                             (locale-names (list "en_US"
-                                                 "hi_IN"
-                                                 "ur_PK"
-                                                 "fa_IR"
-                                                 "ar_SA"))
-                             (disk-serial-id-system "aaa")
-                             (disk-serial-id-home "aaa")
-                             (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
-                             (bootloader-targets (let ((rde-sysinit (getenv "RDE_SYSINIT")))
-                                                   (match rde-sysinit
-                                                     (#f '())
-                                                     ("init" (list fs-boot-efi-partition))
-                                                     (_ '()))))
-                             (kernel linux-libre)
-                             (firmware '())
-                             (kernel-arguments '())
-                             (keyboard-layout (keyboard-layout "us" "altgr-intl"))
-                             (initrd base-initrd)
-                             (initrd-modules %lotus-guix-initrd-modules)
-                             (custom-services #f)
-                             (login-shell (file-append zsh "/bin/zsh"))
-                             (parent-dir "/srv/volumes/local")
-                             (volume-mappings '())
-                             (networking-iwd? #t)
-                             (nm-dns "dnsmasq")
-                             (nm-vpn-plugins (list network-manager-fortisslvpn
-                                                   network-manager-openconnect))
-                             (gdm-auto-login? #t)
-                             (gdm-allow-empty-password? #t))
+                              #:key
+                              (timezone "Asia/Kolkata")
+                              (locale "en_US.utf8")
+                              (locale-names (list "en_US"
+                                                  "hi_IN"
+                                                  "ur_PK"
+                                                  "fa_IR"
+                                                  "ar_SA"))
+                              (disk-serial-id-system "aaa")
+                              (disk-serial-id-home "aaa")
+                              (fs-boot-efi-partition (uuid "0000-0000" 'fat32))
+                              (bootloader-targets (let ((rde-sysinit (getenv "RDE_SYSINIT")))
+                                                    (match rde-sysinit
+                                                      (#f '())
+                                                      ("init" (list fs-boot-efi-partition))
+                                                      (_ '()))))
+                              (kernel linux-libre)
+                              (firmware '())
+                              (kernel-arguments '())
+                              (keyboard-layout (keyboard-layout "us" "altgr-intl"))
+                              (initrd base-initrd)
+                              (initrd-modules %lotus-guix-initrd-modules)
+                              (custom-services #f)
+                              (login-shell (file-append zsh "/bin/zsh"))
+                              (parent-dir "/srv/volumes/local")
+                              (volume-mappings '())
+                              (networking-iwd? #t)
+                              (nm-dns "dnsmasq")
+                              (nm-vpn-plugins (list network-manager-fortisslvpn
+                                                    network-manager-openconnect))
+                              (gdm-auto-login? #t)
+                              (gdm-allow-empty-password? #t))
 
   (when (> (length bootloader-targets) 0)
     (ensure-rw-mount "/boot")
@@ -132,8 +132,8 @@
                         #:kernel-arguments kernel-arguments)
         (feature-bootloader #:bootloader-configuration
                             (bootloader-configuration
-                              (bootloader grub-efi-bootloader)
-                              (targets    bootloader-targets)))
+                             (bootloader grub-efi-bootloader)
+                             (targets    bootloader-targets)))
         (feature-hidpi)
         ;; (keyboard-layout %lotus-keyboard-layout)
         ;; (menu-entries    %lotus-grub-ubuntu-menuentries)

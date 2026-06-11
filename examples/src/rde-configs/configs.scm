@@ -107,6 +107,15 @@
         (let ((config (lotus-make-rde-config #:features
                                              (append rde-host-features
                                                      rde-user-fatures))))
+
+          ;; (format #t "Config features: ~a\n" (rde-config-features config))
+          ;; (format #t "Config emacs: ~a\n" (get-value 'emacs config))
+
+
+          (for-each (lambda (service)
+                      (format #t "Service: ~a\n" service))
+                    (rde-config-home-services config))
+
           (let ((rde-target (getenv "RDE_TARGET")))
             (match rde-target
               ("home" (rde-config-home-environment config))
