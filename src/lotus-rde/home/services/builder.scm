@@ -476,7 +476,9 @@
          (down        (string->symbol (string-append name-str "-down"))))
 
     (shepherd-service
-     (provision (list name))
+     (provision (list name
+                      up
+                      down))
      (requirement '())
      (auto-start? #f)
      (free-form
