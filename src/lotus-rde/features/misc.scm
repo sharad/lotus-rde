@@ -161,11 +161,11 @@
        (simple-service
         'lotus-user-service-packages
         home-profile-service-type
-        (list
-         polkit
-         mpd
-         znc
-         jupyter))
+        (list emacs
+              polkit
+              mpd
+              znc
+              jupyter))
 
        ;; (service
        ;;  home-emacs-service-type
@@ -1097,13 +1097,9 @@
                                 pipewire
                                 pipewire-pulse
                                 wireplumber
-                                ;; secfs-orgp
-                                ;; secfs-secure
-                                ;; secfs-volatile
-                                ;; secfs
                                 znc
                                 emacs-lotus
-                                ;; usrhttpd
+                                usrhttpd
                                 ;; jupyter
                                 ;; keepawaken
                                 awaken-session
@@ -1158,7 +1154,8 @@
                                   xdelayed-login-session-down))
           (xdelayed-requirements '(xawaken-session
                                    delayed-login-session))
-          (xlogin-requirements '(autocutsel
+          (xlogin-requirements '(attnmgr
+                                 autocutsel
                                  dunst
                                  ;; emacs
                                  keymap
