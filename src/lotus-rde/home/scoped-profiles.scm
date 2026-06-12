@@ -26,126 +26,82 @@
   #:use-module (guix gexp)
   #:use-module (guix profiles)
   #:use-module (guix packages)
-
   #:use-module (srfi srfi-1)
-
-  #:export (make-home-scoped-profile-service-type
+  #:export (make-home-profile-service-type
             home-dev-profile-service-type
-            home-ml-profile-service-type
             home-tools-profile-service-type))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Helpers
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define-record-type* <scoped-profile>
+  scoped-profile
+  make-scoped-profile
+  scoped-profile?
+  (name
+   scoped-profile-name)
+  (packages
+   scoped-profile-packages))
 
-(define (packages->profile packages)
-
-  (profile
-   (content
-    (map package->manifest-entry
-         packages))))
-
-
-(define (profile-activation-gexp profile-name packages)
-
-  (let ((profile
-         (packages->profile packages)))
-
-    #~(begin
-
-        (use-modules (guix build utils))
-
-        (let* ((home
-                (getenv "HOME"))
-
-               (profiles-dir
-                (string-append
-                 home
-                 "/.guix-extra-profiles"))
-
-               (profile-link
-                (string-append
-                 profiles-dir
-                 "/"
-                 #$profile-name)))
-
-          (mkdir-p profiles-dir)
-
-          ;; Remove existing symlink if present
-          (false-if-exception
-           (delete-file profile-link))
-
-          ;; Create new symlink
-          (symlink #$profile
-                   profile-link)))))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Service Type Factory
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define (make-home-scoped-profile-service-type profile-name)
-
+(define home-scoped-profile-service-type
   (service-type
-
-   (name
-    (string->symbol
-     (string-append
-      "home-"
-      profile-name
-      "-profile")))
-
-   ;; Extensions collected from simple-service/service-extension
-   ;;
-   ;; Each extension contributes:
-   ;;
-   ;;   (list package1 package2 ...)
-   ;;
-   ;; They all get concatenated together.
-   ;;
-   (compose concatenate)
-
+   (name 'home-scoped-profile)
+   (compose append)
    (extend append)
+   (default-value
+     '())))
 
-   (default-value '())
-
+(define (make-home-profile-service-type
+         profile-name)
+  (service-type
+   (name
+    profile-name)
+   (compose concatenate)
+   (extend append)
+   (default-value
+     '())
    (extensions
-
     (list
-
      (service-extension
-      home-activation-service-type
-
+      home-scoped-profile-service-type
       (lambda (packages)
-
-        (profile-activation-gexp
-         profile-name
-         packages)))))
-
-   (description
-
-    (string-append
-     "Scoped home profile: "
-     profile-name))))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Concrete Profile Service Types
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define home-dev-profile-service-type
-  (make-home-scoped-profile-service-type "dev"))
-
-
-(define home-ml-profile-service-type
-  (make-home-scoped-profile-service-type "ml"))
-
-
-(define home-tools-profile-service-type
-  (make-home-scoped-profile-service-type "tools"))
+        (list
+         (scoped-profile
+          (name
+           profile-name)
+          (packages
+           packages)))))))))
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Examples
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; (define
+;;  home-dev-profile-service-type
+;;  (make-home-profile-service-type 'home-dev-profile-service-type
+;;   ".guix-profiles/dev"))
+;; (define
+;;  home-tools-profile-service-type
+;;  (make-home-profile-service-type 'home-tools-profile-service-type
+;;   ".guix-profiles/tools"))
 
 
+;; (simple-service
+;;  'gcc
+;;  home-dev-profile-service-type
+;;  (list
+;;   gcc-toolchain))
+
+;; (simple-service
+;;  'gdb
+;;  home-dev-profile-service-type
+;;  (list
+;;   gdb))
+
+
+;; (simple-service
+;;  'tools
+;;  home-tools-profile-service-type
+;;  (list
+;;   strace))
+
 

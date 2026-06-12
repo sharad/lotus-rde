@@ -88,30 +88,30 @@
              (if (null? args)
                  (let ((inst-name (car args))
                        (vargs (cdr args)))
-                     (let* ((svc-sym (string->symbol (string-append "transient-"
-                                                                    #$(symbol->string spawner-name)
-                                                                    "-" inst-name)))
-                            (existing (lookup-service svc-sym)))
-                       (if (and existing
-                                (service-running? existing))
-                           (format #t "Already running: ~a\n" svc-sym)
-                           (if (not (#$capable?))
-                               (format #t "Error: not capable\n")
-                               (let ((svc (make <service>
-                                            #:provides (list svc-sym)
-                                            #:requires '()
-                                            #:transient? #t
-                                            #:respawn? #f
-                                            #:start (apply (#$constructor)
-                                                           inst-name
-                                                           (lambda () (symbol->string svc-sym))
-                                                           vargs)
-                                            #:stop (make-kill-destructor))))
-                                 (register-services svc)
-                                 (start-service svc)
-                                 (format #t "Started: ~a\n" svc-sym)))))
+                   (let* ((svc-sym (string->symbol (string-append "transient-"
+                                                                  #$(symbol->string spawner-name)
+                                                                  "-" inst-name)))
+                          (existing (lookup-service svc-sym)))
+                     (if (and existing
+                              (service-running? existing))
+                         (format #t "Already running: ~a\n" svc-sym)
+                         (if (not (#$capable?))
+                             (format #t "Error: not capable\n")
+                             (let ((svc (make <service>
+                                          #:provides (list svc-sym)
+                                          #:requires '()
+                                          #:transient? #t
+                                          #:respawn? #f
+                                          #:start (apply (#$constructor)
+                                                         inst-name
+                                                         (lambda () (symbol->string svc-sym))
+                                                         vargs)
+                                          #:stop (make-kill-destructor))))
+                               (register-services svc)
+                               (start-service svc)
+                               (format #t "Started: ~a\n" svc-sym))))
                      (format #t "Usage: herd spawn ~a <inst-name>\n"
-                             '#$spawner-name))))))
+                             '#$spawner-name)))))))
 
        (shepherd-action
         (name 'destroy)
