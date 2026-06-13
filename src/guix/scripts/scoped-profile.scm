@@ -1,4 +1,5 @@
 (define-module (guix scripts scoped-profile)
+  #:declarative? #f
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 match)
   #:use-module (gnu home)
@@ -9,8 +10,8 @@
   #:use-module (guix records)
   #:use-module (guix scripts package)
   #:autoload
-  (guix scripts package)
-  (build-and-use-profile)
+  (guix scripts home) ;; (guix scripts package)
+  (load-home-environment) ;; (build-and-use-profile)
   #:export (guix-scoped-profile))
 
 (define (show-help)
@@ -112,24 +113,37 @@
             (extract-profiles file)))
 
 
-(define (guix-scoped-profile1 . args)
-  (match args
-    (("reconfigure" file)
-     (reconfigure file))
-    (("roll-back" profile)
-     (roll-back
-      (profile-path profile)))
-    (("list-generations"
-      profile)
-     (profile-generations
-      (profile-path profile)))
-    (_
-     (leave
-      "bad command\n"))))
+;; (define (guix-scoped-profile1 . args)
+;;   (match args
+;;     (("reconfigure" file)
+;;      (reconfigure file))
+;;     (("roll-back" profile)
+;;      (roll-back
+;;       (profile-path profile)))
+;;     (("list-generations"
+;;       profile)
+;;      (profile-generations
+;;       (profile-path profile)))
+;;     (_
+;;      (leave
+;;       "bad command\n"))))
+
+
+(define (load-config file)
+
+  (primitive-load
+
+   (if (absolute-file-name? file)
+
+       file
+
+       (canonicalize-path file))))
 
 
 (define (guix-scoped-profile . args)
-  (primitive-load file))
+  (display (car args))
+  (newline)
+  (load-config (car args)))
 
 
 ;; guix scoped-profile reconfigure home.scm
