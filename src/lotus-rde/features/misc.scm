@@ -126,6 +126,7 @@
   #:use-module (rde features system)
   #:use-module (lotus-rde packages python-xyz)
   #:use-module (lotus-rde packages utils)
+  #:use-module (lotus-rde home scoped-profiles)
   #:use-module (lotus-rde home services builder)
   #:use-module (lotus-rde home services transients)
   #:use-module (lotus-rde home services utils)
@@ -140,7 +141,8 @@
             feature-bluetooth-autoconnect
             feature-power-monitor
             feature-git-annex-daemon
-            feature-ssh-transient))
+            feature-ssh-transient
+            feature-extra-profile))
 
 
 
@@ -1363,5 +1365,24 @@
              (shepherd-autossh-tunnel autossh-tunnel)
              (shepherd-ssh-gpg-tunnel ssh-gpg-tunnel)))
    (name 'ssh-transient)
+   (home-services-getter get-home-services)))
+
+
+(define* (feature-extra-profile)
+  (define* (get-home-services config)
+    (list
+     (simple-service
+      'gcc
+      home-dev-profile-service-type
+      (list
+       gcc-toolchain))
+
+     (simple-service
+      'gdb
+      home-dev-profile-service-type
+      (list
+       gdb))))
+  (feature
+   (name 'extra-profile-11)
    (home-services-getter get-home-services)))
 

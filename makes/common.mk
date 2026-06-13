@@ -134,17 +134,19 @@ rde/system/reconfigure:
 
 
 
-rde/profile/install:
-	${GUIX} package $(GUIX_PROFILE_FLAGS) -m $(PROFILE_BASE_DIR)/manifest.scm -p $(PROFILE_BASE_DIR)/profile.d/$(PROFILE) || \
-		${GUIX} package $(GUIX_PROFILE_FLAGS) -m $(PROFILE_BASE_DIR)/manifest-MOD.scm -p $(PROFILE_BASE_DIR)/profile.d/$(PROFILE)
-rde/profile/update:
-	${GUIX} package $(GUIX_PROFILE_FLAGS) -u -p $(PROFILE_BASE_DIR)/profile.d/$(PROFILE)
-
-rde/profile/clear:
-
+# rde/profile/install:
+# 	${GUIX} package $(GUIX_PROFILE_FLAGS) -m $(PROFILE_BASE_DIR)/manifest.scm -p $(PROFILE_BASE_DIR)/profile.d/$(PROFILE) || \
+# 		${GUIX} package $(GUIX_PROFILE_FLAGS) -m $(PROFILE_BASE_DIR)/manifest-MOD.scm -p $(PROFILE_BASE_DIR)/profile.d/$(PROFILE)
+# rde/profile/update:
+# 	${GUIX} package $(GUIX_PROFILE_FLAGS) -u -p $(PROFILE_BASE_DIR)/profile.d/$(PROFILE)
+# rde/profile/clear:
 
 
 
+
+rde/profile/manifest:
+	RDE_TARGET=manifest ${GUIX} package $(GUIX_HOME_FLAGS) \
+	-m ${CONFIGS} -p /tmp/test-profile
 
 
 

@@ -30,6 +30,7 @@ HUT   = $(GUIX) shell hut -- hut
 
 EXAMPLES_SRC_DIR = ./examples/src
 CONFIGS = ${EXAMPLES_SRC_DIR}/rde-configs/configs.scm
+MANIFEST = ${EXAMPLES_SRC_DIR}/rde-configs/manifest.scm
 
 DEV_ENV_LOAD_PATH  = -L ./env/guix -L ./env/dev -L ./src
 RDE_SRC_LOAD_PATH  = -L ./env/guix -L ./env/dev -L ./src

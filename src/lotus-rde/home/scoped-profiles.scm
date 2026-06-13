@@ -30,7 +30,8 @@
   #:use-module (srfi srfi-1)
   #:export (make-home-profile-service-type
             home-dev-profile-service-type
-            home-tools-profile-service-type))
+            home-tools-profile-service-type
+            profile->manifest))
 
 
 (define-record-type* <scoped-profile>
@@ -50,11 +51,9 @@
    (default-value
      '())))
 
-(define (make-home-profile-service-type
-         profile-name)
+(define (make-home-profile-service-type profile-name)
   (service-type
-   (name
-    profile-name)
+   (name profile-name)
    (compose concatenate)
    (extend append)
    (default-value
@@ -66,24 +65,18 @@
       (lambda (packages)
         (list
          (scoped-profile
-          (name
-           profile-name)
-          (packages
-           packages)))))))))
+          (name profile-name)
+          (packages packages)))))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Examples
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; (define
-;;  home-dev-profile-service-type
-;;  (make-home-profile-service-type 'home-dev-profile-service-type
-;;   ".guix-profiles/dev"))
-;; (define
-;;  home-tools-profile-service-type
-;;  (make-home-profile-service-type 'home-tools-profile-service-type
-;;   ".guix-profiles/tools"))
+(define home-dev-profile-service-type
+  (make-home-profile-service-type 'home-dev-profile-service-type))
+(define home-tools-profile-service-type
+  (make-home-profile-service-type 'home-tools-profile-service-type))
 
 
 ;; (simple-service
@@ -106,3 +99,20 @@
 ;;   strace))
 
 
+(define (profile->manifest env profile-name)
+  (let* ((folded (fold-services
+                  (home-environment-services
+                   env)))
+         (profiles (service-value
+                    (lookup-service folded
+                                    home-scoped-profile-service-type)))
+         ;; get matching scoped profile
+         (selected (filter (lambda (profile)
+                             (equal? (scoped-profile-name
+                                      profile)
+                                     profile-name))
+                    profiles)))
+    ;; collect packages from ALL matched profiles
+    (packages->manifest (append-map scoped-profile-packages
+                                    selected))))
+

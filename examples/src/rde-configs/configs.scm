@@ -1,11 +1,14 @@
 
+
+
 (define-module (rde-configs configs)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 match)
   #:use-module (ice-9 pretty-print)
   #:use-module (gnu services)
   #:use-module (rde features)
-  #:use-module (lotus-rde features))
+  #:use-module (lotus-rde features)
+  #:use-module (lotus-rde home scoped-profiles))
 
 (define* (use-nested-configuration-modules
           #:key
@@ -154,6 +157,8 @@
             (match rde-target
               ("home" (rde-config-home-environment config))
               ("system" (rde-config-operating-system config))
+              ("manifest" (profile->manifest (rde-config-home-environment config)
+                                             'home-dev-profile-service-type))
               (_ #f))))
         (begin
           (format #t "Invalid RDE_HOST: ~a or RDE_USER: ~a\n" 'rde-host-features 'rde-user-features)
