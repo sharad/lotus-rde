@@ -527,6 +527,7 @@
          gnome-keyring
          blueman
          pasystray
+         keepassxc
          ;; barrier
          git
          autossh))
@@ -794,7 +795,7 @@
            #~(make-forkexec-constructor
               (list "/run/privileged/bin/firejail"
                     "--noprofile"
-                    "keepassxc"
+                    #$(file-append keepassxc "/bin/keepassxc")
                     "--minimized"
                     "--keyfile"
                     (string-append (getenv "HOME")
