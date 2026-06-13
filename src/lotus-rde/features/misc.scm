@@ -1375,13 +1375,13 @@
       'gcc
       home-dev-profile-service-type
       (list
-       gcc-toolchain))
+       hello))
 
      (simple-service
       'gdb
       home-dev-profile-service-type
       (list
-       gdb))))
+       keepassxc))))
   (feature
    (name 'extra-profile-11)
    (home-services-getter get-home-services)))

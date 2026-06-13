@@ -21,6 +21,7 @@
 ;; https://chatgpt.com/g/g-p-6a0c475ce26481918489971e3be6f66d-guix/c/6a0c32ea-4624-8322-9640-dace11322bcd
 
 (define-module (lotus-rde home scoped-profiles)
+  #:use-module (gnu home)
   #:use-module (gnu home services)
   #:use-module (gnu services)
   #:use-module (guix gexp)
@@ -49,7 +50,12 @@
    (compose append)
    (extend append)
    (default-value
-     '())))
+     '())
+   ;; root collector
+   (extensions
+    '())
+   (description
+    "service.")))
 
 (define (make-home-profile-service-type profile-name)
   (service-type
@@ -66,7 +72,9 @@
         (list
          (scoped-profile
           (name profile-name)
-          (packages packages)))))))))
+          (packages packages)))))))
+   (description
+    "service.")))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -100,6 +108,8 @@
 
 
 (define (profile->manifest env profile-name)
+  (display "test")
+  (newline)
   (let* ((folded (fold-services
                   (home-environment-services
                    env)))

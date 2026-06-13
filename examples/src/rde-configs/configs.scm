@@ -153,17 +153,20 @@
           ;;             (format #t "Service: ~a\n" service))
           ;;           (rde-config-home-services config))
 
-          (let ((rde-target (getenv "RDE_TARGET")))
-            (match rde-target
-              ("home" (rde-config-home-environment config))
-              ("system" (rde-config-operating-system config))
-              ("manifest" (profile->manifest (rde-config-home-environment config)
-                                             'home-dev-profile-service-type))
-              (_ #f))))
+          (let* ((rde-target (getenv "RDE_TARGET"))
+                 (obj (match rde-target
+                        ("home" (rde-config-home-environment config))
+                        ("system" (rde-config-operating-system config))
+                        ("manifest" (profile->manifest (rde-config-home-environment config)
+                                                       'home-dev-profile-service-type))
+                        (_ #f))))
+            (display obj)
+            (newline)
+            obj))
         (begin
           (format #t "Invalid RDE_HOST: ~a or RDE_USER: ~a\n" 'rde-host-features 'rde-user-features)
           #f))))
 
 
-
 (dispatcher)
+
