@@ -6,6 +6,7 @@
   #:use-module (guix ui)
   #:use-module (guix profiles)
   #:use-module (guix packages)
+  #:use-module (guix records)
   #:use-module (guix scripts package)
   #:autoload
   (guix scripts package)
@@ -88,10 +89,9 @@
   (primitive-load file))
 
 (define (extract-profiles file)
-  (let*
-      ((env (load-home file))
-       (services (home-environment-services env))
-       (result (fold-services services)))
+  (let* ((env (load-home file))
+         (services (home-environment-services env))
+         (result (fold-services services)))
     (service-value
      (lookup-service
       result
@@ -112,7 +112,7 @@
             (extract-profiles file)))
 
 
-(define (guix-scoped-profile . args)
+(define (guix-scoped-profile1 . args)
   (match args
     (("reconfigure" file)
      (reconfigure file))
@@ -126,6 +126,10 @@
     (_
      (leave
       "bad command\n"))))
+
+
+(define (guix-scoped-profile . args)
+  (primitive-load file))
 
 
 ;; guix scoped-profile reconfigure home.scm

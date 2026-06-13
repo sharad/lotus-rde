@@ -24,6 +24,7 @@
   #:use-module (gnu home services)
   #:use-module (gnu services)
   #:use-module (guix gexp)
+  #:use-module (guix records)
   #:use-module (guix profiles)
   #:use-module (guix packages)
   #:use-module (srfi srfi-1)

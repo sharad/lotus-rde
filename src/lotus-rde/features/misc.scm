@@ -107,6 +107,7 @@
   #:use-module (gnu packages linux)
   #:use-module (gnu packages music)
   #:use-module (gnu packages networking)
+  #:use-module (gnu packages password-utils)
   #:use-module (gnu packages python)
   #:use-module (gnu packages ssh)
   #:use-module (gnu packages wm)
