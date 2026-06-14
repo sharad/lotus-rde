@@ -149,10 +149,6 @@
                                 ((feature-home-services-getter f) config)))
                     rde-user-features)
 
-          ;; (for-each (lambda (service)
-          ;;             (format #t "Service: ~a\n" service))
-          ;;           (rde-config-home-services config))
-
           (let* ((rde-target (getenv "RDE_TARGET"))
                  (obj (match rde-target
                         ("home" (rde-config-home-environment config))
