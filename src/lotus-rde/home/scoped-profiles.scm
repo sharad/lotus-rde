@@ -82,9 +82,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define home-dev-profile-service-type
-  (make-home-profile-service-type 'home-dev-profile-service-type))
+  (make-home-profile-service-type 'dev))
 (define home-tools-profile-service-type
-  (make-home-profile-service-type 'home-tools-profile-service-type))
+  (make-home-profile-service-type 'tools))
 
 
 ;; (simple-service
