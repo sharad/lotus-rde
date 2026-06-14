@@ -144,8 +144,8 @@ rde/system/reconfigure:
 
 
 
-rde/profile/manifest:
-	RDE_TARGET=manifest ${GUIX} package $(GUIX_HOME_FLAGS) \
+rde/profile/install:
+	RDE_TARGET=manifest RDE_PROFILE_NAME=dev ${GUIX} package $(GUIX_HOME_FLAGS) \
 	-m ${CONFIGS} -p /tmp/test-profile
 
 

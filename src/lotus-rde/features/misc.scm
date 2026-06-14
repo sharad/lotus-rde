@@ -1369,6 +1369,13 @@
 
 
 (define* (feature-extra-profile)
+
+  (define home-dev-profile-service-type
+    (make-home-profile-service-type 'dev))
+  (define home-tools-profile-service-type
+    (make-home-profile-service-type 'tools))
+
+
   (define* (get-home-services config)
     (list
      (simple-service
