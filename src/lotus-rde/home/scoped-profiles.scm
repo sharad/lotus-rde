@@ -108,21 +108,14 @@
 
 
 (define (profile->manifest env profile-name)
-  (display "test")
-  (newline)
-  (let* ((folded (fold-services
-                  (home-environment-services
-                   env)))
-         (profiles (service-value
-                    (lookup-service folded
-                                    home-scoped-profile-service-type)))
-         ;; get matching scoped profile
-         (selected (filter (lambda (profile)
-                             (equal? (scoped-profile-name
-                                      profile)
-                                     profile-name))
-                    profiles)))
-    ;; collect packages from ALL matched profiles
+  (let* ((folded (fold-services (home-environment-services env)
+                                #:target-type
+                                home-scoped-profile-service-type))
+         (profiles (filter (lambda (service)
+                             (eq? (scoped-profile-name service)
+                                  profile-name))
+                           (apply append
+                                  (service-value folded)))))
     (packages->manifest (append-map scoped-profile-packages
-                                    selected))))
+                                    profiles))))
 

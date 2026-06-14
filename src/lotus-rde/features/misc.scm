@@ -1381,7 +1381,13 @@
       'gdb
       home-dev-profile-service-type
       (list
-       keepassxc))))
+       keepassxc))
+
+     (simple-service
+      'strace
+      home-tools-profile-service-type
+      (list
+       strace))))
   (feature
    (name 'extra-profile-11)
    (home-services-getter get-home-services)))
