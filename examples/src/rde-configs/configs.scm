@@ -153,11 +153,13 @@
                  (obj (match rde-target
                         ("home" (rde-config-home-environment config))
                         ("system" (rde-config-operating-system config))
-                        ("manifest" (profile->manifest (rde-config-home-environment config)
-                                                       'home-dev-profile-service-type))
+                        ("manifest" (let ((rde-profile-name (string->symbol (or (getenv "RDE_PROFILE_NAME")
+                                                                                "dev"))))
+                                     (profile->manifest (rde-config-home-environment config)
+                                                        rde-profile-name)))
                         (_ #f))))
-            (display obj)
-            (newline)
+            ;; (display obj)
+            ;; (newline)
             obj))
         (begin
           (format #t "Invalid RDE_HOST: ~a or RDE_USER: ~a\n" 'rde-host-features 'rde-user-features)
