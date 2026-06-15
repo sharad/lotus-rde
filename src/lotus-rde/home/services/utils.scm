@@ -969,7 +969,7 @@ sender='org.bluez'")
                           (destructor (make-system-destructor cli " >> " #$(log-file "kpkeys") " 2>&1")))
                      (format #t "Running ~a~%" cli
                              (apply destructor running args)))))
-        (one-shot? #t)
+        (one-shot? #f)
         (respawn? #f)))))))
 
 
@@ -1223,7 +1223,7 @@ sender='org.bluez'")
           #$(log-file "ssh-add-key")))
       (stop
        #~(make-kill-destructor))
-      (one-shot? #t)
+      (one-shot? #f)
       (respawn? #f))))))
 
 
