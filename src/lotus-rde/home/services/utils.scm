@@ -1212,19 +1212,40 @@ sender='org.bluez'")
                      xawaken-session-down))
       (auto-start? #f)
       (start
-       #~(make-forkexec-constructor
-          (list ;; #$ssh-add-key
-           (string-append (getenv "HOME")
-                          "/.bin/ssh-add-key")
-           "4"   ;; minimum keys required
-           "5")  ;; maximum retry count
-          #:create-session? #f
-          #:log-file
-          #$(log-file "ssh-add-key")))
+       #~(make-system-constructor (string-join (list (string-append (getenv "HOME") "/.bin/ssh-add-key") (number->string 4) (number->string 5))
+                                                     ;; (number->string min-ssh-keys)
+                                                     ;; (number->string max-tries)
+                                               " ")
+                                  " >> "
+                                  #$(log-file "ssh-add-key")
+                                  " 2>&1"))
       (stop
-       #~(make-kill-destructor))
+       #~(make-system-destructor  "ssh-add -D"
+                                  " >> "
+                                  #$(log-file "ssh-add-key")
+                                  " 2>&1"))
       (one-shot? #f)
       (respawn? #f))))))
+
+
+;; (actions (clear (lambda (retval . args)
+;;                                            ;; (format #t "ls ssh-add with args: ~a ~a~%" retval args)
+;;                         (let* ((port (open-pipe* OPEN_READ "ssh-add" "-D"))
+;;                                (output (read-string port)))
+;;                           (close-pipe port)
+;;                           (format #t "~a" output))))
+;;          (ls (lambda (retval . args)
+;;                ;; (format #t "ls ssh-add with args: ~a ~a~%" retval args)
+;;               (let* ((port (open-pipe* OPEN_READ "ssh-add" "-l"))
+;;                      (output (read-string port)))
+;;                 (close-pipe port)
+;;                 (format #t "~a" output))))
+;;          (lock (lambda (retval . args)
+;;                  ;; (format #t "lock ssh-add with args: ~a ~a~%" retval args)
+;;                  (system "xterm -e `ssh-add -x'")))
+;;          (unlock (lambda (retval . args)
+;;                    ;; (format #t "lock ssh-add with args: ~a ~a~%" retval args)
+;;                    (system "xterm -e `ssh-add -X'"))))
 
 
 
