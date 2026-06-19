@@ -156,7 +156,7 @@
           (polkit polkit)
           (mpd mpd)
           (znc znc)
-          (jupyter python-jupyter)
+          (jupyter python-jupyter-core)
           (usrhttpd rust-usrhttpd))
   (define (get-home-services config)
     (list
