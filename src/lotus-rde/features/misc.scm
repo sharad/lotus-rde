@@ -460,6 +460,9 @@
                     "--ServerApp.quit_button=False"
                     "--ServerApp.base_url=/Documents/Compositions/Drafts/misc/jupyter/"
                     "--NotebookApp.token=mytoken"
+                    "--IdentityProvider.token=mytoken"
+                    ;; "--ContentsManager.allow_hidden=True"
+                    "--FileContentsManager.allow_hidden=True"
                     (format #f
                             "--ServerApp.root_dir=~a/public_html/sites/default/Documents/Compositions/Drafts/misc/jupyter/"
                             (getenv "HOME")))

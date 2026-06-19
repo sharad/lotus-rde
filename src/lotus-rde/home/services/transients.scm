@@ -101,6 +101,7 @@
                                           #:provides (list svc-sym)
                                           #:requires '()
                                           #:transient? #t
+                                          #:requirement (list #$spawner-name)
                                           #:respawn? #f
                                           #:start (apply (#$constructor)
                                                          inst-name
