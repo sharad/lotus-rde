@@ -156,7 +156,7 @@
           (polkit polkit)
           (mpd mpd)
           (znc znc)
-          (jupyter jupyter)
+          (jupyter python-jupyter)
           (usrhttpd rust-usrhttpd))
   (define (get-home-services config)
     (list
@@ -213,7 +213,7 @@
                                                 (string-append xdg-runtime-dir
                                                                "/emacs")
                                                 (string-append (getenv "HOME")
-                                                                      "/.emacs.d")))
+                                                               "/.emacs.d")))
                          (server-dir (string-append emacs-runtime-dir
                                                            "/server"))
                          (make-cmd-destructor #$make-cmd-destructor-gexp))
