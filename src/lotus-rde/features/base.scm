@@ -1356,7 +1356,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
               (openssh-configuration
                ;; (permit-root-login? #f)
                (password-authentication? #t)
-               (pubkey-authentication? #t)
+               ;; (pubkey-authentication? #t)
                (authorized-keys '())))))
 
   (feature
