@@ -345,9 +345,7 @@ sender='org.bluez'")
             (string-append (getenv "HOME")
                            "/.bin/bluetooth-autoconnect")
             "--daemon"
-            "--verbose"
-            "--only-audio"
-            "--retry" "3")
+            "--verbose")
            #:create-session? #f
            #:log-file
            #$(log-file "bluetooth-autoconnect")))
