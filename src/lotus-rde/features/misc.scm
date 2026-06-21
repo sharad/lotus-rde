@@ -1131,13 +1131,13 @@
         home-shepherd-service-type
         (list
          (shepherd-service
-           (provision '(login))
-           (start #~(make-system-constructor "echo started login-service"))
+          (provision '(login login-service))
+          (start #~(make-system-constructor "echo started login-service"))
            ;; #:stop     (make-kill-destructor)
-           (respawn? #f)
-           (auto-start? #f)
-           (one-shot? #t)
-           (requirement (get-active-requirements config login-requirements))))))))
+          (respawn? #f)
+          (auto-start? #f)
+          (one-shot? #t)
+          (requirement (get-active-requirements config login-requirements))))))))
 
   (feature
    (values `((shepherd-awaken-session awaken-session)
