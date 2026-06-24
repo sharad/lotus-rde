@@ -29,9 +29,22 @@
   #:use-module (ice-9 match)
   #:use-module (ice-9 pretty-print)
   #:use-module (rde features)
-  #:export (lotus-make-rde-config))
+  #:export (rde-config-values-print
+            lotus-make-rde-config))
 
 
+
+(define (rde-config-values-hash-print config)
+  (hash-for-each-handle pretty-print
+                        ((@@ (rde features)  rde-config-values) config)))
+
+(define (rde-config-values-alist-print config)
+  ;; (for-each pretty-print
+  ;;           ((@@ (rde features)  rde-config-values-alist) config))
+  (pretty-print
+   ((@@ (rde features)  rde-config-values-alist) config)))
+
+(define rde-config-values-print rde-config-values-hash-print)
 
 (define (lotus-get-operating-system config)
   (define rde-config-integrate-he-in-os?

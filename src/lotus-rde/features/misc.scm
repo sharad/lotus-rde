@@ -131,8 +131,7 @@
   #:use-module (lotus-rde home services transients)
   #:use-module (lotus-rde home services utils)
   #:use-module (lotus-rde lib utils)
-  #:export (rde-config-values-print
-            feature-lotus-nox-services
+  #:export (feature-lotus-nox-services
             feature-lotus-x-services
             feature-lotus-nox-group-services
             feature-lotus-x-group-services
@@ -1080,11 +1079,6 @@
             (let ((shepherd-req (string->symbol (string-append "shepherd-" (symbol->string req)))))
               (get-value shepherd-req config #f)))
           requirements))
-
-(define (rde-config-values-print config)
-  (hash-for-each-handle pretty-print
-                        (rde-config-values config)))
-
 
 (define* (feature-lotus-nox-group-services)
 
