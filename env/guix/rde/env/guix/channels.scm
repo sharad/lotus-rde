@@ -19,7 +19,7 @@
           (name 'nonguix)
           (url "https://gitlab.com/nonguix/nonguix")
           (branch "master")
-          (commit "4ae06fb5cb75f2ca6b0f2f384f41677ae28c069a")
+          (commit "bf39542ca537fde8839b209ac21d6f3254469b15")
           (introduction
            (make-channel-introduction
             "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
@@ -36,15 +36,15 @@
             (openpgp-fingerprint
              "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0"))))
         (channel
-          (name 'guix-android)
-          (url "https://framagit.org/tyreunom/guix-android.git")
+          (name 'lotus)
+          (url "https://github.com/sharad/guix")
           (branch "master")
-          (commit "e5f52bd57275e404db74bf03b541bb62f7d73d58"))
+          (commit "78064a218bbfb7ac826bf0f40c9b0590bc2ac304"))
         (channel
           (name 'guix)
           (url "https://git.guix.gnu.org/guix.git")
           (branch "master")
-          (commit "ddc7e2fbab10bbecb899923b9613e54c348abc1a")
+          (commit "dd00241787d9a4e91f31591b7be05a526286ebc1")
           (introduction
            (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
