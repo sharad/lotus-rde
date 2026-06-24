@@ -1351,7 +1351,7 @@
     home-git-annex-daemon-service)
 
   (feature
-   (values `((shepherd-git-annex git-annex)))
+   (values `((shepherd-annex annex)))
    (name 'annex)
    (home-services-getter get-home-services)))
 

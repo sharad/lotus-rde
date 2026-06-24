@@ -1874,7 +1874,7 @@ sender='org.bluez'")
                              "stop")))
            (cmd (file-append git "/bin/git")))
       (shepherd-service
-       (provision '(annex git-annex-daemon))
+       (provision '(annex git-annex))
        (documentation
         "Git Annex daemon service.")
        (requirement
