@@ -22,10 +22,16 @@
   #:use-module (gnu system file-systems)
   #:use-module (gnu system uuid)
   #:use-module (gnu packages linux)
-  #:export (log-file
+  #:export (lotus-rde-config-values-hash
+            lotus-rde-config-values-alist
+            lotus-rde-config-values-hash-print
+            lotus-rde-config-values-alist-print
+            log-file
             log-file-gexp
             make-cmd-destructor
             make-cmd-destructor-gexp
+            get-active-requirements
+            find-dependent-services
             file->package
             ;; lotus-assert
             ensure-rw-mount
@@ -40,6 +46,25 @@
        msg)))
 
 
+(define (lotus-rde-config-values-hash config)
+  ((@@ (rde features) rde-config-values) config))
+
+(define (lotus-rde-config-values-alist config)
+  ((@@ (rde features) rde-config-values-alist) config))
+
+(define (lotus-rde-config-values-hash-print config)
+  ;; (let ((handle (hash-get-handle (rde-config-values config) key)))
+  ;;   (if handle
+  ;;       (cdr handle)
+  ;;       default-value))
+  (hash-for-each-handle pretty-print
+                        (lotus-rde-config-values-hash config)))
+
+(define (lotus-rde-config-values-alist-print config)
+  ;; (for-each pretty-print
+  ;;           ((@@ (rde features)  rde-config-values-alist) config))
+  (pretty-print (lotus-rde-config-values-alist config)))
+
 
 ;; (define (shepherd-service-log-file name)
 ;;   "Return log file path for shepherd service NAME.
@@ -105,7 +130,34 @@
           (apply system-destructor
                  running
                  args)))))
+
 
+
+(define (get-active-requirements config requirements)
+  (filter (lambda (req)
+            (let ((shepherd-req (string->symbol (string-append "shepherd-" (symbol->string req)))))
+              (get-value shepherd-req config #f)))
+          requirements))
+
+(define (find-dependent-services config service)
+  (define (find-symbols ht prefix sym)
+    (hash-fold
+     (lambda (k v result)
+       (if (and (string? k)
+                (string-prefix? prefix k)
+                (list? v)
+                (member sym v))
+           (cons
+            (string->symbol
+             (substring k (string-length prefix)))
+            result)
+           result))
+     '()
+     ht))
+  (find-symbols (lotus-rde-config-values-hash config)
+                "shepherd-"
+                service))
+
 
 (define (file->package name prog)
   (package

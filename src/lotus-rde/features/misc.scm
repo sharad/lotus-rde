@@ -1071,15 +1071,6 @@
    (home-services-getter get-home-services)))
 
 
-
-
-
-(define (get-active-requirements config requirements)
-  (filter (lambda (req)
-            (let ((shepherd-req (string->symbol (string-append "shepherd-" (symbol->string req)))))
-              (get-value shepherd-req config #f)))
-          requirements))
-
 (define* (feature-lotus-nox-group-services)
 
   (define (get-home-services config)
