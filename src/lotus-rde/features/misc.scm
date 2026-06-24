@@ -1129,9 +1129,11 @@
           (requirement (get-active-requirements config login-requirements))))))))
 
   (feature
-   (values `((shepherd-awaken-session awaken-session)
+   (values `((shepherd-awaken-session (xawaken-session
+                                       delayed-login-session))
              (shepherd-awaken-session-up awaken-session-up)
-             (shepherd-awaken-session-down awaken-session-down)
+             (shepherd-awaken-session-down (xawaken-session-down
+                                            delayed-login-session-down))
              (shepherd-delayed-login-session delayed-login-session)
              (shepherd-delayed-login-session-up delayed-login-session-up)
              (shepherd-delayed-login-session-down delayed-login-session-down)
@@ -1240,7 +1242,7 @@
            (requirement (get-active-requirements config wmlogin-requirements))))))))
 
   (feature
-   (values `((shepherd-xawaken-session awaken-session)
+   (values `((shepherd-xawaken-session 'awaken-session)
              (shepherd-xawaken-session-up awaken-session-up)
              (shepherd-xawaken-session-down awaken-session-down)
              (shepherd-xdelayed-login-session xdelayed-login-session)
