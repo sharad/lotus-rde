@@ -4,6 +4,7 @@
   #:use-module (ice-9 format)
   #:use-module (ice-9 popen)
   #:use-module (ice-9 ftw)
+  #:use-module (ice-9 pretty-print)
   #:use-module (ice-9 threads)
   #:use-module (ice-9 textual-ports)
   #:use-module (ice-9 rdelim)
