@@ -131,7 +131,8 @@
   #:use-module (lotus-rde home services transients)
   #:use-module (lotus-rde home services utils)
   #:use-module (lotus-rde lib utils)
-  #:export (feature-lotus-nox-services
+  #:export (rde-config-values-print
+            feature-lotus-nox-services
             feature-lotus-x-services
             feature-lotus-nox-group-services
             feature-lotus-x-group-services
@@ -483,8 +484,7 @@
           (stop #~(make-kill-destructor))
           (respawn? #t))))))
   (feature
-   (values `(
-             (shepherd-emacs-lotus emacs-lotus)
+   (values `((shepherd-emacs-lotus emacs-lotus)
              (shepherd-ssh-agent ssh-agent)
              (shepherd-gpg-agent gpg-agent)
              (shepherd-pkttyagent pkttyagent)
@@ -1081,6 +1081,10 @@
               (get-value shepherd-req config #f)))
           requirements))
 
+(define (rde-config-values-print config)
+  (hash-for-each-handle pretty-print
+                        (rde-config-values config)))
+
 
 (define* (feature-lotus-nox-group-services)
 
@@ -1106,7 +1110,7 @@
                                 wireplumber
                                 znc
                                 emacs-lotus
-                                usrhttpd
+                                ;; usrhttpd
                                 ;; jupyter
                                 ;; keepawaken
                                 awaken-session
@@ -1141,7 +1145,11 @@
 
   (feature
    (values `((shepherd-awaken-session awaken-session)
+             (shepherd-awaken-session-up awaken-session-up)
+             (shepherd-awaken-session-down awaken-session-down)
              (shepherd-delayed-login-session delayed-login-session)
+             (shepherd-delayed-login-session-up delayed-login-session-up)
+             (shepherd-delayed-login-session-down delayed-login-session-down)
              (shepherd-login login)))
    (name 'lotus-nox-group-services)
    (home-services-getter get-home-services)))
@@ -1171,7 +1179,8 @@
                                  synclient
                                  xrdb
                                  xautolock
-                                 deskflow-server))
+                                 deskflow-server
+                                 login))
           (wmlogin-requirements '( ;; redshift
                                   ;; polkit-gnome-agent
                                   conky
@@ -1247,7 +1256,11 @@
 
   (feature
    (values `((shepherd-xawaken-session awaken-session)
+             (shepherd-xawaken-session-up awaken-session-up)
+             (shepherd-xawaken-session-down awaken-session-down)
              (shepherd-xdelayed-login-session xdelayed-login-session)
+             (shepherd-xdelayed-login-session-up xdelayed-login-session-up)
+             (shepherd-xdelayed-login-session-down xdelayed-login-session-down)
              (shepherd-xlogin xlogin)
              (shepherd-wmlogin wmlogin)))
    (name 'lotus-x-group-services)
