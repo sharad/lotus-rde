@@ -22,6 +22,7 @@
   #:use-module (gnu system file-systems)
   #:use-module (gnu system uuid)
   #:use-module (gnu packages linux)
+  #:use-module (rde features)
   #:export (lotus-rde-config-values-hash
             lotus-rde-config-values-alist
             lotus-rde-config-values-hash-print
