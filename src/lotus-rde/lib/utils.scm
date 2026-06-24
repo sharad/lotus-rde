@@ -53,41 +53,12 @@
   ((@@ (rde features) rde-config-values-alist) config))
 
 (define (lotus-rde-config-values-hash-print config)
-  ;; (let ((handle (hash-get-handle (rde-config-values config) key)))
-  ;;   (if handle
-  ;;       (cdr handle)
-  ;;       default-value))
   (hash-for-each-handle pretty-print
                         (lotus-rde-config-values-hash config)))
 
 (define (lotus-rde-config-values-alist-print config)
-  ;; (for-each pretty-print
-  ;;           ((@@ (rde features)  rde-config-values-alist) config))
   (pretty-print (lotus-rde-config-values-alist config)))
 
-
-;; (define (shepherd-service-log-file name)
-;;   "Return log file path for shepherd service NAME.
-;; Usage: #:log-file #$(shepherd-service-log-file name)"
-;;   (string-append (getenv "HOME") "/.logs/shepherd/" name ".log"))
-
-;; (define shepherd-service-log-file-gexp
-;;   ;; Usage: #:log-file (#$shepherd-service-log-file-gexp #$(service-name-fn))
-;;   #~(lambda (name)
-;;       (string-append (getenv "HOME") "/.logs/shepherd/" name ".log")))
-
-
-
-;; (define (shepherd-service-log-file name)
-;;   "Return log file path for shepherd service NAME.
-;; Usage: #:log-file #$(shepherd-service-log-file name)"
-;;   (string-append (getenv "HOME") "/.logs/shepherd/" name ".log"))
-
-;; (define shepherd-service-log-file-gexp
-;;   ;; Usage: #:log-file (#$shepherd-service-log-file-gexp #$(service-name-fn))
-;;   #~(lambda (name)
-;;       (string-append (getenv "HOME") "/.logs/shepherd/" name ".log")))
-
 
 (define (log-file name)
   #~(string-append
