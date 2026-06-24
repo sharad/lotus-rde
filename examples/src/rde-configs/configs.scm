@@ -7,6 +7,7 @@
   #:use-module (ice-9 pretty-print)
   #:use-module (gnu services)
   #:use-module (rde features)
+  #:use-module (lotus-rde lib utils)
   #:use-module (lotus-rde features)
   #:use-module (lotus-rde home scoped-profiles))
 
