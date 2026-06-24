@@ -150,7 +150,7 @@
                                 ((feature-home-services-getter f) config)))
                     rde-user-features)
 
-          (lotus-rde-config-hash-values-print config)
+          (lotus-rde-config-values-hash-print config)
 
           (let* ((rde-target (getenv "RDE_TARGET"))
                  (obj (match rde-target
