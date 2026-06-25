@@ -1165,7 +1165,7 @@
                                  redshift
                                  synclient
                                  xrdb
-                                 xautolock
+                                 ;; xautolock
                                  deskflow-server
                                  login))
           (wmlogin-requirements '( ;; redshift
