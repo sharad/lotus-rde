@@ -6,6 +6,9 @@
   #:use-module (ice-9 match)
   #:use-module (ice-9 pretty-print)
   #:use-module (gnu services)
+
+  #:use-module (gnu home services shepherd)
+
   #:use-module (rde features)
   #:use-module (lotus-rde lib utils)
   #:use-module (lotus-rde features)
@@ -90,6 +93,16 @@
 
 
 
+;; (define (all-shepherd-services config)
+;;   (let ((home-services (rde-config-home-services config)))
+;;     (append-map
+;;      (lambda (svc)
+;;        (if (eq? (service-kind svc) home-shepherd-service-type)
+;;            (list (service-value svc))
+;;            '()))
+;;      home-services)))
+
+
 ;; ixy-config RDE_HOST=ixy RDE_USER=abcdw
 ;; live-config RDE_HOST=live RDE_USER=guest
 (define (dispatcher)
@@ -151,6 +164,10 @@
                     rde-user-features)
 
           (lotus-rde-config-values-hash-print config)
+
+
+          ;; (use-modules (ice-9 pretty-print))
+          ;; (format #t "~a\n" (all-shepherd-services config))
 
           (let* ((rde-target (getenv "RDE_TARGET"))
                  (obj (match rde-target
