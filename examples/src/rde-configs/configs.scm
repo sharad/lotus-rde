@@ -94,7 +94,12 @@
 
 
 ;; (define (all-shepherd-services config)
-;;   (let ((home-services (rde-config-home-services config)))
+;;   (let ((home-services
+;;          (home-shepherd-configuration-services
+;;           (service-value
+;;            (fold-services
+;;             (get-home-environment config)
+;;             #:target-type home-shepherd-service-type)))))
 ;;     (append-map
 ;;      (lambda (svc)
 ;;        (if (eq? (service-kind svc) home-shepherd-service-type)
