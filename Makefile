@@ -87,6 +87,11 @@ guix-pull:
 	-guix pull --news
 	-guix pull --news --details
 
+guix-pull-nochannel:
+	guix pull
+	-guix pull --news
+	-guix pull --news --details
+
 
 $(CHANNELS_ENV_RDE_FILE):
 	@echo run    guix pull
@@ -95,12 +100,20 @@ $(CHANNELS_ENV_RDE_FILE):
 
 guix-update-current-channels: $(CHANNELS_ENV_RDE_FILE)
 
+guix-update-current-channels-force:
+	make -B guix-update-current-channels
 
 git-commit:
 	git commit -a -m "correction"
 
 git-push: git-commit
 	git push
+
+git-restore:
+	git restore .
+
+git-pull: git-restore
+	git pull
 
 examples/guix-update-channels-latest: guix-pull guix-update-current-channels examples/guix-update-channels git-commit
 	echo "updated channels to latest guix commit"
@@ -130,7 +143,18 @@ repl: ares
 # 	build ${CONFIGS}
 
 # examples/target/rde-live.iso:
-# 	make -C examples target/rde-live.iso
+#   make -C examples target/rde-live.iso
+
+
+
+
+all/reconfigure: guix-update-current-channels-force rde/home/reconfigure sudo/rde/system/reconfigure
+
+pull/all/reconfigure: guix-pull-nochannel all/reconfigure
+
+git/pull/all/reconfigure: git-pull pull/all/reconfigure
+
+
 
 qemu/1/run:
 	qemu-system-x86_64 \
