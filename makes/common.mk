@@ -65,6 +65,29 @@ $(SUDO)/%:
 .PHONY: $(SUDO)/%
 ## -- sudo targets
 
+
+## -- git precommand
+GIT_PULL = git
+# Pattern rule: any target that looks like subdir/something
+$(GIT_PULL)/%:
+	$(MAKE) git-pull
+	$(MAKE) $*
+# Optional: Add a phony declaration if targets aren't actual files
+.PHONY: $(GIT_PULL)/%
+## -- git precommand
+
+
+## -- guix precommand
+GUIX_PULL = guix
+# Pattern rule: any target that looks like subdir/something
+$(GUIX_PULL)/%:
+	$(MAKE) guix-pull-nochannel
+	$(MAKE) $*
+# Optional: Add a phony declaration if targets aren't actual files
+.PHONY: $(GUIX_PULL)/%
+## -- guix precommand
+
+
 ## -- examples dir targets
 SUBDIR = examples
 # Pattern rule: any target that looks like subdir/something
@@ -96,11 +119,11 @@ $(CMD)/%:
 
 
 
-rde/home/build:
+rde/home/build: guix-update-current-channels-force
 	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
 	build ${CONFIGS}
 
-rde/home/reconfigure:
+rde/home/reconfigure: guix-update-current-channels-force
 	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
 	reconfigure ${CONFIGS}
 
@@ -112,7 +135,7 @@ rde/home/reconfigure:
 cow-store: /tmp/.cow-store-start
 
 
-rde/system/init: guix /tmp/.cow-store-start
+rde/system/init: guix /tmp/.cow-store-start guix-update-current-channels-force
 	mount -o rw /boot
 	mount -o rw /boot/efi
 	RDE_SYSINIT=init RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
@@ -120,11 +143,11 @@ rde/system/init: guix /tmp/.cow-store-start
 	umount /boot/efi
 	umount /boot
 
-rde/system/build:
+rde/system/build: guix-update-current-channels-force
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	build ${CONFIGS}
 
-rde/system/reconfigure:
+rde/system/reconfigure: guix-update-current-channels-force
 	mount -o rw /boot
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
 	reconfigure ${CONFIGS}

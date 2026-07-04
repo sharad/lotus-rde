@@ -101,7 +101,9 @@ $(CHANNELS_ENV_RDE_FILE):
 guix-update-current-channels: $(CHANNELS_ENV_RDE_FILE)
 
 guix-update-current-channels-force:
-	make -B guix-update-current-channels
+ifeq ($(strip $(GUIX)),guix)
+	$(MAKE) -B guix-update-current-channels
+endif
 
 git-commit:
 	git commit -a -m "correction"
@@ -148,11 +150,11 @@ repl: ares
 
 
 
-all/reconfigure: guix-update-current-channels-force rde/home/reconfigure sudo/rde/system/reconfigure
+all/reconfigure: rde/home/reconfigure sudo/rde/system/reconfigure
 
-pull/all/reconfigure: guix-pull-nochannel all/reconfigure
+all/reconfigure: all/reconfigure
 
-git/pull/all/reconfigure: git-pull pull/all/reconfigure
+
 
 
 
