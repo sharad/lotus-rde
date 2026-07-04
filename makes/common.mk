@@ -60,7 +60,13 @@ $(PKGEXEC)/%:
 SUDO = sudo
 # Pattern rule: any target that looks like subdir/something
 $(SUDO)/%:
-	sudo --preserve-env=$(SUDO_PRESERVE_ENV_VARS) $(MAKE) $*
+	if [ "x$SUDOPASSPASS" = "x" ]; \
+	then \
+		sudo --preserve-env=$(SUDO_PRESERVE_ENV_VARS) $(MAKE) $* \
+	else \
+		echo "$SUDOPASSPASS" | sudo -S --preserve-env=$(SUDO_PRESERVE_ENV_VARS) $(MAKE) $* \
+	fi
+
 # Optional: Add a phony declaration if targets aren't actual files
 .PHONY: $(SUDO)/%
 ## -- sudo targets
