@@ -78,7 +78,7 @@ $(GIT_PULL)/%:
 
 
 ## -- guix precommand
-GUIX_PULL = guix
+GUIX_PULL = pull
 # Pattern rule: any target that looks like subdir/something
 $(GUIX_PULL)/%:
 	$(MAKE) guix-pull-nochannel
