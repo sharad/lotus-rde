@@ -992,9 +992,9 @@
 
          ;; 28 proxy-fclient
          (let ((cmd (file-append autossh "/bin/autossh"))
-               (server (car '("proxy-server-fclient"
-                              "proxy-server-fclient-linux"
-                              "proxy-server-fclient-window"))))
+               (server (car '("proxy-server-fclient."
+                              "proxy-server-fclient-linux."
+                              "proxy-server-fclient-window."))))
           (shepherd-service
            (provision '(proxy-fclient))
            (documentation "proxy-fclient")
