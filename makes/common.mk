@@ -6,25 +6,25 @@
 
 
 
-GUIXTM_FLAGS      += --debug=3
-GUIXTM_FLAGS      += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
-GUIXTM_PREFIX_ENV +=
+GUIXTM_FLAGS       += --debug=3
+GUIXTM_FLAGS       += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
+GUIXTM_PREFIX_ENV  +=
 
 GUIXTM_COMMAND     = guix time-machine -C ${CHANNELS_FILE} $(GUIXTM_FLAGS) --
 
-GUIX_COMMAND      ?= ${GUIXTM_COMMAND}
+GUIX_COMMAND       ?= ${GUIXTM_COMMAND}
 
 GUIX_FULL_COMMAND  = $(GUIXTM_PREFIX_ENV) $(GUIX_COMMAND)
 
-GUIX_FLAGS        += --verbosity=3
-GUIX_FLAGS        += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
-GUIX_SYSTEM_FLAGS += $(GUIX_FLAGS) --debug=3
-GUIX_HOME_FLAGS   += $(GUIX_FLAGS) --debug=3
+GUIX_FLAGS         += --verbosity=3
+GUIX_FLAGS         += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
+GUIX_SYSTEM_FLAGS  += $(GUIX_FLAGS) --debug=3
+GUIX_HOME_FLAGS    += $(GUIX_FLAGS) --debug=3
 GUIX_PROFILE_FLAGS += $(GUIX_FLAGS) --debug=3
 
 GUIX_PROFILE_INSTALL_FLAGS += $(GUIX_PROFILE_FLAGS)
 GUIX_PROFILE_UPGRADE_FLAGS += $(GUIX_PROFILE_FLAGS)
-GUIX_PROFILE_CLEAR_FLAGS += $(GUIX_PROFILE_FLAGS)
+GUIX_PROFILE_CLEAR_FLAGS   += $(GUIX_PROFILE_FLAGS)
 
 
 GUIX = $(GUIX_FULL_COMMAND)
@@ -48,9 +48,25 @@ SUDO_PRESERVE_ENV_VARS = RDE_HOST,RDE_USER,RDE_TARGET,GUIX_COMMAND
 
 
 
-SYSTEM_GENERATION_CLEANUP_TIME  ?= 1h
-USER_GENERATION_CLEANUP_TIME    ?= 1h
-SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME ?= 1h
+
+
+# # calculate
+# GNU_STORE_MINIMUM_AVAIL_MEGABYTES=300
+# # make 21% of available space of /gnu/store
+# GUIX_CLEANUP_MIN_SPACE_PERCENTAGE=21
+# GNU_STORE_AVAIL_MEGABYTES="$(df -BM --output=avail  /gnu/store | sed -n -e 's/[^[:digit:]]//g' -e 2p)" # not used
+# GNU_STORE_SIZE_GIGABYTES="$(df -BG --output=size  /gnu/store | sed -n -e 's/[^[:digit:]]//g' -e 2p)"
+# GUIX_CLEANUP_MIN_SPACE="$(expr $GNU_STORE_SIZE_GIGABYTES '*' $GUIX_CLEANUP_MIN_SPACE_PERCENTAGE / 100)"
+# # calculate
+
+# DEFAULT_SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE=${GUIX_CLEANUP_MIN_SPACE}G
+# DEFAULT_SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME=30d
+# DEFAULT_SYSTEM_GENERATION_CLEANUP_TIME=10m
+# DEFAULT_USER_GENERATION_CLEANUP_TIME=96h
+
+SYSTEM_GENERATION_CLEANUP_TIME         ?= 10m
+USER_GENERATION_CLEANUP_TIME           ?= 96h
+SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME  ?= 30d
 SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE ?= 10G
 
 
@@ -172,12 +188,8 @@ rde/system/reconfigure: guix-update-current-channels-force
 	umount /boot
 
 
-rde/system/clear:
-	$(GUIX) system delete-generations ${SYSTEM_GENERATION_CLEANUP_TIME}
-
-
 rde/gc/clean:
-	$(GUIX) gc -d ${SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME} -C  ${SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE}
+	$(GUIX) gc -d ${SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME} -C ${SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE}
 
 
 
@@ -200,6 +212,10 @@ rde/profile/clear/%:
 
 .PHONY: rde/profile/install/% rde/profile/upgrade/% rde/profile/clear/%
 
+
+
+rde/system/clear:
+	$(GUIX) system delete-generations ${SYSTEM_GENERATION_CLEANUP_TIME}
 
 
 # function pkgmgr_get_available_pcent_free_in_part()
@@ -295,8 +311,8 @@ rde/profile/clear/%:
 		#                 profile_path="${profile_container_path}/profiles.d/profile"
 		#                 broken_path="${profile_container_path}/broken"
 
-    #                 mkdir -p "${broken_path}"
-    #                 find "${profile_container_path}/profiles.d" -xtype l -exec mv {} "${broken_path}" \;
+		#                 mkdir -p "${broken_path}"
+		#                 find "${profile_container_path}/profiles.d" -xtype l -exec mv {} "${broken_path}" \;
 
 		#                 if [ -f "${manifest_path}" -a -f "${profile_path}/etc/profile" ]
 		#                 then
