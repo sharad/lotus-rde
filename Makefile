@@ -8,8 +8,8 @@
 
 BUILD_TYPE ?= default
 
-CHANNELS_ENV_RDE_FILE    = ./env/guix/rde/env/guix/channels.scm
-CHANNELS_ENV_LATEST_FILE = ./env/guix/rde/env/guix/channels-ci-latest-guix.scm
+CHANNELS_ENV_RDE_FILE     = ./env/guix/rde/env/guix/channels.scm
+CHANNELS_ENV_LATEST_FILE  = ./env/guix/rde/env/guix/channels-ci-latest-guix.scm
 
 CHANNELS_ENV_FILE_default = $(CHANNELS_ENV_RDE_FILE)
 CHANNELS_ENV_FILE_local   = $(CHANNELS_ENV_RDE_FILE)
@@ -28,8 +28,8 @@ GUIXTM_PREFIX_ENV =
 EMACS = $(GUIX) shell emacs emacs-ox-html-stable-ids -- emacs
 HUT   = $(GUIX) shell hut -- hut
 
-EXAMPLES_DIR     = ./examples
-EXAMPLES_SRC_DIR = $(EXAMPLES_DIR)/src
+EXAMPLES_DIR     =  ./examples
+EXAMPLES_SRC_DIR =  $(EXAMPLES_DIR)/src
 CONFIGS          ?= ${EXAMPLES_SRC_DIR}/rde-configs/configs.scm
 MANIFEST         ?= ${EXAMPLES_SRC_DIR}/rde-configs/manifest.scm
 PROFILE_BASE_DIR ?= $(shell readlink $(EXAMPLES_DIR)/target/profiles)
