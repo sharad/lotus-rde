@@ -32,7 +32,7 @@ GUIXTM_PREFIX_ENV = GUILE_LOAD_PATH="../src:../tests:./src"
 
 SRC_DIR          = ./src
 CONFIGS          ?= ${SRC_DIR}/rde-configs/configs.scm
-PROFILE_BASE_DIR ?= $(shell realpath ./targets/profiles)
+PROFILE_BASE_DIR ?= $(shell readlink ./target/profiles)
 
 
 PULL_EXTRA_OPTIONS=
