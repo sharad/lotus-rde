@@ -157,8 +157,7 @@ all/reconfigure: rde/home/reconfigure sudo/rde/system/reconfigure
 
 all/reconfigure: all/reconfigure
 
-
-all/install: rde/
+all/install: rde/install/01-dev rde/install/01-tools
 
 
 qemu/1/run:
