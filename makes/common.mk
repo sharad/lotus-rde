@@ -20,6 +20,12 @@ GUIX_FLAGS        += --verbosity=3
 GUIX_FLAGS        += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
 GUIX_SYSTEM_FLAGS += $(GUIX_FLAGS) --debug=3
 GUIX_HOME_FLAGS   += $(GUIX_FLAGS) --debug=3
+GUIX_PROFILE_FLAGS += $(GUIX_FLAGS) --debug=3
+
+GUIX_PROFILE_INSTALL_FLAGS += $(GUIX_PROFILE_FLAGS)
+GUIX_PROFILE_UPGRADE_FLAGS += $(GUIX_PROFILE_FLAGS)
+GUIX_PROFILE_CLEAR_FLAGS += $(GUIX_PROFILE_FLAGS)
+
 
 GUIX = $(GUIX_FULL_COMMAND)
 
@@ -165,19 +171,30 @@ rde/system/reconfigure: guix-update-current-channels-force
 
 
 # rde/profile/install:
-# 	${GUIX} package $(GUIX_PROFILE_FLAGS) -m $(PROFILE_BASE_DIR)/manifest.scm -p $(PROFILE_BASE_DIR)/profile.d/$(PROFILE) || \
-# 		${GUIX} package $(GUIX_PROFILE_FLAGS) -m $(PROFILE_BASE_DIR)/manifest-MOD.scm -p $(PROFILE_BASE_DIR)/profile.d/$(PROFILE)
+#   ${GUIX} package $(GUIX_PROFILE_FLAGS) -m $(PROFILE_BASE_DIR)/manifest.scm -p $(PROFILE_BASE_DIR)/profile.d/$(PROFILE) || \
+#     ${GUIX} package $(GUIX_PROFILE_FLAGS) -m $(PROFILE_BASE_DIR)/manifest-MOD.scm -p $(PROFILE_BASE_DIR)/profile.d/$(PROFILE)
 # rde/profile/update:
-# 	${GUIX} package $(GUIX_PROFILE_FLAGS) -u -p $(PROFILE_BASE_DIR)/profile.d/$(PROFILE)
+#   ${GUIX} package $(GUIX_PROFILE_FLAGS) -u -p $(PROFILE_BASE_DIR)/profile.d/$(PROFILE)
 # rde/profile/clear:
 
 
+PROFILE_BASE_DIR=$(shell realpath targets/profiles)
 
+rde/profile/install/%:
+	RDE_TARGET=manifest RDE_PROFILE_NAME=$* echo ${GUIX} package $(GUIX_PROFILE_INSTALL_FLAGS) \
+	-m ${CONFIGS} -p ${PROFILE_BASE_DIR}/$*/profile.d/profile || \
+	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODIFIED=true echo ${GUIX} package $(GUIX_PROFILE_INSTALL_FLAGS) \
+	-m ${CONFIGS} -p ${PROFILE_BASE_DIR}/$*/profile.d/profile
 
-rde/profile/install:
-	RDE_TARGET=manifest RDE_PROFILE_NAME=dev ${GUIX} package $(GUIX_HOME_FLAGS) \
-	-m ${CONFIGS} -p /tmp/test-profile
+rde/profile/upgrade/%:
+	RDE_TARGET=manifest RDE_PROFILE_NAME=$* echo ${GUIX} upgrade $(GUIX_PROFILE_UPGRADE_FLAGS) \
+	-p ${PROFILE_BASE_DIR}/$*/profile.d/profile
 
+rde/profile/c/%:
+	RDE_TARGET=manifest RDE_PROFILE_NAME=$* echo ${GUIX} gc $(GUIX_PROFILE_CLEAR_FLAGS) \
+	-p ${PROFILE_BASE_DIR}/$*/profile.d/profile
+
+.PHONY: rde/profile/install/%
 
 
 
