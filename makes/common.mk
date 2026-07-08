@@ -48,6 +48,11 @@ SUDO_PRESERVE_ENV_VARS = RDE_HOST,RDE_USER,RDE_TARGET,GUIX_COMMAND
 
 
 
+SYSTEM_GENERATION_CLEANUP_TIME  ?= 1h
+USER_GENERATION_CLEANUP_TIME    ?= 1h
+SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME ?= 1h
+SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE ?= 10G
+
 
 ## -- pkg-exec targets
 PKGEXEC = pkg-exec
@@ -167,15 +172,15 @@ rde/system/reconfigure: guix-update-current-channels-force
 	umount /boot
 
 
+rde/system/clear:
+	$(GUIX) system delete-generations ${SYSTEM_GENERATION_CLEANUP_TIME}
+
+
+rde/gc/clean:
+	$(GUIX) gc -d ${SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME} -C  ${SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE}
 
 
 
-# rde/profile/install:
-#   ${GUIX} package $(GUIX_PROFILE_FLAGS) -m $(PROFILE_BASE_DIR)/manifest.scm -p $(PROFILE_BASE_DIR)/profile.d/$(PROFILE) || \
-#     ${GUIX} package $(GUIX_PROFILE_FLAGS) -m $(PROFILE_BASE_DIR)/manifest-MOD.scm -p $(PROFILE_BASE_DIR)/profile.d/$(PROFILE)
-# rde/profile/update:
-#   ${GUIX} package $(GUIX_PROFILE_FLAGS) -u -p $(PROFILE_BASE_DIR)/profile.d/$(PROFILE)
-# rde/profile/clear:
 
 
 
@@ -190,10 +195,10 @@ rde/profile/upgrade/%:
 	-p ${PROFILE_BASE_DIR}/$*/profile.d/profile
 
 rde/profile/clear/%:
-	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODE=clear echo ${GUIX} gc $(GUIX_PROFILE_CLEAR_FLAGS) \
-	-p ${PROFILE_BASE_DIR}/$*/profile.d/profile
+	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODE=clear echo ${GUIX} package $(GUIX_PROFILE_CLEAR_FLAGS) \
+	-p ${PROFILE_BASE_DIR}/$*/profile.d/profile --delete-generations=$(USER_GENERATION_CLEANUP_TIME)
 
-.PHONY: rde/profile/install/%
+.PHONY: rde/profile/install/% rde/profile/upgrade/% rde/profile/clear/%
 
 
 
@@ -268,10 +273,10 @@ rde/profile/clear/%:
     # # calculate
 
 
-    # DEFAULT_SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE=${GUIX_CLEANUP_MIN_SPACE}G
-    # DEFAULT_SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME=30d
-    # DEFAULT_SYSTEM_GENERATION_CLEANUP_TIME=10m
-    # DEFAULT_USER_GENERATION_CLEANUP_TIME=96h
+		# DEFAULT_SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE=${GUIX_CLEANUP_MIN_SPACE}G
+		# DEFAULT_SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME=30d
+		# DEFAULT_SYSTEM_GENERATION_CLEANUP_TIME=10m
+		# DEFAULT_USER_GENERATION_CLEANUP_TIME=96h
 
 
 
@@ -281,30 +286,30 @@ rde/profile/clear/%:
 
 
 
-    #             ignore-error running info guix package --delete-generations=${USER_GENERATION_CLEANUP_TIME} # for "01-guixprofile"
+		#             ignore-error running info guix package --delete-generations=${USER_GENERATION_CLEANUP_TIME} # for "01-guixprofile"
 
-    #             for profile in "${LOCAL_GUIX_EXTRA_PROFILES[@]}"
-    #             do
-    #                 profile_container_path="${LOCAL_GUIX_EXTRA_PROFILE_CONTAINER_DIR}/${profile}"
-    #                 manifest_path="${profile_container_path}/manifest.scm"
-    #                 profile_path="${profile_container_path}/profiles.d/profile"
-    #                 broken_path="${profile_container_path}/broken"
+		#             for profile in "${LOCAL_GUIX_EXTRA_PROFILES[@]}"
+		#             do
+		#                 profile_container_path="${LOCAL_GUIX_EXTRA_PROFILE_CONTAINER_DIR}/${profile}"
+		#                 manifest_path="${profile_container_path}/manifest.scm"
+		#                 profile_path="${profile_container_path}/profiles.d/profile"
+		#                 broken_path="${profile_container_path}/broken"
 
     #                 mkdir -p "${broken_path}"
     #                 find "${profile_container_path}/profiles.d" -xtype l -exec mv {} "${broken_path}" \;
 
-    #                 if [ -f "${manifest_path}" -a -f "${profile_path}/etc/profile" ]
-    #                 then
-    #                     ignore-error running info guix package -p "${profile_path}" --delete-generations=${USER_GENERATION_CLEANUP_TIME}
-    #                     # pkgmgr_sync_sleep_sync 5s
-    #                 else
-    #                     warn file "${profile_path}"/etc/profile not exist, for "${profile_path}"
-    #                 fi
-    #                 unset profile_path
-    #                 unset profile
-    #             done
+		#                 if [ -f "${manifest_path}" -a -f "${profile_path}/etc/profile" ]
+		#                 then
+		#                     ignore-error running info guix package -p "${profile_path}" --delete-generations=${USER_GENERATION_CLEANUP_TIME}
+		#                     # pkgmgr_sync_sleep_sync 5s
+		#                 else
+		#                     warn file "${profile_path}"/etc/profile not exist, for "${profile_path}"
+		#                 fi
+		#                 unset profile_path
+		#                 unset profile
+		#             done
 
 
-    #             ignore-error running info sudo_run -E guix system delete-generations ${SYSTEM_GENERATION_CLEANUP_TIME}
-    #             pkgmgr_sync_sleep_sync 5s
-    #             ignore-error running info guix gc -d ${SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME} -C  ${SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE}
+		#             ignore-error running info sudo_run -E guix system delete-generations ${SYSTEM_GENERATION_CLEANUP_TIME}
+		#             pkgmgr_sync_sleep_sync 5s
+		#             ignore-error running info guix gc -d ${SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME} -C  ${SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE}
