@@ -178,20 +178,19 @@ rde/system/reconfigure: guix-update-current-channels-force
 # rde/profile/clear:
 
 
-PROFILE_BASE_DIR=$(shell realpath targets/profiles)
 
 rde/profile/install/%:
-	RDE_TARGET=manifest RDE_PROFILE_NAME=$* echo ${GUIX} package $(GUIX_PROFILE_INSTALL_FLAGS) \
+	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODE=install echo ${GUIX} package $(GUIX_PROFILE_INSTALL_FLAGS) \
 	-m ${CONFIGS} -p ${PROFILE_BASE_DIR}/$*/profile.d/profile || \
-	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODIFIED=true echo ${GUIX} package $(GUIX_PROFILE_INSTALL_FLAGS) \
+	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODE=mod echo ${GUIX} package $(GUIX_PROFILE_INSTALL_FLAGS) \
 	-m ${CONFIGS} -p ${PROFILE_BASE_DIR}/$*/profile.d/profile
 
 rde/profile/upgrade/%:
-	RDE_TARGET=manifest RDE_PROFILE_NAME=$* echo ${GUIX} upgrade $(GUIX_PROFILE_UPGRADE_FLAGS) \
+	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODE=upgrade echo ${GUIX} upgrade $(GUIX_PROFILE_UPGRADE_FLAGS) \
 	-p ${PROFILE_BASE_DIR}/$*/profile.d/profile
 
-rde/profile/c/%:
-	RDE_TARGET=manifest RDE_PROFILE_NAME=$* echo ${GUIX} gc $(GUIX_PROFILE_CLEAR_FLAGS) \
+rde/profile/clear/%:
+	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODE=clear echo ${GUIX} gc $(GUIX_PROFILE_CLEAR_FLAGS) \
 	-p ${PROFILE_BASE_DIR}/$*/profile.d/profile
 
 .PHONY: rde/profile/install/%

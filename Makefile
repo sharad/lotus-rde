@@ -28,9 +28,12 @@ GUIXTM_PREFIX_ENV =
 EMACS = $(GUIX) shell emacs emacs-ox-html-stable-ids -- emacs
 HUT   = $(GUIX) shell hut -- hut
 
-EXAMPLES_SRC_DIR = ./examples/src
-CONFIGS = ${EXAMPLES_SRC_DIR}/rde-configs/configs.scm
-MANIFEST = ${EXAMPLES_SRC_DIR}/rde-configs/manifest.scm
+EXAMPLES_DIR     = ./examples
+EXAMPLES_SRC_DIR = $(EXAMPLES_DIR)/src
+CONFIGS          ?= ${EXAMPLES_SRC_DIR}/rde-configs/configs.scm
+MANIFEST         ?= ${EXAMPLES_SRC_DIR}/rde-configs/manifest.scm
+PROFILE_BASE_DIR ?= $(shell realpath $(EXAMPLES_DIR)/targets/profiles)
+
 
 DEV_ENV_LOAD_PATH  = -L ./env/guix -L ./env/dev -L ./src
 RDE_SRC_LOAD_PATH  = -L ./env/guix -L ./env/dev -L ./src
@@ -155,7 +158,7 @@ all/reconfigure: rde/home/reconfigure sudo/rde/system/reconfigure
 all/reconfigure: all/reconfigure
 
 
-
+all/install: rde/
 
 
 qemu/1/run:
