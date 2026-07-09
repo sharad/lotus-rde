@@ -180,6 +180,14 @@
                      "photoflare"
                      "kmonad"
                      "usb-modeswitch")))))
+     ;; 01-otools
+     (simple-service
+      'metal-common-otools
+      home-otools-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
      ;; 01-crypto
      (simple-service
       'metal-common-crypto
@@ -312,14 +320,6 @@
      (simple-service
       'metal-common-java
       home-java-profile-service-type
-      (scoped-profile-config
-       (packages
-        (apply strings->packages
-               (list)))))
-     ;; 01-otools
-     (simple-service
-      'metal-common-otools
-      home-otools-profile-service-type
       (scoped-profile-config
        (packages
         (apply strings->packages

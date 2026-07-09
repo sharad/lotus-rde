@@ -31,6 +31,7 @@
 
 ;; 01-doc
 ;; 01-tools
+;; 01-otools
 ;; 01-crypto
 ;; 01-x
 ;; 01-dev
@@ -48,7 +49,6 @@
 ;; 40-servers
 ;; 01-games
 ;; 02-java
-;; 01-otools
 ;; 99-tmp
 ;; 02-test
 ;; 99-failed
@@ -61,6 +61,9 @@
 ;; 01-tools
 (define home-tools-profile-service-type
   (make-home-profile-service-type 'tools 1))
+;; 01-otools
+(define home-otools-profile-service-type
+  (make-home-profile-service-type 'otools 1))
 ;; 01-crypto
 (define home-crypto-profile-service-type
   (make-home-profile-service-type 'crypto 1))
@@ -112,9 +115,6 @@
 ;; 02-java
 (define home-java-profile-service-type
   (make-home-profile-service-type 'java 2))
-;; 01-otools
-(define home-otools-profile-service-type
-  (make-home-profile-service-type 'otools 1))
 ;; 99-tmp
 (define home-tmp-profile-service-type
   (make-home-profile-service-type 'tmp 99))

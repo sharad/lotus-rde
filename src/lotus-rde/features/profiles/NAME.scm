@@ -28,6 +28,14 @@
        (packages
         (apply strings->packages
                (list)))))
+     ;; 01-otools
+     (simple-service
+      'NAME-otools
+      home-otools-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
      ;; 01-crypto
      (simple-service
       'NAME-crypto
@@ -160,14 +168,6 @@
      (simple-service
       'NAME-java
       home-java-profile-service-type
-      (scoped-profile-config
-       (packages
-        (apply strings->packages
-               (list)))))
-     ;; 01-otools
-     (simple-service
-      'NAME-otools
-      home-otools-profile-service-type
       (scoped-profile-config
        (packages
         (apply strings->packages
