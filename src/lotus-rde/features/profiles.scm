@@ -133,59 +133,49 @@
   #:use-module (lotus-rde home services transients)
   #:use-module (lotus-rde home services utils)
   #:use-module (lotus-rde lib utils)
-  #:export (feature-extra-profile))
+  #:export (feature-metal-common-profile))
 
 
 
 
+;; 01-doc
+;; 01-tools
 ;; 01-crypto
-(define home-crypto-profile-service-type
-  (make-home-profile-service-type 'crypto 1))
 ;; 01-x
-(define home-x-profile-service-type
-  (make-home-profile-service-type 'x 1))
+;; 01-dev
+;; 01-text
+;; 01-dynamic-hash
+;; 01-net
+;; 91-build-heavy
+;; 01-essential
+;; 01-emacs
 ;; 71-sysdev
-(define home-sysdev-profile-service-type
-  (make-home-profile-service-type 'sysdev 71))
 ;; 60-lengthy
-(define home-lengthy-profile-service-type
-  (make-home-profile-service-type 'lengthy 60))
 ;; 01-simple
-(define home-simple-profile-service-type
-  (make-home-profile-service-type 'simple 1))
-;; 90-heavy
-(define home-heavy-profile-service-type
-  (make-home-profile-service-type 'heavy 90))
-;; 01-games
-(define home-games-profile-service-type
-  (make-home-profile-service-type 'games 1))
-;; 02-java
-(define home-java-profile-service-type
-  (make-home-profile-service-type 'java 2))
-;; 01-otools
-(define home-otools-profile-service-type
-  (make-home-profile-service-type 'otools 1))
-;; 99-tmp
-(define home-tmp-profile-service-type
-  (make-home-profile-service-type 'tmp 99))
 ;; 01-console
-(define home-console-profile-service-type
-  (make-home-profile-service-type 'console 1))
+;; 90-heavy
 ;; 40-servers
-(define home-servers-profile-service-type
-  (make-home-profile-service-type 'servers 40))
+;; 01-games
+;; 02-java
+;; 01-otools
+;; 99-tmp
+;; 02-test
+;; 99-failed
+
+
+
 ;; 01-doc
 (define home-doc-profile-service-type
   (make-home-profile-service-type 'doc 1))
 ;; 01-tools
 (define home-tools-profile-service-type
   (make-home-profile-service-type 'tools 1))
-;; 02-test
-(define home-test-profile-service-type
-  (make-home-profile-service-type 'test 2))
-;; 99-failed
-(define home-failed-profile-service-type
-  (make-home-profile-service-type 'failed 99))
+;; 01-crypto
+(define home-crypto-profile-service-type
+  (make-home-profile-service-type 'crypto 1))
+;; 01-x
+(define home-x-profile-service-type
+  (make-home-profile-service-type 'x 1))
 ;; 01-dev
 (define home-dev-profile-service-type
   (make-home-profile-service-type 'dev 1))
@@ -207,21 +197,251 @@
 ;; 01-emacs
 (define home-emacs-profile-service-type
   (make-home-profile-service-type 'emacs 1))
+;; 71-sysdev
+(define home-sysdev-profile-service-type
+  (make-home-profile-service-type 'sysdev 71))
+;; 60-lengthy
+(define home-lengthy-profile-service-type
+  (make-home-profile-service-type 'lengthy 60))
+;; 01-simple
+(define home-simple-profile-service-type
+  (make-home-profile-service-type 'simple 1))
+;; 01-console
+(define home-console-profile-service-type
+  (make-home-profile-service-type 'console 1))
+;; 90-heavy
+(define home-heavy-profile-service-type
+  (make-home-profile-service-type 'heavy 90))
+;; 40-servers
+(define home-servers-profile-service-type
+  (make-home-profile-service-type 'servers 40))
+;; 01-games
+(define home-games-profile-service-type
+  (make-home-profile-service-type 'games 1))
+;; 02-java
+(define home-java-profile-service-type
+  (make-home-profile-service-type 'java 2))
+;; 01-otools
+(define home-otools-profile-service-type
+  (make-home-profile-service-type 'otools 1))
+;; 99-tmp
+(define home-tmp-profile-service-type
+  (make-home-profile-service-type 'tmp 99))
+;; 02-test
+(define home-test-profile-service-type
+  (make-home-profile-service-type 'test 2))
+;; 99-failed
+(define home-failed-profile-service-type
+  (make-home-profile-service-type 'failed 99))
+
+
+(define* (feature-NAME-profile)
+
+  (define* (get-home-services config)
+    (list
+     ;; 01-doc
+     (simple-service
+      'NAME-doc
+      home-doc-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-tools
+     (simple-service
+      'NAME-tools
+      home-tools-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-crypto
+     (simple-service
+      'NAME-crypto
+      home-crypto-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-x
+     (simple-service
+      'NAME-x
+      home-x-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-dev
+     (simple-service
+      'NAME-dev
+      home-dev-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-text
+     (simple-service
+      'NAME-text
+      home-text-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-dynamic-hash
+     (simple-service
+      'NAME-dynamic-hash
+      home-dynamic-hash-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-net
+     (simple-service
+      'NAME-net
+      home-net-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 91-build-heavy
+     (simple-service
+      'NAME-build-heavy
+      home-build-heavy-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-essential
+     (simple-service
+      'NAME-essential
+      home-essential-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-emacs
+     (simple-service
+      'NAME-emacs
+      home-emacs-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 71-sysdev
+     (simple-service
+      'NAME-sysdev
+      home-sysdev-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 60-lengthy
+     (simple-service
+      'NAME-lengthy
+      home-lengthy-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-simple
+     (simple-service
+      'NAME-simple
+      home-simple-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-console
+     (simple-service
+      'NAME-console
+      home-console-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 90-heavy
+     (simple-service
+      'NAME-heavy
+      home-heavy-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 40-servers
+     (simple-service
+      'NAME-servers
+      home-servers-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-games
+     (simple-service
+      'NAME-games
+      home-games-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 02-java
+     (simple-service
+      'NAME-java
+      home-java-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-otools
+     (simple-service
+      'NAME-otools
+      home-otools-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 99-tmp
+     (simple-service
+      'NAME-tmp
+      home-tmp-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 02-test
+     (simple-service
+      'NAME-test
+      home-test-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 99-failed
+     (simple-service
+      'NAME-failed
+      home-failed-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))))
+
+  (feature
+   (name 'NAME-profile)
+   (home-services-getter get-home-services)))
 
 
 (define* (feature-metal-common-profile)
 
   (define* (get-home-services config)
     (list
-
+     ;; 01-doc
      (simple-service
-      'metal-common-tmp
-      home-tmp-profile-service-type
+      'metal-common-doc
+      home-doc-profile-service-type
       (scoped-profile-config
        (packages
         (apply strings->packages
                (list)))))
-
+     ;; 01-tools
      (simple-service
       'metal-common-tools
       home-tools-profile-service-type
@@ -380,7 +600,23 @@
                                                  "photoflare"
                                                  "kmonad"
                                                  "usb-modeswitch")))))
-
+     ;; 01-crypto
+     (simple-service
+      'metal-common-crypto
+      home-crypto-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-x
+     (simple-service
+      'metal-common-x
+      home-x-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-dev
      (simple-service
       'metal-common-dev
       home-dev-profile-service-type
@@ -388,7 +624,23 @@
        (packages
         (apply strings->packages
                (list)))))
-
+     ;; 01-text
+     (simple-service
+      'metal-common-text
+      home-text-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-dynamic-hash
+     (simple-service
+      'metal-common-dynamic-hash
+      home-dynamic-hash-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-net
      (simple-service
       'metal-common-net
       home-net-profile-service-type
@@ -396,10 +648,122 @@
        (packages
         (apply strings->packages
                (list)))))
-
+     ;; 91-build-heavy
      (simple-service
-      'metal-common-x
-      home-x-profile-service-type
+      'metal-common-build-heavy
+      home-build-heavy-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-essential
+     (simple-service
+      'metal-common-essential
+      home-essential-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-emacs
+     (simple-service
+      'metal-common-emacs
+      home-emacs-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 71-sysdev
+     (simple-service
+      'metal-common-sysdev
+      home-sysdev-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 60-lengthy
+     (simple-service
+      'metal-common-lengthy
+      home-lengthy-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-simple
+     (simple-service
+      'metal-common-simple
+      home-simple-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-console
+     (simple-service
+      'metal-common-console
+      home-console-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 90-heavy
+     (simple-service
+      'metal-common-heavy
+      home-heavy-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 40-servers
+     (simple-service
+      'metal-common-servers
+      home-servers-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-games
+     (simple-service
+      'metal-common-games
+      home-games-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 02-java
+     (simple-service
+      'metal-common-java
+      home-java-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 01-otools
+     (simple-service
+      'metal-common-otools
+      home-otools-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 99-tmp
+     (simple-service
+      'metal-common-tmp
+      home-tmp-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 02-test
+     (simple-service
+      'metal-common-test
+      home-test-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+     ;; 99-failed
+     (simple-service
+      'metal-common-failed
+      home-failed-profile-service-type
       (scoped-profile-config
        (packages
         (apply strings->packages
