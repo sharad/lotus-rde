@@ -137,43 +137,275 @@
 
 
 
-(apply strings->packages
-       '())
 
+;; 01-crypto
+(define home-crypto-profile-service-type
+  (make-home-profile-service-type 'crypto 1))
+;; 01-x
+(define home-x-profile-service-type
+  (make-home-profile-service-type 'x 1))
+;; 71-sysdev
+(define home-sysdev-profile-service-type
+  (make-home-profile-service-type 'sysdev 71))
+;; 60-lengthy
+(define home-lengthy-profile-service-type
+  (make-home-profile-service-type 'lengthy 60))
+;; 01-simple
+(define home-simple-profile-service-type
+  (make-home-profile-service-type 'simple 1))
+;; 90-heavy
+(define home-heavy-profile-service-type
+  (make-home-profile-service-type 'heavy 90))
+;; 01-games
+(define home-games-profile-service-type
+  (make-home-profile-service-type 'games 1))
+;; 02-java
+(define home-java-profile-service-type
+  (make-home-profile-service-type 'java 2))
+;; 01-otools
+(define home-otools-profile-service-type
+  (make-home-profile-service-type 'otools 1))
+;; 99-tmp
+(define home-tmp-profile-service-type
+  (make-home-profile-service-type 'tmp 99))
+;; 01-console
+(define home-console-profile-service-type
+  (make-home-profile-service-type 'console 1))
+;; 40-servers
+(define home-servers-profile-service-type
+  (make-home-profile-service-type 'servers 40))
+;; 01-doc
+(define home-doc-profile-service-type
+  (make-home-profile-service-type 'doc 1))
+;; 01-tools
+(define home-tools-profile-service-type
+  (make-home-profile-service-type 'tools 1))
+;; 02-test
+(define home-test-profile-service-type
+  (make-home-profile-service-type 'test 2))
+;; 99-failed
+(define home-failed-profile-service-type
+  (make-home-profile-service-type 'failed 99))
+;; 01-dev
+(define home-dev-profile-service-type
+  (make-home-profile-service-type 'dev 1))
+;; 01-text
+(define home-text-profile-service-type
+  (make-home-profile-service-type 'text 1))
+;; 01-dynamic-hash
+(define home-dynamic-hash-profile-service-type
+  (make-home-profile-service-type 'dynamic-hash 1))
+;; 01-net
+(define home-net-profile-service-type
+  (make-home-profile-service-type 'net 1))
+;; 91-build-heavy
+(define home-build-heavy-profile-service-type
+  (make-home-profile-service-type 'build-heavy 91))
+;; 01-essential
+(define home-essential-profile-service-type
+  (make-home-profile-service-type 'essential 1))
+;; 01-emacs
+(define home-emacs-profile-service-type
+  (make-home-profile-service-type 'emacs 1))
+
 
-
-
-(define* (feature-extra-profile)
-
-  (define home-dev-profile-service-type
-    (make-home-profile-service-type 'dev 1))
-  (define home-tools-profile-service-type
-    (make-home-profile-service-type 'tools 1))
-
+(define* (feature-metal-common-profile)
 
   (define* (get-home-services config)
     (list
-     (simple-service
-      'gcc
-      home-dev-profile-service-type
-      (scoped-profile-config
-       (packages
-        (list hello))))
 
      (simple-service
-      'gdb
-      home-dev-profile-service-type
+      'metal-common-tmp
+      home-tmp-profile-service-type
       (scoped-profile-config
        (packages
-        (list
-         keepassxc))))
+        (apply strings->packages
+               (list)))))
 
      (simple-service
-      'strace
+      'metal-common-tools
       home-tools-profile-service-type
       (scoped-profile-config
-       (packages (list strace))))))
+       (packages
+        (apply strings->packages
+               (list "zk"
+                                                 "dstask"
+                                                 "rust-usrhttpd"
+                                                 "xdg-desktop-portal-gtk"
+                                                 "xdg-dbus-proxy"
+                                                 "docker-cli"
+                                                 "docker-compose"
+                                                 "node-tiddlywiki"
+                                                 "deskflow" ;; "barrier"
+                                                 "refind"
+                                                 "slscroll"
+                                                 "tabbed"
+                                                 "boxes"
+                                                 "bool"
+                                                 "beancount"
+                                                 "ghq"
+                                                 "gita"
+                                                 "fzf"
+                                                 "bc"
+                                                 "gnome-calculator"
+                                                 "nushell"
+                                                 "rlwrap"
+                                                 "parted"
+                                                 "gparted"
+                                                 "netcat-openbsd"
+
+                                                 "xvkbd"
+                                                 "svkbd"
+
+                                                 "lsix"
+                                                 "mazo"
+                                                 "meld"
+
+                                                 "nerd-dictation"
+                                                 "recoll"
+                                                 "recoll-cli"
+                                                 "showmethekey"
+
+                                                 "xhost"
+                                                 "xauth"
+                                                 "xkill"
+                                                 "mosh"
+                                                 "autossh"
+                                                 "flatpak"
+                                                 "jq"
+                                                 ;; "conda" ;; break
+                                                 ;; "weasyprint"
+                                                 "python-pyflakes"
+                                                 "python-flake8"
+                                                 "python-fire"
+                                                 "python-pikepdf" ;; break
+                                                 "python-wrapper"
+                                                 "python-xq"
+                                                 "python-yq"
+                                                 "python-importmagic"
+                                                 "python-epc"
+                                                 "python-sexpdata"
+                                                 ;; "python-tinydb"
+                                                 "python-dbus"
+                                                 "python-pikepdf"
+                                                 "python-gitlab"
+                                                 "python-gtts"
+                                                 ;; these below two are not command, but library use them in some separate profile like 01-python/profile.d/profile
+                                                 ;; "python-pygobject"
+                                                 ;; "python-gst"
+                                                 "python-pyaudio"
+                                                 ;; "python-playsound"
+                                                 "python-pyttsx3"
+                                                 "python-speechrecognition"
+
+                                                 "rofi"
+                                                 "python-rofi"
+                                                 "python-rofi-menu"
+                                                 "python-paramiko"
+                                                 "python-scp"
+                                                 ;; "rofi-master"
+                                                 "python-attnmgr"
+                                                 "python-secretstorage"
+
+                                                 "enscript"
+
+                                                 ;; "jupyter"
+                                                 "python-git-review"
+
+                                                 "wget"
+                                                 "xmlstarlet"
+                                                 "libxml2"
+                                                 "libxslt"
+                                                 "qtxmlpatterns"                 ;xquery
+
+                                                 "atool"
+                                                 "sshpass"
+
+                                                 "shellcheck"
+
+                                                 "cups-minimal" ;; for lp lpr command
+
+                                                 "python-rofi-tmux"
+
+                                                 "lsof"
+
+                                                 "unzip"
+                                                 "zip"
+                                                 "cpio"
+
+                                                 "poppler"
+                                                 "whois"
+                                                 "pwgen"
+                                                 ;; "gettext"
+
+                                                 ;; "visidata"
+
+                                                 "baobab"
+                                                 "ncdu"
+                                                 "catdoc"
+                                                 "pinfo"
+
+
+
+                                                 "vmware-open-vm-tools"
+
+                                                 "h2c"
+                                                 ;; "h-client"
+                                                 "electron-cash"
+                                                 "date2name"
+                                                 ;; xdiskusage
+                                                 "ncftp"
+                                                 "lftp"
+                                                 "bitwise"
+                                                 "nss"
+                                                 "nss:bin"
+                                                 "gnutls"
+                                                 "p11-kit"
+                                                 "beep"
+                                                 "nxbelld"
+                                                 "chrpath"
+                                                 "dtach"
+
+                                                 "imagemagick"
+                                                 "recordmydesktop"
+                                                 "gifsicle"
+                                                 "scrot"
+                                                 "espeak"
+                                                 "espeak-ng"
+
+                                                 "ffmpeg-normalize"
+                                                 "rsync"
+                                                 "v4l-utils"
+                                                 "guvcview"
+                                                 "photoflare"
+                                                 "kmonad"
+                                                 "usb-modeswitch")))))
+
+     (simple-service
+      'metal-common-dev
+      home-dev-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+
+     (simple-service
+      'metal-common-net
+      home-net-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
+
+     (simple-service
+      'metal-common-x
+      home-x-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))))
+
   (feature
-   (name 'extra-profile-11)
+   (name 'metal-common-profile)
    (home-services-getter get-home-services)))
 
