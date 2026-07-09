@@ -1386,10 +1386,7 @@
       home-dev-profile-service-type
       (scoped-profile-config
        (packages
-        (list
-         gcc
-         gdb
-         strace))))
+        (list hello))))
 
      (simple-service
       'gdb
