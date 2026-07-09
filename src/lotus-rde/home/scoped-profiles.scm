@@ -29,10 +29,12 @@
   #:use-module (guix profiles)
   #:use-module (guix packages)
   #:use-module (srfi srfi-1)
-  #:export (make-home-profile-service-type
+  #:export (scoped-profile-config
+            make-home-profile-service-type
             home-dev-profile-service-type
             home-tools-profile-service-type
-            profile->manifest))
+            profile->manifest
+            profile-mod->manifest))
 
 
 (define-record-type* <scoped-profile>
@@ -41,8 +43,21 @@
   scoped-profile?
   (name
    scoped-profile-name)
+  (level
+   scoped-profile-level)
   (packages
-   scoped-profile-packages))
+   scoped-profile-packages)
+  (exclude
+   scoped-profile-exclude
+   (default '())))
+
+(define-record-type* <scoped-profile-config>
+  scoped-profile-config
+  make-scoped-profile-config
+  scoped-profile-config?
+  (packages scoped-profile-config-packages)
+  (exclude scoped-profile-config-exclude
+           (default '())))
 
 (define home-scoped-profile-service-type
   (service-type
@@ -57,7 +72,8 @@
    (description
     "service.")))
 
-(define (make-home-profile-service-type profile-name)
+(define (make-home-profile-service-type profile-name
+                                        profile-level)
   (service-type
    (name profile-name)
    (compose concatenate)
@@ -68,11 +84,13 @@
     (list
      (service-extension
       home-scoped-profile-service-type
-      (lambda (packages)
+      (lambda (entry)
         (list
          (scoped-profile
           (name profile-name)
-          (packages packages)))))))
+          (level profile-level)
+          (packages (scoped-profile-config-packages entry))
+          (exclude  (scoped-profile-config-exclude entry))))))))
    (description
     "service.")))
 
@@ -82,9 +100,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; (define home-dev-profile-service-type
-;;   (make-home-profile-service-type 'dev))
+;;   (make-home-profile-service-type 'dev 1))
 ;; (define home-tools-profile-service-type
-;;   (make-home-profile-service-type 'tools))
+;;   (make-home-profile-service-type 'tools 1))
 
 
 ;; (simple-service
@@ -107,15 +125,69 @@
 ;;   strace))
 
 
-(define (profile->manifest env profile-name)
+(define (profile->manifest env
+                           profile-name
+                           profile-level)
   (let* ((folded (fold-services (home-environment-services env)
                                 #:target-type
                                 home-scoped-profile-service-type))
          (profiles (filter (lambda (service)
-                             (eq? (scoped-profile-name service)
-                                  profile-name))
+                             (and (eq? (scoped-profile-name service)
+                                       profile-name)
+                                  (eq? (scoped-profile-level service)
+                                       profile-level)))
                            (apply append
                                   (service-value folded)))))
     (packages->manifest (append-map scoped-profile-packages
                                     profiles))))
+
+
+(define (profile-mod-over->manifest env
+                                    profile-name
+                                    profile-level)
+  (let* ((folded (fold-services (home-environment-services env)
+                                #:target-type
+                                home-scoped-profile-service-type))
+         (profiles (filter (lambda (service)
+                             (and (eq? (scoped-profile-name service)
+                                       profile-name)
+                                  (eq? (scoped-profile-level service)
+                                       profile-level)))
+                           (apply append
+                                  (service-value folded))))
+         ;; Collect all packages
+         (packages (append-map scoped-profile-packages
+                               profiles))
+         ;; Collect all exclusions
+         (excluded (append-map scoped-profile-exclude
+                               profiles))
+         ;; Remove excluded packages
+         (result (filter (lambda (pkg)
+                           (not (member pkg excluded)))
+                         packages)))
+    (packages->manifest result)))
+
+(define (profile-mod->manifest env
+                               profile-name
+                               profile-level)
+  (let* ((folded (fold-services (home-environment-services env)
+                                #:target-type
+                                home-scoped-profile-service-type))
+         (profiles (filter (lambda (service)
+                             (and (eq? (scoped-profile-name service)
+                                       profile-name)
+                                  (eq? (scoped-profile-level service)
+                                       profile-level)))
+                           (apply append
+                                  (service-value folded)))))
+
+    (packages->manifest
+     (append-map
+      (lambda (profile)
+        (filter
+         (lambda (pkg)
+           (not (member pkg
+                        (scoped-profile-exclude profile))))
+         (scoped-profile-packages profile)))
+      profiles))))
 

@@ -1374,9 +1374,9 @@
 (define* (feature-extra-profile)
 
   (define home-dev-profile-service-type
-    (make-home-profile-service-type 'dev))
+    (make-home-profile-service-type 'dev 1))
   (define home-tools-profile-service-type
-    (make-home-profile-service-type 'tools))
+    (make-home-profile-service-type 'tools 1))
 
 
   (define* (get-home-services config)
@@ -1384,20 +1384,26 @@
      (simple-service
       'gcc
       home-dev-profile-service-type
-      (list
-       hello))
+      (scoped-profile-config
+       (packages
+        (list
+         gcc
+         gdb
+         strace))))
 
      (simple-service
       'gdb
       home-dev-profile-service-type
-      (list
-       keepassxc))
+      (scoped-profile-config
+       (packages
+        (list
+         keepassxc))))
 
      (simple-service
       'strace
       home-tools-profile-service-type
-      (list
-       strace))))
+      (scoped-profile-config
+       (packages (list strace))))))
   (feature
    (name 'extra-profile-11)
    (home-services-getter get-home-services)))

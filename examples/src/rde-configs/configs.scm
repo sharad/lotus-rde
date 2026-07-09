@@ -119,6 +119,23 @@
       (format #t "envname: ~a, envvar: ~a, sym: ~a, null?: ~a\n" envname envvar sym (not val))
       val))
 
+  (define (profile-name-level envvar)
+    (let* ((profile-spec (or (getenv envvar)
+                             "01-dev"))
+           (dash-pos (string-index profile-spec #\-)))
+      (unless dash-pos
+        (error "Invalid RDE_PROFILE_NAME, expected LEVEL-NAME"
+               profile-spec))
+      (let* ((profile-level
+              (string->number
+               (substring profile-spec 0 dash-pos)))
+             (profile-name
+              (string->symbol
+               (substring profile-spec (+ dash-pos 1)))))
+        (list profile-name
+              profile-level))))
+
+
   (let* ((rde-host-features (env-features->symbol "RDE_HOST"))
          (rde-user-features  (env-features->symbol "RDE_USER")))
 
@@ -178,10 +195,16 @@
                  (obj (match rde-target
                         ("home" (rde-config-home-environment config))
                         ("system" (rde-config-operating-system config))
-                        ("manifest" (let ((rde-profile-name (string->symbol (or (getenv "RDE_PROFILE_NAME")
-                                                                                "dev"))))
-                                     (profile->manifest (rde-config-home-environment config)
-                                                        rde-profile-name)))
+                        ("manifest" (let* ((name-level (profile-name-level "RDE_PROFILE_NAME"))
+                                           (profile-name (car name-level))
+                                           (profile-level (cadr name-level)))
+                                      (profile->manifest (rde-config-home-environment config)
+                                                         rde-profile-name)))
+                        ("manifest-mod" (let* ((name-level (profile-name-level "RDE_PROFILE_NAME"))
+                                               (profile-name (car name-level))
+                                               (profile-level (cadr name-level)))
+                                          (profile-mod->manifest (rde-config-home-environment config)
+                                                             rde-profile-name)))
                         (_ #f))))
             ;; (display obj)
             ;; (newline)
