@@ -1370,38 +1370,3 @@
    (name 'ssh-transient)
    (home-services-getter get-home-services)))
 
-
-(define* (feature-extra-profile)
-
-  (define home-dev-profile-service-type
-    (make-home-profile-service-type 'dev 1))
-  (define home-tools-profile-service-type
-    (make-home-profile-service-type 'tools 1))
-
-
-  (define* (get-home-services config)
-    (list
-     (simple-service
-      'gcc
-      home-dev-profile-service-type
-      (scoped-profile-config
-       (packages
-        (list hello))))
-
-     (simple-service
-      'gdb
-      home-dev-profile-service-type
-      (scoped-profile-config
-       (packages
-        (list
-         keepassxc))))
-
-     (simple-service
-      'strace
-      home-tools-profile-service-type
-      (scoped-profile-config
-       (packages (list strace))))))
-  (feature
-   (name 'extra-profile-11)
-   (home-services-getter get-home-services)))
-
