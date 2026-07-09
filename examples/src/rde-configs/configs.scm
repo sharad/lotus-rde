@@ -132,8 +132,8 @@
              (profile-name
               (string->symbol
                (substring profile-spec (+ dash-pos 1)))))
-        (list profile-name
-              profile-level))))
+        (values profile-name
+                profile-level))))
 
 
   (let* ((rde-host-features (env-features->symbol "RDE_HOST"))
@@ -195,16 +195,20 @@
                  (obj (match rde-target
                         ("home" (rde-config-home-environment config))
                         ("system" (rde-config-operating-system config))
-                        ("manifest" (let* ((name-level (profile-name-level "RDE_PROFILE_NAME"))
-                                           (profile-name (car name-level))
-                                           (profile-level (cadr name-level)))
-                                      (profile->manifest (rde-config-home-environment config)
-                                                         rde-profile-name)))
-                        ("manifest-mod" (let* ((name-level (profile-name-level "RDE_PROFILE_NAME"))
-                                               (profile-name (car name-level))
-                                               (profile-level (cadr name-level)))
-                                          (profile-mod->manifest (rde-config-home-environment config)
-                                                             rde-profile-name)))
+                        ("manifest" (call-with-values
+                                        (lambda ()
+                                          (profile-name-level "RDE_PROFILE_NAME"))
+                                      (lambda (profile-level profile-name)
+                                        (profile->manifest (rde-config-home-environment config)
+                                                           profile-name
+                                                           profile-level))))
+                        ("manifest-mod" (call-with-values
+                                            (lambda ()
+                                              (profile-name-level "RDE_PROFILE_NAME"))
+                                          (lambda (profile-level profile-name)
+                                            (profile-mod->manifest (rde-config-home-environment config)
+                                                                   profile-name
+                                                                   profile-level))))
                         (_ #f))))
             ;; (display obj)
             ;; (newline)
