@@ -182,7 +182,7 @@
            ghc-clientsession
            ghc-concurrent-output
            ghc-conduit
-           ghc-connection
+           ;; ghc-connection
            ghc-crypto-api
            ghc-cryptonite
            ghc-data-default

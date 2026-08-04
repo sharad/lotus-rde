@@ -32,6 +32,13 @@ GUIX = $(GUIX_FULL_COMMAND)
 
 
 
+ifeq ($(PROFILE_BASE_DIR),)
+PROFILE_BASE_DIR := $(shell readlink $(PROFILE_BASE_DIR_LINK) 2>/dev/null)
+ifeq ($(PROFILE_BASE_DIR),)
+$(error $(CURDIR)/$(PROFILE_BASE_DIR_LINK) does not exist. Run 'make init' first.)
+endif
+endif
+
 ROOT_MOUNT_POINT=/mnt
 
 
@@ -68,6 +75,15 @@ SYSTEM_GENERATION_CLEANUP_TIME         ?= 10m
 USER_GENERATION_CLEANUP_TIME           ?= 96h
 SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME  ?= 30d
 SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE ?= 10G
+
+
+
+$(TARGET_DIR):
+	mkdir -p $(TARGET_DIR)
+
+$(PROFILE_BASE_DIR_LINK): $(TARGET_DIR)
+	echo Create $(PROFILE_BASE_DIR_LINK) link
+
 
 
 ## -- pkg-exec targets
@@ -196,21 +212,30 @@ rde/gc/clean:
 
 
 
-rde/profile/install/%:
-	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODE=install echo ${GUIX} package $(GUIX_PROFILE_INSTALL_FLAGS) \
-	-m ${CONFIGS} -p ${PROFILE_BASE_DIR}/$*/profile.d/profile || \
-	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODE=mod echo ${GUIX} package $(GUIX_PROFILE_INSTALL_FLAGS) \
-	-m ${CONFIGS} -p ${PROFILE_BASE_DIR}/$*/profile.d/profile
+rde/profile/install/%: $(TARGET_DIR)
+	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODE=install ${GUIX} package $(GUIX_PROFILE_INSTALL_FLAGS) \
+	-m ${CONFIGS} -p $(PROFILE_BASE_DIR)/$*/profile.d/profile || \
+	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODE=mod ${GUIX} package $(GUIX_PROFILE_INSTALL_FLAGS) \
+	-m ${CONFIGS} -p $(PROFILE_BASE_DIR)/$*/profiles.d/profile
 
-rde/profile/upgrade/%:
-	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODE=upgrade echo ${GUIX} upgrade $(GUIX_PROFILE_UPGRADE_FLAGS) \
-	-p ${PROFILE_BASE_DIR}/$*/profile.d/profile
+rde/profile/upgrade/%: $(TARGET_DIR)
+	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODE=upgrade ${GUIX} upgrade $(GUIX_PROFILE_UPGRADE_FLAGS) \
+	-p $(PROFILE_BASE_DIR)/$*/profiles.d/profile
 
-rde/profile/clear/%:
-	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODE=clear echo ${GUIX} package $(GUIX_PROFILE_CLEAR_FLAGS) \
-	-p ${PROFILE_BASE_DIR}/$*/profile.d/profile --delete-generations=$(USER_GENERATION_CLEANUP_TIME)
+rde/profile/clear/%: $(TARGET_DIR)
+	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODE=clear ${GUIX} package $(GUIX_PROFILE_CLEAR_FLAGS) \
+	-p $(PROFILE_BASE_DIR)/$*/profiles.d/profile --delete-generations=$(USER_GENERATION_CLEANUP_TIME)
 
-.PHONY: rde/profile/install/% rde/profile/upgrade/% rde/profile/clear/%
+rde/profile/pkg/install/%: $(TARGET_DIR)
+	RDE_PROFILE_NAME=$(word 1,$(subst /, ,$*)) ;  RDE_PACKAGE=$(word 2,$(subst /, ,$*)) ; RDE_PROFILE_MODE=install ${GUIX} install $(GUIX_PROFILE_INSTALL_FLAGS) \
+	-p $(PROFILE_BASE_DIR)/$${RDE_PROFILE_NAME}/profiles.d/profile $${RDE_PACKAGE}
+
+rde/profile/pkg/remove/%: $(TARGET_DIR)
+	RDE_PROFILE_NAME=$(word 1,$(subst /, ,$*)) ;  RDE_PACKAGE=$(word 2,$(subst /, ,$*)) ; RDE_PROFILE_MODE=remove ${GUIX} remove $(GUIX_PROFILE_REMOVE_FLAGS) \
+	-p $(PROFILE_BASE_DIR)/$${RDE_PROFILE_NAME}/profiles.d/profile $${RDE_PACKAGE}
+
+
+.PHONY: rde/profile/install/% rde/profile/upgrade/% rde/profile/clear/% rde/profile/pkg/install/% rde/profile/pkg/remove/%
 
 
 

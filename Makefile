@@ -29,10 +29,12 @@ EMACS = $(GUIX) shell emacs emacs-ox-html-stable-ids -- emacs
 HUT   = $(GUIX) shell hut -- hut
 
 EXAMPLES_DIR     =  ./examples
+TARGET_DIR       = $(EXAMPLES_DIR)/target
+PROFILE_BASE_DIR_LINK = $(EXAMPLES_DIR)/target/profiles
 EXAMPLES_SRC_DIR =  $(EXAMPLES_DIR)/src
 CONFIGS          ?= ${EXAMPLES_SRC_DIR}/rde-configs/configs.scm
 MANIFEST         ?= ${EXAMPLES_SRC_DIR}/rde-configs/manifest.scm
-PROFILE_BASE_DIR ?= $(shell readlink $(EXAMPLES_DIR)/target/profiles)
+# PROFILE_BASE_DIR ?= $(shell readlink $(EXAMPLES_DIR)/target/profiles)
 
 
 DEV_ENV_LOAD_PATH  = -L ./env/guix -L ./env/dev -L ./src
