@@ -226,16 +226,29 @@ rde/profile/clear/%: $(TARGET_DIR)
 	RDE_TARGET=manifest RDE_PROFILE_NAME=$* RDE_PROFILE_MODE=clear ${GUIX} package $(GUIX_PROFILE_CLEAR_FLAGS) \
 	-p $(PROFILE_BASE_DIR)/$*/profiles.d/profile --delete-generations=$(USER_GENERATION_CLEANUP_TIME)
 
+
+
+
+
+
+FIRST_GOAL := $(firstword $(MAKECMDGOALS))
+ifneq ($(filter rde/pkg/search rde/profile/pkg/install/% rde/profile/pkg/remove/%,$(FIRST_GOAL)),)
+ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+$(ARGS):
+	@:
+endif
+
+
 rde/profile/pkg/install/%: $(TARGET_DIR)
-	RDE_PROFILE_NAME=$(word 1,$(subst /, ,$*)) ;  RDE_PACKAGE=$(word 2,$(subst /, ,$*)) ; RDE_PROFILE_MODE=install ${GUIX} install $(GUIX_PROFILE_INSTALL_FLAGS) \
-	-p $(PROFILE_BASE_DIR)/$${RDE_PROFILE_NAME}/profiles.d/profile $${RDE_PACKAGE}
+	RDE_PROFILE_MODE=install ${GUIX} install $(GUIX_PROFILE_INSTALL_FLAGS) \
+	-p $(PROFILE_BASE_DIR)/$*/profiles.d/profile $(ARGS)
 
 rde/profile/pkg/remove/%: $(TARGET_DIR)
-	RDE_PROFILE_NAME=$(word 1,$(subst /, ,$*)) ;  RDE_PACKAGE=$(word 2,$(subst /, ,$*)) ; RDE_PROFILE_MODE=remove ${GUIX} remove $(GUIX_PROFILE_REMOVE_FLAGS) \
-	-p $(PROFILE_BASE_DIR)/$${RDE_PROFILE_NAME}/profiles.d/profile $${RDE_PACKAGE}
+	RDE_PROFILE_MODE=remove ${GUIX} remove $(GUIX_PROFILE_REMOVE_FLAGS) \
+	-p $(PROFILE_BASE_DIR)/$*/profiles.d/profile $(ARGS)
 
-rde/pkg/search/%:
-	RDE_PACKAGE=$* ; RDE_PROFILE_MODE=remove ${GUIX} search $(GUIX_PROFILE_SEARCH_FLAGS) $${RDE_PACKAGE}
+rde/pkg/search:
+	RDE_PROFILE_MODE=remove ${GUIX} search $(GUIX_PROFILE_SEARCH_FLAGS) $(ARGS)
 
 
 .PHONY: rde/profile/install/% rde/profile/upgrade/% rde/profile/clear/% rde/profile/pkg/install/% rde/profile/pkg/remove/% rde/pkg/search/%
