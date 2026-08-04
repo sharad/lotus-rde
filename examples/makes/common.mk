@@ -240,12 +240,22 @@ endif
 
 
 rde/profile/pkg/install/%: $(TARGET_DIR)
+ifeq ($*,)
+	RDE_PROFILE_MODE=install ${GUIX} install $(GUIX_PROFILE_INSTALL_FLAGS) \
+	$(ARGS)
+else
 	RDE_PROFILE_MODE=install ${GUIX} install $(GUIX_PROFILE_INSTALL_FLAGS) \
 	-p $(PROFILE_BASE_DIR)/$*/profiles.d/profile $(ARGS)
+endif
 
 rde/profile/pkg/remove/%: $(TARGET_DIR)
+ifeq ($*,)
+	RDE_PROFILE_MODE=remove ${GUIX} remove $(GUIX_PROFILE_REMOVE_FLAGS) \
+	$(ARGS)
+else
 	RDE_PROFILE_MODE=remove ${GUIX} remove $(GUIX_PROFILE_REMOVE_FLAGS) \
 	-p $(PROFILE_BASE_DIR)/$*/profiles.d/profile $(ARGS)
+endif
 
 rde/pkg/search:
 	RDE_PROFILE_MODE=remove ${GUIX} search $(GUIX_PROFILE_SEARCH_FLAGS) $(ARGS)
