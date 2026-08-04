@@ -234,6 +234,10 @@ rde/profile/pkg/remove/%: $(TARGET_DIR)
 	RDE_PROFILE_NAME=$(word 1,$(subst /, ,$*)) ;  RDE_PACKAGE=$(word 2,$(subst /, ,$*)) ; RDE_PROFILE_MODE=remove ${GUIX} remove $(GUIX_PROFILE_REMOVE_FLAGS) \
 	-p $(PROFILE_BASE_DIR)/$${RDE_PROFILE_NAME}/profiles.d/profile $${RDE_PACKAGE}
 
+rde/profile/pkg/search/%: $(TARGET_DIR)
+	RDE_PROFILE_NAME=$(word 1,$(subst /, ,$*)) ;  RDE_PACKAGE=$(word 2,$(subst /, ,$*)) ; RDE_PROFILE_MODE=remove ${GUIX} search $(GUIX_PROFILE_REMOVE_FLAGS) \
+	-p $(PROFILE_BASE_DIR)/$${RDE_PROFILE_NAME}/profiles.d/profile $${RDE_PACKAGE}
+
 
 .PHONY: rde/profile/install/% rde/profile/upgrade/% rde/profile/clear/% rde/profile/pkg/install/% rde/profile/pkg/remove/%
 
