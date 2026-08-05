@@ -20,10 +20,10 @@
        (packages
         (apply strings->packages
                (list)))))
-     ;; 01-tools
+     ;; 01-tool
      (simple-service
-      'NAME-tools
-      home-tools-profile-service-type
+      'NAME-tool
+      home-tool-profile-service-type
       (scoped-profile-config
        (packages
         (apply strings->packages
@@ -36,10 +36,10 @@
        (packages
         (apply strings->packages
                (list)))))
-     ;; 01-crypto
+     ;; 01-security
      (simple-service
-      'NAME-crypto
-      home-crypto-profile-service-type
+      'NAME-security
+      home-security-profile-service-type
       (scoped-profile-config
        (packages
         (apply strings->packages
@@ -108,6 +108,14 @@
        (packages
         (apply strings->packages
                (list)))))
+     ;; 01-editor
+     (simple-service
+      'common-editor
+      home-editor-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list "meld")))))
      ;; 71-sysdev
      (simple-service
       'NAME-sysdev
