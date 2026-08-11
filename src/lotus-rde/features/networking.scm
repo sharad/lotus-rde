@@ -38,7 +38,8 @@
 
   #:use-module (guix gexp)
 
-  #:export (feature-lotus-networking))
+  #:export (feature-lotus-networking
+            feature-lotus-webserver))
 
 
 
@@ -114,6 +115,39 @@
                    `((name-service . ,%mdns-host-lookup-nss)
                      (mdns . #t))
                    '())))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
+
+
+(define* (feature-lotus-webserver
+          #:key
+          (nginx-rtmp-module nginx-rtmp-module)
+          (nginx-configuration nginx-configuration)
+          (nginx-server-configuration nginx-server-configuration)
+          (nginx-location-configuration nginx-location-configuration))
+  (define (get-home-services config)
+    (list))
+  (define (get-system-services config)
+    (list
+     (service nginx-service-type
+              (nginx-configuration
+               (server-blocks
+                (list
+                 (nginx-server-configuration
+                  (server-name '("app1.example.org"))
+                  (listen '("443 ssl"))
+                  (ssl-certificate "/etc/ssl/app1.crt")
+                  (ssl-certificate-key "/etc/ssl/app1.key")
+
+                  (locations
+                   (list
+                    (nginx-location-configuration
+                     (uri "/")
+                     (body
+                      (list "proxy_pass http://127.0.0.1:8080;"))))))))))))
+  (feature
+   (name 'webserver)
+   (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
