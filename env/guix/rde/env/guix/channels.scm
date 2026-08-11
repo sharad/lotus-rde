@@ -19,7 +19,7 @@
           (name 'nonguix)
           (url "https://gitlab.com/nonguix/nonguix")
           (branch "master")
-          (commit "fe63493aba7ad6107cb938fcd307c400b53a32b1")
+          (commit "7b7b2c47f9c205ad89ddf54293e7756e797f8980")
           (introduction
            (make-channel-introduction
             "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
@@ -29,22 +29,17 @@
           (name 'rde)
           (url "https://git.sr.ht/~abcdw/rde")
           (branch "master")
-          (commit "6ccd368e0a0484e724205f9d608d2eb1ab706ac3")
+          (commit "70a1881f09c939792eb2ed932dded1f16291a59f")
           (introduction
            (make-channel-introduction
             "257cebd587b66e4d865b3537a9a88cccd7107c95"
             (openpgp-fingerprint
              "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0"))))
         (channel
-          (name 'lotus)
-          (url "https://github.com/sharad/guix")
-          (branch "master")
-          (commit "78064a218bbfb7ac826bf0f40c9b0590bc2ac304"))
-        (channel
           (name 'guix)
           (url "https://git.guix.gnu.org/guix.git")
           (branch "master")
-          (commit "7cfff507fc5dbe0dc39981d462ddf58113b78396")
+          (commit "e8195a2729bc5462e25a2fd4ece44f3000b709fe")
           (introduction
            (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"

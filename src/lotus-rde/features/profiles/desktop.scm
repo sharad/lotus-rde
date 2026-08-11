@@ -12,6 +12,18 @@
 
   (define* (get-home-services config)
     (list
+     (simple-service
+      'desktop-user-home-service
+      home-profile-service-type
+      (list))
+     ;; ~/.guix-profile/
+     (simple-service
+      'desktop-user-profile
+      user-profile-service-type
+      (scoped-profile-config
+       (packages
+        (apply strings->packages
+               (list)))))
      ;; 01-doc
      (simple-service
       'desktop-doc
@@ -19,22 +31,7 @@
       (scoped-profile-config
        (packages
         (apply strings->packages
-               (map symbol->string
-                    '(okular
-                      qpdfview
-                      mupdf
-
-                      zathura
-                      zathura-pdf-poppler
-                      zathura-pdf-mupdf
-                      zathura-ps
-                      zathura-cb
-                      zathura-djvu
-
-                      xournalpp
-
-                      ;; texlive-*
-                      asciidoc))))))
+               (list)))))
      ;; 01-tool
      (simple-service
       'desktop-tool
@@ -42,44 +39,7 @@
       (scoped-profile-config
        (packages
         (apply strings->packages
-               (map symbol->string
-                    '(rofi
-                      python-rofi
-                      python-rofi-menu
-
-                      boxes
-
-                      gnome-calculator
-                      gnome-tweaks
-                      discover
-                      bluedevil
-
-                      viewnior
-                      photoflare
-
-                      kmonad
-                      acpilight
-
-                      obs
-                      flatpak
-
-                      nautilus
-                      tracker
-                      menumaker
-                      keynav
-                      conky
-
-                      hiawatha
-                      uwsgi
-                      udiskie
-                      libappindicator
-                      geoclue
-
-                      feh
-                      eog
-                      imagemagick
-
-                      ))))))
+               (list)))))
      ;; 01-otools
      (simple-service
       'desktop-otools
@@ -95,13 +55,7 @@
       (scoped-profile-config
        (packages
         (apply strings->packages
-               (map symbol->string
-                    '(qrencode
-                      zbar
-                      gnome-keyring
-                      python-keyring
-                      seahorse
-                      libsecret))))))
+               (list)))))
      ;; 01-x
      (simple-service
       'desktop-x
@@ -109,70 +63,7 @@
       (scoped-profile-config
        (packages
         (apply strings->packages
-               (map symbol->string
-                    '(vmware-open-vm-tools
-                      xpra
-                      xssstate
-                      xscreensaver
-                      xrandr-invert-colors
-                      guvcview
-                      v4l-utils
-                      beep
-                      nxbelld
-                      wireplumber
-                      easyeffects
-                      calf
-                      swh-plugins
-
-                      xinit
-                      i3status
-                      libwm
-                      wmutils-core
-                      wmutils-opt
-                      xautomation
-                      dmenu
-                      st
-                      xrdb
-                      xterm
-                      xdotool
-                      xrandr
-                      arandr
-                      autorandr
-                      xrandr-invert-colors
-                      rxvt-unicode
-                      alacritty
-                      sakura
-                      xprop
-                      xwininfo
-                      xautolock
-                      slock
-                      xtrlock
-                      xset
-                      xsetroot
-
-                      stumpish
-                      sbcl-stumpwm-wifi
-                      sbcl-stumpwm-ttf-fonts
-                      sbcl-stumpwm-swm-gaps
-                      sbcl-stumpwm-stumptray
-                      sbcl-stumpwm-pass
-                      sbcl-stumpwm-net
-                      sbcl-stumpwm-kbd-layouts
-                      sbcl-stumpwm-globalwindows
-                      sbcl-dbus
-
-                      compton
-                      xcompmgr
-                      xdpyinfo
-                      xlsfonts
-                      xclip
-                      xsel
-                      xmodmap
-                      autocutsel
-                      xfd
-                      xwininfo
-                      setxkbmap
-                      wmctrl))))))
+               (list)))))
      ;; 01-dev
      (simple-service
       'desktop-dev
@@ -180,8 +71,7 @@
       (scoped-profile-config
        (packages
         (apply strings->packages
-               (list
-                "python-dbus")))))
+               (list)))))
      ;; 01-text
      (simple-service
       'desktop-text
@@ -221,22 +111,7 @@
       (scoped-profile-config
        (packages
         (apply strings->packages
-               (map symbol->string
-                    '(gparted
-
-                      alsa-lib
-                      alsa-utils
-                      bluez
-                      bluez-alsa
-                      blueman
-                      ddcutil
-                      udevil
-
-                      mpd-mpc
-                      cava
-                      aumix
-                      pavucontrol
-                      pulsemixer))))))
+               (list)))))
      ;; 01-emacs
      (simple-service
       'desktop-emacs
@@ -252,7 +127,7 @@
       (scoped-profile-config
        (packages
         (apply strings->packages
-               (list "vscodium"))))))))
+               (list "meld")))))
      ;; 71-sysdev
      (simple-service
       'desktop-sysdev
@@ -284,16 +159,7 @@
       (scoped-profile-config
        (packages
         (apply strings->packages
-               (map symbol->string
-                    '(quassel
-                      irssi
-                      weechat
-                      weechat-wee-slack
-                      poezio
-                      quaternion
-                      nheko
-                      aerc
-                      mumble))))))
+               (list)))))
      ;; 90-heavy
      (simple-service
       'desktop-heavy
@@ -309,13 +175,7 @@
       (scoped-profile-config
        (packages
         (apply strings->packages
-               (list
-                "deskflow"
-                "kodi"
-                "kodi-cli"
-                "syncplay"
-                "jupyter"
-                "udiskie")))))
+               (list)))))
      ;; 01-games
      (simple-service
       'desktop-games

@@ -54,7 +54,9 @@
 ;; 99-failed
 
 
-
+;; ~/.guix-profile/
+(define user-profile-service-type
+  (make-home-profile-service-type 'user-profile 1))
 ;; 01-doc
 (define home-doc-profile-service-type
   (make-home-profile-service-type 'doc 1))

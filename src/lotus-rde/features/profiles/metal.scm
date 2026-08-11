@@ -1,24 +1,24 @@
 
 
-(define-module (lotus-rde features profiles NAME)
+(define-module (lotus-rde features profiles metal)
   #:use-module (rde features)
   #:use-module (rde predicates)
   #:use-module (rde system services admin)
   #:use-module (lotus-rde features profiles)
-  #:export (feature-NAME-profile))
+  #:export (feature-metal-profile))
 
 
-(define* (feature-NAME-profile)
+(define* (feature-metal-profile)
 
   (define* (get-home-services config)
     (list
      (simple-service
-      'NAME-user-home-service
+      'metal-user-home-service
       home-profile-service-type
       (list))
      ;; ~/.guix-profile/
      (simple-service
-      'NAME-user-profile
+      'metal-user-profile
       user-profile-service-type
       (scoped-profile-config
        (packages
@@ -26,7 +26,7 @@
                (list)))))
      ;; 01-doc
      (simple-service
-      'NAME-doc
+      'metal-doc
       home-doc-profile-service-type
       (scoped-profile-config
        (packages
@@ -34,7 +34,7 @@
                (list)))))
      ;; 01-tool
      (simple-service
-      'NAME-tool
+      'metal-tool
       home-tool-profile-service-type
       (scoped-profile-config
        (packages
@@ -42,7 +42,7 @@
                (list)))))
      ;; 01-otools
      (simple-service
-      'NAME-otools
+      'metal-otools
       home-otools-profile-service-type
       (scoped-profile-config
        (packages
@@ -50,7 +50,7 @@
                (list)))))
      ;; 01-security
      (simple-service
-      'NAME-security
+      'metal-security
       home-security-profile-service-type
       (scoped-profile-config
        (packages
@@ -58,7 +58,7 @@
                (list)))))
      ;; 01-x
      (simple-service
-      'NAME-x
+      'metal-x
       home-x-profile-service-type
       (scoped-profile-config
        (packages
@@ -66,7 +66,7 @@
                (list)))))
      ;; 01-dev
      (simple-service
-      'NAME-dev
+      'metal-dev
       home-dev-profile-service-type
       (scoped-profile-config
        (packages
@@ -74,7 +74,7 @@
                (list)))))
      ;; 01-text
      (simple-service
-      'NAME-text
+      'metal-text
       home-text-profile-service-type
       (scoped-profile-config
        (packages
@@ -82,7 +82,7 @@
                (list)))))
      ;; 01-dynamic-hash
      (simple-service
-      'NAME-dynamic-hash
+      'metal-dynamic-hash
       home-dynamic-hash-profile-service-type
       (scoped-profile-config
        (packages
@@ -90,7 +90,7 @@
                (list)))))
      ;; 01-net
      (simple-service
-      'NAME-net
+      'metal-net
       home-net-profile-service-type
       (scoped-profile-config
        (packages
@@ -98,7 +98,7 @@
                (list)))))
      ;; 91-build-heavy
      (simple-service
-      'NAME-build-heavy
+      'metal-build-heavy
       home-build-heavy-profile-service-type
       (scoped-profile-config
        (packages
@@ -106,7 +106,7 @@
                (list)))))
      ;; 01-essential
      (simple-service
-      'NAME-essential
+      'metal-essential
       home-essential-profile-service-type
       (scoped-profile-config
        (packages
@@ -114,7 +114,7 @@
                (list)))))
      ;; 01-emacs
      (simple-service
-      'NAME-emacs
+      'metal-emacs
       home-emacs-profile-service-type
       (scoped-profile-config
        (packages
@@ -130,7 +130,7 @@
                (list "meld")))))
      ;; 71-sysdev
      (simple-service
-      'NAME-sysdev
+      'metal-sysdev
       home-sysdev-profile-service-type
       (scoped-profile-config
        (packages
@@ -138,7 +138,7 @@
                (list)))))
      ;; 60-lengthy
      (simple-service
-      'NAME-lengthy
+      'metal-lengthy
       home-lengthy-profile-service-type
       (scoped-profile-config
        (packages
@@ -146,7 +146,7 @@
                (list)))))
      ;; 01-simple
      (simple-service
-      'NAME-simple
+      'metal-simple
       home-simple-profile-service-type
       (scoped-profile-config
        (packages
@@ -154,7 +154,7 @@
                (list)))))
      ;; 01-console
      (simple-service
-      'NAME-console
+      'metal-console
       home-console-profile-service-type
       (scoped-profile-config
        (packages
@@ -162,7 +162,7 @@
                (list)))))
      ;; 90-heavy
      (simple-service
-      'NAME-heavy
+      'metal-heavy
       home-heavy-profile-service-type
       (scoped-profile-config
        (packages
@@ -170,7 +170,7 @@
                (list)))))
      ;; 40-servers
      (simple-service
-      'NAME-servers
+      'metal-servers
       home-servers-profile-service-type
       (scoped-profile-config
        (packages
@@ -178,7 +178,7 @@
                (list)))))
      ;; 01-games
      (simple-service
-      'NAME-games
+      'metal-games
       home-games-profile-service-type
       (scoped-profile-config
        (packages
@@ -186,7 +186,7 @@
                (list)))))
      ;; 02-java
      (simple-service
-      'NAME-java
+      'metal-java
       home-java-profile-service-type
       (scoped-profile-config
        (packages
@@ -194,7 +194,7 @@
                (list)))))
      ;; 99-tmp
      (simple-service
-      'NAME-tmp
+      'metal-tmp
       home-tmp-profile-service-type
       (scoped-profile-config
        (packages
@@ -202,7 +202,7 @@
                (list)))))
      ;; 02-test
      (simple-service
-      'NAME-test
+      'metal-test
       home-test-profile-service-type
       (scoped-profile-config
        (packages
@@ -210,7 +210,7 @@
                (list)))))
      ;; 99-failed
      (simple-service
-      'NAME-failed
+      'metal-failed
       home-failed-profile-service-type
       (scoped-profile-config
        (packages
@@ -218,6 +218,6 @@
                (list)))))))
 
   (feature
-   (name 'NAME-profile)
+   (name 'metal-profile)
    (home-services-getter get-home-services)))
 
