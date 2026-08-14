@@ -1201,8 +1201,6 @@
                                   ;; obsidian
                                   ;; zoom
                                   xdg-autostart
-                                  xawaken-session
-                                  xdelayed-login-session
                                   login-service)))
       (list
        (simple-service 'x-service-groups
