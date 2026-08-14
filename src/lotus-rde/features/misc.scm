@@ -1097,9 +1097,7 @@
                                 emacs-lotus
                                 ;; usrhttpd
                                 ;; jupyter
-                                ;; keepawaken
-                                awaken-session
-                                delayed-login-session)))
+                                )))
       (list
        ;; shepherd services
        (simple-service 'tty-service-groups
