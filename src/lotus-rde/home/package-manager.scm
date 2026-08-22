@@ -211,6 +211,15 @@ description and hierarchical tags.")))
    scoped-profile-level)
   (constraint
    scoped-profile-constraint))
+
+
+(define-record-type* <scoped-profile-config>
+  scoped-profile-config
+  make-scoped-profile-config
+  scoped-profile-config?
+  ;; (exclude scoped-profile-config-exclude
+  ;;          (default '()))
+  (constraint scoped-profile-config-constraint))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Calculate packages for a scoped profile
@@ -280,6 +289,61 @@ description and hierarchical tags.")))
    (description
     "A home scoped profile selected by package constraints.")))
 
+
+
+(define (make-home-profile-service-type-NEW profile-name
+                                            profile-level)
+  (service-type
+   (name profile-name)
+   (compose concatenate)
+   (extend append)
+   (default-value
+     '())
+   (extensions
+    (list
+     (service-extension
+      home-scoped-profile-service-type
+      (lambda (entry)
+        (list
+         (scoped-profile
+          (name profile-name)
+          (level profile-level)
+          (constraint (scoped-profile-config-constraint entry))))))))
+   (description
+    "service.")))
+
+
+
+(define (make-home-profile-service-type-NEW1 profile-name
+                                             profile-level)
+
+  (service-type
+    (name profile-name)
+
+    (compose concatenate)
+    (extend append)
+
+    (default-value '())
+
+    (extensions
+     (list
+      (service-extension
+       home-scoped-profile-service-type
+
+       (lambda (configs)
+         (map
+          (lambda (config)
+            (scoped-profile
+             (name profile-name)
+             (level profile-level)
+             (constraint
+              (scoped-profile-config-constraint config))))
+          configs))))))
+
+  (description
+   "A scoped home profile."))
+
+
 (define (home-environment-pkg-col-collection env)
   (let ((folded
          (fold-services
@@ -296,4 +360,19 @@ description and hierarchical tags.")))
      profile
      collection)))
 
+
+;; (simple-service
+;;  'rofi
+;;  pkg-col-type
+;;  (pkg-col
+;;   (description
+;;    "Graphical application selector.")
+;;   (packages
+;;    (list rofi))
+;;   (tags
+;;    '((gui tool)))))
+
+
+
+
 
