@@ -1,5 +1,5 @@
 
-(define-module (guix home package-manager)
+(define-module (lotus-rde home package-manager)
 
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 match)
