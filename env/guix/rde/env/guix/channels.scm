@@ -14,12 +14,12 @@
           (name 'guix-more-lotus)
           (url "https://github.com/sharad/guix-more.git")
           (branch "master")
-          (commit "8fddd0df7ae4a297cb2b3db36952cbf44f23ff0e"))
+          (commit "1371da910bb235178af53c20a5704a22d75c41d4"))
         (channel
           (name 'nonguix)
           (url "https://gitlab.com/nonguix/nonguix")
           (branch "master")
-          (commit "7b7b2c47f9c205ad89ddf54293e7756e797f8980")
+          (commit "caa8c0b4646b993537be13c9bc819b3df68ab9b2")
           (introduction
            (make-channel-introduction
             "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
@@ -29,7 +29,7 @@
           (name 'rde)
           (url "https://git.sr.ht/~abcdw/rde")
           (branch "master")
-          (commit "70a1881f09c939792eb2ed932dded1f16291a59f")
+          (commit "91163744b7bf75f7b3cc9b3b65de499597177994")
           (introduction
            (make-channel-introduction
             "257cebd587b66e4d865b3537a9a88cccd7107c95"
@@ -39,7 +39,7 @@
           (name 'guix)
           (url "https://git.guix.gnu.org/guix.git")
           (branch "master")
-          (commit "f38f2809b78baeccc7a753065916d98763ff388c")
+          (commit "a56b050d4badafa09790236f66ca588f9b797274")
           (introduction
            (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"

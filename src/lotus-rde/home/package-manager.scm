@@ -42,13 +42,10 @@
   pkg-col
   make-pkg-col
   pkg-col?
-
   (description
    pkg-col-description)
-
   (packages
    pkg-col-packages)
-
   (tags
    pkg-col-tags))
 
@@ -64,19 +61,13 @@
 
 (define pkg-col-type
   (service-type
-
    (name 'pkg-col)
-
    ;; Values contributed by different instances are combined.
    (compose append)
-
    ;; Each instance contributes one pkg-col.
    (extend append)
-
    (default-value '())
-
    (extensions '())
-
    (description
     "Collect package collections together with their
 description and hierarchical tags.")))
@@ -109,11 +100,9 @@ description and hierarchical tags.")))
   pkg-constraint
   make-pkg-constraint
   pkg-constraint?
-
   (include
    pkg-constraint-include
    (default '()))
-
   (exclude
    pkg-constraint-exclude
    (default '())))
@@ -133,10 +122,8 @@ description and hierarchical tags.")))
 
 (define (tag-path-prefix? prefix path)
   "Return #t if PREFIX is a prefix of PATH."
-
   (and (<= (length prefix)
            (length path))
-
        (equal? prefix
                (take path
                      (length prefix)))))
@@ -161,7 +148,6 @@ description and hierarchical tags.")))
 ;; because hierarchy is prefix based.
 
 (define (pkg-col-has-tag? entry tag)
-
   (any (lambda (path)
          (tag-path-prefix? tag path))
        (pkg-col-tags entry)))
@@ -171,10 +157,8 @@ description and hierarchical tags.")))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (pkg-col-matches-constraint? entry constraint)
-
   (let ((include (pkg-constraint-include constraint))
         (exclude (pkg-constraint-exclude constraint)))
-
     ;; Every include constraint must match.
     ;;
     ;; If include is empty, everything is eligible.
@@ -183,7 +167,6 @@ description and hierarchical tags.")))
          (every (lambda (tag)
                  (pkg-col-has-tag? entry tag))
                 include))
-
      ;; No excluded constraint may match.
      (not
       (any (lambda (tag)
@@ -195,16 +178,13 @@ description and hierarchical tags.")))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (pkg-col-filter collection constraint)
-
   (append-map
    pkg-col-packages
-
    (filter
     (lambda (entry)
       (pkg-col-matches-constraint?
        entry
        constraint))
-
     collection)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -225,10 +205,10 @@ description and hierarchical tags.")))
   scoped-profile
   make-scoped-profile
   scoped-profile?
-
   (name
    scoped-profile-name)
-
+  (level
+   scoped-profile-level)
   (constraint
    scoped-profile-constraint))
 
@@ -237,7 +217,6 @@ description and hierarchical tags.")))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (scoped-profile-packages profile collection)
-
   (pkg-col-filter
    collection
    (scoped-profile-constraint profile)))
@@ -268,17 +247,11 @@ description and hierarchical tags.")))
 
 (define home-scoped-profile-service-type
   (service-type
-
    (name 'home-scoped-profile)
-
    (compose append)
-
    (extend append)
-
    (default-value '())
-
    (extensions '())
-
    (description
     "Scoped profiles selected from package collections.")))
 
@@ -287,38 +260,25 @@ description and hierarchical tags.")))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (make-home-profile-service-type profile-name
+                                        profile-level
                                         constraint)
-
   (service-type
-
    (name profile-name)
-
    (compose append)
-
    (extend append)
-
    (default-value '())
-
    (extensions
     (list
-
      (service-extension
-
       home-scoped-profile-service-type
-
       (lambda (value)
-
         (list
          (scoped-profile
           (name profile-name)
+          (level profile-level)
           (constraint constraint)))))))
-
    (description
     "A home scoped profile selected by package constraints.")))
-
-
-
-
 
 (define (home-environment-pkg-col-collection env)
   (let ((folded
@@ -329,14 +289,11 @@ description and hierarchical tags.")))
     ;; service-value of pkg-col-type is the collection
     (service-value folded)))
 
-
-
 (define (profile->manifest env profile)
   (let ((collection
          (home-environment-pkg-col-collection env)))
     (scoped-profile->manifest
      profile
      collection)))
-
 
 

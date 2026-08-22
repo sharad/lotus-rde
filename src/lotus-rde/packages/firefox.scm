@@ -112,7 +112,7 @@
                                              libxcomposite
                                              libxt
                                              gtk+
-                                             atk
+                                             at-spi2-core
                                              cairo
                                              dbus-glib
                                              fontconfig
@@ -263,7 +263,7 @@
                                              libxcomposite
                                              libxt
                                              gtk+
-                                             atk
+                                             at-spi2-core
                                              cairo
                                              dbus-glib
                                              fontconfig
