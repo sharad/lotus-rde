@@ -520,22 +520,22 @@
         'lotus-shepherd-packages
         home-profile-service-type
 
-        (list
-         conky
-         eww
-         keynav
-         xautolock
-         autocutsel
-         picom
-         dunst
-         ibus
-         gnome-keyring
-         blueman
-         pasystray
-         keepassxc
-         ;; barrier
-         git
-         autossh))
+        (list conky
+              eww
+              keynav
+              xautolock
+              autocutsel
+              picom
+              dunst
+              ibus
+              gnome-keyring
+              blueman
+              pasystray
+              keepassxc
+              keepassxc-browser-icecat
+              ;; barrier
+              git
+              autossh))
 
        ;; shepherd services
        (simple-service
