@@ -21,6 +21,8 @@
   #:use-module (gnu services networking)
   #:use-module (gnu services avahi)
   #:use-module (gnu services dbus)
+  #:use-module (gnu services web)
+  #:use-module (gnu services certbot)
   #:use-module (gnu home services)
   #:use-module (gnu home services admin)
   #:use-module (gnu home services desktop)
@@ -38,6 +40,7 @@
   #:use-module (gnu packages nfs)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages freedesktop)
+  #:use-module (gnu packages web)
   #:use-module (rde packages)
 
   #:use-module (srfi srfi-1)
@@ -959,23 +962,34 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
   (define (get-system-services config)
     (list
+     (service certbot-service-type
+              (certbot-configuration
+               (certificates
+                (list
+                 (certificate-configuration
+                  (name "app1")
+                  (domains '("app1.example.org")))
+                 (certificate-configuration
+                  (name "app2")
+                  (domains '("app2.example.org")))))))
      (service nginx-service-type
               (nginx-configuration
                (nginx nginx)
                (server-blocks
                 (list
                  (nginx-server-configuration
-                  ;; (server-name '("app1.example.org"))
-                  (listen '("443 ssl"))
-                  (ssl-certificate (local-file "./certs/app1.crt"))
-                  (ssl-certificate-key (local-file "./certs/app1.key"))
-
+                  (server-name '("app1.example.org"))
+                  (listen '("80" "443 ssl"))
+                  (ssl-certificate "/etc/letsencrypt/live/app1/fullchain.pem")
+                  (ssl-certificate-key "/etc/letsencrypt/live/app1/privkey.pem")
                   (locations
                    (list
                     (nginx-location-configuration
                      (uri "/")
                      (body
-                      (list "proxy_pass http://127.0.0.1:8080;"))))))))))))
+                      (list "proxy_pass http://127.0.0.1:8080;"
+                            "proxy_set_header Host $host;"
+                            "proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"))))))))))))
 
   (feature
    (name 'nginx)

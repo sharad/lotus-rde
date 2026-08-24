@@ -102,6 +102,9 @@ $(CHANNELS_ENV_RDE_FILE):
 	@echo run    guix pull
 	./bin/guix-update-current-channels.sh > $@
 	guix style --whole-file $@
+	if [ -n "$$SUDO_UID" ]; then \
+		chown "$$SUDO_UID:$$SUDO_GID" $@; \
+	fi
 
 guix-update-current-channels: $(CHANNELS_ENV_RDE_FILE)
 

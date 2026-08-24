@@ -1007,7 +1007,7 @@
                                          (car args)
                                          #$server))
                              (log-file   #$log-file-gexp)
-                             (log-file-loc (string-append "proxy-" server))
+                             (log-file-loc (string-append "proxy-" (string-trim-right server #\.)))
                              (constructor (make-forkexec-constructor (list #$cmd "-N"
                                                                            "-S" "none"
                                                                            "-M" "20000"
