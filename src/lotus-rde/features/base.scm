@@ -112,6 +112,7 @@
             feature-messaging-services
             feature-mail-services
             feature-iio-sensor-proxy-services
+            feature-nginx-services
             feature-dnsmasq-services
             feature-pointer-services
             feature-bluetooth-services
@@ -945,6 +946,39 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
   (feature
    (name 'iio-sensor-proxy)
+   (values `())
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
+
+(define* (feature-nginx-services
+          #:key
+          (nginx nginx))
+  ;; https://guix.gnu.org/manual/en/html_node/Desktop-Services.html
+  (define (get-home-services config)
+    (list))
+
+  (define (get-system-services config)
+    (list
+     (service nginx-service-type
+              (nginx-configuration
+               (nginx nginx)
+               (server-blocks
+                (list
+                 (nginx-server-configuration
+                  ;; (server-name '("app1.example.org"))
+                  (listen '("443 ssl"))
+                  (ssl-certificate (local-file "./certs/app1.crt"))
+                  (ssl-certificate-key (local-file "./certs/app1.key"))
+
+                  (locations
+                   (list
+                    (nginx-location-configuration
+                     (uri "/")
+                     (body
+                      (list "proxy_pass http://127.0.0.1:8080;"))))))))))))
+
+  (feature
+   (name 'nginx)
    (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))

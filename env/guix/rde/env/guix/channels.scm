@@ -29,7 +29,7 @@
           (name 'rde)
           (url "https://git.sr.ht/~abcdw/rde")
           (branch "master")
-          (commit "91163744b7bf75f7b3cc9b3b65de499597177994")
+          (commit "47fb718f2b1a3f68a03c51a2740c1ada4052bd3c")
           (introduction
            (make-channel-introduction
             "257cebd587b66e4d865b3537a9a88cccd7107c95"
@@ -39,7 +39,7 @@
           (name 'guix)
           (url "https://git.guix.gnu.org/guix.git")
           (branch "master")
-          (commit "a56b050d4badafa09790236f66ca588f9b797274")
+          (commit "5d473033d7d6cf848dc875d5d82325578499b22b")
           (introduction
            (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
