@@ -63,7 +63,7 @@
 
 (define %deb-build-system-modules
   ;; Build-side modules imported by default.
-  `((lotus build deb-build-system)
+  `((lotus-rde build deb-build-system)
     ,@patchelf:%patchelf-build-system-modules))
 
 (define (default-patchelf)
@@ -215,9 +215,9 @@
                     (make-dynamic-linker-cache? #t)
                     (license-file-regexp %license-file-regexp)
                     ;; (phases '%standard-phases)
-                    ;; (phases '(@ (lotus build patchelf-build-system)
+                    ;; (phases '(@ (lotus-rde build patchelf-build-system)
                     ;;             %standard-phases))
-                    (phases '(@ (lotus build deb-build-system)
+                    (phases '(@ (lotus-rde build deb-build-system)
                                 %standard-phases))
                     (input-lib-mapping ''())
                     (readonly-binaries '#f)
@@ -227,7 +227,7 @@
                     ;; (imported-modules %gnu-build-system-modules)
                     (imported-modules %deb-build-system-modules)
                     ;; (modules %default-modules)
-                    (modules '((lotus build deb-build-system)
+                    (modules '((lotus-rde build deb-build-system)
                                (guix build utils)))
                     (substitutable? #t)
                     allowed-references

@@ -52,15 +52,15 @@
 
 (define %patchelf-build-system-modules
   ;; Build-side modules imported by default.
-  `((lotus build patchelf-build-system)
-    (lotus build patchelf-utils)
+  `((lotus-rde build patchelf-build-system)
+    (lotus-rde build patchelf-utils)
     ,@%default-gnu-imported-modules))
 
 (define %default-modules
   ;; Modules in scope in the build-side environment.
-  '((lotus build patchelf-build-system)
+  '((lotus-rde build patchelf-build-system)
     (guix build utils)
-    (lotus build patchelf-utils)))
+    (lotus-rde build patchelf-utils)))
 
 ;; (define %default-modules
 ;;   ;; Modules in scope in the build-side environment.
@@ -177,7 +177,7 @@
                          (make-dynamic-linker-cache? #t)
                          (license-file-regexp %license-file-regexp)
                          ;; (phases '%standard-phases)
-                         (phases '(@ (lotus build patchelf-build-system)
+                         (phases '(@ (lotus-rde build patchelf-build-system)
                                      %standard-phases))
                          (input-lib-mapping ''())
                          (readonly-binaries '#f)
@@ -188,9 +188,9 @@
                          (imported-modules %patchelf-build-system-modules)
                          (modules %default-modules)
                          ;; (modules %patchelf-build-system-modules)
-                         ;; (modules '((lotus build patchelf-build-system)
+                         ;; (modules '((lotus-rde build patchelf-build-system)
                          ;;            (guix build utils)
-                         ;;            (lotus build patchelf-utils)))
+                         ;;            (lotus-rde build patchelf-utils)))
                          ;; (modules '())
                          (substitutable? #t)
                          allowed-references

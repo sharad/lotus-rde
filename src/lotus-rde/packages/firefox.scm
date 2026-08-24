@@ -295,7 +295,7 @@
                                             ;; This overwrites the installed launcher, which execs xulrunner,
                                             ;; with one that execs 'icecat --app'
                                             ;; (define source (getcwd))
-                                            ;; (use-modules (lotus build patchelf-utils))
+                                            ;; (use-modules (lotus-rde build patchelf-utils))
                                             (define (required-link? file)
                                               (or (directory? file)
                                                   (string-suffix? ".sh"  file)
