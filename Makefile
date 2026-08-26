@@ -132,7 +132,7 @@ git-restore: git-stash-push
 
 git-pull: git-restore
 	git pull
-	git stash pop
+	-git stash pop
 
 examples/guix-update-channels-latest: guix-pull guix-update-current-channels examples/guix-update-channels git-commit
 	echo "updated channels to latest guix commit"
