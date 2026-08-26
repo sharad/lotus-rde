@@ -44,6 +44,95 @@
             home-spawner-configuration-capable?))
 
 
+
+
+
+(define (plist-ref plist key default)
+    (let ((p (memq key plist)))
+      (cond
+       ((not p) default)          ; key not found
+       ((null? (cdr p))
+        (error "Keyword without value" key))
+       (else (cadr p)))))
+
+(define (string->keyword s)
+  (format #f "s=~S" s)
+  (symbol->keyword (string->symbol s)))
+
+(define (string->value s)
+  (cond
+   ((string=? s "t") #t)
+   ((string=? s "f") #f)
+   ((string->number s) => values)
+   (else s)))
+
+(define (strings->keyword-args lst)
+  (format #f "lst=~S" lst)
+  (let loop ((lst lst) (out '()))
+    (match lst
+      (() (reverse out))
+      ((key val . rest)
+       (let* ((kw (string->keyword key))
+              (v  (string->value val)))
+         (loop rest (cons v (cons kw out)))))
+      (_
+       (error "Odd number of keyword arguments" lst)))))
+
+
+(define (service-running-safe? svc-name)
+  (let ((svc (lookup-service svc-name)))
+    (if svc
+        (service-running? svc)
+        svc)))
+
+(define (string-prefix? prefix str)
+    (let ((plen (string-length prefix)))
+      (and (<= plen (string-length str))
+           (string=? prefix (substring str 0 plen)))))
+
+(define* (service-name-str inst-name #:key (transient? #t))
+  (format #f "~a~a-~a"
+          (if transient?
+              "transient-"
+              "")
+          (symbol->string spawner-service)
+          inst-name))
+
+(define* (service-sym inst-name  #:key (transient? #t))
+  (string->symbol (service-name-str inst-name #:transient? transient?)))
+
+
+(define (is-service-sym? service)
+  (let ((prefix (symbol->string spawner-service)))
+    (or (string-prefix? (format #f "~a-" prefix) (symbol->string service))
+        (string-prefix? (format #f "transient-~a-" prefix) (symbol->string service)))))
+
+  ;; -----------------------------
+  ;; Create dynamic service
+  ;; -----------------------------
+(define* (make-spawner-service inst-name
+                               #:key
+                               (respawn? #f)
+                               (respawn-delay 5)
+                               (respawn-limit 20)
+                               (transient? #t)
+                               #:allow-other-keys
+                               #:rest rest-keys)
+  (service (list (service-sym inst-name #:transient? transient?))
+           #:start (apply constructor-fn inst-name
+                          (lambda () (service-name-str inst-name #:transient? transient?))
+                          (append (list #:transient? transient?)
+                                  rest-keys))
+           #:stop (make-kill-destructor)
+           #:respawn-delay respawn-delay
+           #:respawn-limit respawn-limit
+           ;; #:respawn? #f
+           #:transient? transient?
+           #:requirement (list spawner-service)
+           ;; #:one-shot? #f
+           #:respawn? respawn?))
+
+
 ;; (define-record-type* <home-spawner-configuration>
 ;;   home-spawner-configuration make-home-spawner-configuration
 ;;   home-spawner-configuration?
