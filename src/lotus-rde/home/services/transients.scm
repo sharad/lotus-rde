@@ -197,10 +197,11 @@
                  (format #t "Usage: herd destroy ~a <inst-name> [unregister]\n"
                          '#$spawner-name)
                  (let* ((inst-name (car args))
-                        (unregister? (member "unregister" (cdr args)))
+                        (vargs     (cdr args))
+                        (unregister? (member "unregister" vargs))
                         (kw-args  (if unregister?
-                                      (strings->keyword-args (cdr args))
-                                      (strings->keyword-args args)))
+                                      (strings->keyword-args (cdr vargs))
+                                      (strings->keyword-args vargs)))
                         (svc-name (service-sym '#$spawner-name inst-name #:transient? (plist-ref kw-args #:transient? #t)))
                         (svc (lookup-service svc-name)))
                    (if (not svc)
