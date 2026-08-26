@@ -204,6 +204,7 @@
                                       (strings->keyword-args vargs)))
                         (svc-name (service-sym '#$spawner-name inst-name #:transient? (plist-ref kw-args #:transient? #t)))
                         (svc (lookup-service svc-name)))
+                   (format #t "service ~a: unregister? ~a" svc unregister?)
                    (if (not svc)
                        (format #t "Not found: ~a\n" svc-name)
                        (begin
