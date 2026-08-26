@@ -172,7 +172,7 @@
                         (kw-args  (strings->keyword-args vargs))
                         (svc-name (service-sym '#$spawner-name inst-name
                                                #:transient? (plist-ref kw-args #:transient? #t))))
-                   (format #t "spawn: svc-name = ~a\n" svc-name)
+                   (format #t "spawn: svc-name = ~a kw-args=~a\n" svc-name kw-args)
                    (if (not (#$capable?))
                        (begin
                          (format #t "Error: Not able to run this service.\n")
