@@ -43,6 +43,7 @@
             home-spawner-configuration-constructor-gexp
             home-spawner-configuration-capable?))
 
+
 (define-record-type* <home-spawner-configuration>
   home-spawner-configuration
   make-home-spawner-configuration
@@ -98,10 +99,17 @@
           (and (<= plen (string-length str))
                (string=? prefix (substring str 0 plen)))))
 
-      (define* (service-sym spawner-service inst-name  #:key (transient? #t))
-        (string->symbol (service-name-str spawner-service inst-name #:transient? transient?)))
+      (define* (service-sym spawner-service
+                            inst-name
+                            #:key
+                            (transient? #t))
+        (string->symbol (service-name-str spawner-service
+                                          inst-name
+                                          #:transient? transient?)))
 
-      (define* (service-name-str spawner-service inst-name #:key (transient? #t))
+      (define* (service-name-str spawner-service
+                                 inst-name
+                                 #:key (transient? #t))
         (format #f "~a~a-~a"
                 (if transient?
                     "transient-"
@@ -114,7 +122,6 @@
           (or (string-has-prefix? (format #f "~a-" prefix) (symbol->string service))
               (string-has-prefix? (format #f "transient-~a-" prefix) (symbol->string service)))))
 
-
       (define* (make-spawner-service spawner-service
                                      constructor-fn
                                      inst-name
@@ -123,6 +130,7 @@
                                      (respawn-delay 5)
                                      (respawn-limit 20)
                                      (transient? #t)
+                                     (one-shot? #f)
                                      #:allow-other-keys
                                      #:rest rest-keys)
         (service (list (service-sym spawner-service inst-name #:transient? transient?))
@@ -131,13 +139,12 @@
                                 (append (list #:transient? transient?)
                                         rest-keys))
                  #:stop (make-kill-destructor)
+                 #:requirement (list spawner-service)
                  #:respawn-delay respawn-delay
                  #:respawn-limit respawn-limit
-                 ;; #:respawn? #f
+                 #:respawn? respawn?
                  #:transient? transient?
-                 #:requirement (list spawner-service)
-                 ;; #:one-shot? #f
-                 #:respawn? respawn?))))
+                 #:one-shot? one-shot?))))
 
 (define (spawner-config->shepherd-service config)
   (let ((spawner-name (home-spawner-configuration-name config))
@@ -158,12 +165,12 @@
          #~(lambda (running . args)
              #$helpers
              (if (null? args)
-                 (format #t "Usage: herd destroy ~a <inst-name> [unregister]\n"
+                 (format #t "Usage: herd spawn ~a <inst-name> [key val ...]\n"
                          '#$spawner-name)
                  (let* ((inst-name (car args))
                         (vargs (cdr args))
                         (kw-args  (strings->keyword-args vargs))
-                        (svc-name (service-sym #$spawner-name inst-name #:transient? (plist-ref kw-args #:transient? #t))))
+                        (svc-name (service-sym '#$spawner-name inst-name #:transient? (plist-ref kw-args #:transient? #t))))
                    (format #t "spawn: svc-name = ~a\n" svc-name)
                    (if (not (#$capable?))
                        (begin
@@ -171,7 +178,7 @@
                          #f)
                        (if (not (service-running-safe? svc-name))
                            (let ((svc (apply make-spawner-service
-                                             #$spawner-name
+                                             '#$spawner-name
                                              #$constructor
                                              inst-name
                                              kw-args)))
@@ -179,7 +186,6 @@
                              (apply start-service svc vargs)
                              (format #t "Started new service: ~a\n" svc-name))
                            (format #t "Service ~a already running.\n" svc-name))))))))
-
 
        (shepherd-action
         (name 'destroy)
@@ -192,7 +198,7 @@
                          '#$spawner-name)
                  (let* ((inst-name (car args))
                         (unregister? (member "unregister" (cdr args)))
-                        (svc-name (service-sym #$spawner-name inst-name #:transient? (plist-ref kw-args #:transient? #t)))
+                        (svc-name (service-sym '#$spawner-name inst-name #:transient? (plist-ref kw-args #:transient? #t)))
                         (svc (lookup-service svc-name)))
                    (if (not svc)
                        (format #t "Not found: ~a\n" svc-name)
@@ -235,7 +241,7 @@
    (extend append)
    (default-value '())
    (description "Generic spawner service. Extend with home-spawner-configuration records.")))
-
+
 
 (define home-autossh-tunnel-service-type
   (service-type
@@ -348,3 +354,5 @@
 ;;    (list
 ;;     (service home-autossh-tunnel-service-type)
 ;;     (service home-ssh-tunnel-service-type))))
+
+
