@@ -55,7 +55,7 @@
    home-spawner-configuration-constructor-gexp)
   (capable?
    home-spawner-configuration-capable?
-   (default #~(lambda args #t))))
+   (default #~(lambda _ #t))))
 
 ;; Shared helper definitions, staged once and spliced (via #$helpers)
 ;; into every action's own gexp below. They MUST live inside a gexp:
@@ -216,17 +216,13 @@
         (procedure
          #~(lambda (running . args)
              #$helpers
-             (let ((prefix (string-append "transient-"
-                                          #$(symbol->string spawner-name)
-                                          "-")))
-               (for-each
-                (lambda (svc)
-                  (let ((name (symbol->string (car (service-provision svc)))))
-                    (when (string-has-prefix? prefix name)
-                      (format #t "~a => ~a\n" name
-                              (if (service-running? svc)
-                                  "running" "stopped")))))
-                (all-services)))))))))))
+             (for-each-service (lambda (svc)
+                                 (when (is-service-sym? '#$spawner-name (car (service-name svc)))
+                                   (format #t "~a => ~a\n"
+                                           (car (service-name svc))
+                                           (if (service-running-safe? (car (service-name svc)))
+                                               "running" "stopped")))))))))))))
+
 
 (define home-spawner-service-type
   (service-type
