@@ -119,11 +119,15 @@ git-commit:
 git-push: git-commit
 	git push
 
-git-restore:
+git-stash-push:
+	git stash push
+
+git-restore: git-stash-push
 	git restore .
 
 git-pull: git-restore
 	git pull
+	git stash pop
 
 examples/guix-update-channels-latest: guix-pull guix-update-current-channels examples/guix-update-channels git-commit
 	echo "updated channels to latest guix commit"
