@@ -198,6 +198,9 @@
                          '#$spawner-name)
                  (let* ((inst-name (car args))
                         (unregister? (member "unregister" (cdr args)))
+                        (kw-args  (if unregister?
+                                      (strings->keyword-args (cdr args))
+                                      (strings->keyword-args args)))
                         (svc-name (service-sym '#$spawner-name inst-name #:transient? (plist-ref kw-args #:transient? #t)))
                         (svc (lookup-service svc-name)))
                    (if (not svc)
