@@ -219,7 +219,7 @@
              (for-each-service (lambda (svc)
                                  (when (is-service-sym? '#$spawner-name (car (service-provision svc)))
                                    (format #t "~a => ~a\n"
-                                           (car (service-name svc))
+                                           (car (service-provision svc))
                                            (if (service-running-safe? (car (service-name svc)))
                                                "running" "stopped")))))))))))))
 
