@@ -170,7 +170,8 @@
                  (let* ((inst-name (car args))
                         (vargs (cdr args))
                         (kw-args  (strings->keyword-args vargs))
-                        (svc-name (service-sym '#$spawner-name inst-name #:transient? (plist-ref kw-args #:transient? #t))))
+                        (svc-name (service-sym '#$spawner-name inst-name
+                                               #:transient? (plist-ref kw-args #:transient? #t))))
                    (format #t "spawn: svc-name = ~a\n" svc-name)
                    (if (not (#$capable?))
                        (begin
