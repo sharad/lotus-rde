@@ -110,7 +110,12 @@ guix-update-current-channels: $(CHANNELS_ENV_RDE_FILE)
 
 guix-update-current-channels-force:
 ifeq ($(strip $(GUIX)),guix)
-	$(MAKE) -B guix-update-current-channels
+	@printf "Run guix-update-current-channels? [y/N] "; \
+	read ans; \
+	case "$$ans" in \
+		y|Y) $(MAKE) -B guix-update-current-channels ;; \
+		*)   echo "Skipped." ;; \
+	esac
 endif
 
 git-commit:

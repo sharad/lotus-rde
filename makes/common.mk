@@ -169,13 +169,15 @@ $(CMD)/%:
 
 
 
-rde/home/build: guix-update-current-channels-force
+rde/home/build:
 	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
-	build ${CONFIGS}
+	build ${CONFIGS} && \
+	make guix-update-current-channels-force
 
-rde/home/reconfigure: guix-update-current-channels-force
+rde/home/reconfigure:
 	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
-	reconfigure ${CONFIGS}
+	reconfigure ${CONFIGS} && \
+	make guix-update-current-channels-force
 
 
 /tmp/.cow-store-start:
@@ -185,22 +187,25 @@ rde/home/reconfigure: guix-update-current-channels-force
 cow-store: /tmp/.cow-store-start
 
 
-rde/system/init: guix /tmp/.cow-store-start guix-update-current-channels-force
+rde/system/init: guix /tmp/.cow-store-start
 	mount -o rw /boot
 	mount -o rw /boot/efi
 	RDE_SYSINIT=init RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	init ${CONFIGS} ${ROOT_MOUNT_POINT}
+	init ${CONFIGS} ${ROOT_MOUNT_POINT} && \
+	make guix-update-current-channels-force
 	umount /boot/efi
 	umount /boot
 
-rde/system/build: guix-update-current-channels-force
+rde/system/build:
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	build ${CONFIGS}
+	build ${CONFIGS} && \
+	make guix-update-current-channels-force
 
-rde/system/reconfigure: guix-update-current-channels-force
+rde/system/reconfigure:
 	mount -o rw /boot
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	reconfigure ${CONFIGS}
+	reconfigure ${CONFIGS} && \
+	make guix-update-current-channels-force
 	umount /boot
 
 
