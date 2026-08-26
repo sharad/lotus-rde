@@ -160,7 +160,9 @@
              (if (null? args)
                  (format #t "Usage: herd destroy ~a <inst-name> [unregister]\n"
                          '#$spawner-name)
-                 (let* ((kw-args  (strings->keyword-args vargs))
+                 (let* ((inst-name (car args))
+                        (vargs (cdr args))
+                        (kw-args  (strings->keyword-args vargs))
                         (svc-name (service-sym inst-name #:transient? (plist-ref kw-args #:transient? #t))))
                    (format #t "spawn: svc-name = ~a\n" svc-name)
                    (if (not (#$capable?))
