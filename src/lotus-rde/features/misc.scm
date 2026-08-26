@@ -49,6 +49,7 @@
   #:use-module (gnu packages pulseaudio)
   #:use-module (gnu packages hardware)
   #:use-module (gnu packages version-control)
+  #:use-module (gnu packages browser-extensions)
   #:use-module (rde packages)
 
   #:use-module (srfi srfi-1)
@@ -532,7 +533,7 @@
               blueman
               pasystray
               keepassxc
-              keepassxc-browser-icecat
+              keepassxc-browser/icecat
               ;; barrier
               git
               autossh))

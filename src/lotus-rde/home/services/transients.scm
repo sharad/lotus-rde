@@ -40,107 +40,8 @@
             make-home-spawner-configuration
             home-spawner-configuration?
             home-spawner-configuration-name
-            home-spawner-configuration-constructor
+            home-spawner-configuration-constructor-gexp
             home-spawner-configuration-capable?))
-
-
-
-
-
-(define (plist-ref plist key default)
-    (let ((p (memq key plist)))
-      (cond
-       ((not p) default)          ; key not found
-       ((null? (cdr p))
-        (error "Keyword without value" key))
-       (else (cadr p)))))
-
-(define (string->keyword s)
-  (format #f "s=~S" s)
-  (symbol->keyword (string->symbol s)))
-
-(define (string->value s)
-  (cond
-   ((string=? s "t") #t)
-   ((string=? s "f") #f)
-   ((string->number s) => values)
-   (else s)))
-
-(define (strings->keyword-args lst)
-  (format #f "lst=~S" lst)
-  (let loop ((lst lst) (out '()))
-    (match lst
-      (() (reverse out))
-      ((key val . rest)
-       (let* ((kw (string->keyword key))
-              (v  (string->value val)))
-         (loop rest (cons v (cons kw out)))))
-      (_
-       (error "Odd number of keyword arguments" lst)))))
-
-
-(define (service-running-safe? svc-name)
-  (let ((svc (lookup-service svc-name)))
-    (if svc
-        (service-running? svc)
-        svc)))
-
-(define (string-prefix? prefix str)
-    (let ((plen (string-length prefix)))
-      (and (<= plen (string-length str))
-           (string=? prefix (substring str 0 plen)))))
-
-(define* (service-name-str inst-name #:key (transient? #t))
-  (format #f "~a~a-~a"
-          (if transient?
-              "transient-"
-              "")
-          (symbol->string spawner-service)
-          inst-name))
-
-(define* (service-sym inst-name  #:key (transient? #t))
-  (string->symbol (service-name-str inst-name #:transient? transient?)))
-
-
-(define (is-service-sym? service)
-  (let ((prefix (symbol->string spawner-service)))
-    (or (string-prefix? (format #f "~a-" prefix) (symbol->string service))
-        (string-prefix? (format #f "transient-~a-" prefix) (symbol->string service)))))
-
-  ;; -----------------------------
-  ;; Create dynamic service
-  ;; -----------------------------
-(define* (make-spawner-service inst-name
-                               #:key
-                               (respawn? #f)
-                               (respawn-delay 5)
-                               (respawn-limit 20)
-                               (transient? #t)
-                               #:allow-other-keys
-                               #:rest rest-keys)
-  (service (list (service-sym inst-name #:transient? transient?))
-           #:start (apply constructor-fn inst-name
-                          (lambda () (service-name-str inst-name #:transient? transient?))
-                          (append (list #:transient? transient?)
-                                  rest-keys))
-           #:stop (make-kill-destructor)
-           #:respawn-delay respawn-delay
-           #:respawn-limit respawn-limit
-           ;; #:respawn? #f
-           #:transient? transient?
-           #:requirement (list spawner-service)
-           ;; #:one-shot? #f
-           #:respawn? respawn?))
-
-
-;; (define-record-type* <home-spawner-configuration>
-;;   home-spawner-configuration make-home-spawner-configuration
-;;   home-spawner-configuration?
-;;   (name          home-spawner-configuration-name)          ;; symbol e.g. 'autossh-tunnel
-;;   (constructor   home-spawner-configuration-constructor)   ;; procedure: (inst-name svc-name-fn . kwargs) → gexp
-;;   (capable?      home-spawner-configuration-capable?       ;; gexp: #~(lambda () bool)
-;;                  (default #~(lambda () #t))))
-
 
 (define-record-type* <home-spawner-configuration>
   home-spawner-configuration
@@ -148,19 +49,100 @@
   home-spawner-configuration?
   (name
    home-spawner-configuration-name)
-  ;; gexp evaluating to procedure
+  ;; gexp evaluating to a procedure: (inst-name service-name-fn . kwargs) -> <start-value>
   (constructor-gexp
    home-spawner-configuration-constructor-gexp)
   (capable?
    home-spawner-configuration-capable?
-   (default #~(lambda () #t))))
+   (default #~(lambda args #t))))
 
+;; Shared helper definitions, staged once and spliced (via #$helpers)
+;; into every action's own gexp below. They MUST live inside a gexp:
+;; they run inside the shepherd process, not inside the process that
+;; builds this home-environment, so they can't be plain closures here.
+(define helpers
+  #~(begin
+      (define (plist-ref plist key default)
+        (let ((p (memq key plist)))
+          (cond
+           ((not p) default)
+           ((null? (cdr p)) (error "Keyword without value" key))
+           (else (cadr p)))))
+
+      (define (string->keyword s)
+        (symbol->keyword (string->symbol s)))
+
+      (define (string->value s)
+        (cond
+         ((string=? s "t") #t)
+         ((string=? s "f") #f)
+         ((string->number s) => values)
+         (else s)))
+
+      (define (strings->keyword-args lst)
+        (let loop ((lst lst) (out '()))
+          (cond
+           ((null? lst) (reverse out))
+           ((null? (cdr lst)) (error "Odd number of keyword arguments" lst))
+           (else
+            (loop (cddr lst)
+                  (cons (string->value (cadr lst))
+                        (cons (string->keyword (car lst)) out)))))))
+
+      (define (service-running-safe? svc-name)
+        (let ((svc (lookup-service svc-name)))
+          (if svc (service-running? svc) svc)))
+
+      (define (string-has-prefix? prefix str)
+        (let ((plen (string-length prefix)))
+          (and (<= plen (string-length str))
+               (string=? prefix (substring str 0 plen)))))
+
+      (define* (service-sym inst-name  #:key (transient? #t))
+        (string->symbol (service-name-str inst-name #:transient? transient?)))
+
+      (define* (service-name-str spawner-service inst-name #:key (transient? #t))
+        (format #f "~a~a-~a"
+                (if transient?
+                    "transient-"
+                    "")
+                (symbol->string spawner-service)
+                inst-name))
+
+      (define (is-service-sym? spawner-service service)
+        (let ((prefix (symbol->string spawner-service)))
+          (or (string-has-prefix? (format #f "~a-" prefix) (symbol->string service))
+              (string-has-prefix? (format #f "transient-~a-" prefix) (symbol->string service)))))
+
+
+      (define* (make-spawner-service spawner-service
+                                     constructor-fn
+                                     inst-name
+                                     #:key
+                                     (respawn? #f)
+                                     (respawn-delay 5)
+                                     (respawn-limit 20)
+                                     (transient? #t)
+                                     #:allow-other-keys
+                                     #:rest rest-keys)
+       (service (list (service-sym inst-name #:transient? transient?))
+                #:start (apply constructor-fn inst-name
+                               (lambda () (service-name-str spawner-service inst-name #:transient? transient?))
+                               (append (list #:transient? transient?)
+                                       rest-keys))
+                #:stop (make-kill-destructor)
+                #:respawn-delay respawn-delay
+                #:respawn-limit respawn-limit
+                ;; #:respawn? #f
+                #:transient? transient?
+                #:requirement (list spawner-service)
+                ;; #:one-shot? #f
+                #:respawn? respawn?))))
 
 (define (spawner-config->shepherd-service config)
-  (let* ((spawner-name (home-spawner-configuration-name config))
-         (constructor  (home-spawner-configuration-constructor-gexp config))
-         (capable?     (home-spawner-configuration-capable? config)))
-
+  (let ((spawner-name (home-spawner-configuration-name config))
+        (constructor  (home-spawner-configuration-constructor-gexp config))
+        (capable?     (home-spawner-configuration-capable? config)))
     (shepherd-service
      (provision (list spawner-name))
      (documentation (format #f "Spawner for ~a services" spawner-name))
@@ -174,75 +156,69 @@
         (documentation "herd spawn <spawner> <inst-name> [key val ...]")
         (procedure
          #~(lambda (running . args)
+             #$helpers
              (if (null? args)
-                 (let ((inst-name (car args))
-                       (vargs (cdr args)))
-                   (let* ((svc-sym (string->symbol (string-append "transient-"
-                                                                  #$(symbol->string spawner-name)
-                                                                  "-" inst-name)))
-                          (existing (lookup-service svc-sym)))
-                     (if (and existing
-                              (service-running? existing))
-                         (format #t "Already running: ~a\n" svc-sym)
-                         (if (not (#$capable?))
-                             (format #t "Error: not capable\n")
-                             (let ((svc (make <service>
-                                          #:provides (list svc-sym)
-                                          #:requires '()
-                                          #:transient? #t
-                                          #:requirement (list #$spawner-name)
-                                          #:respawn? #f
-                                          #:start (apply (#$constructor)
-                                                         inst-name
-                                                         (lambda () (symbol->string svc-sym))
-                                                         vargs)
-                                          #:stop (make-kill-destructor))))
-                               (register-services svc)
-                               (start-service svc)
-                               (format #t "Started: ~a\n" svc-sym))))
-                     (format #t "Usage: herd spawn ~a <inst-name>\n"
-                             '#$spawner-name)))))))
+                 (format #t "Usage: herd destroy ~a <inst-name> [unregister]\n"
+                         '#$spawner-name)
+                 (let* ((kw-args  (strings->keyword-args vargs))
+                        (svc-name (service-sym inst-name #:transient? (plist-ref kw-args #:transient? #t))))
+                   (format #t "spawn: svc-name = ~a\n" svc-name)
+                   (if (not (#$capable?))
+                       (begin
+                         (format #t "Error: Not able to run this service.\n")
+                         #f)
+                       (if (not (service-running-safe? svc-name))
+                           (let ((svc (apply make-spawner-service
+                                             #$spawner-name
+                                             #$constructor
+                                             inst-name
+                                             kw-args)))
+                             (register-services (list svc))
+                             (apply start-service svc vargs)
+                             (format #t "Started new service: ~a\n" svc-name))
+                           (format #t "Service ~a already running.\n" svc-name))))))))
+
 
        (shepherd-action
         (name 'destroy)
-        (documentation "herd destroy <spawner> <inst-name>")
+        (documentation "herd destroy <spawner> <inst-name> [unregister]")
         (procedure
          #~(lambda (running . args)
+             #$helpers
              (if (null? args)
-               (let ((inst-name (car args))
-                     (vargs (cdr args)))
-                (let* ((svc-sym (string->symbol
-                                 (string-append "transient-"
-                                                #$(symbol->string spawner-name)
-                                                "-" inst-name)))
-                       (svc (lookup-service svc-sym)))
-                  (if (not svc)
-                      (format #t "Not found: ~a\n" svc-sym)
-                      (begin
-                        (when (service-running? svc)
-                          (stop-service svc))
-                        (deregister-service svc-sym)
-                        (format #t "Destroyed: ~a\n" svc-sym)))))
-               (format #t "Usage: herd destroy ~a <inst-name>\n"
-                       '#$spawner-name)))))
-
+                 (format #t "Usage: herd destroy ~a <inst-name> [unregister]\n"
+                         '#$spawner-name)
+                 (let* ((inst-name (car args))
+                        (unregister? (member "unregister" (cdr args)))
+                        (svc-name (service-sym inst-name #:transient? (plist-ref kw-args #:transient? #t)))
+                        (svc (lookup-service svc-name)))
+                   (if (not svc)
+                       (format #t "Not found: ~a\n" svc-name)
+                       (begin
+                         (when (service-running? svc)
+                           (stop-service svc))
+                         (if unregister?
+                             (begin
+                               (unregister-services (list svc))
+                               (format #t "Stopped and unregistered ~a\n" svc-name))
+                             (format #t "Stopped: ~a\n" svc-name)))))))))
        (shepherd-action
         (name 'list)
         (documentation "List spawned instances")
         (procedure
          #~(lambda (running . args)
+             #$helpers
              (let ((prefix (string-append "transient-"
                                           #$(symbol->string spawner-name)
                                           "-")))
                (for-each
                 (lambda (svc)
                   (let ((name (symbol->string (car (service-provision svc)))))
-                    (when (string-prefix? prefix name)
+                    (when (string-has-prefix? prefix name)
                       (format #t "~a => ~a\n" name
                               (if (service-running? svc)
                                   "running" "stopped")))))
-                (running-services)))))))))))
-
+                (all-services)))))))))))
 
 (define home-spawner-service-type
   (service-type
@@ -251,7 +227,8 @@
     (list (service-extension
            home-shepherd-service-type
            (lambda (configs)
-             (map spawner-config->shepherd-service configs)))))
+             (map spawner-config->shepherd-service
+                  configs)))))
    (compose concatenate)
    (extend append)
    (default-value '())
@@ -361,8 +338,6 @@
                 #~(const #t))))))))
    (default-value #f)
    (description "SSH tunnel spawner for guix home.")))
-
-
 
 
 ;; (home-environment
