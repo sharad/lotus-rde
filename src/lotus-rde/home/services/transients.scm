@@ -98,8 +98,8 @@
           (and (<= plen (string-length str))
                (string=? prefix (substring str 0 plen)))))
 
-      (define* (service-sym inst-name  #:key (transient? #t))
-        (string->symbol (service-name-str inst-name #:transient? transient?)))
+      (define* (service-sym spawner-service inst-name  #:key (transient? #t))
+        (string->symbol (service-name-str spawner-service inst-name #:transient? transient?)))
 
       (define* (service-name-str spawner-service inst-name #:key (transient? #t))
         (format #f "~a~a-~a"
@@ -125,19 +125,19 @@
                                      (transient? #t)
                                      #:allow-other-keys
                                      #:rest rest-keys)
-       (service (list (service-sym inst-name #:transient? transient?))
-                #:start (apply constructor-fn inst-name
-                               (lambda () (service-name-str spawner-service inst-name #:transient? transient?))
-                               (append (list #:transient? transient?)
-                                       rest-keys))
-                #:stop (make-kill-destructor)
-                #:respawn-delay respawn-delay
-                #:respawn-limit respawn-limit
-                ;; #:respawn? #f
-                #:transient? transient?
-                #:requirement (list spawner-service)
-                ;; #:one-shot? #f
-                #:respawn? respawn?))))
+        (service (list (service-sym spawner-service inst-name #:transient? transient?))
+                 #:start (apply constructor-fn inst-name
+                                (lambda () (service-name-str spawner-service inst-name #:transient? transient?))
+                                (append (list #:transient? transient?)
+                                        rest-keys))
+                 #:stop (make-kill-destructor)
+                 #:respawn-delay respawn-delay
+                 #:respawn-limit respawn-limit
+                 ;; #:respawn? #f
+                 #:transient? transient?
+                 #:requirement (list spawner-service)
+                 ;; #:one-shot? #f
+                 #:respawn? respawn?))))
 
 (define (spawner-config->shepherd-service config)
   (let ((spawner-name (home-spawner-configuration-name config))
@@ -163,7 +163,7 @@
                  (let* ((inst-name (car args))
                         (vargs (cdr args))
                         (kw-args  (strings->keyword-args vargs))
-                        (svc-name (service-sym inst-name #:transient? (plist-ref kw-args #:transient? #t))))
+                        (svc-name (service-sym #$spawner-name inst-name #:transient? (plist-ref kw-args #:transient? #t))))
                    (format #t "spawn: svc-name = ~a\n" svc-name)
                    (if (not (#$capable?))
                        (begin
@@ -192,7 +192,7 @@
                          '#$spawner-name)
                  (let* ((inst-name (car args))
                         (unregister? (member "unregister" (cdr args)))
-                        (svc-name (service-sym inst-name #:transient? (plist-ref kw-args #:transient? #t)))
+                        (svc-name (service-sym #$spawner-name inst-name #:transient? (plist-ref kw-args #:transient? #t)))
                         (svc (lookup-service svc-name)))
                    (if (not svc)
                        (format #t "Not found: ~a\n" svc-name)
