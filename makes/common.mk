@@ -16,7 +16,7 @@ GUIX_COMMAND       ?= ${GUIXTM_COMMAND}
 
 GUIX_FULL_COMMAND  = $(GUIXTM_PREFIX_ENV) $(GUIX_COMMAND)
 
-GUIX_FLAGS         += --verbosity=3
+# GUIX_FLAGS         += --verbosity=3
 GUIX_FLAGS         += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
 GUIX_SYSTEM_FLAGS  += $(GUIX_FLAGS) --debug=3
 GUIX_HOME_FLAGS    += $(GUIX_FLAGS) --debug=3

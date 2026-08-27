@@ -434,20 +434,50 @@
               #:log-file #$(log-file "znc")))
           (stop #~(make-kill-destructor))
           (respawn? #t))
+
          ;; usrhttpd
+         ;; (shepherd-service
+         ;;  (provision '(usrhttpd))
+         ;;  (documentation "Simple user http server")
+         ;;  (auto-start? #f)
+         ;;  (start #~(make-forkexec-constructor
+         ;;            (list #$(file-append usrhttpd "/bin/usrhttpd")
+         ;;                  "-H"
+         ;;                  "0.0.0.0"
+         ;;                  (string-append (getenv "HOME")
+         ;;                                 "/public_html/sites/default"))
+         ;;            #:log-file #$(log-file "usrhttpd")))
+         ;;  (stop #~(make-kill-destructor))
+         ;;  (respawn? #f))
+
+         ;; (shepherd-service
+         ;;  (provision '(usrhttpd))
+         ;;  (documentation "HTTP server activated on demand")
+         ;;  (auto-start? #f)
+
          (shepherd-service
           (provision '(usrhttpd))
-          (documentation "Simple user http server")
-          (auto-start? #f)
-          (start #~(make-forkexec-constructor
-                    (list #$(file-append usrhttpd "/bin/usrhttpd")
-                          "-H"
-                          "0.0.0.0"
-                          (string-append (getenv "HOME")
-                                         "/public_html/sites/default"))
-                    #:log-file #$(log-file "usrhttpd")))
-          (stop #~(make-kill-destructor))
+          (documentation "Simple user HTTP server")
+          (auto-start? #t)
+
+          (start
+           #~(make-inetd-constructor
+              (list #$(file-append usrhttpd "/bin/usrhttpd")
+                    "--inetd"
+                    "true"
+                    ;; "-H"
+                    ;; "0.0.0.0"
+                    (string-append (getenv "HOME")
+                                   "/public_html/sites/default"))
+              (list
+               (endpoint
+                (make-socket-address AF_INET INADDR_ANY 8080)))))
+
+          (stop
+           #~(make-inetd-destructor))
+
           (respawn? #f))
+
          ;; jupyter
          (shepherd-service
           (provision '(jupyter))
