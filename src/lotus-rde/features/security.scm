@@ -155,7 +155,9 @@
    (values `((shepherd-secfs-orgp secfs-orgp)
              (shepherd-secfs-secure secfs-secure)
              (shepherd-secfs-volatile secfs-volatile)
-             (shepherd-secfs secfs)))
+             (shepherd-secfs (xawaken-session))
+             (shepherd-kpkeys (xawaken-session))
+             (shepherd-ssh-add (xawaken-session))))
    (home-services-getter get-home-services)))
 
 

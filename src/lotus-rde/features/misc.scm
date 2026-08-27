@@ -484,15 +484,15 @@
           (stop #~(make-kill-destructor))
           (respawn? #t))))))
   (feature
-   (values `((shepherd-emacs-lotus emacs-lotus)
-             (shepherd-ssh-agent ssh-agent)
-             (shepherd-gpg-agent gpg-agent)
-             (shepherd-pkttyagent pkttyagent)
-             (shepherd-attnmgr attnmgr)
-             (shepherd-mpd mpd)
-             (shepherd-znc znc)
-             (shepherd-jupyter jupyter)
-             (shepherd-usrhttpd usrhttpd)
+   (values `((shepherd-emacs-lotus (login))
+             (shepherd-ssh-agent (login))
+             (shepherd-gpg-agent (login))
+             (shepherd-pkttyagent (login))
+             (shepherd-attnmgr (awaken-session xlogin))
+             (shepherd-mpd (login))
+             (shepherd-znc (login))
+             (shepherd-jupyter (login))
+             (shepherd-usrhttpd (login))
              (shepherd-keepawaken keepawaken)))
    (name 'lotus-nox-services)
    (home-services-getter get-home-services)))
@@ -1042,33 +1042,33 @@
 
   (feature
    (name 'lotus-x-services)
-   (values `((shepherd-conky conky)
-             (shepherd-eww eww)
-             (shepherd-keynav keynav)
-             (shepherd-xautolock xautolock)
-             (shepherd-autocutsel autocutsel)
+   (values `((shepherd-conky (wmlogin))
+             (shepherd-eww (wmlogin))
+             (shepherd-keynav (xlogin))
+             (shepherd-xautolock (wmlogin))
+             (shepherd-autocutsel (xlogin wmlogin))
              (shepherd-picom picom)
-             (shepherd-dunst dunst)
+             (shepherd-dunst (xlogin wmlogin))
              (shepherd-ibus ibus)
-             (shepherd-blueman blueman)
+             (shepherd-blueman (wmlogin))
              (shepherd-autossh autossh)
              (shepherd-osdsh osdsh)
-             (shepherd-notification notification)
-             (shepherd-ibus-portal ibus-portal)
-             (shepherd-ibus-daemon ibus-daemon)
-             (shepherd-ibus-x11 ibus-x11)
+             (shepherd-notification (wmlogin))
+             (shepherd-ibus-portal (wmlogin))
+             (shepherd-ibus-daemon (wmlogin))
+             (shepherd-ibus-x11 (wmlogin))
              (shepherd-gnome-keyring gnome-keyring)
-             (shepherd-keepassxc keepassxc)
-             (shepherd-keymap keymap)
-             (shepherd-xrdb xrdb)
-             (shepherd-synclient synclient)
-             (shepherd-pwr-applet pwr-applet)
-             (shepherd-logind-applet logind-applet)
-             (shepherd-pasystray pasystray)
-             (shepherd-deskflow-server deskflow-server)
+             (shepherd-keepassxc (xawaken-session))
+             (shepherd-keymap (xlogin wmlogin))
+             (shepherd-xrdb (xlogin wmlogin xautolock))
+             (shepherd-synclient (xlogin wmlogin))
+             (shepherd-pwr-applet (wmlogin))
+             (shepherd-logind-applet (wmlogin))
+             (shepherd-pasystray (wmlogin))
+             (shepherd-deskflow-server (xlogin xawaken-session))
              (shepherd-deskflow-client deskflow-client)
-             (shepherd-proxy-fclient proxy-fclient)
-             (shepherd-xdg-autostart xdg-autostart)))
+             (shepherd-proxy-fclient (xawaken-session))
+             (shepherd-xdg-autostart (wmlogin))))
    (home-services-getter get-home-services)))
 
 
@@ -1076,7 +1076,6 @@
 
   (define (get-home-services config)
     (let ((awaken-requirements '(attnmgr
-                                 secfs
                                  xawaken-session-down))
           (delayed-requirements '(awaken-session
                                   xdelayed-login-session-down))
@@ -1085,15 +1084,15 @@
                                 ;; attnmgr
                                 bluez-autoconnect
                                 power-mon
-                                udiskie
-                                geoclue
+                                udiskie ;; todo
+                                geoclue ;; todo
                                 mpd
                                 ssh-agent
                                 gpg-agent
                                 ;; pulseaudio
-                                pipewire
-                                pipewire-pulse
-                                wireplumber
+                                pipewire ;; todo
+                                pipewire-pulse ;; todo
+                                wireplumber ;; todo
                                 znc
                                 emacs-lotus
                                 ;; usrhttpd
@@ -1136,7 +1135,7 @@
              (shepherd-delayed-login-session delayed-login-session)
              (shepherd-delayed-login-session-up delayed-login-session-up)
              (shepherd-delayed-login-session-down delayed-login-session-down)
-             (shepherd-login login)))
+             (shepherd-login (xlogin wmlogin))))
    (name 'lotus-nox-group-services)
    (home-services-getter get-home-services)))
 
@@ -1147,12 +1146,13 @@
   (define (get-home-services config)
     (let ((xawaken-requirements '(proxy-fclient
                                   deskflow-server ;; barrier
+                                  secfs
                                   annex
                                   kpkey
                                   ssh-add
                                   keepassxc
                                   awaken-session
-                                  xdelayed-login-session-down))
+                                  xdelayed-login-session-down)) ;todo
           (xdelayed-requirements '(xawaken-session
                                    delayed-login-session))
           (xlogin-requirements '(attnmgr
@@ -1179,8 +1179,8 @@
                                   dunst
                                   notification
                                   ;; gnome-keyring
-                                  nm-applet
-                                  blueman-applet
+                                  nm-applet ;todo
+                                  blueman-applet ;todo
                                   ibus-portal
                                   ibus-daemon
                                   ibus-x11
@@ -1239,12 +1239,12 @@
            (requirement (get-active-requirements config wmlogin-requirements))))))))
 
   (feature
-   (values `((shepherd-xawaken-session 'awaken-session)
+   (values `((shepherd-xawaken-session awaken-session)
              (shepherd-xawaken-session-up awaken-session-up)
-             (shepherd-xawaken-session-down awaken-session-down)
+             (shepherd-xawaken-session-down (awaken-session))
              (shepherd-xdelayed-login-session xdelayed-login-session)
              (shepherd-xdelayed-login-session-up xdelayed-login-session-up)
-             (shepherd-xdelayed-login-session-down xdelayed-login-session-down)
+             (shepherd-xdelayed-login-session-down (delayed-login-session))
              (shepherd-xlogin xlogin)
              (shepherd-wmlogin wmlogin)))
    (name 'lotus-x-group-services)
@@ -1322,7 +1322,7 @@
     home-bluetooth-autoconnect-service)
 
   (feature
-   (values `((shepherd-bluez-autoconnect bluez-autoconnect)))
+   (values `((shepherd-bluez-autoconnect (login))))
    (name 'bluetooth-autoconnect)
    (home-services-getter get-home-services)))
 
@@ -1336,7 +1336,7 @@
     home-power-monitor-service)
 
   (feature
-   (values `((shepherd-power-monitor power-monitor)))
+   (values `((shepherd-power-monitor (login))))
    (name 'power-monitor)
    (home-services-getter get-home-services)))
 
@@ -1348,7 +1348,7 @@
     home-git-annex-daemon-service)
 
   (feature
-   (values `((shepherd-annex annex)))
+   (values `((shepherd-annex (xawaken-session))))
    (name 'annex)
    (home-services-getter get-home-services)))
 

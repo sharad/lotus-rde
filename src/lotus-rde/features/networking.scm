@@ -110,7 +110,8 @@
 
   (feature
    (name f-name)
-   (values `((,f-name . #t)
+   (values `((shepherd-nm-applet (wmlogin))
+             (,f-name . #t)
              ,@(if mdns?
                    `((name-service . ,%mdns-host-lookup-nss)
                      (mdns . #t))
