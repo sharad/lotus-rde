@@ -12,24 +12,54 @@ GUIXTM_PREFIX_ENV  +=
 
 GUIXTM_COMMAND     = guix time-machine -C ${CHANNELS_FILE} $(GUIXTM_FLAGS) --
 
+
+
+
 GUIX_COMMAND       ?= ${GUIXTM_COMMAND}
 
 GUIX_FULL_COMMAND  = $(GUIXTM_PREFIX_ENV) $(GUIX_COMMAND)
 
-# GUIX_FLAGS         += --verbosity=3
 GUIX_FLAGS         += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
-GUIX_SYSTEM_FLAGS  += $(GUIX_FLAGS) --debug=3
-GUIX_HOME_FLAGS    += $(GUIX_FLAGS) --debug=3
-GUIX_PROFILE_FLAGS += $(GUIX_FLAGS) --debug=3
+
+GUIX_DEBUG_FLAG    =  --debug=3
+GUIX_VERBOSE_FLAG  =  --verbosity=3
+
+
+GUIX_CMD_FLAGS     += $(GUIX_FLAGS) $(GUIX_DEBUG_FLAG)
+
+
+GUIX_SYSTEM_FLAGS  += $(GUIX_FLAGS) $(GUIX_DEBUG_FLAG)
+GUIX_HOME_FLAGS    += $(GUIX_FLAGS) $(GUIX_DEBUG_FLAG)
+
+GUIX_PROFILE_FLAGS += $(GUIX_FLAGS) $(GUIX_DEBUG_FLAG)
 
 GUIX_PROFILE_INSTALL_FLAGS += $(GUIX_PROFILE_FLAGS)
 GUIX_PROFILE_UPGRADE_FLAGS += $(GUIX_PROFILE_FLAGS)
 GUIX_PROFILE_CLEAR_FLAGS   += $(GUIX_PROFILE_FLAGS)
 
 
+GUIX_PKG_BUILD_FLAGS   += $(GUIX_FLAGS) $(GUIX_DEBUG_FLAG)
+GUIX_PKG_INSTALL_FLAGS += $(GUIX_FLAGS) $(GUIX_DEBUG_FLAG)
+GUIX_PKG_SEARCH_FLAGS  += $(GUIX_FLAGS) $(GUIX_DEBUG_FLAG)
+
+GUIX_REPL_FLAGS          += $(GUIX_FLAGS) $(GUIX_DEBUG_FLAG)
+
 GUIX = $(GUIX_FULL_COMMAND)
 
 
+
+FIRST_GOAL := $(firstword $(MAKECMDGOALS))
+ifneq ($(filter rde/profile/pkg/install/% rde/profile/pkg/remove/%,$(FIRST_GOAL)),)
+ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+$(ARGS):
+	@:
+endif
+
+ifneq ($(filter rde/pkg/build rde/pkg/install rde/pkg/search,$(FIRST_GOAL)),)
+ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+$(ARGS):
+	@:
+endif
 
 
 ifeq ($(PROFILE_BASE_DIR),)
@@ -48,6 +78,9 @@ RDE_USER ?= $(USER)
 export RDE_USER
 RDE_TARGET ?= system
 export RDE_TARGET
+
+
+
 
 
 
@@ -151,7 +184,7 @@ $(SUBDIR)/%:
 CMD = cmd
 # Pattern rule: any target that looks like subdir/something
 $(CMD)/%:
-	${GUIX} $* $(GUIX_FLAGS)
+	${GUIX} $* $(GUIX_CMD_FLAGS)
 # Optional: Add a phony declaration if targets aren't actual files
 .PHONY: $(CMD)/%
 ## -- guix subcmd targets
@@ -236,12 +269,6 @@ rde/profile/clear/%: $(TARGET_DIR)
 
 
 
-FIRST_GOAL := $(firstword $(MAKECMDGOALS))
-ifneq ($(filter rde/pkg/search rde/profile/pkg/install/% rde/profile/pkg/remove/%,$(FIRST_GOAL)),)
-ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-$(ARGS):
-	@:
-endif
 
 
 rde/profile/pkg/install/%: $(TARGET_DIR)
@@ -262,11 +289,23 @@ else
 	-p $(PROFILE_BASE_DIR)/$*/profiles.d/profile $(ARGS)
 endif
 
+rde/pkg/build:
+	RDE_PROFILE_MODE=remove ${GUIX} build $(GUIX_PKG_BUILD_FLAGS) $(ARGS)
+
+rde/pkg/instal:
+	RDE_PROFILE_MODE=remove ${GUIX} instal $(GUIX_PKG_INSTAL_FLAGS) $(ARGS)
+
 rde/pkg/search:
-	RDE_PROFILE_MODE=remove ${GUIX} search $(GUIX_PROFILE_SEARCH_FLAGS) $(ARGS)
+	RDE_PROFILE_MODE=remove ${GUIX} search $(GUIX_PKG_SEARCH_FLAGS) $(ARGS)
+
+rde/repl:
+	RDE_PROFILE_MODE=remove ${GUIX} repl $(GUIX_REPL_FLAGS) $(ARGS)
 
 
-.PHONY: rde/profile/install/% rde/profile/upgrade/% rde/profile/clear/% rde/profile/pkg/install/% rde/profile/pkg/remove/% rde/pkg/search/%
+.PHONY: rde/profile/install/% rde/profile/upgrade/% rde/profile/clear/%
+.PHONY: rde/profile/pkg/install/% rde/profile/pkg/remove/%
+.PHONY: rde/pkg/build rde/pkg/install rde/pkg/search
+.PHONY: rde/pkg/repl
 
 
 
