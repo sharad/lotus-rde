@@ -88,6 +88,7 @@
   #:use-module (gnu packages boost)
   #:use-module (guix build-system python)
   #:use-module (gnu packages check)
+  #:use-module (gnu packages curl)
   #:use-module (gnu packages ruby)
   #:use-module (gnu packages documentation)
   #:use-module (gnu packages xml)
@@ -1688,8 +1689,17 @@ unavailable."
    (description
     "Modular Rust HTTP server with .htaccess support, reverse proxy, TLS, and directory indexing.")
    (license license:gpl3+)))
+
 
-
+(define-public glyr-fixed
+  (package
+    (inherit glyr)
+    (name "glyr-fixed")
+    (arguments
+     (substitute-keyword-arguments (package-arguments glyr)
+       ((#:configure-flags flags)
+        #~(cons "-DCMAKE_C_FLAGS=-DCURL_DISABLE_TYPECHECK"
+                #$flags))))))
 
 (define-public gob2
   (package
@@ -1755,7 +1765,7 @@ It generates C source and header files from GOB source files.")
 
 
 (define-public gmpc
-  (let ((commit "ea02570f8f7e82fcb276b554d92ba2fc45570dfc")
+  (let ((commit "aeb46a9010e3b55cd53bfed2ef34468a7c691317")
         (revision "1"))
     (package
       (name "gmpc")
@@ -1769,9 +1779,8 @@ It generates C source and header files from GOB source files.")
            (commit commit)))
          (file-name (git-file-name name version))
          (sha256
-          (base32 "0g8lbksvr9xl7njir7p9wc81s4ask4lrfpraf642p2biyw0qi7ay"))))
+          (base32 "1gigxs1dvqr1vp7qj8w0zhh6fkap9rpr0v0g6llm96zj70s46zq8"))))
       (build-system gnu:gnu-build-system)
-
       (native-inputs
        (list autoconf
              automake
@@ -1781,12 +1790,12 @@ It generates C source and header files from GOB source files.")
              gettext-minimal
              intltool
              gob2))
-
       (inputs
        (list gtk+
              glib
              libmpd
-             glyr
+             glyr-fixed
+             curl
              libsoup
              libxml2
              zlib))
@@ -1797,4 +1806,4 @@ It generates C source and header files from GOB source files.")
       (home-page "https://github.com/sharad/gmpc")
       (license license:gpl2))))
 
-
+
