@@ -1688,3 +1688,81 @@ unavailable."
 
 
 
+(define-public libmpd
+  (let ((commit "8601a0e3a80981398c037ac311d03b5cf94ec1d4")
+        (revision "1"))
+    (package
+      (name "libmpd")
+      (version (git-version "11.8.90" revision commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri
+          (git-reference
+           (url "https://github.com/DaveDavenport/libmpd.git")
+           (commit commit)))
+         (file-name (git-file-name name version))
+         (sha256
+          (base32 "0000000000000000000000000000000000000000000000000000"))))
+      (build-system gnu-build-system)
+
+      (native-inputs
+       (list autoconf
+             automake
+             libtool
+             pkg-config))
+
+      (inputs
+       (list glib))
+
+      (synopsis "MPD client library")
+      (description
+       "libmpd is a library for communicating with Music Player Daemon.")
+      (home-page "https://github.com/DaveDavenport/libmpd")
+      (license license:gpl2))))
+
+
+(define-public gmpc
+  (let ((commit "ea02570f8f7e82fcb276b554d92ba2fc45570dfc")
+        (revision "1"))
+    (package
+      (name "gmpc")
+      (version (git-version "11.8.90" revision commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri
+          (git-reference
+           (url "https://github.com/sharad/gmpc.git")
+           (commit commit)))
+         (file-name (git-file-name name version))
+         (sha256
+          (base32 "0000000000000000000000000000000000000000000000000000"))))
+      (build-system gnu-build-system)
+
+      (native-inputs
+       (list autoconf
+             automake
+             libtool
+             pkg-config
+             vala
+             gettext-minimal
+             intltool
+             gob2))
+
+      (inputs
+       (list gtk+
+             glib
+             libmpd
+             libglyr
+             libsoup
+             libxml2
+             zlib))
+
+      (synopsis "GNOME Music Player Client")
+      (description
+       "GMPC is a GTK-based graphical client for the Music Player Daemon (MPD).")
+      (home-page "https://github.com/sharad/gmpc")
+      (license license:gpl2))))
+
+
