@@ -96,7 +96,10 @@
   #:use-module (gnu packages golang-check)
   #:use-module (gnu packages bash)
   #:use-module (gnu packages rust-crates)
-  #:use-module (gnu packages shells))
+  #:use-module (gnu packages shells)
+  #:use-module (gnu packages music)
+  #:use-module (gnu packages flex)
+  #:use-module (gnu packages bison))
 
 ;; https://issues.guix.gnu.org/issue/35619
 
@@ -1688,6 +1691,35 @@ unavailable."
 
 
 
+(define-public gob2
+  (package
+    (name "gob2")
+    (version "2.0.20")
+    (source
+     (origin
+       (method url-fetch)
+       (uri
+        (string-append
+         "http://ftp.5z.com/pub/gob/gob2-"
+         version
+         ".tar.xz"))
+       (sha256
+        (base32
+         "09l0pr83vpl53hyl610qsrlsml2dribijik0b9pfk2m8gk089vpp"))))
+    (build-system gnu:gnu-build-system)
+    (native-inputs
+     (list flex
+           bison
+           pkg-config))
+    (inputs
+     (list glib))
+    (synopsis "GObject Builder")
+    (description
+     "GOB2 is a preprocessor for easily creating GObject objects.
+It generates C source and header files from GOB source files.")
+    (home-page "https://www.jirka.org/gob.html")
+    (license license:gpl2+)))
+
 (define-public libmpd
   (let ((commit "8601a0e3a80981398c037ac311d03b5cf94ec1d4")
         (revision "1"))
@@ -1703,8 +1735,8 @@ unavailable."
            (commit commit)))
          (file-name (git-file-name name version))
          (sha256
-          (base32 "0000000000000000000000000000000000000000000000000000"))))
-      (build-system gnu-build-system)
+          (base32 "0n1pz5686iwpzivr8q4wq0fgx9m0drj5qnc2a8l7v1fdqbj60xmm"))))
+      (build-system gnu:gnu-build-system)
 
       (native-inputs
        (list autoconf
@@ -1737,8 +1769,8 @@ unavailable."
            (commit commit)))
          (file-name (git-file-name name version))
          (sha256
-          (base32 "0000000000000000000000000000000000000000000000000000"))))
-      (build-system gnu-build-system)
+          (base32 "0g8lbksvr9xl7njir7p9wc81s4ask4lrfpraf642p2biyw0qi7ay"))))
+      (build-system gnu:gnu-build-system)
 
       (native-inputs
        (list autoconf
@@ -1754,7 +1786,7 @@ unavailable."
        (list gtk+
              glib
              libmpd
-             libglyr
+             glyr
              libsoup
              libxml2
              zlib))
