@@ -168,6 +168,9 @@
         (list emacs
               polkit
               mpd
+              gmpc
+              ;; euphonica
+              ;; flatpak run com.yktoo.ymuse
               znc
               jupyter))
 
