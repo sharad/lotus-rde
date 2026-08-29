@@ -21,8 +21,6 @@
   #:use-module (gnu services networking)
   #:use-module (gnu services avahi)
   #:use-module (gnu services dbus)
-  #:use-module (gnu services web)
-  #:use-module (gnu services certbot)
   #:use-module (gnu home services)
   #:use-module (gnu home services admin)
   #:use-module (gnu home services desktop)
@@ -40,7 +38,6 @@
   #:use-module (gnu packages nfs)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages freedesktop)
-  #:use-module (gnu packages web)
   #:use-module (rde packages)
 
   #:use-module (srfi srfi-1)
@@ -115,8 +112,6 @@
             feature-messaging-services
             feature-mail-services
             feature-iio-sensor-proxy-services
-            feature-nginx-services
-            feature-dnsmasq-services
             feature-pointer-services
             feature-bluetooth-services
             feature-music-services
@@ -952,113 +947,6 @@ Defaults:%wheel env_keep+=TERMINFO")))))
    (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
-
-(define* (feature-nginx-services
-          #:key
-          (nginx nginx))
-  ;; https://guix.gnu.org/manual/en/html_node/Desktop-Services.html
-  (define (get-home-services config)
-    (list))
-
-  (define (get-system-services config)
-    (list
-     (service certbot-service-type
-              (certbot-configuration
-               (certificates
-                (list
-                 (certificate-configuration
-                  (name "app1")
-                  (domains '("app1.example.org")))
-                 (certificate-configuration
-                  (name "app2")
-                  (domains '("app2.example.org")))))))
-     (service nginx-service-type
-              (nginx-configuration
-               (nginx nginx)
-               (server-blocks
-                (list
-                 (nginx-server-configuration
-                  (server-name '("app1.example.org"))
-                  (listen '("80" "443 ssl"))
-                  (ssl-certificate "/etc/letsencrypt/live/app1/fullchain.pem")
-                  (ssl-certificate-key "/etc/letsencrypt/live/app1/privkey.pem")
-                  (locations
-                   (list
-                    (nginx-location-configuration
-                     (uri "/")
-                     (body
-                      (list "proxy_pass http://127.0.0.1:8080;"
-                            "proxy_set_header Host $host;"
-                            "proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"))))))))))))
-
-  (feature
-   (name 'nginx)
-   (values `())
-   (home-services-getter get-home-services)
-   (system-services-getter get-system-services)))
-
-
-(define* (feature-dnsmasq-services
-          #:key
-          (no-resolv? #t)
-          (local-service? #t))
-  ;; https://notabug.org/thomassgn/guixsd-configuration/src/master/config.scm
-  ;; https://guix.gnu.org/manual/en/html_node/Networking-Services.html
-  ;; https://jonathansblog.co.uk/using-dnsmasq-as-an-internal-dns-server-to-block-online-adverts
-  ;; https://stackoverflow.com/questions/48644841/multiple-addn-hosts-conf-in-dnsmasq
-  (define (get-home-services config)
-    (list))
-
-  (define (get-system-services config)
-    (list
-     (service dnsmasq-service-type
-              (dnsmasq-configuration
-                (no-resolv? no-resolv?)
-                (local-service? local-service?)))))
-
-  (feature
-   (name 'dnsmasq)
-   (values `())
-   (home-services-getter get-home-services)
-   (system-services-getter get-system-services)))
-
-
-;; (define* (feature-network-manager-services
-;;           #:key
-;;           (vpn-plugins (list network-manager-fortisslvpn
-;;                              network-manager-openconnect))
-;;           (dns "dnsmasq"))
-;;   ;; https://guix.gnu.org/manual/en/html_node/Networking-Services.html
-;;   (define (get-home-services config)
-;;     (list))
-
-;;   (define (get-system-services config)
-;;     (list
-;;      (service network-manager-service-type
-;;               (network-manager-configuration
-;;                (vpn-plugins vpn-plugins)
-;;                (dns dns)))))
-
-;;   (feature
-;;    (name 'network-manager-vpn)
-;;    (values `())
-;;    (home-services-getter get-home-services)
-;;    (system-services-getter get-system-services)))
-
-;; (define* (feature-dns-services)
-;;   ;; https://guix.gnu.org/manual/en/html_node/Avahi-Services.html
-;;   (define (get-home-services config)
-;;     (list))
-
-;;   (define (get-system-services config)
-;;     (list
-;;      (service avahi-service-type)))
-
-;;   (feature
-;;    (name 'avahi)
-;;    (values `())
-;;    (home-services-getter get-home-services)
-;;    (system-services-getter get-system-services)))
 
 
 (define* (feature-pointer-services)

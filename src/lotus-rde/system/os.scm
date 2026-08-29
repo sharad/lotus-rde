@@ -190,7 +190,7 @@
         ;; (feature-messaging-services)
         ;; (feature-mail-services)
         (feature-iio-sensor-proxy-services)
-        (feature-nginx-services)
+        (feature-lotus-webserver)
         ;; (feature-network-manager-services)
 
         ;; (feature-dns-services)
