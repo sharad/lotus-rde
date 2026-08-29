@@ -1765,7 +1765,7 @@ It generates C source and header files from GOB source files.")
 
 
 (define-public gmpc
-  (let ((commit "aeb46a9010e3b55cd53bfed2ef34468a7c691317")
+  (let ((commit "780a6ca1e7b7f8386e84d8124a7023be8fac7a23")
         (revision "1"))
     (package
       (name "gmpc")
@@ -1779,7 +1779,7 @@ It generates C source and header files from GOB source files.")
            (commit commit)))
          (file-name (git-file-name name version))
          (sha256
-          (base32 "1gigxs1dvqr1vp7qj8w0zhh6fkap9rpr0v0g6llm96zj70s46zq8"))))
+          (base32 "0qf7f8qny195b9x7fa8drxgdw3c44jrcwhyny1fq7cfwbk2jnvwy"))))
       (build-system gnu:gnu-build-system)
       (native-inputs
        (list autoconf

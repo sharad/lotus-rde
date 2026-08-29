@@ -290,16 +290,16 @@ else
 endif
 
 rde/pkg/build:
-	RDE_PROFILE_MODE=remove ${GUIX} build $(GUIX_PKG_BUILD_FLAGS) $(ARGS)
+	RDE_PROFILE_MODE=build ${GUIX} build $(GUIX_PKG_BUILD_FLAGS) $(ARGS)
 
-rde/pkg/instal:
-	RDE_PROFILE_MODE=remove ${GUIX} instal $(GUIX_PKG_INSTAL_FLAGS) $(ARGS)
+rde/pkg/install:
+	RDE_PROFILE_MODE=install ${GUIX} install $(GUIX_PKG_INSTALL_FLAGS) $(ARGS)
 
 rde/pkg/search:
-	RDE_PROFILE_MODE=remove ${GUIX} search $(GUIX_PKG_SEARCH_FLAGS) $(ARGS)
+	RDE_PROFILE_MODE=search ${GUIX} search $(GUIX_PKG_SEARCH_FLAGS) $(ARGS)
 
 rde/repl:
-	RDE_PROFILE_MODE=remove ${GUIX} repl $(GUIX_REPL_FLAGS) $(ARGS)
+	RDE_PROFILE_MODE=repl ${GUIX} repl $(GUIX_REPL_FLAGS) $(ARGS)
 
 
 .PHONY: rde/profile/install/% rde/profile/upgrade/% rde/profile/clear/%
