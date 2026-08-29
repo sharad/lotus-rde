@@ -1226,6 +1226,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
 
+
 (define* (feature-substitutes
           #:key
           (substitute-urls '())
@@ -1238,7 +1239,8 @@ Defaults:%wheel env_keep+=TERMINFO")))))
                                   "https://berlin.guix.gnu.org"
                                   "https://guix.tobias.gr"
                                   "https://mirror.brielmaier.net"
-                                  "https://cuirass.genenetwork.org"))
+                                  "https://cuirass.genenetwork.org"
+                                  "https://substitutes.guix.gofranz.com"))
 
           (base-authorized-guix-keys (list (plain-file "cache-cdn.guix.moe-old.pub"
                                                        "(public-key (ecc (curve Ed25519) (q #374EC58F5F2EC0412431723AF2D527AD626B049D657B5633AAAEBC694F3E33F9#)))")
@@ -1260,7 +1262,9 @@ Defaults:%wheel env_keep+=TERMINFO")))))
                                            (plain-file "mirror.brielmaier.net"
                                                        "(public-key (ecc (curve Ed25519) (q #34C318D602FCF6198C5A9F5290A8DB2382D2D0C5478441F8308D24E31BA61633#)))")
                                            (plain-file "cuirass-genenetwork-org.pub"
-                                                       "(public-key (ecc (curve Ed25519) (q #11217788B41ADC8D5B8E71BD87EF699C65312EC387752899FE9C888856F5C769#)))"))))
+                                                       "(public-key (ecc (curve Ed25519) (q #11217788B41ADC8D5B8E71BD87EF699C65312EC387752899FE9C888856F5C769#)))")
+                                           (plain-file "guix.gofranz.com.pub"
+                                                       "(public-key (ecc (curve Ed25519) (q #0096373009D945F86C75DFE96FC2D21E2F82BA8264CB69180AA4F9D3C45BAA47#)))"))))
 
   "Provides substitute URLs and authorized keys for Guix.  The values"
 
