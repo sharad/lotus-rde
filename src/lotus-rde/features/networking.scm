@@ -148,6 +148,29 @@
     (list))
 
   (define (get-system-services config)
+
+    ;; Convert one site specification into an nginx-server-configuration.
+    (define (site->server-block site)
+      (let* ((name   (car site))
+             (hosts  (cadr site))
+             (port   (caddr site))
+             (sprefix (cadddr site)))
+        (nginx-server-configuration
+         (server-name hosts)
+         (listen '("80" "[::]:80"))
+         (locations
+          (list
+           (nginx-location-configuration
+            (uri sprefix)
+            (body
+             (list
+              (string-append "proxy_pass http://127.0.0.1:"
+                             (number->string port)
+                             ";")
+              "proxy_set_header Host $host;"
+              "proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"
+              "proxy_set_header X-Forwarded-Proto $scheme;"))))))))
+
     (list
      (service certbot-service-type
               (certbot-configuration
@@ -159,29 +182,6 @@
                  (certificate-configuration
                   (name "app2")
                   (domains '("app2.example.org")))))))
-
-
-     ;; Convert one site specification into an nginx-server-configuration.
-     (define (site->server-block site)
-       (let* ((name   (car site))
-              (hosts  (cadr site))
-              (port   (caddr site))
-              (prefix (cadddr site)))
-         (nginx-server-configuration
-          (server-name hosts)
-          (listen '("80" "[::]:80"))
-          (locations
-           (list
-            (nginx-location-configuration
-             (uri (string-append prefix "/"))
-             (body
-              (list
-               (string-append "proxy_pass http://127.0.0.1:"
-                              (number->string port)
-                              ";")
-               "proxy_set_header Host $host;"
-               "proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"
-               "proxy_set_header X-Forwarded-Proto $scheme;"))))))))
 
      (service nginx-service-type
               (nginx-configuration
