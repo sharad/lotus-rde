@@ -134,6 +134,11 @@
                     8080
                     "/")
 
+                   ;; ;; hostname based
+                   ;; (guix-publish
+                   ;;  ("guix.example.local")
+                   ;;  8899)
+
                    (app2-api
                     ("example.local")
                     888
@@ -148,6 +153,27 @@
     (list))
 
   (define (get-system-services config)
+
+    ;; (define (site->catchall port sprefix)
+    ;;   (nginx-server-configuration
+    ;;    (server-name '("_"))
+    ;;    (listen '("80 default_server"
+    ;;              "[::]:80 default_server"
+    ;;              "443 ssl default_server"
+    ;;              "[::]:443 ssl default_server"))
+    ;;    (locations
+    ;;     (list
+    ;;      (nginx-location-configuration
+    ;;       (uri sprefix)
+    ;;       (body
+    ;;         (list)
+    ;;         (string-append "proxy_pass http://127.0.0.1:"
+    ;;                        (number->string port
+    ;;                         ";"))
+    ;;         "proxy_set_header Host $host;"
+    ;;         "proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"
+    ;;         "proxy_set_header X-Forwarded-Proto $scheme;"))))))
+
 
     ;; Convert one site specification into an nginx-server-configuration.
     (define (site->server-block site)

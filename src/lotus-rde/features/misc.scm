@@ -145,10 +145,6 @@
             feature-ssh-transient
             feature-extra-profile))
 
-
-
-
-
 (define* (feature-lotus-nox-services
           #:key
           (emacs emacs)
