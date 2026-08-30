@@ -17,6 +17,7 @@
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (lotus-rde packages utils)
+  #:use-module (system base message)
   #:use-module (guix packages)
   #:use-module (guix download)
   #:use-module (guix git-download)
@@ -1689,6 +1690,48 @@ unavailable."
    (description
     "Modular Rust HTTP server with .htaccess support, reverse proxy, TLS, and directory indexing.")
    (license license:gpl3+)))
+
+(define-public rust-mpd
+  (package
+    (name "rust-mpd")
+    (version "v0.99.6-beta-1")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/htkhiem/rust-mpd.git")
+             (commit version)))
+       (file-name (git-file-name name version))
+       (sha256
+        (base32 "218e1af6c44e08101b3c99f0df0fe1d10c3702b4"))))
+    (build-system cargo-build-system)
+    (inputs (append (lotus-cargo-inputs 'rust-mpd)))
+    (home-page "https://github.com/htkhiem/rust-mpd")
+    (synopsis "Fork of kstep/rust-mpd with additional features used by Euphonica.")
+    (description
+     "Fork of kstep/rust-mpd with additional features used by Euphonica.")
+    (license license:gpl3+)))
+
+(define-public rust-euphinica
+  (package
+    (name "rust-euphinica")
+    (version "v0.99.6-beta-1")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/htkhiem/euphonica.git")
+             (commit version)))
+       (file-name (git-file-name name version))
+       (sha256
+        (base32 "18dl67zgahb6pqv308jirfijlvf93z1xpfhgjqymh62hsdyglka7"))))
+    (build-system cargo-build-system)
+    (inputs (append (lotus-cargo-inputs 'euphonica)))
+    (home-page "https://github.com/htkhiem/euphonica")
+    (synopsis "An MPD client with delusions of grandeur, made with Rust, GTK and Libadwaita.")
+    (description
+     "An MPD client with delusions of grandeur, made with Rust, GTK and Libadwaita.")
+    (license license:gpl3+)))
 
 
 (define-public glyr-fixed
