@@ -1822,6 +1822,7 @@ unavailable."
                           gtk
                           openssl
                           pango
+                          pipewire
                           rust-mpd
                           glib-2.88)))
     (home-page "https://github.com/htkhiem/euphonica")
