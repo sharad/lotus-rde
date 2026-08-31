@@ -102,6 +102,7 @@
   #:use-module (gnu packages music)
   #:use-module (gnu packages flex)
   #:use-module (gnu packages bison)
+  #:use-module (gnu packages llvm)
   #:use-module (lotus-rde packages rust-crates))
 
 ;; https://issues.guix.gnu.org/issue/35619
@@ -1689,6 +1690,21 @@ compressed format}.")
          ((#:phases phases)
           #~(modify-phases #$phases
               (delete 'check))))))))
+
+
+(define-public libadwaita-1.9
+  (package
+    (inherit libadwaita)
+    (name "libadwaita-1.9")
+    (version "1.9.0")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append "mirror://gnome/sources/libadwaita/"
+                                  (version-major+minor version) "/"
+                                  "libadwaita-" version ".tar.xz"))
+              (sha256
+               (base32
+                "0sqvrazqg2x07kzsppr5cspkc57zdq9qaq76zjxvag9n0szkfy41"))))))
 
 
 (define* (lotus-cargo-inputs name #:key (module '(lotus-rde packages rust-crates)))
@@ -1813,16 +1829,20 @@ unavailable."
                         (format #f "mpd = { path = ~s, features = [\"serde\"] }"
                                 mpd)))))))))
     (native-inputs
-     (list pkg-config))
+     (list pkg-config
+           python-3))
     (inputs (append (lotus-cargo-inputs 'euphonica)
                     (lotus-cargo-inputs 'rust-mpd)
                     (list cairo
+                          clang
                           gdk-pixbuf
                           graphene
                           gtk
+                          libadwaita-1.9
                           openssl
                           pango
                           pipewire
+                          python-3
                           rust-mpd
                           glib-2.88)))
     (home-page "https://github.com/htkhiem/euphonica")
