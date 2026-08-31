@@ -1663,7 +1663,7 @@ compressed format}.")
 
 (define-public glib-minimal-2.88
   (package
-    (inherit glib-minimal)
+    (inherit glib)
     (name "glib")
     (version "2.88.0")
     (source
@@ -1683,7 +1683,7 @@ compressed format}.")
       (name "glib")
       (native-inputs
        (modify-inputs (package-native-inputs base)
-         (prepend gobject-introspection-minimal)))
+         (prepend gobject-introspection)))
       (arguments
        (substitute-keyword-arguments (package-arguments base)
          ((#:phases phases)
