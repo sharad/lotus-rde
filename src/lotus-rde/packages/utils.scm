@@ -1855,12 +1855,13 @@ unavailable."
                           graphene
                           gtk
                           libadwaita-1.9
+                          libsecret
                           openssl
                           pango
                           pipewire
                           python-3
                           rust-mpd
-                          libsecret)))
+                          sqlite)))
     (home-page "https://github.com/htkhiem/euphonica")
     (synopsis "An MPD client with delusions of grandeur, made with Rust, GTK and Libadwaita.")
     (description
