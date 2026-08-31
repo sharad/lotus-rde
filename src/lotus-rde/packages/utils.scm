@@ -1818,6 +1818,7 @@ unavailable."
                     (lotus-cargo-inputs 'rust-mpd)
                     (list cairo
                           gdk-pixbuf
+                          openssl
                           pango
                           rust-mpd
                           glib-2.88)))
