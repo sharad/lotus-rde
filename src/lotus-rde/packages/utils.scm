@@ -1688,9 +1688,7 @@ compressed format}.")
        (substitute-keyword-arguments (package-arguments base)
          ((#:phases phases)
           #~(modify-phases #$phases
-              (delete 'check)
-              (add-after 'install 'check
-                (assoc-ref #$phases 'check)))))))))
+              (delete 'check))))))))
 
 
 (define* (lotus-cargo-inputs name #:key (module '(lotus-rde packages rust-crates)))
@@ -1818,7 +1816,10 @@ unavailable."
      (list pkg-config))
     (inputs (append (lotus-cargo-inputs 'euphonica)
                     (lotus-cargo-inputs 'rust-mpd)
-                    (list rust-mpd glib-2.88)))
+                    (list cairo
+                          pango
+                          rust-mpd
+                          glib-2.88)))
     (home-page "https://github.com/htkhiem/euphonica")
     (synopsis "An MPD client with delusions of grandeur, made with Rust, GTK and Libadwaita.")
     (description
