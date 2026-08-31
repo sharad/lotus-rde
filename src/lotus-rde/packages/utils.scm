@@ -1817,6 +1817,7 @@ unavailable."
     (inputs (append (lotus-cargo-inputs 'euphonica)
                     (lotus-cargo-inputs 'rust-mpd)
                     (list cairo
+                          gdk-pixbuf
                           pango
                           rust-mpd
                           glib-2.88)))
