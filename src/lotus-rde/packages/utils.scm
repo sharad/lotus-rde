@@ -1824,15 +1824,15 @@ unavailable."
                  (lambda _
                    (substitute* "src/config.rs.in"
                      (("@VERSION@")
-                      ,version)
+                      #$version)
                      (("@GETTEXT_PACKAGE@")
                       "euphonica")
                      (("@LOCALEDIR@")
-                      "/gnu/store/.../share/locale")
+                      (string-append #$output "/share/locale"))
                      (("@APPLICATION_ID@")
                       "io.github.htkhiem.Euphonica")
                      (("@PKGDATADIR@")
-                      "/gnu/store/.../share/euphonica"))
+                      (string-append #$output "/share/euphonica")))
                    (copy-file "src/config.rs.in" "src/config.rs")))
                (add-before 'build 'use-guix-mpd
                  (lambda* (#:key inputs #:allow-other-keys)
