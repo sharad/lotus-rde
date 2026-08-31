@@ -1661,6 +1661,38 @@ compressed format}.")
    (license #f)))
 
 
+(define-public glib-minimal-2.88
+  (package
+    (inherit glib-minimal)
+    (name "glib")
+    (version "2.88.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri
+        (string-append "mirror://gnome/sources/"
+                       "glib/" (string-take version 4) "/"
+                       "glib-" version ".tar.xz"))
+       (sha256
+        (base32
+         "0000000000000000000000000000000000000000000000000000"))))))
+
+(define-public glib-2.88
+  (let ((base glib-minimal-2.88))
+    (package/inherit base
+      (name "glib")
+      (native-inputs
+       (modify-inputs (package-native-inputs base)
+         (prepend gobject-introspection-minimal)))
+      (arguments
+       (substitute-keyword-arguments (package-arguments base)
+         ((#:phases phases)
+          #~(modify-phases #$phases
+              (delete 'check)
+              (add-after 'install 'check
+                (assoc-ref #$phases 'check)))))))))
+
+
 (define* (lotus-cargo-inputs name #:key (module '(lotus-rde packages rust-crates)))
   "Lookup Cargo inputs for NAME defined in MODULE, return an empty list if
 unavailable."
@@ -1782,9 +1814,11 @@ unavailable."
                        (("mpd = \\{[^\\n]*git = \"https://github\\.com/htkhiem/rust-mpd\\.git\"[^\\n]*\\}")
                         (format #f "mpd = { path = ~s, features = [\"serde\"] }"
                                 mpd)))))))))
+    (native-inputs
+     (list pkg-config))
     (inputs (append (lotus-cargo-inputs 'euphonica)
                     (lotus-cargo-inputs 'rust-mpd)
-                    (list rust-mpd)))
+                    (list rust-mpd glib-2.88)))
     (home-page "https://github.com/htkhiem/euphonica")
     (synopsis "An MPD client with delusions of grandeur, made with Rust, GTK and Libadwaita.")
     (description
