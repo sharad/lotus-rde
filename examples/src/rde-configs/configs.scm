@@ -210,13 +210,12 @@
                                                                    profile-name
                                                                    profile-level))))
                         (_ #f))))
-            ;; (display obj)
-            ;; (newline)
             obj))
         (begin
           (format #t "Invalid RDE_HOST: ~a or RDE_USER: ~a\n" 'rde-host-features 'rde-user-features)
           #f))))
 
+(when (getenv "RDE_TARGET")
+  (dispatcher))
 
-(dispatcher)
 

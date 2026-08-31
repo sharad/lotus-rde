@@ -6,20 +6,6 @@
 
 
 
-BUILD_TYPE ?= default
-
-CHANNELS_ENV_RDE_FILE     = ./env/guix/rde/env/guix/channels.scm
-CHANNELS_ENV_LATEST_FILE  = ./env/guix/rde/env/guix/channels-ci-latest-guix.scm
-
-CHANNELS_ENV_FILE_default = $(CHANNELS_ENV_RDE_FILE)
-CHANNELS_ENV_FILE_local   = $(CHANNELS_ENV_RDE_FILE)
-CHANNELS_ENV_FILE_rde     = $(CHANNELS_ENV_RDE_FILE)
-CHANNELS_ENV_FILE_latest  = $(CHANNELS_ENV_LATEST_FILE)
-
-CHANNELS_FILE             = $(CHANNELS_ENV_FILE_$(BUILD_TYPE))
-
-
-
 
 GUIXTM_FLAGS =
 GUIXTM_PREFIX_ENV =
@@ -42,7 +28,7 @@ RDE_SRC_LOAD_PATH  = -L ./env/guix -L ./env/dev -L ./src
 EXAMPLES_LOAD_PATH = -L ${EXAMPLES_SRC_DIR}
 
 
-GUIX_FLAGS = $(RDE_SRC_LOAD_PATH) $(EXAMPLES_LOAD_PATH)
+# GUIX_FLAGS = $(RDE_SRC_LOAD_PATH) $(EXAMPLES_LOAD_PATH)
 
 
 DEV_SRC_LOAD_PATH=${RDE_SRC_LOAD_PATH} \
@@ -59,8 +45,26 @@ QEMU_BASE_ARGS= \
 # -vga none -device qxl-vga,vgamem_mb=32
 
 
+ifneq ($(strip $(GUIX_COMMAND)),)
+BUILD_TYPE ?= default
+
+CHANNELS_ENV_RDE_FILE     = ./env/guix/rde/env/guix/channels.scm
+CHANNELS_ENV_LATEST_FILE  = ./env/guix/rde/env/guix/channels-ci-latest-guix.scm
+
+CHANNELS_ENV_FILE_default = $(CHANNELS_ENV_RDE_FILE)
+CHANNELS_ENV_FILE_local   = $(CHANNELS_ENV_RDE_FILE)
+CHANNELS_ENV_FILE_rde     = $(CHANNELS_ENV_RDE_FILE)
+CHANNELS_ENV_FILE_latest  = $(CHANNELS_ENV_LATEST_FILE)
+
+CHANNELS_FILE             = $(CHANNELS_ENV_FILE_$(BUILD_TYPE))
+endif
+
 
 include makes/common.mk
+
+
+
+
 
 
 ## -- examples dir targets
