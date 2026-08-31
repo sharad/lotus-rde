@@ -1675,7 +1675,7 @@ compressed format}.")
                        "glib-" version ".tar.xz"))
        (sha256
         (base32
-         "0000000000000000000000000000000000000000000000000000"))))))
+         "01zx9nvb5dx2wdlanasp8q421xp1812kaj7bqi5lsx5krcf2aiim"))))))
 
 (define-public glib-2.88
   (let ((base glib-minimal-2.88))
