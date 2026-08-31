@@ -1958,15 +1958,6 @@
                 "1iy79yppaqsw0pjb8q7b36vivw7qsc1b4n0jg9090lmlz61r7jwh"))
 
 
-(define rust-mpd-0.1.0.218e1af
-  (origin
-    (method git-fetch)
-    (uri (git-reference
-           (url "https://github.com/htkhiem/rust-mpd.git")
-           (commit "218e1af6c44e08101b3c99f0df0fe1d10c3702b4")))
-    (file-name (git-file-name "mpd" "0.1.0"))
-    (sha256
-     (base32 "1z9sslnd06xhw9kyvfn17n48rkn2bis6hxlyihx6b0j5iimciwrc"))))
 
 
 (define-cargo-inputs lookup-cargo-inputs
