@@ -1804,7 +1804,8 @@ unavailable."
 (define-public rust-euphonica
   (package
     (name "rust-euphonica")
-    (version "v0.99.6-beta-1")
+    ;; (version "v0.99.6-beta-1")
+    (version  "v0.99.7-beta")
     (source
      (origin
        (method git-fetch)
@@ -1813,12 +1814,26 @@ unavailable."
              (commit version)))
        (file-name (git-file-name name version))
        (sha256
-        (base32 "18dl67zgahb6pqv308jirfijlvf93z1xpfhgjqymh62hsdyglka7"))))
+        (base32 "0bsihvll5xir3fr79kcjjklqmbl79j93vmbr5rm4bjdfzxaad6h5"))))
     (build-system cargo-build-system)
 
     (arguments
      (list #:phases
            #~(modify-phases %standard-phases
+               (add-before 'build 'generate-config-rs
+                 (lambda _
+                   (substitute* "src/config.rs.in"
+                     (("@VERSION@")
+                      ,version)
+                     (("@GETTEXT_PACKAGE@")
+                      "euphonica")
+                     (("@LOCALEDIR@")
+                      "/gnu/store/.../share/locale")
+                     (("@APPLICATION_ID@")
+                      "io.github.htkhiem.Euphonica")
+                     (("@PKGDATADIR@")
+                      "/gnu/store/.../share/euphonica"))
+                   (copy-file "src/config.rs.in" "src/config.rs")))
                (add-before 'build 'use-guix-mpd
                  (lambda* (#:key inputs #:allow-other-keys)
                    (let ((mpd (assoc-ref inputs "rust-mpd")))
@@ -1836,6 +1851,7 @@ unavailable."
                     (list cairo
                           clang
                           gdk-pixbuf
+                          glib-2.88
                           graphene
                           gtk
                           libadwaita-1.9
@@ -1844,7 +1860,7 @@ unavailable."
                           pipewire
                           python-3
                           rust-mpd
-                          glib-2.88)))
+                          libsecret)))
     (home-page "https://github.com/htkhiem/euphonica")
     (synopsis "An MPD client with delusions of grandeur, made with Rust, GTK and Libadwaita.")
     (description
