@@ -101,7 +101,8 @@
   #:use-module (gnu packages shells)
   #:use-module (gnu packages music)
   #:use-module (gnu packages flex)
-  #:use-module (gnu packages bison))
+  #:use-module (gnu packages bison)
+  #:use-module (lotus-rde packages rust-crates))
 
 ;; https://issues.guix.gnu.org/issue/35619
 
@@ -1658,7 +1659,7 @@ compressed format}.")
    (synopsis "Command line catalog tool to index and search offline media.")
    (description "gocatcli gives the ability to navigate, explore and find your files that are stored on external media when those are not connected.")
    (license #f)))
-
+
 
 (define* (lotus-cargo-inputs name #:key (module '(lotus-rde packages rust-crates)))
   "Lookup Cargo inputs for NAME defined in MODULE, return an empty list if
@@ -1694,27 +1695,37 @@ unavailable."
 (define-public rust-mpd
   (package
     (name "rust-mpd")
-    (version "v0.99.6-beta-1")
+    (version "0.1.0-218e1af")
     (source
      (origin
        (method git-fetch)
        (uri (git-reference
-             (url "https://github.com/htkhiem/rust-mpd.git")
-             (commit version)))
+              (url "https://github.com/htkhiem/rust-mpd.git")
+              (commit "218e1af6c44e08101b3c99f0df0fe1d10c3702b4")))
        (file-name (git-file-name name version))
        (sha256
-        (base32 "218e1af6c44e08101b3c99f0df0fe1d10c3702b4"))))
+        (base32
+         "1z9sslnd06xhw9kyvfn17n48rkn2bis6hxlyihx6b0j5iimciwrc"))))
     (build-system cargo-build-system)
-    (inputs (append (lotus-cargo-inputs 'rust-mpd)))
+    (arguments
+     (list
+      #:tests? #f))
+    (propagated-inputs
+     (list rust-bufstream-0.1.4
+           rust-fxhash-0.2.1
+           rust-serde-1.0.228
+           rust-serde-repr-0.1.20
+           rust-tempfile-3.27.0
+           rust-byteorder-1.5.0))
     (home-page "https://github.com/htkhiem/rust-mpd")
-    (synopsis "Fork of kstep/rust-mpd with additional features used by Euphonica.")
+    (synopsis "Rust MPD client library")
     (description
-     "Fork of kstep/rust-mpd with additional features used by Euphonica.")
-    (license license:gpl3+)))
+     "Rust library for communicating with Music Player Daemon (MPD).")
+    (license license:expat)))
 
 (define-public rust-euphonica
   (package
-    (name "rust-euphinica")
+    (name "rust-euphonica")
     (version "v0.99.6-beta-1")
     (source
      (origin
@@ -1726,7 +1737,21 @@ unavailable."
        (sha256
         (base32 "18dl67zgahb6pqv308jirfijlvf93z1xpfhgjqymh62hsdyglka7"))))
     (build-system cargo-build-system)
-    (inputs (append (lotus-cargo-inputs 'euphonica)))
+
+    (arguments
+     (list #:phases
+           #~(modify-phases %standard-phases
+               (add-before 'build 'use-guix-mpd
+                 (lambda* (#:key inputs #:allow-other-keys)
+                   (let ((mpd (assoc-ref inputs "rust-mpd-0.1.0.218e1af")))
+                     (unless mpd
+                       (error "rust-mpd input not found"))
+                     (substitute* "Cargo.toml"
+                       (("mpd = \\{[^\\n]*git = \"https://github\\.com/htkhiem/rust-mpd\\.git\"[^\\n]*\\}")
+                        (format #f "mpd = { path = ~s, features = [\"serde\"] }"
+                                mpd)))))))))
+    (inputs (append (lotus-cargo-inputs 'euphonica)
+                    (list rust-mpd)))
     (home-page "https://github.com/htkhiem/euphonica")
     (synopsis "An MPD client with delusions of grandeur, made with Rust, GTK and Libadwaita.")
     (description
