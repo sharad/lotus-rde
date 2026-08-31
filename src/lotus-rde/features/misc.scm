@@ -1396,3 +1396,86 @@
    (name 'ssh-transient)
    (home-services-getter get-home-services)))
 
+
+(define* (feature-gui-theme
+          #:key
+          (theme "Adwaita-dark")
+          (icon-theme "Adwaita")
+          (font "Sans 10"))
+
+  (define (get-home-services config)
+    (list
+
+     (simple-service
+      'lotus-gui-theme-packages
+      home-profile-service-type
+      (list
+       (specification->package "gnome-themes-extra")
+       (specification->package "adwaita-icon-theme")))
+     ;; GTK 2
+     (simple-service 'gtk2-theme
+                     home-files-service-type
+                     `((" .gtkrc-2.0"
+                        ,(plain-file
+                          "gtkrc-2.0"
+                          ,(string-append
+                            "gtk-theme-name=\"" theme "\"\n"
+                            "gtk-icon-theme-name=\"" icon-theme "\"\n"
+                            "gtk-font-name=\"" font "\"\n"
+                            "gtk-cursor-theme-name=\"DMZ-White\"\n"
+                            "gtk-cursor-theme-size=0\n"
+                            "gtk-toolbar-style=GTK_TOOLBAR_BOTH\n"
+                            "gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR\n"
+                            "gtk-button-images=1\n"
+                            "gtk-menu-images=1\n"
+                            "gtk-enable-event-sounds=1\n"
+                            "gtk-enable-input-feedback-sounds=1\n"
+                            "gtk-xft-antialias=1\n"
+                            "gtk-xft-hinting=0\n"
+                            "gtk-xft-hintstyle=\"hintfull\"\n"
+                            "gtk-xft-rgba=\"rgb\"\n")))))
+
+     ;; GTK 3
+     (simple-service 'gtk3-theme
+                     home-xdg-configuration-files-service-type
+                     `(("gtk-3.0/settings.ini"
+                        ,(plain-file
+                          "gtk3-settings.ini"
+                          ,(string-append
+                            "[Settings]\n"
+                            "gtk-theme-name=" theme "\n"
+                            "gtk-icon-theme-name=" icon-theme "\n"
+                            "gtk-font-name=" font "\n"
+                            "gtk-cursor-theme-name=DMZ-White\n"
+                            "gtk-cursor-theme-size=0\n")))))
+
+     ;; GTK 4
+     (simple-service 'gtk4-theme
+                     home-xdg-configuration-files-service-type
+                     `(("gtk-4.0/settings.ini"
+                        ,(plain-file
+                          "gtk4-settings.ini"
+                          ,(string-append
+                            "[Settings]\n"
+                            "gtk-theme-name=" theme "\n"
+                            "gtk-icon-theme-name=" icon-theme "\n"
+                            "gtk-font-name=" font "\n"
+                            "gtk-cursor-theme-name=DMZ-White\n"
+                            "gtk-cursor-theme-size=0\n")))))
+
+     ;; Theme packages
+     (simple-service 'gui-theme-packages
+                     home-profile-service-type
+                     (list
+                      (specification->package "gnome-themes-extra")
+                      (specification->package "adwaita-icon-theme")))))
+
+  (define (get-system-services config)
+    (list))
+
+  (feature
+   (name 'gui-theme)
+   (values `())
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
+

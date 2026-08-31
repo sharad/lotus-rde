@@ -103,6 +103,7 @@
   #:use-module (gnu packages flex)
   #:use-module (gnu packages bison)
   #:use-module (gnu packages llvm)
+  #:use-module (gnu packages sqlite)
   #:use-module (lotus-rde packages rust-crates))
 
 ;; https://issues.guix.gnu.org/issue/35619
@@ -1841,7 +1842,7 @@ unavailable."
                        (error "rust-mpd input not found"))
                      (substitute* "Cargo.toml"
                        (("mpd = \\{[^\\n]*git = \"https://github\\.com/htkhiem/rust-mpd\\.git\"[^\\n]*\\}")
-                        (format #f "mpd = { path = ~s, features = [\"serde\"] }"
+                        (format #f "mpd = { version = \"0.1.0\", path = ~s, features = [\"serde\"] }"
                                 mpd)))))))))
     (native-inputs
      (list pkg-config
