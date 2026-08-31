@@ -1664,7 +1664,7 @@ compressed format}.")
 (define-public glib-minimal-2.88
   (package
     (inherit glib)
-    (name "glib")
+    (name "glib-minimal-2.88")
     (version "2.88.0")
     (source
      (origin
@@ -1680,7 +1680,7 @@ compressed format}.")
 (define-public glib-2.88
   (let ((base glib-minimal-2.88))
     (package/inherit base
-      (name "glib")
+      (name "glib-2.88")
       (native-inputs
        (modify-inputs (package-native-inputs base)
          (prepend gobject-introspection)))
