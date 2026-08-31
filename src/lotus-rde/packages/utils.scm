@@ -1822,18 +1822,18 @@ unavailable."
            #~(modify-phases %standard-phases
                (add-before 'build 'generate-config-rs
                  (lambda _
-                   (substitute* "src/config.rs.in"
+                   (copy-file "src/config.rs.in" "src/config.rs")
+                   (substitute* "src/config.rs"
                      (("@VERSION@")
                       #$version)
                      (("@GETTEXT_PACKAGE@")
-                      "euphonica")
+                      "\"euphonica\"")
                      (("@LOCALEDIR@")
-                      (string-append #$output "/share/locale"))
+                      (string-append "\"" #$output "/share/locale" "\""))
                      (("@APPLICATION_ID@")
-                      "io.github.htkhiem.Euphonica")
+                      "\"io.github.htkhiem.Euphonica\"")
                      (("@PKGDATADIR@")
-                      (string-append #$output "/share/euphonica")))
-                   (copy-file "src/config.rs.in" "src/config.rs")))
+                      (string-append "\"" #$output "/share/euphonica" "\"")))))
                (add-before 'build 'use-guix-mpd
                  (lambda* (#:key inputs #:allow-other-keys)
                    (let ((mpd (assoc-ref inputs "rust-mpd")))
