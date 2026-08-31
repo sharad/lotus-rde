@@ -1692,6 +1692,43 @@ unavailable."
     "Modular Rust HTTP server with .htaccess support, reverse proxy, TLS, and directory indexing.")
    (license license:gpl3+)))
 
+;; (define-public rust-mpd
+;;   (package
+;;     (name "rust-mpd")
+;;     (version "0.1.0-218e1af")
+;;     (source
+;;      (origin
+;;        (method git-fetch)
+;;        (uri (git-reference
+;;               (url "https://github.com/htkhiem/rust-mpd.git")
+;;               (commit "218e1af6c44e08101b3c99f0df0fe1d10c3702b4")))
+;;        (file-name (git-file-name name version))
+;;        (sha256
+;;         (base32
+;;          "1z9sslnd06xhw9kyvfn17n48rkn2bis6hxlyihx6b0j5iimciwrc"))))
+;;     (build-system cargo-build-system)
+;;     (arguments
+;;      (list
+;;       #:tests? #f))
+;;     (inputs
+;;      (lotus-cargo-inputs 'rust-mpd))
+;;     (home-page "https://github.com/htkhiem/rust-mpd")
+;;     (synopsis "Rust MPD client library")
+;;     (description
+;;      "Rust library for communicating with Music Player Daemon (MPD).")
+;;     (license license:expat)))
+
+;; (define rust-mpd-0.1.0.218e1af
+;;   (origin
+;;     (method git-fetch)
+;;     (uri (git-reference
+;;            (url "https://github.com/htkhiem/rust-mpd.git")
+;;            (commit "218e1af6c44e08101b3c99f0df0fe1d10c3702b4")))
+;;     (file-name (git-file-name "mpd" "0.1.0"))
+;;     (sha256
+;;      (base32 "1z9sslnd06xhw9kyvfn17n48rkn2bis6hxlyihx6b0j5iimciwrc"))))
+
+
 (define-public rust-mpd
   (package
     (name "rust-mpd")
@@ -1699,40 +1736,24 @@ unavailable."
     (source
      (origin
        (method git-fetch)
-       (uri (git-reference
-              (url "https://github.com/htkhiem/rust-mpd.git")
-              (commit "218e1af6c44e08101b3c99f0df0fe1d10c3702b4")))
+       (uri
+        (git-reference
+          (url "https://github.com/htkhiem/rust-mpd.git")
+          (commit "218e1af6c44e08101b3c99f0df0fe1d10c3702b4")))
        (file-name (git-file-name name version))
        (sha256
         (base32
          "1z9sslnd06xhw9kyvfn17n48rkn2bis6hxlyihx6b0j5iimciwrc"))))
-    (build-system cargo-build-system)
+    (build-system copy-build-system)
     (arguments
      (list
-      #:tests? #f))
-    (propagated-inputs
-     (list rust-bufstream-0.1.4
-           rust-fxhash-0.2.1
-           rust-serde-1.0.228
-           rust-serde-repr-0.1.20
-           rust-tempfile-3.27.0
-           rust-byteorder-1.5.0))
+      #:install-plan
+      #~'(("." "."))))
     (home-page "https://github.com/htkhiem/rust-mpd")
-    (synopsis "Rust MPD client library")
+    (synopsis "Source tree for the Rust MPD client library")
     (description
-     "Rust library for communicating with Music Player Daemon (MPD).")
-    (license license:expat)))
-
-(define rust-mpd-0.1.0.218e1af
-  (origin
-    (method git-fetch)
-    (uri (git-reference
-           (url "https://github.com/htkhiem/rust-mpd.git")
-           (commit "218e1af6c44e08101b3c99f0df0fe1d10c3702b4")))
-    (file-name (git-file-name "mpd" "0.1.0"))
-    (sha256
-     (base32 "1z9sslnd06xhw9kyvfn17n48rkn2bis6hxlyihx6b0j5iimciwrc"))))
-
+     "Source tree for the Rust MPD client library.")
+    (license (list license:expat license:asl2.0))))
 
 (define-public rust-euphonica
   (package
@@ -1754,7 +1775,7 @@ unavailable."
            #~(modify-phases %standard-phases
                (add-before 'build 'use-guix-mpd
                  (lambda* (#:key inputs #:allow-other-keys)
-                   (let ((mpd (assoc-ref inputs "rust-mpd-0.1.0.218e1af")))
+                   (let ((mpd (assoc-ref inputs "rust-mpd")))
                      (unless mpd
                        (error "rust-mpd input not found"))
                      (substitute* "Cargo.toml"
@@ -1762,6 +1783,7 @@ unavailable."
                         (format #f "mpd = { path = ~s, features = [\"serde\"] }"
                                 mpd)))))))))
     (inputs (append (lotus-cargo-inputs 'euphonica)
+                    (lotus-cargo-inputs 'rust-mpd)
                     (list rust-mpd)))
     (home-page "https://github.com/htkhiem/euphonica")
     (synopsis "An MPD client with delusions of grandeur, made with Rust, GTK and Libadwaita.")
