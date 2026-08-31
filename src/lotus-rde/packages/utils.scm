@@ -1712,7 +1712,7 @@ unavailable."
      "Fork of kstep/rust-mpd with additional features used by Euphonica.")
     (license license:gpl3+)))
 
-(define-public rust-euphinica
+(define-public rust-euphonica
   (package
     (name "rust-euphinica")
     (version "v0.99.6-beta-1")

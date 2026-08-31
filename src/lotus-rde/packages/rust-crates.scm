@@ -1955,11 +1955,20 @@
 (define rust-zvariant-utils-3.5.0
   (crate-source "zvariant_utils" "3.5.0"
                 "1iy79yppaqsw0pjb8q7b36vivw7qsc1b4n0jg9090lmlz61r7jwh"))
+
+(define rust-mpd-0.1.0.218e1af
+ (crate-source "mpd" "0.1.0"
+               "0000000000000000000000000000000000000000000000000000"
+               #:repository
+               "https://github.com/htkhiem/rust-mpd.git"
+               #:commit
+               "218e1af6c44e08101b3c99f0df0fe1d10c3702b4"))
 
 
 (define-cargo-inputs lookup-cargo-inputs
                      (euphonica =>
-                                (list rust-adler2-2.0.1
+                                (list rust-mpd-0.1.0.218e1af
+                                      rust-adler2-2.0.1
                                  rust-ahash-0.8.12
                                  rust-aho-corasick-1.1.4
                                  rust-aligned-0.4.3
