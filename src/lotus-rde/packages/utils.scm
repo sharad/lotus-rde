@@ -1694,17 +1694,10 @@ compressed format}.")
 ;;               (delete 'check))))))))
 
 
-
-(define %glib-minimal
-  (variable-ref
-   (module-variable
-    (resolve-module '(gnu packages glib))
-    'glib-minimal)))
-
-(define-public glib-minimal-2.88
+(define-public glib-2.88
   (package
-    (inherit %glib-minimal)
-    (name "glib-minimal-2.88")
+    (inherit glib)
+    (name "glib-2.88")
     (version "2.88.0")
     (source
      (origin
@@ -1715,22 +1708,12 @@ compressed format}.")
                        "glib-" version ".tar.xz"))
        (sha256
         (base32
-         "01zx9nvb5dx2wdlanasp8q421xp1812kaj7bqi5lsx5krcf2aiim"))))))
-
-
-
-(define-public glib-2.88
-  (let ((base glib-minimal-2.88))
-    (package/inherit base
-      (name "glib-2.88")
-      (native-inputs
-       (modify-inputs (package-native-inputs base)
-         (prepend gobject-introspection)))
-      (arguments
-       (substitute-keyword-arguments (package-arguments base)
-         ((#:phases phases)
-          #~(modify-phases #$phases
-              (delete 'check))))))))
+         "01zx9nvb5dx2wdlanasp8q421xp1812kaj7bqi5lsx5krcf2aiim"))))
+    (arguments
+     (substitute-keyword-arguments (package-arguments glib)
+       ((#:phases phases)
+        #~(modify-phases #$phases
+            (delete 'check)))))))
 
 
 (define-public libadwaita-1.9
@@ -1978,7 +1961,8 @@ unavailable."
               (let ((mpd (assoc-ref inputs "rust-mpd")))
                 (unless mpd
                   (error "rust-mpd input not found"))
-                (substitute* "../Cargo.toml"
+                (format #t "CWD ~a~%" (getcwd))
+                (substitute* "../source/Cargo.toml"
                   (("mpd = \\{[^\\n]*git = \"https://github\\.com/htkhiem/rust-mpd\\.git\"[^\\n]*\\}")
                    (format #f
                            "mpd = { version = \"0.1.0\", path = ~s, features = [\"serde\"] }"
@@ -1986,7 +1970,7 @@ unavailable."
 
     (native-inputs
      (list gettext-minimal
-           glib-2.88
+           `(,glib "bin")
            rust
            `(,rust "cargo")
            pkg-config
