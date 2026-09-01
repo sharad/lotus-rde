@@ -1664,36 +1664,6 @@ compressed format}.")
    (license #f)))
 
 
-;; (define-public glib-minimal-2.88
-;;   (package
-;;     (inherit glib)
-;;     (name "glib-minimal-2.88")
-;;     (version "2.88.0")
-;;     (source
-;;      (origin
-;;        (method url-fetch)
-;;        (uri
-;;         (string-append "mirror://gnome/sources/"
-;;                        "glib/" (string-take version 4) "/"
-;;                        "glib-" version ".tar.xz"))
-;;        (sha256
-;;         (base32
-;;          "01zx9nvb5dx2wdlanasp8q421xp1812kaj7bqi5lsx5krcf2aiim"))))))
-
-;; (define-public glib-2.88
-;;   (let ((base glib-minimal-2.88))
-;;     (package/inherit base
-;;       (name "glib-2.88")
-;;       (native-inputs
-;;        (modify-inputs (package-native-inputs base)
-;;          (prepend gobject-introspection)))
-;;       (arguments
-;;        (substitute-keyword-arguments (package-arguments base)
-;;          ((#:phases phases)
-;;           #~(modify-phases #$phases
-;;               (delete 'check))))))))
-
-
 (define-public glib-2.88
   (package
     (inherit glib)
@@ -1762,43 +1732,6 @@ unavailable."
     "Modular Rust HTTP server with .htaccess support, reverse proxy, TLS, and directory indexing.")
    (license license:gpl3+)))
 
-;; (define-public rust-mpd
-;;   (package
-;;     (name "rust-mpd")
-;;     (version "0.1.0-218e1af")
-;;     (source
-;;      (origin
-;;        (method git-fetch)
-;;        (uri (git-reference
-;;               (url "https://github.com/htkhiem/rust-mpd.git")
-;;               (commit "218e1af6c44e08101b3c99f0df0fe1d10c3702b4")))
-;;        (file-name (git-file-name name version))
-;;        (sha256
-;;         (base32
-;;          "1z9sslnd06xhw9kyvfn17n48rkn2bis6hxlyihx6b0j5iimciwrc"))))
-;;     (build-system cargo-build-system)
-;;     (arguments
-;;      (list
-;;       #:tests? #f))
-;;     (inputs
-;;      (lotus-cargo-inputs 'rust-mpd))
-;;     (home-page "https://github.com/htkhiem/rust-mpd")
-;;     (synopsis "Rust MPD client library")
-;;     (description
-;;      "Rust library for communicating with Music Player Daemon (MPD).")
-;;     (license license:expat)))
-
-;; (define rust-mpd-0.1.0.218e1af
-;;   (origin
-;;     (method git-fetch)
-;;     (uri (git-reference
-;;            (url "https://github.com/htkhiem/rust-mpd.git")
-;;            (commit "218e1af6c44e08101b3c99f0df0fe1d10c3702b4")))
-;;     (file-name (git-file-name "mpd" "0.1.0"))
-;;     (sha256
-;;      (base32 "1z9sslnd06xhw9kyvfn17n48rkn2bis6hxlyihx6b0j5iimciwrc"))))
-
-
 (define-public rust-mpd
   (package
     (name "rust-mpd")
@@ -1824,75 +1757,6 @@ unavailable."
     (description
      "Source tree for the Rust MPD client library.")
     (license (list license:expat license:asl2.0))))
-
-(define-public rust-euphonica-old
-  (package
-    (name "rust-euphonica-old")
-    ;; (version "v0.99.6-beta-1")
-    (version  "v0.99.7-beta")
-    (source
-     (origin
-       (method git-fetch)
-       (uri (git-reference
-             (url "https://github.com/htkhiem/euphonica.git")
-             (commit version)))
-       (file-name (git-file-name name version))
-       (sha256
-        (base32 "0bsihvll5xir3fr79kcjjklqmbl79j93vmbr5rm4bjdfzxaad6h5"))))
-    (build-system cargo-build-system)
-
-    (arguments
-     (list #:phases
-           #~(modify-phases %standard-phases
-               (add-before 'build 'generate-config-rs
-                 (lambda _
-                   (copy-file "src/config.rs.in" "src/config.rs")
-                   (substitute* "src/config.rs"
-                     (("@VERSION@")
-                      #$version)
-                     (("@GETTEXT_PACKAGE@")
-                      "\"euphonica\"")
-                     (("@LOCALEDIR@")
-                      (string-append "\"" #$output "/share/locale" "\""))
-                     (("@APPLICATION_ID@")
-                      "\"io.github.htkhiem.Euphonica\"")
-                     (("@PKGDATADIR@")
-                      (string-append "\"" #$output "/share/euphonica" "\"")))))
-               (add-before 'build 'use-guix-mpd
-                 (lambda* (#:key inputs #:allow-other-keys)
-                   (let ((mpd (assoc-ref inputs "rust-mpd")))
-                     (unless mpd
-                       (error "rust-mpd input not found"))
-                     (substitute* "Cargo.toml"
-                       (("mpd = \\{[^\\n]*git = \"https://github\\.com/htkhiem/rust-mpd\\.git\"[^\\n]*\\}")
-                        (format #f "mpd = { version = \"0.1.0\", path = ~s, features = [\"serde\"] }"
-                                mpd)))))))))
-    (native-inputs
-     (list pkg-config
-           python-3))
-    (inputs (append (lotus-cargo-inputs 'euphonica)
-                    (lotus-cargo-inputs 'rust-mpd)
-                    (list cairo
-                          clang
-                          gdk-pixbuf
-                          glib-2.88
-                          graphene
-                          gtk
-                          libadwaita-1.9
-                          libsecret
-                          openssl
-                          pango
-                          pipewire
-                          python-3
-                          rust-mpd
-                          sqlite)))
-    (home-page "https://github.com/htkhiem/euphonica")
-    (synopsis "An MPD client with delusions of grandeur, made with Rust, GTK and Libadwaita.")
-    (description
-     "An MPD client with delusions of grandeur, made with Rust, GTK and Libadwaita.")
-    (license license:gpl3+)))
-
-
 
 (define-public rust-euphonica
   (package
