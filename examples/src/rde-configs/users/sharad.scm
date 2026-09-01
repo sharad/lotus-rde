@@ -769,7 +769,8 @@ fi
         ;; (feature-extra-profile)
         ;; (feature-extra-profile)
         (feature-ssh-transient)
-        ))
+        (feature-gui-theme)
+        (feature-lotus-udiskie-service)))
 
 
 

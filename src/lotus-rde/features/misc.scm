@@ -120,6 +120,7 @@
   #:use-module (nongnu system linux-initrd)
   #:use-module (rde predicates)
   #:use-module (rde home services emacs)
+  #:use-module (rde home services desktop)
   #:use-module (rde features)
   #:use-module (rde features base)
   #:use-module (rde features guile)
@@ -143,7 +144,9 @@
             feature-power-monitor
             feature-git-annex-daemon
             feature-ssh-transient
-            feature-extra-profile))
+            feature-extra-profile
+            feature-gui-theme
+            feature-lotus-udiskie-service))
 
 (define* (feature-lotus-nox-services
           #:key
@@ -1416,52 +1419,52 @@
      (simple-service 'gtk2-theme
                      home-files-service-type
                      `((" .gtkrc-2.0"
-                        ,(plain-file
-                          "gtkrc-2.0"
-                          ,(string-append
-                            "gtk-theme-name=\"" theme "\"\n"
-                            "gtk-icon-theme-name=\"" icon-theme "\"\n"
-                            "gtk-font-name=\"" font "\"\n"
-                            "gtk-cursor-theme-name=\"DMZ-White\"\n"
-                            "gtk-cursor-theme-size=0\n"
-                            "gtk-toolbar-style=GTK_TOOLBAR_BOTH\n"
-                            "gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR\n"
-                            "gtk-button-images=1\n"
-                            "gtk-menu-images=1\n"
-                            "gtk-enable-event-sounds=1\n"
-                            "gtk-enable-input-feedback-sounds=1\n"
-                            "gtk-xft-antialias=1\n"
-                            "gtk-xft-hinting=0\n"
-                            "gtk-xft-hintstyle=\"hintfull\"\n"
-                            "gtk-xft-rgba=\"rgb\"\n")))))
+                        (plain-file
+                         "gtkrc-2.0"
+                         ,(string-append
+                           "gtk-theme-name=\"" theme "\"\n"
+                           "gtk-icon-theme-name=\"" icon-theme "\"\n"
+                           "gtk-font-name=\"" font "\"\n"
+                           "gtk-cursor-theme-name=\"DMZ-White\"\n"
+                           "gtk-cursor-theme-size=0\n"
+                           "gtk-toolbar-style=GTK_TOOLBAR_BOTH\n"
+                           "gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR\n"
+                           "gtk-button-images=1\n"
+                           "gtk-menu-images=1\n"
+                           "gtk-enable-event-sounds=1\n"
+                           "gtk-enable-input-feedback-sounds=1\n"
+                           "gtk-xft-antialias=1\n"
+                           "gtk-xft-hinting=0\n"
+                           "gtk-xft-hintstyle=\"hintfull\"\n"
+                           "gtk-xft-rgba=\"rgb\"\n")))))
 
      ;; GTK 3
      (simple-service 'gtk3-theme
                      home-xdg-configuration-files-service-type
                      `(("gtk-3.0/settings.ini"
-                        ,(plain-file
-                          "gtk3-settings.ini"
-                          ,(string-append
-                            "[Settings]\n"
-                            "gtk-theme-name=" theme "\n"
-                            "gtk-icon-theme-name=" icon-theme "\n"
-                            "gtk-font-name=" font "\n"
-                            "gtk-cursor-theme-name=DMZ-White\n"
-                            "gtk-cursor-theme-size=0\n")))))
+                        (plain-file
+                         "gtk3-settings.ini"
+                         ,(string-append
+                           "[Settings]\n"
+                           "gtk-theme-name=" theme "\n"
+                           "gtk-icon-theme-name=" icon-theme "\n"
+                           "gtk-font-name=" font "\n"
+                           "gtk-cursor-theme-name=DMZ-White\n"
+                           "gtk-cursor-theme-size=0\n")))))
 
      ;; GTK 4
      (simple-service 'gtk4-theme
                      home-xdg-configuration-files-service-type
                      `(("gtk-4.0/settings.ini"
-                        ,(plain-file
-                          "gtk4-settings.ini"
-                          ,(string-append
-                            "[Settings]\n"
-                            "gtk-theme-name=" theme "\n"
-                            "gtk-icon-theme-name=" icon-theme "\n"
-                            "gtk-font-name=" font "\n"
-                            "gtk-cursor-theme-name=DMZ-White\n"
-                            "gtk-cursor-theme-size=0\n")))))
+                        (plain-file
+                         "gtk4-settings.ini"
+                         ,(string-append
+                           "[Settings]\n"
+                           "gtk-theme-name=" theme "\n"
+                           "gtk-icon-theme-name=" icon-theme "\n"
+                           "gtk-font-name=" font "\n"
+                           "gtk-cursor-theme-name=DMZ-White\n"
+                           "gtk-cursor-theme-size=0\n")))))
 
      ;; Theme packages
      (simple-service 'gui-theme-packages
@@ -1470,6 +1473,23 @@
                       (specification->package "gnome-themes-extra")
                       (specification->package "adwaita-icon-theme")))))
 
+  (define (get-system-services config)
+    (list))
+
+  (feature
+   (name 'gui-theme)
+   (values `())
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
+
+
+(define* (feature-lotus-udiskie-service
+          #:key
+          (font "Sans 10"))
+
+  (define (get-home-services config)
+    (list
+     (service home-udiskie-service-type)))
   (define (get-system-services config)
     (list))
 

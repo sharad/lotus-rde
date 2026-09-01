@@ -20,7 +20,7 @@ GUIX_COMMAND       ?= ${GUIXTM_COMMAND}
 GUIX_FULL_COMMAND  = $(GUIXTM_PREFIX_ENV) $(GUIX_COMMAND)
 
 GUIX_FLAGS = $(RDE_SRC_LOAD_PATH)
-ifneq ($(RDE_TARGET),)
+ifneq ($(filter rde/home/%  rde/system/% rde/profile/install/%,$(MAKECMDGOALS)),)
 GUIX_FLAGS += $(EXAMPLES_LOAD_PATH)
 endif
 
