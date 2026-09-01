@@ -1664,9 +1664,46 @@ compressed format}.")
    (license #f)))
 
 
+;; (define-public glib-minimal-2.88
+;;   (package
+;;     (inherit glib)
+;;     (name "glib-minimal-2.88")
+;;     (version "2.88.0")
+;;     (source
+;;      (origin
+;;        (method url-fetch)
+;;        (uri
+;;         (string-append "mirror://gnome/sources/"
+;;                        "glib/" (string-take version 4) "/"
+;;                        "glib-" version ".tar.xz"))
+;;        (sha256
+;;         (base32
+;;          "01zx9nvb5dx2wdlanasp8q421xp1812kaj7bqi5lsx5krcf2aiim"))))))
+
+;; (define-public glib-2.88
+;;   (let ((base glib-minimal-2.88))
+;;     (package/inherit base
+;;       (name "glib-2.88")
+;;       (native-inputs
+;;        (modify-inputs (package-native-inputs base)
+;;          (prepend gobject-introspection)))
+;;       (arguments
+;;        (substitute-keyword-arguments (package-arguments base)
+;;          ((#:phases phases)
+;;           #~(modify-phases #$phases
+;;               (delete 'check))))))))
+
+
+
+(define %glib-minimal
+  (variable-ref
+   (module-variable
+    (resolve-module '(gnu packages glib))
+    'glib-minimal)))
+
 (define-public glib-minimal-2.88
   (package
-    (inherit glib)
+    (inherit %glib-minimal)
     (name "glib-minimal-2.88")
     (version "2.88.0")
     (source
@@ -1679,6 +1716,8 @@ compressed format}.")
        (sha256
         (base32
          "01zx9nvb5dx2wdlanasp8q421xp1812kaj7bqi5lsx5krcf2aiim"))))))
+
+
 
 (define-public glib-2.88
   (let ((base glib-minimal-2.88))
@@ -1946,7 +1985,9 @@ unavailable."
                            mpd)))))))))
 
     (native-inputs
-     (list rust
+     (list gettext-minimal
+           glib-2.88
+           rust
            `(,rust "cargo")
            pkg-config
            clang
