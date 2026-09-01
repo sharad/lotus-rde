@@ -103,6 +103,7 @@
   #:use-module (gnu packages flex)
   #:use-module (gnu packages bison)
   #:use-module (gnu packages llvm)
+  #:use-module (gnu packages rust)
   #:use-module (gnu packages sqlite)
   #:use-module (lotus-rde packages rust-crates))
 
@@ -1802,9 +1803,9 @@ unavailable."
      "Source tree for the Rust MPD client library.")
     (license (list license:expat license:asl2.0))))
 
-(define-public rust-euphonica
+(define-public rust-euphonica-old
   (package
-    (name "rust-euphonica")
+    (name "rust-euphonica-old")
     ;; (version "v0.99.6-beta-1")
     (version  "v0.99.7-beta")
     (source
@@ -1865,6 +1866,112 @@ unavailable."
                           sqlite)))
     (home-page "https://github.com/htkhiem/euphonica")
     (synopsis "An MPD client with delusions of grandeur, made with Rust, GTK and Libadwaita.")
+    (description
+     "An MPD client with delusions of grandeur, made with Rust, GTK and Libadwaita.")
+    (license license:gpl3+)))
+
+
+
+(define-public rust-euphonica
+  (package
+    (name "rust-euphonica")
+    (version "v0.99.7-beta")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/htkhiem/euphonica.git")
+             (commit version)))
+       (file-name (git-file-name name version))
+       (sha256
+        (base32
+         "0bsihvll5xir3fr79kcjjklqmbl79j93vmbr5rm4bjdfzxaad6h5"))))
+
+    (build-system meson-build-system)
+
+    (arguments
+     (list
+      #:imported-modules
+      `(,@%meson-build-system-modules
+        ,@%cargo-build-system-modules)
+
+      #:modules
+      '(((guix build cargo-build-system) #:prefix cargo:)
+        (guix build meson-build-system)
+        (guix build utils))
+
+      #:phases
+      #~(modify-phases %standard-phases
+
+          (add-after 'unpack 'prepare-for-build
+            (lambda _
+              ;; Guix will perform the installation/update steps.
+              (substitute* "meson.build"
+                (("gtk_update_icon_cache: true")
+                 "gtk_update_icon_cache: false")
+                (("update_desktop_database: true")
+                 "update_desktop_database: false"))
+
+              ;; We don't want Meson/Cargo to use the upstream lock file
+              ;; if the Guix cargo inputs are being used.
+              (when (file-exists? "Cargo.lock")
+                (delete-file "Cargo.lock"))))
+
+          ;; Meson changes into its build directory during configure.
+          ;; Run the Cargo preparation phases there, just like helvum.
+          (add-after 'configure 'prepare-cargo-build-system
+            (lambda args
+              (for-each
+               (lambda (phase)
+                 (format #t "Running cargo phase: ~a~%" phase)
+                 (apply (assoc-ref cargo:%standard-phases phase)
+                        #:vendor-dir "vendor"
+                        args))
+               '(unpack-rust-crates
+                 configure
+                 check-for-pregenerated-files
+                 patch-cargo-checksums))))
+
+          ;; Replace Euphonica's upstream Git dependency on mpd with
+          ;; the Guix-provided source tree.
+          (add-before 'build 'use-guix-mpd
+            (lambda* (#:key inputs #:allow-other-keys)
+              (let ((mpd (assoc-ref inputs "rust-mpd")))
+                (unless mpd
+                  (error "rust-mpd input not found"))
+                (substitute* "../Cargo.toml"
+                  (("mpd = \\{[^\\n]*git = \"https://github\\.com/htkhiem/rust-mpd\\.git\"[^\\n]*\\}")
+                   (format #f
+                           "mpd = { version = \"0.1.0\", path = ~s, features = [\"serde\"] }"
+                           mpd)))))))))
+
+    (native-inputs
+     (list rust
+           `(,rust "cargo")
+           pkg-config
+           clang
+           python-3))
+
+    (inputs
+     (append
+      (list cairo
+            gdk-pixbuf
+            glib-2.88
+            graphene
+            gtk
+            libadwaita-1.9
+            libsecret
+            openssl
+            pango
+            pipewire
+            sqlite
+            rust-mpd)
+      (lotus-cargo-inputs 'euphonica)
+      (lotus-cargo-inputs 'rust-mpd)))
+
+    (home-page "https://github.com/htkhiem/euphonica")
+    (synopsis
+     "An MPD client with delusions of grandeur, made with Rust, GTK and Libadwaita.")
     (description
      "An MPD client with delusions of grandeur, made with Rust, GTK and Libadwaita.")
     (license license:gpl3+)))
