@@ -382,7 +382,9 @@
   (respawn-limit  home-flatpak-app-configuration-respawn-limit
                   (default 300))
   (requirement    home-flatpak-app-configuration-requirement
-                  (default '())))
+                  (default '()))
+  (desktop-link? home-flatpak-app-configuration-desktop-link?
+                 (default #f)))
 
 
 (define (flatpak-app->shepherd-service config)
@@ -417,21 +419,59 @@
                                 #$log
                                 " 2>&1")))))))
 
+
+(define (flatpak-app->desktop-link-service config)
+  (let* ((app  (home-flatpak-app-configuration-app config))
+         (link? (home-flatpak-app-configuration-desktop-link? config)))
+    (if link?
+        (simple-service
+         (symbol-append
+          'flatpak-desktop-link-
+          (string->symbol app))
+         home-activation-service-type
+         #~(let* ((home (getenv "HOME"))
+                  (source
+                   (string-append
+                    home
+                    "/.local/share/flatpak/app/"
+                    #$app
+                    "/current/active/export/share/applications/"
+                    #$app
+                    ".desktop"))
+                  (target
+                   (string-append
+                    home
+                    "/.local/share/applications/"
+                    #$app
+                    ".desktop")))
+             (mkdir-p (dirname target))
+             (when (file-exists? target)
+               (delete-file target))
+             (when (file-exists? source)
+               (symlink source target))))
+        '())))
+
 (define home-flatpak-service-type
   (service-type
     (name 'home-flatpak)
     (extensions
-     (list (service-extension
-            home-shepherd-service-type
-            (lambda (configs)
-              (map flatpak-app->shepherd-service configs)))))
+     (list
+      ;; Shepherd services
+      (service-extension
+       home-shepherd-service-type
+       (lambda (configs)
+         (map flatpak-app->shepherd-service configs)))
+      ;; Desktop-file symlinks
+      (service-extension
+       home-activation-service-type
+       (lambda (configs)
+         (filter-map flatpak-app->desktop-link-service configs)))))
+
     (compose concatenate)
     (extend append)
     (default-value '())
     (description
      "Manages flatpak applications as shepherd services.")))
-
-
 
 ;; (simple-service 'my-flatpak-apps
 ;;                 home-flatpak-service-type

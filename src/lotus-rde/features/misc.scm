@@ -1284,36 +1284,34 @@
 
 
 
-(define* (feature-msteam)
+
+(define* (feature-flatpak-service #:key
+                                  name
+                                  app)
   (define* (get-home-services config)
     (list
-     (simple-service 'my-flatpak-apps
+     (simple-service (symbol-append 'flatpak-service- name)
                      home-flatpak-service-type
                      (list
                       (home-flatpak-app-configuration
-                       (name 'msteam)
-                       (app  "com.github.IsmaelMartinez.teams_for_linux"))))))
-
+                       (name name)
+                       (app  app)
+                       (desktop-link? #t))))))
   (feature
-   (values `((shepherd-msteam msteam)))
-   (name 'msteam)
+   (values `((,(symbol-append 'shepherd- name)
+              name)))
+   (name name)
    (home-services-getter get-home-services)))
 
+(define* (feature-msteam #:key
+                         (app "com.github.IsmaelMartinez.teams_for_linux"))
+  (feature-flatpak-service #:name 'msteam
+                           #:app app))
 
-(define* (feature-zoom)
-  (define* (get-home-services config)
-    (list
-     (simple-service 'my-flatpak-apps
-                     home-flatpak-service-type
-                     (list
-                      (home-flatpak-app-configuration
-                       (name 'zoom)
-                       (app  "us.zoom.Zoom"))))))
-
-  (feature
-   (values `((shepherd-zoom zoom)))
-   (name 'zoom)
-   (home-services-getter get-home-services)))
+(define* (feature-zoom #:key
+                       (app "us.zoom.Zoom"))
+  (feature-flatpak-service #:name 'zoom
+                           #:app app))
 
 
 (define* (feature-doc-publishing #:key
@@ -1322,24 +1320,27 @@
                                  (obsidian #t))
   (define* (get-home-services config)
     (list
-     (simple-service 'my-flatpak-apps
+     (simple-service 'doc-publishing-flatpak-apps
                      home-flatpak-service-type
                      (filter home-flatpak-app-configuration?
                              (list
                               (when pandoc
                                 (home-flatpak-app-configuration
                                  (name 'pandoc)
-                                 (app  "io.github.jgm.pandoc")))
+                                 (app  "io.github.jgm.pandoc")
+                                 (desktop-link? #f)))
 
                               (when logseq
                                 (home-flatpak-app-configuration
                                  (name 'logseq)
-                                 (app  "com.logseq.Logseq.Locale")))
+                                 (app  "com.logseq.Logseq.Locale")
+                                 (desktop-link? #f)))
 
                               (when obsidian
                                 (home-flatpak-app-configuration
                                  (name 'obsidian)
-                                 (app  "md.obsidian.Obsidian"))))))))
+                                 (app  "md.obsidian.Obsidian")
+                                 (desktop-link? #f))))))))
   (feature
    (values `((shepherd-pandoc ,(when pandoc 'pandoc))
              (shepherd-logseq ,(when logseq 'logseq))
