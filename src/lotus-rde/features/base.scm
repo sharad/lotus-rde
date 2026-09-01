@@ -76,14 +76,17 @@
   #:use-module (gnu packages suckless)
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu packages idutils)
+  #:use-module (gnu packages networking)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
+  #:use-module (rde home services desktop)
   #:use-module (rde predicates)
   #:use-module (rde features)
   #:use-module (rde features base)
   #:use-module (rde features guile)
   #:use-module (rde features networking)
   #:use-module (rde features system)
+  #:use-module (lotus-rde lib utils)
   #:use-module (lotus-rde features mfs)
   #:export (feature-locale-names
             feature-login-shell
@@ -507,11 +510,32 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
   (define (get-home-services _)
     (list (service home-dbus-service-type
-                   (home-dbus-configuration (dbus dbus)))))
+                   (home-dbus-configuration (dbus dbus)))
+          (service home-udiskie-service-type)
+
+          (simple-service
+           'home-geoclue-shepherd-service
+           home-shepherd-service-type
+           (list
+            (shepherd-service
+             (provision '(geoclue))
+             (start #~(make-forkexec-constructor (list #$(file-append geoclue "/libexec/geoclue"))
+                                                 #:log-file #$(log-file "geoclue")))
+             (stop #~(make-kill-destructor))
+             (respawn? #t))))))
+
+          ;; (simple-service
+          ;;  'dbus-dummy-shepherd-service
+          ;;  home-shepherd-service-type
+          ;;  (list
+          ;;   (shepherd-service
+          ;;             (documentation "Provide the D-Bus session bus started elsewhere.")
+          ;;             (provision '(dbus))
+          ;;             (one-shot? #t)
+          ;;             (start #~(lambda _ #t))
+          ;;             (stop #~(lambda _ #t)))))
 
   (define (get-system-services _)
-
-
     (append
      ;; (modify-services default-desktop-system-services
      ;;   (network-manager-service-type config =>
@@ -543,7 +567,8 @@ Defaults:%wheel env_keep+=TERMINFO")))))
    (name 'desktop-services)
    (values `((desktop-services . #t)
              (elogind . ,elogind)
-             (dbus . ,dbus)))
+             (dbus . ,dbus)
+             (shepherd-geoclue geoclue)))
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
@@ -969,7 +994,21 @@ Defaults:%wheel env_keep+=TERMINFO")))))
           #:key (auto-enable? #t))
   ;; https://unix.stackexchange.com/questions/617858/how-to-enable-bluetooth-in-guix
   (define (get-home-services config)
-    (list))
+    (list
+     (shepherd-service
+      (provision '(blueman-applet))
+      (start     #~(make-forkexec-constructor
+                    (list #$(file-append blueman "/bin/blueman-applet")
+                          #:log-file #$(log-file "blueman-applet"))))
+      (stop      #~(make-kill-destructor))
+      (respawn? #t)
+      (actions
+       (list (shepherd-action
+              (name 'test)
+              (documentation "Test action")
+              (procedure (lambda (service x)
+                           "Testing doc"
+                           (format #t "Running Service: ~a, x: ~a\n" service x)))))))))
 
   (define (get-system-services config)
     (list
@@ -979,7 +1018,7 @@ Defaults:%wheel env_keep+=TERMINFO")))))
 
   (feature
    (name 'bluetooth)
-   (values `())
+   (values `((shepherd-blueman-applet blueman-applet)))
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 

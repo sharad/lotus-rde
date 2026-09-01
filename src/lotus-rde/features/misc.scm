@@ -145,8 +145,7 @@
             feature-git-annex-daemon
             feature-ssh-transient
             feature-extra-profile
-            feature-gui-theme
-            feature-lotus-udiskie-service))
+            feature-gui-theme))
 
 (define* (feature-lotus-nox-services
           #:key
@@ -168,7 +167,7 @@
               polkit
               mpd
               gmpc
-              ;; euphonica
+              rust-euphonica
               ;; flatpak run com.yktoo.ymuse
               znc
               jupyter))
@@ -1420,9 +1419,9 @@
      (simple-service 'gtk2-theme
                      home-files-service-type
                      `((" .gtkrc-2.0"
-                        (plain-file
-                         "gtkrc-2.0"
-                         ,(string-append
+                        ,(plain-file
+                          "gtkrc-2.0"
+                          (string-append
                            "gtk-theme-name=\"" theme "\"\n"
                            "gtk-icon-theme-name=\"" icon-theme "\"\n"
                            "gtk-font-name=\"" font "\"\n"
@@ -1443,9 +1442,9 @@
      (simple-service 'gtk3-theme
                      home-xdg-configuration-files-service-type
                      `(("gtk-3.0/settings.ini"
-                        (plain-file
-                         "gtk3-settings.ini"
-                         ,(string-append
+                        ,(plain-file
+                          "gtk3-settings.ini"
+                          (string-append
                            "[Settings]\n"
                            "gtk-theme-name=" theme "\n"
                            "gtk-icon-theme-name=" icon-theme "\n"
@@ -1457,9 +1456,9 @@
      (simple-service 'gtk4-theme
                      home-xdg-configuration-files-service-type
                      `(("gtk-4.0/settings.ini"
-                        (plain-file
-                         "gtk4-settings.ini"
-                         ,(string-append
+                        ,(plain-file
+                          "gtk4-settings.ini"
+                          (string-append
                            "[Settings]\n"
                            "gtk-theme-name=" theme "\n"
                            "gtk-icon-theme-name=" icon-theme "\n"
@@ -1474,23 +1473,6 @@
                       (specification->package "gnome-themes-extra")
                       (specification->package "adwaita-icon-theme")))))
 
-  (define (get-system-services config)
-    (list))
-
-  (feature
-   (name 'gui-theme)
-   (values `())
-   (home-services-getter get-home-services)
-   (system-services-getter get-system-services)))
-
-
-(define* (feature-lotus-udiskie-service
-          #:key
-          (font "Sans 10"))
-
-  (define (get-home-services config)
-    (list
-     (service home-udiskie-service-type)))
   (define (get-system-services config)
     (list))
 
