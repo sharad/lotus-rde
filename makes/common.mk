@@ -39,7 +39,7 @@ GUIX_SYSTEM_FLAGS  += $(GUIX_FLAGS) # $(GUIX_DEBUG_FLAG)
 # guix/ui.scm:1033:18: In procedure struct-vtable: Wrong type argument in position 1 (expecting struct): #f
 
 
-GUIX_HOME_FLAGS    += $(GUIX_FLAGS) $(GUIX_DEBUG_FLAG)
+GUIX_HOME_FLAGS    += $(GUIX_FLAGS) # $(GUIX_DEBUG_FLAG)
 
 GUIX_PROFILE_FLAGS += $(GUIX_FLAGS) $(GUIX_DEBUG_FLAG)
 

@@ -421,30 +421,29 @@
 
 (define (flatpak-app->desktop-link-gexp config)
   (let* ((app   (home-flatpak-app-configuration-app config))
-         (link? (home-flatpak-app-configuration-desktop-link? config))
-         (app-dir
-          (string-append
-           "/.local/share/flatpak/app/" app
-           "/current/active/export/share/applications/"
-           app ".desktop"))
-         (desktop
-          (string-append
-           "/.local/share/applications/" app ".desktop")))
-    (and link?
-         #~(let ((home (getenv "HOME")))
-             (let ((source
-                    (string-append
-                     home
-                     #$(literal-expression app-dir)))
-                   (target
-                    (string-append
-                     home
-                     #$(literal-expression desktop))))
-               (mkdir-p (dirname target))
-               (when (file-exists? target)
-                 (delete-file target))
-               (when (file-exists? source)
-                 (symlink source target)))))))
+         (link? (home-flatpak-app-configuration-desktop-link? config)))
+    (when link?
+      #~(let* ((home (getenv "HOME"))
+               (app  #$app)
+               (source
+                (string-append
+                 home
+                 "/.local/share/flatpak/app/"
+                 app
+                 "/current/active/export/share/applications/"
+                 app
+                 ".desktop"))
+               (target
+                (string-append
+                 home
+                 "/.local/share/applications/"
+                 app
+                 ".desktop")))
+          (mkdir-p (dirname target))
+          (when (file-exists? target)
+            (delete-file target))
+          (when (file-exists? source)
+            (symlink source target))))))
 
 (define home-flatpak-service-type
   (service-type
@@ -461,8 +460,11 @@
       (service-extension
        home-activation-service-type
        (lambda (configs)
-         (filter-map flatpak-app->desktop-link-gexp
-                     configs)))))
+         (filter-map
+          (lambda (config)
+            (and (home-flatpak-app-configuration-desktop-link? config)
+                 (flatpak-app->desktop-link-gexp config)))
+          configs)))))
 
     (compose concatenate)
     (extend append)
