@@ -153,7 +153,6 @@
           (openssh openssh-sans-x)
           (gnupg gnupg)
           (polkit polkit)
-          (mpd mpd)
           (znc znc)
           (jupyter python-jupyter-core)
           (usrhttpd rust-usrhttpd))
@@ -165,10 +164,6 @@
         home-profile-service-type
         (list emacs
               polkit
-              mpd
-              gmpc
-              rust-euphonica
-              ;; flatpak run com.yktoo.ymuse
               znc
               jupyter))
 
@@ -409,20 +404,6 @@
          ;; wireplumber;;
          ;; emacs;;
 
-         ;; mpd
-         (shepherd-service
-          (provision '(mpd))
-          (documentation "Music Player Daemon")
-          (auto-start? #f)
-          (start
-           #~(make-forkexec-constructor
-              (list #$(file-append mpd "/bin/mpd")
-                    "--no-daemon"
-                    (string-append (getenv "HOME")
-                                   "/.config/mpd/mpd.conf"))
-              #:log-file #$(log-file "mpd")))
-          (stop #~(make-kill-destructor))
-          (respawn? #t))
          ;; znc
          (shepherd-service
           (provision '(znc))
@@ -520,7 +501,6 @@
              (shepherd-gpg-agent (login))
              (shepherd-pkttyagent (login))
              (shepherd-attnmgr (awaken-session xlogin))
-             (shepherd-mpd (login))
              (shepherd-znc (login))
              (shepherd-jupyter (login))
              (shepherd-usrhttpd (login))

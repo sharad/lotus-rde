@@ -54,6 +54,7 @@
   #:use-module (rde home services wm)
   #:use-module (rde packages aspell)
   #:use-module (rde packages)
+  #:use-module (lotus-rde features audio)
   #:use-module (lotus-rde features base)
   #:use-module (lotus-rde features misc)
   #:use-module (lotus-rde features security))
@@ -769,7 +770,8 @@ fi
         ;; (feature-extra-profile)
         ;; (feature-extra-profile)
         (feature-ssh-transient)
-        (feature-gui-theme)))
+        (feature-gui-theme)
+        (feature-lotus-music)))
 
 
 
