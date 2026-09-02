@@ -4,6 +4,8 @@
 (define-module (lotus-rde features audio)
   #:use-module (rde features)
   #:use-module (rde predicates)
+  #:use-module (gnu services)
+  #:use-module (gnu services shepherd)
   #:use-module (gnu packages mpd)
   #:export (feature-lotus-music))
 
