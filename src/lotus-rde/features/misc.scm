@@ -1398,7 +1398,7 @@
      ;; GTK 2
      (simple-service 'gtk2-theme
                      home-files-service-type
-                     `((" .gtkrc-2.0"
+                     `((".gtkrc-2.0"
                         ,(plain-file
                           "gtkrc-2.0"
                           (string-append
