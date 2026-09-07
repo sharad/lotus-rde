@@ -133,13 +133,13 @@
            '((("localhost")
               (publish 8080 "/~s")
               (home 8080 "/home")
-              (openclaw 19789 "/openclaw"))
+              (openclaw 18789 "/openclaw"))
 
              (("home.local")
               (home 8080 "/home"))
 
              (("openclaw.local")
-              (openclaw 19789 "/openclaw"))
+              (openclaw 18789 "/openclaw"))
 
              (("example.local")
               (app2-api 888 "/api")
@@ -197,6 +197,32 @@
            "proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"
            "proxy_set_header X-Forwarded-Proto $scheme;")))))
 
+
+    (define (site->locations site)
+      (let ((port   (cadr site))
+            (prefix (caddr site)))
+        (list
+         (nginx-location-configuration
+          (uri prefix)
+          (body
+           (list
+            (string-append
+             "return 301 "
+             prefix
+             "/;"))))
+
+         (nginx-location-configuration
+          (uri (string-append prefix "/"))
+          (body
+           (list
+            (string-append
+             "proxy_pass http://127.0.0.1:"
+             (number->string port)
+             "/;")
+            "proxy_set_header Host $host;"
+            "proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"
+            "proxy_set_header X-Forwarded-Proto $scheme;"))))))
+
     ;; Convert one server specification into an nginx-server-configuration.
     (define (server->server-block server)
       (let ((hosts (car server))
@@ -217,7 +243,8 @@
                (server->index-page server)
                "';"))))
            ;; Proxies for this server.
-           (map site->location sites))))))
+           (apply append
+                  (map site->locations sites)))))))
 
     (list
      (service certbot-service-type
