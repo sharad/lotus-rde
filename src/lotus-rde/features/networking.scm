@@ -134,6 +134,11 @@
                     8080
                     "/~s/")
 
+                   (home
+                    ("localhost" "publish.local")
+                    8080
+                    "/home/")
+
                    (openclaw
                     ("localhost" "openclaw.local")
                     19789               ;19791 admin
