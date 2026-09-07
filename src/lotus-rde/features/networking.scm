@@ -129,10 +129,15 @@
           #:key
           (nginx nginx)
           (nginx-rtmp-module nginx-rtmp-module)
-          (sites '((app1
-                    ("localhost" "app1.local")
+          (sites '((publish
+                    ("localhost" "publish.local")
                     8080
-                    "/")
+                    "/~s")
+
+                   (openclaw
+                    ("localhost" "openclaw.local")
+                    19789               ;19791 admin
+                    "/openclaw")
 
                    ;; ;; hostname based
                    ;; (guix-publish
