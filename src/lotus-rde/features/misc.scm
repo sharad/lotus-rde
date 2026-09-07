@@ -116,6 +116,7 @@
   #:use-module (gnu packages xorg)
   #:use-module (gnu services)
 
+
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
   #:use-module (rde predicates)
@@ -126,8 +127,11 @@
   #:use-module (rde features guile)
   #:use-module (rde features networking)
   #:use-module (rde features system)
+  #:use-module (lotus-rde packages fixed-node-pqrs)
   #:use-module (lotus-rde packages python-xyz)
   #:use-module (lotus-rde packages utils)
+  #:use-module (myguix packages node-pqrs)
+  #:use-module (myguix home services openclaw)
   #:use-module (lotus-rde home scoped-profiles)
   #:use-module (lotus-rde home services builder)
   #:use-module (lotus-rde home services transients)
@@ -145,7 +149,8 @@
             feature-git-annex-daemon
             feature-ssh-transient
             feature-extra-profile
-            feature-gui-theme))
+            feature-gui-theme
+            feature-ai-agent))
 
 (define* (feature-lotus-nox-services
           #:key
@@ -1365,7 +1370,6 @@
    (home-services-getter get-home-services)))
 
 
-
 (define* (feature-ssh-transient)
   (define (get-home-services config)
     (list
@@ -1461,4 +1465,43 @@
    (values `())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
+
+
+(define* (feature-ai-agent #:key
+                           (node-openclaw node-openclaw-fixed))
+  (define (get-home-services config)
+    (list
+     (simple-service
+      'lotus-openclaw-packages
+      home-profile-service-type
+      (list node-openclaw))
+     (service home-openclaw-service-type
+              (openclaw-gateway-configuration
+               (package node-openclaw)
+               (provision '(openclaw-gateway))
+               (requirement '())
+               (auto-start? #t)
+               (state-directory "$HOME/.openclaw")
+               (config-file "$HOME/.openclaw/openclaw.json")
+               (workspace-directory "$HOME/.openclaw/workspace")
+               (log-file "$XDG_STATE_HOME/log/openclaw-gateway.log")
+               (port 18789)
+               (bind "loopback")
+               (auth-mode "token")
+               (password-file #f)
+               (tailscale-mode "off")
+               (tailscale-reset-on-exit? #f)
+               (ws-log "auto")
+               (force? #f)
+               (verbose? #f)
+               (auto-onboard? #t)
+               (onboard-extra-options '())
+               (extra-options '())
+               (environment-variables '())
+               (respawn? #t)
+               (stop-grace-period 30)))))
+  (feature
+   (values `((shepherd-oepnclaw openclaw)))
+   (name 'ai-agent)
+   (home-services-getter get-home-services)))
 

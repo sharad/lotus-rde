@@ -771,6 +771,7 @@ fi
         ;; (feature-extra-profile)
         (feature-ssh-transient)
         (feature-gui-theme)
+        (feature-ai-agent)
         (feature-lotus-music)))
 
 
