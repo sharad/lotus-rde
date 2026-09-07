@@ -132,12 +132,12 @@
           (sites '((publish
                     ("localhost" "publish.local")
                     8080
-                    "/~s")
+                    "/~s/")
 
                    (openclaw
                     ("localhost" "openclaw.local")
                     19789               ;19791 admin
-                    "/openclaw")
+                    "/openclaw/")
 
                    ;; ;; hostname based
                    ;; (guix-publish
