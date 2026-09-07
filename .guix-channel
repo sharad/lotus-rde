@@ -1,3 +1,5 @@
+;; -*- mode: scheme; -*-
+
 (channel
  (version 0)
  (directory "src")
@@ -8,6 +10,15 @@
   (channel
    (name nonguix)
    (url "https://gitlab.com/nonguix/nonguix"))
+  ;; (channel
+  ;;   (name guix-more-lotus)
+  ;;   (url "https://github.com/sharad/guix-more.git"))
+  ;; (channel
+  ;;   (name guix-android)
+  ;;   (url "https://framagit.org/tyreunom/guix-android.git"))
   (channel
    (name rde)
-   (url "https://git.sr.ht/~abcdw/rde"))))
+   (url "https://git.sr.ht/~abcdw/rde"))
+  (channel
+    (name b-vitamins)
+    (url "https://github.com/b-vitamins/myguix.git"))))

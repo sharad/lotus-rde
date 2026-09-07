@@ -129,83 +129,95 @@
           #:key
           (nginx nginx)
           (nginx-rtmp-module nginx-rtmp-module)
-          (sites '((publish
-                    ("localhost" "publish.local")
-                    8080
-                    "/~s/")
+          (sites
+           '((("localhost")
+              (publish 8080 "/~s")
+              (home 8080 "/home")
+              (openclaw 19789 "/openclaw"))
 
-                   (home
-                    ("localhost" "publish.local")
-                    8080
-                    "/home/")
+             (("home.local")
+              (home 8080 "/home"))
 
-                   (openclaw
-                    ("localhost" "openclaw.local")
-                    19789               ;19791 admin
-                    "/openclaw/")
+             (("openclaw.local")
+              (openclaw 19789 "/openclaw"))
 
-                   ;; ;; hostname based
-                   ;; (guix-publish
-                   ;;  ("guix.example.local")
-                   ;;  8899)
-
-                   (app2-api
-                    ("example.local")
-                    888
-                    "/api/")
-
-                   (app2-admin
-                    ("example.local")
-                    999
-                    "/admin/"))))
+             (("example.local")
+              (app2-api 888 "/api")
+              (app2-admin 999 "/admin")))))
 
   (define (get-home-services config)
     (list))
 
   (define (get-system-services config)
 
-    ;; (define (site->catchall port sprefix)
-    ;;   (nginx-server-configuration
-    ;;    (server-name '("_"))
-    ;;    (listen '("80 default_server"
-    ;;              "[::]:80 default_server"
-    ;;              "443 ssl default_server"
-    ;;              "[::]:443 ssl default_server"))
-    ;;    (locations
-    ;;     (list
-    ;;      (nginx-location-configuration
-    ;;       (uri sprefix)
-    ;;       (body
-    ;;         (list)
-    ;;         (string-append "proxy_pass http://127.0.0.1:"
-    ;;                        (number->string port
-    ;;                         ";"))
-    ;;         "proxy_set_header Host $host;"
-    ;;         "proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"
-    ;;         "proxy_set_header X-Forwarded-Proto $scheme;"))))))
+    (define (site->link host site)
+      (let ((name   (symbol->string (car site)))
+            (prefix (caddr site)))
+        (string-append
+         "<li><a href=\"" prefix "\">"
+         name
+         " (" prefix ")"
+         "</a></li>\n")))
 
+    (define (server->index-page server)
+      (let ((host  (car (car server)))
+            (sites (cdr server)))
+        (string-append
+         "<!DOCTYPE html>\n"
+         "<html>\n"
+         "<head>\n"
+         "  <meta charset=\"UTF-8\">\n"
+         "  <title>" host "</title>\n"
+         "</head>\n"
+         "<body>\n"
+         "  <h1>" host "</h1>\n"
+         "  <ul>\n"
+         (apply string-append
+                (map (lambda (site)
+                       (site->link host site))
+                     sites))
+         "  </ul>\n"
+         "</body>\n"
+         "</html>\n")))
 
-    ;; Convert one site specification into an nginx-server-configuration.
-    (define (site->server-block site)
-      (let* ((name   (car site))
-             (hosts  (cadr site))
-             (port   (caddr site))
-             (sprefix (cadddr site)))
+    ;; Convert one site specification into an nginx-location-configuration.
+    (define (site->location site)
+      (let ((port   (cadr site))
+            (prefix (caddr site)))
+        (nginx-location-configuration
+         (uri prefix)
+         (body
+          (list
+           (string-append
+            "proxy_pass http://127.0.0.1:"
+            (number->string port)
+            ;; ";"
+            "/;")
+           "proxy_set_header Host $host;"
+           "proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"
+           "proxy_set_header X-Forwarded-Proto $scheme;")))))
+
+    ;; Convert one server specification into an nginx-server-configuration.
+    (define (server->server-block server)
+      (let ((hosts (car server))
+            (sites (cdr server)))
         (nginx-server-configuration
          (server-name hosts)
          (listen '("80" "[::]:80"))
          (locations
-          (list
+          (cons
+           ;; Index for this particular server.
            (nginx-location-configuration
-            (uri sprefix)
+            (uri "/")
             (body
              (list
-              (string-append "proxy_pass http://127.0.0.1:"
-                             (number->string port)
-                             ";")
-              "proxy_set_header Host $host;"
-              "proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"
-              "proxy_set_header X-Forwarded-Proto $scheme;"))))))))
+              "default_type text/html;"
+              (string-append
+               "return 200 '"
+               (server->index-page server)
+               "';"))))
+           ;; Proxies for this server.
+           (map site->location sites))))))
 
     (list
      (service certbot-service-type
@@ -223,7 +235,7 @@
               (nginx-configuration
                (nginx nginx)
                (server-blocks
-                (map site->server-block sites))))))
+                (map server->server-block sites))))))
 
   (feature
    (name 'webserver)
