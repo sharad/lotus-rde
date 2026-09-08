@@ -18,6 +18,7 @@
 ;;; along with rde.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (lotus-rde features networking)
+  #:use-module (ice-9 match)
   #:use-module (rde features)
   #:use-module (rde predicates)
 
