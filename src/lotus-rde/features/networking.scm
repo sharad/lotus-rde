@@ -40,6 +40,7 @@
   #:use-module (rde packages)
 
   #:use-module (guix gexp)
+  #:use-module (guix records)
 
   #:export (feature-lotus-networking
             feature-lotus-webserver
@@ -125,83 +126,155 @@
    (system-services-getter get-system-services)))
 
 
+(define-record-type* <lotus-server>
+  lotus-server
+  make-lotus-server
+  lotus-server?
+  (server-name lotus-server-name
+               (default '("_")))
+  (listen lotus-server-listen
+          (default '("80" "[::]:80")))
+  (root lotus-server-root
+        (default "/srv/http"))
+  (index lotus-server-index
+         (default "index.html"))
+  (server-tokens lotus-server-tokens
+                 (default #f))
+  (ssl-certificate lotus-server-ssl-certificate
+                   (default #f))
+  (ssl-certificate-key lotus-server-ssl-certificate-key
+                        (default #f))
+  (raw-content lotus-server-raw-content
+               (default '()))
+  (services lotus-server-services
+            (default '())))
+
+
 (define* (feature-lotus-webserver
           #:key
           (nginx nginx)
           (nginx-rtmp-module nginx-rtmp-module)
-          (sites
-           '((("localhost")
-              (publish 8080 "/~s")
-              (home 8080 "/home")
-              (openclaw 18789 "/openclaw"))
+          (servers
+           (list
 
-             (("home.local")
-              (home 8080 "/home"))
+            ;; Default server.
+            (lotus-server
+             (server-name '("_"))
+             (listen '("80 default_server"
+                       "[::]:80 default_server"))
+             (services
+              '((publish 8080 "/~s")
+                (home 8080 "/home")
+                (openclaw 18789 "/openclaw"))))
 
-             (("openclaw.local")
-              (openclaw 18789 "/openclaw"))
+            ;; Home.
+            (lotus-server
+             (server-name '("home.local"))
+             (services
+              '((home 8080 "/home"))))
 
-             (("example.local")
-              (app2-api 888 "/api")
-              (app2-admin 999 "/admin")))))
+            ;; OpenClaw.
+            (lotus-server
+             (server-name '("openclaw.local"))
+             (services
+              '((openclaw 18789 "/openclaw"))))
+
+            ;; ;; HTTPS application.
+            ;; ;;
+            ;; ;; The certificate and key must exist when nginx starts.
+            ;; (lotus-server
+            ;;  (server-name '("app1.example.org"))
+            ;;  (listen '("443 ssl"
+            ;;            "[::]:443 ssl"))
+            ;;  (ssl-certificate
+            ;;   "/etc/letsencrypt/live/app1/fullchain.pem")
+            ;;  (ssl-certificate-key
+            ;;   "/etc/letsencrypt/live/app1/privkey.pem")
+            ;;  (services
+            ;;   '((app1 8080 "/app1"))))
+
+
+            ;; Example application.
+            (lotus-server
+             (server-name '("example.local"))
+             (services
+              '((app2-api 888 "/api")
+                (app2-admin 999 "/admin")))))))
 
   (define (get-home-services config)
     (list))
 
   (define (get-system-services config)
 
-    (define (site->link host site)
-      (let ((name   (symbol->string (car site)))
-            (prefix (caddr site)))
+    ;; ------------------------------------------------------------
+    ;; Generate one link for a service.
+    ;; ------------------------------------------------------------
+
+    (define (service->link service)
+      (let ((name   (symbol->string (car service)))
+            (prefix (caddr service)))
         (string-append
          "<li><a href=\"" prefix "\">"
          name
          " (" prefix ")"
          "</a></li>\n")))
 
+
+    ;; ------------------------------------------------------------
+    ;; Generate the index page for one server.
+    ;; ------------------------------------------------------------
+
     (define (server->index-page server)
-      (let ((host  (car (car server)))
-            (sites (cdr server)))
+      (let ((host     (car (lotus-server-name server)))
+            (services (lotus-server-services server)))
         (string-append
          "<!DOCTYPE html>\n"
          "<html>\n"
          "<head>\n"
          "  <meta charset=\"UTF-8\">\n"
-         "  <title>" host "</title>\n"
+         "  <title>"
+         (match host
+           ("_" "Default server")
+           (_ host))
+         "</title>\n"
          "</head>\n"
          "<body>\n"
          "  <h1>" host "</h1>\n"
          "  <ul>\n"
          (apply string-append
-                (map (lambda (site)
-                       (site->link host site))
-                     sites))
+                (map service->link services))
          "  </ul>\n"
          "</body>\n"
          "</html>\n")))
 
-    ;; Convert one site specification into an nginx-location-configuration.
-    (define (site->location site)
-      (let ((port   (cadr site))
-            (prefix (caddr site)))
-        (nginx-location-configuration
-         (uri prefix)
-         (body
-          (list
-           (string-append
-            "proxy_pass http://127.0.0.1:"
-            (number->string port)
-            ;; ";"
-            "/;")
-           "proxy_set_header Host $host;"
-           "proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"
-           "proxy_set_header X-Forwarded-Proto $scheme;")))))
+    ;; ------------------------------------------------------------
+    ;; Convert one Lotus service into nginx locations.
+    ;;
+    ;; Example:
+    ;;
+    ;;   (home 8080 "/home")
+    ;;
+    ;; becomes:
+    ;;
+    ;;   location /home {
+    ;;       return 301 /home/;
+    ;;   }
+    ;;
+    ;;   location /home/ {
+    ;;       proxy_pass http://127.0.0.1:8080/;
+    ;;   }
+    ;;
+    ;; The trailing "/" in proxy_pass causes nginx to strip
+    ;; "/home/" before forwarding to port 8080.
+    ;; ------------------------------------------------------------
 
+    (define (service->locations service)
+      (let ((port   (cadr service))
+            (prefix (caddr service)))
 
-    (define (site->locations site)
-      (let ((port   (cadr site))
-            (prefix (caddr site)))
         (list
+
+         ;; /home -> /home/
          (nginx-location-configuration
           (uri prefix)
           (body
@@ -211,6 +284,7 @@
              prefix
              "/;"))))
 
+         ;; /home/... -> backend /...
          (nginx-location-configuration
           (uri (string-append prefix "/"))
           (body
@@ -219,56 +293,123 @@
              "proxy_pass http://127.0.0.1:"
              (number->string port)
              "/;")
+
             "proxy_set_header Host $host;"
             "proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"
             "proxy_set_header X-Forwarded-Proto $scheme;"))))))
 
-    ;; Convert one server specification into an nginx-server-configuration.
+
+    ;; ------------------------------------------------------------
+    ;; Generate the locations belonging to one server.
+    ;; ------------------------------------------------------------
+
+    (define (server->locations server)
+
+      (cons
+
+       ;; Server index.
+       (nginx-location-configuration
+        (uri "/")
+        (body
+         (list
+          "default_type text/html;"
+          (string-append
+           "return 200 '"
+           (server->index-page server)
+           "';"))))
+
+       ;; Service locations.
+       (apply append
+              (map service->locations
+                   (lotus-server-services server)))))
+
+
+    ;; ------------------------------------------------------------
+    ;; Convert one lotus-server into an nginx-server-configuration.
+    ;; ------------------------------------------------------------
+
     (define (server->server-block server)
-      (let ((hosts (car server))
-            (sites (cdr server)))
-        (nginx-server-configuration
-         (server-name hosts)
-         (listen '("80" "[::]:80"))
-         (locations
-          (cons
-           ;; Index for this particular server.
-           (nginx-location-configuration
-            (uri "/")
-            (body
-             (list
-              "default_type text/html;"
-              (string-append
-               "return 200 '"
-               (server->index-page server)
-               "';"))))
-           ;; Proxies for this server.
-           (apply append
-                  (map site->locations sites)))))))
+
+      (nginx-server-configuration
+
+       ;; server_name
+       (server-name
+        (lotus-server-name server))
+
+       ;; listen
+       (listen
+        (lotus-server-listen server))
+
+       ;; root
+       (root
+        (lotus-server-root server))
+
+       ;; index expects a list in Guix's nginx configuration.
+       (index
+        (list
+         (lotus-server-index server)))
+
+       ;; Guix calls this field server-tokens?.
+       (server-tokens?
+        (lotus-server-tokens server))
+
+       ;; These are emitted only when non-#f.
+       (ssl-certificate
+        (lotus-server-ssl-certificate server))
+
+       (ssl-certificate-key
+        (lotus-server-ssl-certificate-key server))
+
+       ;; Arbitrary additional nginx directives.
+       (raw-content
+        (lotus-server-raw-content server))
+
+       ;; /
+       ;; /prefix
+       ;; /prefix/
+       (locations
+        (server->locations server))))
+
+
+    ;; ------------------------------------------------------------
+    ;; Services.
+    ;; ------------------------------------------------------------
 
     (list
+
+     ;; Let's Encrypt / Certbot.
      (service certbot-service-type
               (certbot-configuration
                (certificates
                 (list
+
                  (certificate-configuration
                   (name "app1")
-                  (domains '("app1.example.org")))
+                  (domains
+                   '("app1.example.org")))
+
                  (certificate-configuration
                   (name "app2")
-                  (domains '("app2.example.org")))))))
+                  (domains
+                   '("app2.example.org")))))))
 
+
+     ;; Nginx.
      (service nginx-service-type
               (nginx-configuration
                (nginx nginx)
+
                (server-blocks
-                (map server->server-block sites))))))
+                (map server->server-block
+                     servers))))))
+
 
   (feature
    (name 'webserver)
    (values '())
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
+
 
 (define* (feature-dnsmasq-services
           #:key
@@ -331,6 +472,4 @@
 ;;    (values `())
 ;;    (home-services-getter get-home-services)
 ;;    (system-services-getter get-system-services)))
-
-
 
