@@ -50,7 +50,6 @@
 
 
 
-
 (define* (feature-lotus-networking
           #:key
           (dns "default")
@@ -210,7 +209,6 @@
     ;; ------------------------------------------------------------
     ;; Generate one link for a service.
     ;; ------------------------------------------------------------
-
     (define (service->link service)
       (let ((name   (symbol->string (car service)))
             (prefix (caddr service)))
@@ -375,7 +373,6 @@
     ;; ------------------------------------------------------------
     ;; Services.
     ;; ------------------------------------------------------------
-
     (list
 
      ;; Let's Encrypt / Certbot.
@@ -412,10 +409,9 @@
    (system-services-getter get-system-services)))
 
 
-(define* (feature-dnsmasq-services
-          #:key
-          (no-resolv? #t)
-          (local-service? #t))
+(define* (feature-dnsmasq-services #:key
+                                   (no-resolv? #t)
+                                   (local-service? #t))
   ;; https://notabug.org/thomassgn/guixsd-configuration/src/master/config.scm
   ;; https://guix.gnu.org/manual/en/html_node/Networking-Services.html
   ;; https://jonathansblog.co.uk/using-dnsmasq-as-an-internal-dns-server-to-block-online-adverts
