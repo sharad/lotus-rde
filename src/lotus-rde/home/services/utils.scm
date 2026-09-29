@@ -53,7 +53,10 @@
             home-power-monitor-service
             home-kpkey-service
             home-ssh-add-key-service
-            home-git-annex-daemon-service))
+            home-git-annex-daemon-service
+            idle-timer-configuration
+            idle-timer-configuration?
+            idle-timer-service-type))
 
 
 ;; ------------------------------------------------------------
@@ -2088,5 +2091,852 @@ sender='org.bluez'")
      (deskflow-configuration))
    (description
     "Deskflow home service.")))
+
+
+;;;
+;;; Configuration
+;;;
+
+(define-record-type* <idle-timer-configuration>
+  idle-timer-configuration
+  make-idle-timer-configuration
+  idle-timer-configuration?
+
+  ;; Program used to obtain X11 idle time.
+  ;;
+  ;; Usually simply "xssstate", assuming it is in PATH.
+  ;;
+  (xssstate
+   idle-timer-configuration-xssstate
+   (default "xssstate"))
+
+  ;; Shell used to execute scheduled commands.
+  ;;
+  ;; #f means use $SHELL, falling back to /bin/sh.
+  ;;
+  (shell
+   idle-timer-configuration-shell
+   (default #f))
+
+  ;; Additional shell initialization files.
+  ;;
+  ;; These are sourced before executing the scheduled command.
+  ;;
+  ;; This preserves the useful part of the old idlerun.sh:
+  ;;
+  ;;   ~/.setup/binx/setup/lib_setup.sh
+  ;;   ~/.rsetup/sh/env
+  ;;
+  (shell-init-files
+   idle-timer-configuration-shell-init-files
+   (default
+     '("~/.setup/binx/setup/lib_setup.sh"
+       "~/.rsetup/sh/env")))
+
+  ;; Whether the controller Shepherd service starts automatically.
+  ;;
+  (auto-start?
+   idle-timer-configuration-auto-start?
+   (default #t))
+
+  ;; Shepherd requirements of the controller service.
+  ;;
+  (requirement
+   idle-timer-configuration-requirement
+   (default '())))
+
+
+;;;
+;;; Runtime service-name helpers
+;;;
+
+;; Every dynamically-created job has the form:
+;;
+;;   idle-timer-job/GROUP/JOB-ID
+;;
+;; The group is therefore part of the Shepherd service identity.
+
+(define idle-timer-job-prefix
+  "idle-timer-job/")
+
+
+;;;
+;;; Shepherd service
+;;;
+
+(define (idle-timer-shepherd-service cfg)
+
+  (let ((xssstate
+         (idle-timer-configuration-xssstate cfg))
+
+        (shell
+         (idle-timer-configuration-shell cfg))
+
+        (shell-init-files
+         (idle-timer-configuration-shell-init-files cfg)))
+
+    (list
+
+     (shepherd-service
+      (provision '(idle-timer))
+
+      (documentation
+       "Schedule commands according to X11 idle time.")
+
+      (auto-start?
+       (idle-timer-configuration-auto-start? cfg))
+
+      (requirement
+       (idle-timer-configuration-requirement cfg))
+
+      ;; The controller itself does not run a monitor.
+      ;;
+      ;; Individual monitors are transient Shepherd services.
+      (start
+       #~(const #t))
+
+      (stop
+       #~(const #t))
+
+      (modules
+       '((shepherd service)
+         (ice-9 popen)
+         (ice-9 rdelim)
+         (ice-9 signals)
+         (srfi srfi-13)))
+
+      (actions
+       (list
+
+
+        ;; ================================================================
+        ;;
+        ;; schedule-idle
+        ;;
+        ;; herd schedule-idle idle-timer GROUP SECONDS COMMAND [ARGS...]
+        ;;
+        ;; ================================================================
+
+        (shepherd-action
+         (name 'schedule-idle)
+
+         (documentation
+          "Schedule COMMAND after SECONDS of X11 idle time in GROUP.")
+
+         (procedure
+          #~(lambda (_ group timeout . command)
+
+              (unless (and group
+                           timeout
+                           (pair? command))
+                (error
+                 "usage: herd schedule-idle idle-timer GROUP SECONDS COMMAND [ARGS...]"))
+
+              (let ((seconds
+                     (string->number timeout)))
+
+                (unless (and seconds
+                             (> seconds 0))
+                  (error
+                   "idle timeout must be a positive number: ~a"
+                   timeout))
+
+                ;; ----------------------------------------------------------
+                ;; Validate group.
+                ;;
+                ;; Since the group becomes part of a service name, don't
+                ;; allow '/' in it.
+                ;; ----------------------------------------------------------
+
+                (when (string-contains group "/")
+                  (error
+                   "idle group must not contain '/': ~a"
+                   group))
+
+                ;; ----------------------------------------------------------
+                ;; Create a unique service name.
+                ;;
+                ;;   idle-timer-job/backup/job-123
+                ;; ----------------------------------------------------------
+
+                (let* ((job-id
+                        (symbol->string
+                         (gensym "job-")))
+
+                       (service-name
+                        (string->symbol
+                         (format
+                          #f
+                          "idle-timer-job/~a/~a"
+                          group
+                          job-id)))
+
+
+                       ;; ===================================================
+                       ;; The actual idle job.
+                       ;;
+                       ;; This is the important part:
+                       ;;
+                       ;; There is NO idle-monitor program.
+                       ;;
+                       ;; The transient Shepherd service itself performs
+                       ;; the monitoring.
+                       ;; ===================================================
+
+                       (job
+                        (service
+                         (list service-name)
+
+                         #:documentation
+                         (format
+                          #f
+                          "Idle timer: group=~a command=~a"
+                          group
+                          command)
+
+                         #:transient?
+                         #t
+
+                         #:respawn?
+                         #f
+
+
+                         ;; ------------------------------------------------
+                         ;; START
+                         ;; ------------------------------------------------
+
+                         #:start
+                         (lambda ()
+
+                           ;; Shepherd needs the start procedure to return
+                           ;; the value representing the running service.
+                           ;;
+                           ;; We therefore fork a small Guile worker.
+                           (let ((pid
+                                  (primitive-fork)))
+
+                             (if (zero? pid)
+
+                                 ;; =========================================
+                                 ;; CHILD
+                                 ;; =========================================
+
+                                 (begin
+
+                                   ;; ---------------------------------------
+                                   ;; State
+                                   ;; ---------------------------------------
+
+                                   (define run-now?
+                                     #f)
+
+
+                                   ;; ---------------------------------------
+                                   ;; X11 idle time
+                                   ;;
+                                   ;; Keep xssstate as the provider only.
+                                   ;; The scheduling logic itself is Guile.
+                                   ;; ---------------------------------------
+
+                                   (define (idle-time)
+
+                                     (let* ((port
+                                             (open-pipe*
+                                              OPEN_READ
+                                              #$xssstate
+                                              "-i"))
+
+                                            (line
+                                             (read-line port))
+
+                                            (status
+                                             (close-pipe port)))
+
+                                       (unless (zero? status)
+                                         (error
+                                          "xssstate -i failed"))
+
+                                       (or
+                                        (and
+                                         (string? line)
+                                         (string->number
+                                          (string-trim-both line)))
+
+                                        (error
+                                         "invalid xssstate output: ~a"
+                                         line))))
+
+
+                                   ;; ---------------------------------------
+                                   ;; Shell quoting
+                                   ;; ---------------------------------------
+
+                                   (define (shell-quote value)
+
+                                     (string-append
+                                      "'"
+                                      (string-replace-substring
+                                       value
+                                       "'"
+                                       "'\\''")
+                                      "'"))
+
+
+                                   (define (command-string)
+
+                                     (string-join
+                                      (map shell-quote command)
+                                      " "))
+
+
+                                   ;; ---------------------------------------
+                                   ;; Execute the user's command.
+                                   ;;
+                                   ;; Interactive shell is intentional:
+                                   ;;
+                                   ;;   bash -ic ...
+                                   ;;   zsh  -ic ...
+                                   ;;
+                                   ;; This makes shell functions available.
+                                   ;; ---------------------------------------
+
+                                   (define (run-command)
+
+                                     (let* ((program
+                                             #$(or shell
+                                                   "$SHELL"))
+
+                                            (shell-program
+                                             (if (string=? program "$SHELL")
+                                                 (or (getenv "SHELL")
+                                                     "/bin/sh")
+                                                 program))
+
+                                            ;; Source configured initialization
+                                            ;; files before the command.
+                                            (initialization
+                                             (string-join
+                                              (map
+                                               (lambda (file)
+                                                 (format
+                                                  #f
+                                                  ". ~a"
+                                                  (shell-quote
+                                                   (if (string-prefix?
+                                                        "~/"
+                                                        file)
+                                                       (string-append
+                                                        "$HOME/"
+                                                        (string-drop
+                                                         file
+                                                         2))
+                                                       file))))
+                                               '#$shell-init-files)
+                                              "; "))
+
+                                            (script
+                                             (if (string-null?
+                                                  initialization)
+
+                                                 (command-string)
+
+                                                 (string-append
+                                                  initialization
+                                                  "; "
+                                                  (command-string)))))
+
+                                       (format
+                                        (current-error-port)
+                                        "[idle-timer ~a/~a] running: ~a~%"
+                                        #$group
+                                        #$job-id
+                                        (command-string))
+
+                                       (system*
+                                        shell-program
+                                        "-ic"
+                                        script)))
+
+
+                                   ;; ---------------------------------------
+                                   ;; SIGUSR1
+                                   ;;
+                                   ;; Equivalent to:
+                                   ;;
+                                   ;;   trap runOnSignUSR1 SIGUSR1
+                                   ;;
+                                   ;; but expressed as Scheme state.
+                                   ;; ---------------------------------------
+
+                                   (sigaction
+                                    SIGUSR1
+                                    (lambda (_)
+                                      (set! run-now? #t)))
+
+
+                                   ;; ---------------------------------------
+                                   ;; Initial state
+                                   ;; ---------------------------------------
+
+                                   (let* ((initial-idle
+                                           (idle-time))
+
+                                          (previous-idle
+                                           initial-idle)
+
+                                          ;; Has the initial continuous
+                                          ;; idle period been interrupted?
+                                          (continuous?
+                                           #t))
+
+                                     (format
+                                      (current-error-port)
+                                      "[idle-timer ~a/~a] started: ~a sec~%"
+                                      #$group
+                                      #$job-id
+                                      seconds)
+
+                                     (format
+                                      (current-error-port)
+                                      "[idle-timer ~a/~a] command: ~a~%"
+                                      #$group
+                                      #$job-id
+                                      (command-string))
+
+
+                                     ;; ======================================
+                                     ;; Idle loop
+                                     ;; ======================================
+
+                                     (let loop
+                                         ((previous previous-idle)
+                                          (continuous? continuous?))
+
+                                       (sleep 1)
+
+                                       (let ((current
+                                              (idle-time)))
+
+                                         ;; ---------------------------------
+                                         ;; User activity?
+                                         ;;
+                                         ;; X idle time decreased, meaning
+                                         ;; activity occurred.
+                                         ;; ---------------------------------
+
+                                         (let ((continuous?
+                                                (and continuous?
+                                                     (>= current
+                                                         previous))))
+
+                                           ;; --------------------------------
+                                           ;; For the initial continuous
+                                           ;; period, measure from the time
+                                           ;; this job was scheduled.
+                                           ;;
+                                           ;; Once activity occurs, use the
+                                           ;; absolute X idle time.
+                                           ;; --------------------------------
+
+                                           (let ((effective-idle
+                                                  (if continuous?
+
+                                                      (- current
+                                                         initial-idle)
+
+                                                      current)))
+
+                                             ;; ------------------------------
+                                             ;; Small amount of useful
+                                             ;; debugging.
+                                             ;; ------------------------------
+
+                                             (format
+                                              (current-error-port)
+                                              "[idle-timer ~a/~a] idle=~ams~%"
+                                              #$group
+                                              #$job-id
+                                              effective-idle)
+
+
+                                             ;; ------------------------------
+                                             ;; Trigger:
+                                             ;;
+                                             ;;   SIGUSR1
+                                             ;;
+                                             ;; OR
+                                             ;;
+                                             ;;   idle >= timeout
+                                             ;; ------------------------------
+
+                                             (if
+                                              (or
+                                               run-now?
+
+                                               (>=
+                                                effective-idle
+                                                (* seconds
+                                                   1000)))
+
+                                              (begin
+
+                                                (run-command)
+
+                                                ;; The transient service
+                                                ;; terminates after the
+                                                ;; command has run.
+                                                (primitive-exit 0))
+
+                                              ;; Continue monitoring.
+                                              (loop
+                                               current
+                                               continuous?))))))))
+
+                                 ;; =========================================
+                                 ;; PARENT
+                                 ;; =========================================
+
+                                 pid)))
+
+
+                         #:stop
+                         (make-kill-destructor))))
+
+
+                  ;; --------------------------------------------------------
+                  ;; Register and start.
+                  ;; --------------------------------------------------------
+
+                  (register-services
+                   (list job))
+
+                  (start-service job)
+
+                  (format
+                   #t
+                   "scheduled ~a/~a: ~a after ~a seconds idle~%"
+                   group
+                   job-id
+                   (string-join command " ")
+                   seconds))))))
+
+
+        ;; ================================================================
+        ;;
+        ;; list-idle
+        ;;
+        ;; herd list-idle idle-timer
+        ;;
+        ;; ================================================================
+
+        (shepherd-action
+         (name 'list-idle)
+
+         (documentation
+          "List all scheduled idle timers.")
+
+         (procedure
+          #~(lambda (_)
+
+              (let ((count 0))
+
+                (for-each-service
+                 (lambda (service)
+
+                   (let ((name
+                          (symbol->string
+                           (service-canonical-name service))))
+
+                     (when
+                      (string-prefix?
+                       "idle-timer-job/"
+                       name
+
+                       (set! count
+                             (+ count 1))
+
+                       (format
+                        #t
+                        "~a  running=~a~%"
+                        name
+                        (service-running? service)))))))
+
+                (if (zero? count)
+
+                    (format
+                     #t
+                     "No idle timers scheduled.~%")
+
+                    (format
+                     #t
+                     "Total: ~a idle timer(s).~%"
+                     count))))))
+
+
+        ;; ================================================================
+        ;;
+        ;; cancel-idle-group
+        ;;
+        ;; herd cancel-idle-group idle-timer GROUP
+        ;;
+        ;; ================================================================
+
+        (shepherd-action
+         (name 'cancel-idle-group)
+
+         (documentation
+          "Cancel all idle timers belonging to GROUP.")
+
+         (procedure
+          #~(lambda (_ group)
+
+              (unless group
+                (error
+                 "usage: herd cancel-idle-group idle-timer GROUP"))
+
+              (let ((prefix
+                     (format
+                      #f
+                      "idle-timer-job/~a/"
+                      group))
+
+                    (jobs
+                     '()))
+
+                ;; Find matching services first.
+                (for-each-service
+                 (lambda (service)
+
+                   (let ((name
+                          (symbol->string
+                           (service-canonical-name service))))
+
+                     (when
+                      (string-prefix?
+                       prefix
+                       name
+
+                       (set!
+                        jobs
+                        (cons service jobs)))))))
+
+                ;; Then stop them.
+                (for-each
+                 (lambda (job)
+
+                   (when
+                    (service-running? job
+
+                     (format
+                      #t
+                      "stopping ~a~%"
+                      (service-canonical-name job))
+
+                     (stop-service job))))
+
+                 jobs)
+
+                (format
+                 #t
+                 "Cancelled ~a idle timer(s) in group '~a'.~%"
+                 (length jobs)
+                 group)))))
+
+
+        ;; ================================================================
+        ;;
+        ;; cancel-idle
+        ;;
+        ;; herd cancel-idle idle-timer
+        ;;
+        ;; ================================================================
+
+        (shepherd-action
+         (name 'cancel-idle)
+
+         (documentation
+          "Cancel all scheduled idle timers.")
+
+         (procedure
+          #~(lambda (_)
+
+              (let ((jobs '()))
+
+                (for-each-service
+                 (lambda (service)
+
+                   (let ((name
+                          (symbol->string
+                           (service-canonical-name service))))
+
+                     (when
+                      (string-prefix?
+                       "idle-timer-job/"
+                       name
+
+                       (set!
+                        jobs
+                        (cons service jobs)))))))
+
+                (for-each
+                 (lambda (job)
+
+                   (when
+                    (service-running? job
+
+                     (format
+                      #t
+                      "stopping ~a~%"
+                      (service-canonical-name job))
+
+                     (stop-service job))))
+
+                 jobs)
+
+                (format
+                 #t
+                 "Cancelled ~a idle timer(s).~%"
+                 (length jobs))))))
+
+
+        ;; ================================================================
+        ;;
+        ;; run-idle-now
+        ;;
+        ;; herd run-idle-now idle-timer
+        ;;
+        ;; herd run-idle-now idle-timer GROUP
+        ;;
+        ;; ================================================================
+
+        (shepherd-action
+         (name 'run-idle-now)
+
+         (documentation
+          "Immediately trigger idle timers, optionally restricted to GROUP.")
+
+         (procedure
+          #~(lambda (_ . args)
+
+              (let* ((group
+                      (and (pair? args)
+                           (car args)))
+
+                     (prefix
+                      (and group
+                           (format
+                            #f
+                            "idle-timer-job/~a/"
+                            group)))
+
+                     (jobs
+                      '()))
+
+                (for-each-service
+                 (lambda (service)
+
+                   (let ((name
+                          (symbol->string
+                           (service-canonical-name service))))
+
+                     (when
+                      (and
+                       (string-prefix?
+                        "idle-timer-job/"
+                        name)
+
+                       (or
+                        (not group)
+                        (string-prefix?
+                         prefix
+                         name))
+
+                       (set!
+                        jobs
+                        (cons service jobs)))))))
+
+                ;; SIGUSR1 is the "run now" protocol.
+                (for-each
+                 (lambda (job)
+
+                   (when
+                    (service-running? job
+
+                     (kill
+                      (service-running-value job)
+                      SIGUSR1))))
+
+                 jobs)
+
+                (format
+                 #t
+                 "Triggered ~a idle timer(s).~%"
+                 (length jobs))))))))))))
+
+;;;
+;;; Service type
+;;;
+
+(define idle-timer-service-type
+  (service-type
+   (name 'idle-timer)
+
+   (extensions
+    (list
+     (service-extension
+      home-shepherd-service-type
+      idle-timer-shepherd-service)))
+
+   (default-value
+     (idle-timer-configuration))
+
+   (description
+    "Home service providing grouped X11 idle-time command scheduling.")))
+
+;;
+
+;; (service
+;;  idle-timer-service-type
+;;  (idle-timer-configuration
+;;   (auto-start? #t)))
+
+;; herd schedule-idle idle-timer backup 300 mybackup /home/me
+;; herd schedule-idle idle-timer backup 600 mybackup /home/me/Documents
+;; herd schedule-idle idle-timer sync 120 sync-files
+
+
+
+;; Management
+
+;; herd list-idle idle-timer
+;; herd run-idle-now idle-timer backup
+;; herd run-idle-now idle-timer
+;; herd cancel-idle-group idle-timer backup
+;; herd cancel-idle idle-timer
+
+;; Shell functions
+;; The default configuration preserves the two initialization files from your original script:
+;; (shell-init-files
+;;  '("~/.setup/binx/setup/lib_setup.sh"
+;;    "~/.rsetup/sh/env"))
+;; and the command is executed using:
+;; $SHELL -ic ...
+
+;; Therefore something like:
+
+;; my-backup() {
+;;              ...}
+
+;; can be scheduled:
+
+;; herd schedule-idle idle-timer backup 300 my-backup /data
+
+
+;; The important architectural point is that idlerun.sh has disappeared. Its meaningful behavior has been reduced to three Guile concepts:
+
+;; X idle query       → idle-time
+;; SIGUSR1            → sigaction + run-now?
+;; idle scheduling    → transient Shepherd service
+
 
 
