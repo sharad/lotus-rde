@@ -54,6 +54,9 @@
             home-kpkey-service
             home-ssh-add-key-service
             home-git-annex-daemon-service
+            deskflow-configuration
+            deskflow-configuration?
+            deskflow-service-type
             idle-timer-configuration
             idle-timer-configuration?
             idle-timer-service-type))
