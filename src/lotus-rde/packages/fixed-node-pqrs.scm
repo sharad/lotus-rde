@@ -108,6 +108,16 @@
 (define-public node-openclaw-fixed
   (package
     (inherit node-openclaw)
+    (version "2026.6.8")
+    (source
+     (origin
+       (method url-fetch)
+       (uri "https://registry.npmjs.org/openclaw/-/openclaw-2026.6.8.tgz")
+       (sha256
+        (base32 "0m25shxsab4i3b5lr55as289ncjzqjnrilah9vily41inycf601j"))
+       (patches
+        (myguix-patches
+         "openclaw-guix-home-shepherd-service.patch"))))
     (inputs (list node-grammyjs-transformer-throttler-1.2.1
                   node-earendil-works-pi-coding-agent-0.75.4
                   node-earendil-works-pi-agent-core-0.75.4
