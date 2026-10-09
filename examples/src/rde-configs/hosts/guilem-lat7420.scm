@@ -119,6 +119,7 @@
                                                                                      "--verbose"
                                                                                      "nosplash"
                                                                                      "debug")
+                                                            #:networking-iwd? #f
                                                             #:volume-mappings '( ("knba2f"
                                                                                   ((("vg01" "lv01"))
                                                                                    (("vg01" "lv02"))

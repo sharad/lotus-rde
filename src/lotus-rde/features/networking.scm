@@ -97,9 +97,9 @@
                                           '(wireless-daemon)))
                 (dns dns)
                 (vpn-plugins vpn-plugins)
-                (iwd? (if iwd?
-                          '(iwd)
-                          #f))
+                ;; (iwd? (if iwd?
+                ;;           '(iwd)
+                ;;           #f))
                 (extra-configuration-files extra-configuration-files)))
      (if iwd?
          (service iwd-service-type
