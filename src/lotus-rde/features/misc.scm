@@ -551,6 +551,7 @@
               keepassxc
               keepassxc-browser/icecat
               ;; barrier
+              deskflow
               git
               autossh))
 
