@@ -166,7 +166,7 @@
   (operating-system
     (inherit lotus-installation-os)
     (services
-     (modify-services (operating-system-user-services installation-os)
+     (modify-services (operating-system-user-services lotus-installation-os)
       (guix-service-type
        config =>
        (guix-configuration
@@ -196,7 +196,7 @@
           (supplementary-features '())) ;; user-preferences
   (rde-config-operating-system
    (rde-config
-    (initial-os installation-os)
+    (initial-os lotus-installation-os)
     (features
      (append
       supplementary-features
