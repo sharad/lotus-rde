@@ -85,6 +85,7 @@
         e2fsprogs
         f2fs-tools))
 
+(define %installation-initrd-modules (@@ (gnu system install) %installation-initrd-modules))
 
 (define* (make-installation-os #:key
                                ;; Version displayed in the GRUB entry name.
