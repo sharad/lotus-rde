@@ -57,7 +57,7 @@
             live-os))
 
 
-(define %installation-services (@ (gnu system install) %installation-services))
+(define %xinstallation-services (@ (gnu system install) %installation-services))
 
 (define %issue
   ;; Greeting.
@@ -138,7 +138,7 @@
                    (comment "Guest of GNU"))))
 
     (issue %issue)
-    (services (%installation-services))
+    (services (%xinstallation-services))
 
     ;; We don't need setuid programs, except for 'passwd', which can be handy
     ;; if one is to allow remote SSH login to the machine being installed.
