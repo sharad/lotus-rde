@@ -164,7 +164,7 @@
 
 (define guix-with-substitute-mirror
   (operating-system
-    (inherit installation-os)
+    (inherit lotus-installation-os)
     (services
      (modify-services (operating-system-user-services installation-os)
       (guix-service-type
