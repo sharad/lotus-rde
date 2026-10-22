@@ -57,9 +57,7 @@
             live-os))
 
 
-
-
-(define %installation-console-login (@ (gnu system install) %installation-console-login))
+;; (define %installation-console-login (@ (gnu system install) %installation-console-login))
 
 (define %issue
   ;; Greeting.
