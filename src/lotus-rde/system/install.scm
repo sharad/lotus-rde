@@ -57,6 +57,13 @@
             live-os))
 
 
+(define %issue
+  ;; Greeting.
+  "
+\x1b[1;37mThis is an installation image of the GNU system.  Welcome.\x1b[0m
+
+\x1b[1;33mUse Alt-F2 for documentation.\x1b[0m
+")
 
 (define %lotus-installer-disk-utilities
   ;; A well-rounded set of packages for interacting with disks, partitions and
