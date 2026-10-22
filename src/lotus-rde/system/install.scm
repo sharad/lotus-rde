@@ -156,7 +156,7 @@
                      ;; Mostly so xrefs to its manual work.
                      (bootloader-package
                       (bootloader-configuration-bootloader bootloader)))
-               %installer-disk-utilities
+               %lotus-installer-disk-utilities
                %base-packages))))
 
 (define lotus-installation-os (make-installation-os))
