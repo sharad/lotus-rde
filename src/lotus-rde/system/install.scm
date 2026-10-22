@@ -212,4 +212,9 @@
 
 ;; guix system image -t iso9660 \
 ;; -e '(@ (lotus-rde system install) guix-with-substitute-mirror)'
+
+
+;; guix system image -t iso9660 lotus-rde/system/install.scm
 
+
+guix-with-substitute-mirror
