@@ -83,7 +83,10 @@
         f2fs-tools))
 
 (define* (make-installation-os #:key
-                               (kernel (operating-system-kernel installation-os))
+                               (kernel   (operating-system-kernel installation-os))
+                               (firmware (operating-system-firmware installation-os))
+                               (initrd-modules (operating-system-initrd-modules installation-os))
+                               (initrd (operating-system-initrd installation-os))
                                (inherit-os installation-os)
                                (substitute-urls '())
                                (authorized-guix-keys '())
