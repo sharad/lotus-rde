@@ -156,6 +156,7 @@
         (inherit config)
         (substitute-urls '("http://ci.guix.trop.in"
                            "https://bordeaux.guix.gnu.org"))))))))
+
 
 (define live-file-systems
   (list (file-system
@@ -207,4 +208,5 @@
 ;; guix system image -t iso9660 lotus-rde/system/install.scm
 
 
-guix-with-substitute-mirror
+;; guix-with-substitute-mirror
+lotus-installation-os

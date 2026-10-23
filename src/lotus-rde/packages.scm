@@ -67,7 +67,7 @@
      (origin
       (method git-fetch)
       (uri (git-reference (url "https://github.com/sharad/lotus-rde.git")
-                          (commit "86cb4e608014fa43e54995bd5e40b6ca105793c8")))
+                          (commit "2efdcd0b548b86bda5b177756f3ebd8b64852d31")))
       (sha256
        (base32
         "1ynlq6sn18pnf0dmv21g2c0jh4qcnrilpb5198j37l2v5jx0faz9"))
