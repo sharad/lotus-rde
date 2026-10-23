@@ -3,3 +3,4 @@ stale/**
 .cow-store-start
 rf
 guix
+channels.scm

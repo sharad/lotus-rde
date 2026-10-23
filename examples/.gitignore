@@ -1,3 +1,4 @@
 target/**
 .channels-src-*
 .cow-store-start
+channels.scm
