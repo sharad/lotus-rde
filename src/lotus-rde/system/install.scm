@@ -57,28 +57,6 @@
   #:export (guix-with-substitute-mirror
             live-os))
 
-
-;; https://substitutes.nonguix.org/signing-key.pub
-(define %signing-key
-  (plain-file "nonguix.pub" "\
-(public-key
- (ecc
-  (curve Ed25519)
-  (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))"))
-
-(define %channels %lotus-rde-channels)
-
-
-(define %installation-services (@@ (gnu system install) %installation-services))
-
-(define %issue
-  ;; Greeting.
-  "
-\x1b[1;37mThis is an installation image of the GNU system.  Welcome.\x1b[0m
-
-\x1b[1;33mUse Alt-F2 for documentation.\x1b[0m
-")
-
 (define %lotus-installer-disk-utilities
   ;; A well-rounded set of packages for interacting with disks, partitions and
   ;; file systems, included with the Guix installation image.
@@ -96,8 +74,6 @@
         ;; xfsprogs
         e2fsprogs
         f2fs-tools))
-
-(define %installation-initrd-modules (@@ (gnu system install) %installation-initrd-modules))
 
 (define* (make-installation-os #:key
                                (kernel (operating-system-kernel installation-os))
@@ -145,6 +121,7 @@
 
 (define lotus-installation-os (make-installation-os))
 
+
 (define guix-with-substitute-mirror
   (operating-system
     (inherit lotus-installation-os)
