@@ -156,15 +156,15 @@
                                                                                     "mptspi"
                                                                                     "virtio_net"
                                                                                     "vmwgfx")
-                                                                              %base-initrd-modules)
+                                                                              (base-initrd-modules linux-libre))
                                                      #:initrd microcode-initrd))
 
 
 (define guix-with-substitute-mirror
   (operating-system
-    (inherit lotus-installation-os)
+    (inherit %lotus-installation-os)
     (services
-     (modify-services (operating-system-user-services lotus-installation-os)
+     (modify-services (operating-system-user-services %lotus-installation-os)
       (guix-service-type
        config =>
        (guix-configuration
@@ -195,7 +195,7 @@
           (supplementary-features '())) ;; user-preferences
   (rde-config-operating-system
    (rde-config
-    (initial-os lotus-installation-os)
+    (initial-os %lotus-installation-os)
     (features
      (append
       supplementary-features

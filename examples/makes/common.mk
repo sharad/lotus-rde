@@ -270,7 +270,7 @@ target/rde-live.iso: guix  $(TARGET_DIR)
 
 target/install-image:  $(TARGET_DIR)
 	$(GUIX) system $(GUIX_SYSTEM_FLAGS) image -t iso9660 \
-			-e '(@ (lotus-rde system install) guix-with-substitute-mirror)' -r $(TARGET_DIR)/install.iso  $(ARGS)
+			-e '(@ (lotus-rde system install) %lotus-installation-os)' -r $(TARGET_DIR)/install.iso  $(ARGS)
 
 
 
