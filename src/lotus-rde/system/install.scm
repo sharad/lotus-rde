@@ -1,6 +1,8 @@
 
 
 (define-module (lotus-rde system install)
+  #:use-module (guix utils)
+  #:use-module (guix gexp)
   #:use-module (gnu)
   #:use-module (gnu packages linux)
   #:use-module (gnu system)
