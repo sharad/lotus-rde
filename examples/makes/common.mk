@@ -261,10 +261,10 @@ live/image/build: guix
 	RDE_HOST=live RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) image --image-type=iso9660 \
 	${CONFIGS}
 
-target/rde-live.iso: guix  $(TARGET_DIR)
+target/lotus-rde-live.iso: guix  $(TARGET_DIR)
 	RDE_HOST=live RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) image --image-type=iso9660 \
-   ${CONFIGS} -r target/rde-live-tmp.iso
-	mv -f target/rde-live-tmp.iso $(TARGET_DIR)/rde-live.iso
+   ${CONFIGS} -r target/lotus-rde-live-tmp.iso
+	mv -f target/lotus-rde-live-tmp.iso $(TARGET_DIR)/lotus-rde-live.iso
 
 
 
@@ -274,6 +274,17 @@ target/install-image:  $(TARGET_DIR)
 
 
 
+# TODO: Prevent is rebuilds.
+release/lotus-rde-live-x86_64: target/lotus-rde-live.iso $(TARGET_RELEASE_DIR)
+	cp -df $< target/release/lotus-rde-live-${VERSION}-x86_64.iso
+	gpg -ab target/release/lotus-rde-live-${VERSION}-x86_64.iso
+
+minimal-emacs: guix
+	${GUIX} shell --pure -Df ./src/rde-configs/minimal-emacs.scm \
+	-E '.*GTK.*|.*XDG.*|.*DISPLAY.*' \
+	--rebuild-cache -- emacs -q \
+	--eval "(load \"~/.config/emacs/early-init.el\")"
+	#--eval "(require 'feature-loader-portable)"
 
 
 
