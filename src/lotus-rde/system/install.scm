@@ -59,6 +59,7 @@
   #:use-module (rde features base)
   #:use-module (lotus-rde config misc)
   #:export (guix-with-substitute-mirror
+            %lotus-installation-os
             live-os))
 
 (define %lotus-installer-disk-utilities
@@ -142,7 +143,7 @@
                %lotus-installer-disk-utilities
                %base-packages))))
 
-(define lotus-installation-os (make-installation-os))
+(define %lotus-installation-os (make-installation-os))
 
 
 (define guix-with-substitute-mirror
@@ -209,4 +210,4 @@
 
 
 ;; guix-with-substitute-mirror
-lotus-installation-os
+%lotus-installation-os

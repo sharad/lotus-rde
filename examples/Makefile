@@ -30,7 +30,8 @@ GUIXTM_PREFIX_ENV = GUILE_LOAD_PATH="../src:../tests:./src"
 
 
 TARGET_DIR       = target
-PROFILE_BASE_DIR)LINK = ./target/profiles
+TARGET_RELEASE_DIR = $(TARGET_DIR)/release
+PROFILE_BASE_DIR)LINK = $(TARGET_DIR)/profiles
 SRC_DIR          = ./src
 CONFIGS          ?= ${SRC_DIR}/rde-configs/configs.scm
 # PROFILE_BASE_DIR ?= $(shell readlink ./target/profiles)

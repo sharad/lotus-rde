@@ -124,6 +124,9 @@ SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE ?= 10G
 $(TARGET_DIR):
 	mkdir -p $(TARGET_DIR)
 
+$(TARGET_RELEASE_DIR): $(TARGET_DIR)
+	mkdir -p $(TARGET_RELEASE_DIR)
+
 $(PROFILE_BASE_DIR_LINK): $(TARGET_DIR)
 	echo Create $(PROFILE_BASE_DIR_LINK) link
 
@@ -261,13 +264,13 @@ live/image/build: guix
 target/rde-live.iso: guix  $(TARGET_DIR)
 	RDE_HOST=live RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) image --image-type=iso9660 \
    ${CONFIGS} -r target/rde-live-tmp.iso
-	mv -f target/rde-live-tmp.iso target/rde-live.iso
+	mv -f target/rde-live-tmp.iso $(TARGET_DIR)/rde-live.iso
 
 
 
 target/install-image:  $(TARGET_DIR)
 	$(GUIX) system $(GUIX_SYSTEM_FLAGS) image -t iso9660 \
-			-e '(@ (lotus-rde system install) guix-with-substitute-mirror)' -r target/install.iso  $(ARGS)
+			-e '(@ (lotus-rde system install) guix-with-substitute-mirror)' -r $(TARGET_DIR)/install.iso  $(ARGS)
 
 
 

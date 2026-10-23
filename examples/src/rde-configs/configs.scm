@@ -136,16 +136,24 @@
                 profile-level))))
 
 
-  (let* ((rde-host-features (env-features->symbol "RDE_HOST"))
+  (let* ((rde-target (getenv "RDE_TARGET"))
+         (rde-host-features (env-features->symbol "RDE_HOST"))
          (rde-user-features  (env-features->symbol "RDE_USER")))
 
     (format #t "RDE_TARGET: ~a\n" (getenv "RDE_TARGET"))
 
     (if (and rde-host-features
              rde-user-features)
-        (let ((config (lotus-make-rde-config #:features
-                                             (append rde-host-features
-                                                     rde-user-features))))
+        (let ((config (match rde-target
+                        ( "install" (lotus-make-rde-config #:initial-os
+                                                   %lotus-installation-os
+                                                   #:features
+                                                   (append rde-host-features
+                                                           rde-user-features
+                                                           #:integrate-he-in-os? #f)))
+                        ("system" (lotus-make-rde-config #:features
+                                                         (append rde-host-features
+                                                                 rde-user-features))))))
 
           ;; (format #t "Config features: ~a\n" (rde-config-features config))
           ;; (format #t "Config emacs: ~a\n" (get-value 'emacs config))
@@ -195,6 +203,7 @@
                  (obj (match rde-target
                         ("home" (rde-config-home-environment config))
                         ("system" (rde-config-operating-system config))
+                        ("install" (rde-config-operating-system config))
                         ("manifest" (call-with-values
                                         (lambda ()
                                           (profile-name-level "RDE_PROFILE_NAME"))

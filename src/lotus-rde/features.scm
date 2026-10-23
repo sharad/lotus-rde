@@ -31,7 +31,9 @@
   #:use-module (rde features)
   #:export (lotus-make-rde-config))
 
-(define (lotus-get-operating-system config)
+
+
+(define* (lotus-get-operating-system config)
   (define rde-config-integrate-he-in-os?
     (@@ (rde features) rde-config-integrate-he-in-os?))
   (define rde-config-initial-os
@@ -182,13 +184,20 @@
           (shepherd-configuration
            (inherit this-config)
            (shepherd (get-value 'shepherd config)))))))))
+
 
-(define* (lotus-make-rde-config #:key (features '()))
+(define* (lotus-make-rde-config #:key
+                                (features '())
+                                (integrate-he-in-os? #f)
+                                (initail-os bare-bone-os))
   (define (make-os-thunk f)
     (lambda (cfg)
       (f cfg)))
   (letrec ((cfg (rde-config
+                 (initail-os initail-os)
+                 (integrate-he-in-os? integrate-he-in-os?)
                  (features features)
                  (operating-system
                    ((make-os-thunk lotus-get-operating-system) cfg)))))
     cfg))
+

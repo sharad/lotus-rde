@@ -16,7 +16,8 @@ HUT   = $(GUIX) shell hut -- hut
 
 EXAMPLES_DIR     =  ./examples
 TARGET_DIR       = $(EXAMPLES_DIR)/target
-PROFILE_BASE_DIR_LINK = $(EXAMPLES_DIR)/target/profiles
+TARGET_RELEASE_DIR = $(TARGET_DIR)/release
+PROFILE_BASE_DIR_LINK = $(TARGET_DIR)/profiles
 EXAMPLES_SRC_DIR =  $(EXAMPLES_DIR)/src
 CONFIGS          ?= ${EXAMPLES_SRC_DIR}/rde-configs/configs.scm
 MANIFEST         ?= ${EXAMPLES_SRC_DIR}/rde-configs/manifest.scm
