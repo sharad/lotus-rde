@@ -53,9 +53,21 @@
   #:use-module (rde features)
   #:use-module (rde features system)
   #:use-module (rde features base)
+  #:use-module (lotus-rde config misc)
   #:export (guix-with-substitute-mirror
             live-os))
 
+
+;; https://substitutes.nonguix.org/signing-key.pub
+(define %signing-key
+  (plain-file "nonguix.pub" "\
+(public-key
+ (ecc
+  (curve Ed25519)
+  (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))"))
+
+(define %channels %lotus-rde-channels)
+
 
 (define %installation-services (@@ (gnu system install) %installation-services))
 
@@ -88,70 +100,39 @@
 (define %installation-initrd-modules (@@ (gnu system install) %installation-initrd-modules))
 
 (define* (make-installation-os #:key
-                               ;; Version displayed in the GRUB entry name.
-                               (grub-displayed-version
-                                (package-version guix))
-                               ;; Whether to use efi-only installation.
-                               ;; When #f, use hybrid grub that sets up
-                               ;; both legacy boot and efi.
+                               (kernel (operating-system-kernel installation-os))
+                               (inherit-os installation-os)
+                               (channels %lotus-rde-channels)
+                               (substitute-urls '())
+                               (authorized-guix-keys '())
+                               (base-substitute-urls %lotus-rde-substitute-urls)
+                               (base-authorized-guix-keys %lotus-rde-authorized-guix-keys)
                                (efi-only? #f))
   ;; The operating system used on installation images for USB sticks etc.
   (operating-system
-    (host-name "gnu")
-    (timezone "Europe/Paris")
-    (locale "en_US.utf8")
-    (name-service-switch %mdns-host-lookup-nss)
-
-    (initrd-modules (%installation-initrd-modules))
-
-    (bootloader (if efi-only?
-                    (bootloader-configuration
-                      (bootloader grub-efi-bootloader)
-                      (targets '("/boot/efi")))
-                    (bootloader-configuration
-                      (bootloader grub-bootloader)
-                      (targets '("/dev/sda")))))
-    (label (string-append "GNU Guix installation " grub-displayed-version))
-
-    ;; XXX: The AMD Radeon driver is reportedly broken, which makes kmscon
-    ;; non-functional:
-    ;; <https://lists.gnu.org/archive/html/guix-devel/2019-03/msg00441.html>.
-    ;; Thus, blacklist it.
-    (kernel-arguments '("quiet" "modprobe.blacklist=radeon,amdgpu"))
-
-    (file-systems
-     ;; Note: the disk image build code overrides this root file system with
-     ;; the appropriate one.
-     (append %base-live-file-systems
-
-             ;; XXX: This should be %BASE-FILE-SYSTEMS but we don't need
-             ;; elogind's cgroup file systems.
-             (list %pseudo-terminal-file-system
-                   %shared-memory-file-system
-                   %efivars-file-system
-                   %immutable-store)))
-
-    (users (list (user-account
-                   (name "guest")
-                   (group "users")
-                   (supplementary-groups '("wheel")) ; allow use of sudo
-                   (password "")
-                   (comment "Guest of GNU"))))
-
-    (issue %issue)
-    (services (%installation-services))
-
-    ;; We don't need setuid programs, except for 'passwd', which can be handy
-    ;; if one is to allow remote SSH login to the machine being installed.
-    (privileged-programs (list (privileged-program
-                                 (program (file-append shadow "/bin/passwd"))
-                                 (setuid? #t))))
-
-    (pam-services
-     ;; Explicitly allow for empty passwords.
-     (base-pam-services #:allow-empty-passwords? #t))
-
+    (inherit inherit-os)
+    (kernel kernel)
+    (services
+     (cons*
+      ;; Include the channel file so that it can be used during installation
+      (simple-service 'channel-file etc-service-type
+                      (list `("channels.scm" ,(local-file "channels.scm"))))
+      (modify-services (operating-system-user-services installation-os)
+        (guix-service-type
+         config => (guix-configuration
+                    (inherit config)
+                    (guix (guix-for-channels channels))
+                    (authorized-keys
+                     (append %default-authorized-guix-keys
+                             authorized-guix-keys
+                             base-authorized-guix-keys))
+                    (substitute-urls
+                     (append %default-substitute-urls
+                             substitute-urls
+                             base-substitute-urls))
+                    (channels %channels))))))
     (packages (append
+               ;; (operating-system-packages installation-os)
                (list glibc             ; for 'tzselect' & co.
                      fontconfig
                      font-dejavu font-gnu-unifont
@@ -163,7 +144,6 @@
                %base-packages))))
 
 (define lotus-installation-os (make-installation-os))
-
 
 (define guix-with-substitute-mirror
   (operating-system
