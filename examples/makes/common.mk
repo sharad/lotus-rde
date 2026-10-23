@@ -258,16 +258,16 @@ live/image/build: guix
 	RDE_HOST=live RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) image --image-type=iso9660 \
 	${CONFIGS}
 
-target/rde-live.iso: guix target
+target/rde-live.iso: guix  $(TARGET_DIR)
 	RDE_HOST=live RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) image --image-type=iso9660 \
    ${CONFIGS} -r target/rde-live-tmp.iso
 	mv -f target/rde-live-tmp.iso target/rde-live.iso
 
 
 
-target/image:
+target/install-image:  $(TARGET_DIR)
 	$(GUIX) system $(GUIX_SYSTEM_FLAGS) image -t iso9660 \
-		-e '(@ (lotus-rde system install) guix-with-substitute-mirror)' -r target/install.iso
+			-e '(@ (lotus-rde system install) guix-with-substitute-mirror)' -r target/install.iso
 
 
 
