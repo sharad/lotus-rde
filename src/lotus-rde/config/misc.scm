@@ -1,10 +1,13 @@
 (define-module (lotus-rde config misc)
+  #:use-module (guix gexp)
+  #:use-module (guix channels)
   #:use-module (rde features)
   #:use-module (rde predicates)
   #:use-module (rde system services admin)
-  #:export (lotus-locale-names
-            lotus-rde-substitute-urls
-            lotus-rde-authorized-guix-keys))
+  #:export (%lotus-locale-names
+            %lotus-rde-substitute-urls
+            %lotus-rde-authorized-guix-keys
+            %lotus-rde-channels))
 
 
 (define %lotus-locale-names '("en_US"
@@ -48,7 +51,7 @@
                                           (plain-file "guix.gofranz.com.pub"
                                                       "(public-key (ecc (curve Ed25519) (q #0096373009D945F86C75DFE96FC2D21E2F82BA8264CB69180AA4F9D3C45BAA47#)))")))
 
-(define %%lotus-rde-channels
+(define %lotus-rde-channels
   (append (list (channel
                  (name 'guix-more-lotus)
                  (url "https://github.com/sharad/guix-more.git")

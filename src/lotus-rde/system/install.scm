@@ -4,12 +4,12 @@
   #:use-module (gnu)
   #:use-module (gnu packages linux)
   #:use-module (gnu system)
-  ;; #:use-module (gnu system install)
 
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (gnu)
   #:use-module (gnu system)
   #:use-module (gnu system privilege)
+  #:use-module (gnu system install)
   #:use-module (guix build-system trivial)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader u-boot)
@@ -117,7 +117,7 @@
       ;; Include the channel file so that it can be used during installation
       (simple-service 'channel-file etc-service-type
                       (list `("channels.scm" ,(local-file "channels.scm"))))
-      (modify-services (operating-system-user-services installation-os)
+      (modify-services (operating-system-user-services bootloaderinherit-os)
         (guix-service-type
          config => (guix-configuration
                     (inherit config)
@@ -139,7 +139,7 @@
 
                      ;; Mostly so xrefs to its manual work.
                      (bootloader-package
-                      (bootloader-configuration-bootloader bootloader)))
+                      (bootloader-configuration-bootloader (operating-system-bootloader inherit-os))))
                %lotus-installer-disk-utilities
                %base-packages))))
 
