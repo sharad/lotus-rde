@@ -52,30 +52,29 @@
                                                       "(public-key (ecc (curve Ed25519) (q #0096373009D945F86C75DFE96FC2D21E2F82BA8264CB69180AA4F9D3C45BAA47#)))")))
 
 (define %lotus-rde-channels
-  (append (list (channel
+  (list (channel
                  (name 'guix-more-lotus)
                  (url "https://github.com/sharad/guix-more.git")
                  (branch "master")
                  (commit "1371da910bb235178af53c20a5704a22d75c41d4"))
-                (channel
-                 (name 'nonguix)
-                 (url "https://gitlab.com/nonguix/nonguix")
-                 (branch "master")
-                 (commit "47c20df59dd9f27c9154ef20a81d383a19d4ad7f")
-                 (introduction
-                  (make-channel-introduction
-                   "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
-                   (openpgp-fingerprint
-                    "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
-                (channel
-                 (name 'rde)
-                 (url "https://git.sr.ht/~abcdw/rde")
-                 (branch "master")
-                 (commit "6821d6f604caf3e2bb8ddd38ca55c0aa5756b0e1")
-                 (introduction
-                  (make-channel-introduction
-                   "257cebd587b66e4d865b3537a9a88cccd7107c95"
-                   (openpgp-fingerprint
-                    "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0")))))
-          %default-channels))
+        (channel
+         (name 'nonguix)
+         (url "https://gitlab.com/nonguix/nonguix")
+         (branch "master")
+         (commit "47c20df59dd9f27c9154ef20a81d383a19d4ad7f")
+         (introduction
+          (make-channel-introduction
+           "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+           (openpgp-fingerprint
+            "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
+        (channel
+         (name 'rde)
+         (url "https://git.sr.ht/~abcdw/rde")
+         (branch "master")
+         (commit "6821d6f604caf3e2bb8ddd38ca55c0aa5756b0e1")
+         (introduction
+          (make-channel-introduction
+           "257cebd587b66e4d865b3537a9a88cccd7107c95"
+           (openpgp-fingerprint
+            "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0"))))))
 
