@@ -60,7 +60,7 @@ CHANNELS_FILE             = $(CHANNELS_ENV_FILE_$(BUILD_TYPE))
 endif
 
 
-include makes/common.mk
+include examples/makes/common.mk
 
 
 

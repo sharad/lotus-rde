@@ -12,24 +12,64 @@ GUIXTM_PREFIX_ENV  +=
 
 GUIXTM_COMMAND     = guix time-machine -C ${CHANNELS_FILE} $(GUIXTM_FLAGS) --
 
+
+
+
 GUIX_COMMAND       ?= ${GUIXTM_COMMAND}
 
 GUIX_FULL_COMMAND  = $(GUIXTM_PREFIX_ENV) $(GUIX_COMMAND)
 
-GUIX_FLAGS         += --verbosity=3
+GUIX_FLAGS = $(RDE_SRC_LOAD_PATH)
+ifneq ($(filter rde/home/%  rde/system/% rde/profile/install/%,$(MAKECMDGOALS)),)
+GUIX_FLAGS += $(EXAMPLES_LOAD_PATH)
+endif
+
 GUIX_FLAGS         += $(if $(strip $(SUBSTITUTE_URLS)), --substitute-urls='$(SUBSTITUTE_URLS)')
-GUIX_SYSTEM_FLAGS  += $(GUIX_FLAGS) --debug=3
-GUIX_HOME_FLAGS    += $(GUIX_FLAGS) --debug=3
-GUIX_PROFILE_FLAGS += $(GUIX_FLAGS) --debug=3
+
+GUIX_DEBUG_FLAG    =  --debug=3
+GUIX_VERBOSE_FLAG  =  --verbosity=3
+
+
+GUIX_CMD_FLAGS     += $(GUIX_FLAGS) # $(GUIX_DEBUG_FLAG)
+
+
+GUIX_SYSTEM_FLAGS  += $(GUIX_FLAGS) # $(GUIX_DEBUG_FLAG)
+# $(GUIX_DEBUG_FLAG):: --debug=1
+# causing
+# guix/ui.scm:1033:18: In procedure struct-vtable: Wrong type argument in position 1 (expecting struct): #f
+
+
+GUIX_HOME_FLAGS    += $(GUIX_FLAGS) # $(GUIX_DEBUG_FLAG)
+
+GUIX_PROFILE_FLAGS += $(GUIX_FLAGS) $(GUIX_DEBUG_FLAG)
 
 GUIX_PROFILE_INSTALL_FLAGS += $(GUIX_PROFILE_FLAGS)
 GUIX_PROFILE_UPGRADE_FLAGS += $(GUIX_PROFILE_FLAGS)
 GUIX_PROFILE_CLEAR_FLAGS   += $(GUIX_PROFILE_FLAGS)
 
 
+GUIX_PKG_BUILD_FLAGS   += $(GUIX_FLAGS) $(GUIX_DEBUG_FLAG)
+GUIX_PKG_INSTALL_FLAGS += $(GUIX_FLAGS) $(GUIX_DEBUG_FLAG)
+GUIX_PKG_SEARCH_FLAGS  += $(GUIX_FLAGS) # $(GUIX_DEBUG_FLAG)
+
+GUIX_REPL_FLAGS          += $(GUIX_FLAGS) # $(GUIX_DEBUG_FLAG)
+
 GUIX = $(GUIX_FULL_COMMAND)
 
 
+
+FIRST_GOAL := $(firstword $(MAKECMDGOALS))
+ifneq ($(filter rde/profile/pkg/install/% rde/profile/pkg/remove/%,$(FIRST_GOAL)),)
+ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+$(ARGS):
+	@:
+endif
+
+ifneq ($(filter rde/pkg/build rde/pkg/install rde/pkg/search,$(FIRST_GOAL)),)
+ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+$(ARGS):
+	@:
+endif
 
 
 ifeq ($(PROFILE_BASE_DIR),)
@@ -46,8 +86,11 @@ RDE_HOST ?= $(shell hostname)
 export RDE_HOST
 RDE_USER ?= $(USER)
 export RDE_USER
-RDE_TARGET ?= system
-export RDE_TARGET
+# RDE_TARGET ?= system
+# export RDE_TARGET
+
+
+
 
 
 
@@ -151,7 +194,7 @@ $(SUBDIR)/%:
 CMD = cmd
 # Pattern rule: any target that looks like subdir/something
 $(CMD)/%:
-	${GUIX} $* $(GUIX_FLAGS)
+	${GUIX} $* $(GUIX_CMD_FLAGS)
 # Optional: Add a phony declaration if targets aren't actual files
 .PHONY: $(CMD)/%
 ## -- guix subcmd targets
@@ -169,13 +212,15 @@ $(CMD)/%:
 
 
 
-rde/home/build: guix-update-current-channels-force
+rde/home/build:
 	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
-	build ${CONFIGS}
+	build ${CONFIGS} && \
+	make guix-update-current-channels-force
 
-rde/home/reconfigure: guix-update-current-channels-force
+rde/home/reconfigure:
 	RDE_TARGET=home ${GUIX} home $(GUIX_HOME_FLAGS) \
-	reconfigure ${CONFIGS}
+	reconfigure ${CONFIGS} && \
+	make guix-update-current-channels-force
 
 
 /tmp/.cow-store-start:
@@ -185,23 +230,46 @@ rde/home/reconfigure: guix-update-current-channels-force
 cow-store: /tmp/.cow-store-start
 
 
-rde/system/init: guix /tmp/.cow-store-start guix-update-current-channels-force
+rde/system/init: guix /tmp/.cow-store-start
 	mount -o rw /boot
 	mount -o rw /boot/efi
 	RDE_SYSINIT=init RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	init ${CONFIGS} ${ROOT_MOUNT_POINT}
+	init ${CONFIGS} ${ROOT_MOUNT_POINT} && \
+	make guix-update-current-channels-force
 	umount /boot/efi
 	umount /boot
 
-rde/system/build: guix-update-current-channels-force
+rde/system/build:
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	build ${CONFIGS}
+	build ${CONFIGS} && \
+	make guix-update-current-channels-force
 
-rde/system/reconfigure: guix-update-current-channels-force
+rde/system/reconfigure:
 	mount -o rw /boot
 	RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) \
-	reconfigure ${CONFIGS}
+	reconfigure ${CONFIGS} && \
+	make guix-update-current-channels-force
 	umount /boot
+
+
+
+
+# live/image/build: guix
+# 	RDE_HOST=live RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) image --image-type=iso9660 \
+# 	${CONFIGS}
+
+# target/rde-live.iso: guix target
+# 	RDE_HOST=live RDE_TARGET=system ${GUIX} system $(GUIX_SYSTEM_FLAGS) image --image-type=iso9660 \
+# 	${CONFIGS} -r target/rde-live-tmp.iso
+# 	mv -f target/rde-live-tmp.iso target/rde-live.iso
+
+
+
+
+
+
+
+
 
 
 rde/gc/clean:
@@ -231,12 +299,6 @@ rde/profile/clear/%: $(TARGET_DIR)
 
 
 
-FIRST_GOAL := $(firstword $(MAKECMDGOALS))
-ifneq ($(filter rde/pkg/search rde/profile/pkg/install/% rde/profile/pkg/remove/%,$(FIRST_GOAL)),)
-ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-$(ARGS):
-	@:
-endif
 
 
 rde/profile/pkg/install/%: $(TARGET_DIR)
@@ -257,11 +319,23 @@ else
 	-p $(PROFILE_BASE_DIR)/$*/profiles.d/profile $(ARGS)
 endif
 
+rde/pkg/build:
+	RDE_PROFILE_MODE=build ${GUIX} build $(GUIX_PKG_BUILD_FLAGS) $(ARGS)
+
+rde/pkg/install:
+	RDE_PROFILE_MODE=install ${GUIX} install $(GUIX_PKG_INSTALL_FLAGS) $(ARGS)
+
 rde/pkg/search:
-	RDE_PROFILE_MODE=remove ${GUIX} search $(GUIX_PROFILE_SEARCH_FLAGS) $(ARGS)
+	RDE_PROFILE_MODE=search ${GUIX} search $(GUIX_PKG_SEARCH_FLAGS) $(ARGS)
+
+rde/repl:
+	RDE_PROFILE_MODE=repl ${GUIX} repl $(GUIX_REPL_FLAGS) $(ARGS)
 
 
-.PHONY: rde/profile/install/% rde/profile/upgrade/% rde/profile/clear/% rde/profile/pkg/install/% rde/profile/pkg/remove/% rde/pkg/search/%
+.PHONY: rde/profile/install/% rde/profile/upgrade/% rde/profile/clear/%
+.PHONY: rde/profile/pkg/install/% rde/profile/pkg/remove/%
+.PHONY: rde/pkg/build rde/pkg/install rde/pkg/search
+.PHONY: rde/pkg/repl
 
 
 
@@ -330,53 +404,53 @@ rde/system/clear:
 
 
 
-    # # calculate
-    # GNU_STORE_MINIMUM_AVAIL_MEGABYTES=300
-    # # make 21% of available space of /gnu/store
-    # GUIX_CLEANUP_MIN_SPACE_PERCENTAGE=21
-    # GNU_STORE_AVAIL_MEGABYTES="$(df -BM --output=avail  /gnu/store | sed -n -e 's/[^[:digit:]]//g' -e 2p)" # not used
-    # GNU_STORE_SIZE_GIGABYTES="$(df -BG --output=size  /gnu/store | sed -n -e 's/[^[:digit:]]//g' -e 2p)"
-    # GUIX_CLEANUP_MIN_SPACE="$(expr $GNU_STORE_SIZE_GIGABYTES '*' $GUIX_CLEANUP_MIN_SPACE_PERCENTAGE / 100)"
-    # # calculate
+# # calculate
+# GNU_STORE_MINIMUM_AVAIL_MEGABYTES=300
+# # make 21% of available space of /gnu/store
+# GUIX_CLEANUP_MIN_SPACE_PERCENTAGE=21
+# GNU_STORE_AVAIL_MEGABYTES="$(df -BM --output=avail  /gnu/store | sed -n -e 's/[^[:digit:]]//g' -e 2p)" # not used
+# GNU_STORE_SIZE_GIGABYTES="$(df -BG --output=size  /gnu/store | sed -n -e 's/[^[:digit:]]//g' -e 2p)"
+# GUIX_CLEANUP_MIN_SPACE="$(expr $GNU_STORE_SIZE_GIGABYTES '*' $GUIX_CLEANUP_MIN_SPACE_PERCENTAGE / 100)"
+# # calculate
 
 
-		# DEFAULT_SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE=${GUIX_CLEANUP_MIN_SPACE}G
-		# DEFAULT_SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME=30d
-		# DEFAULT_SYSTEM_GENERATION_CLEANUP_TIME=10m
-		# DEFAULT_USER_GENERATION_CLEANUP_TIME=96h
-
-
-
-
-    #     sudo_run truncate -s 1k -c /var/log/messages
-    #     sudo_run chmod og+rx  /var/log
+# DEFAULT_SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE=${GUIX_CLEANUP_MIN_SPACE}G
+# DEFAULT_SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME=30d
+# DEFAULT_SYSTEM_GENERATION_CLEANUP_TIME=10m
+# DEFAULT_USER_GENERATION_CLEANUP_TIME=96h
 
 
 
-		#             ignore-error running info guix package --delete-generations=${USER_GENERATION_CLEANUP_TIME} # for "01-guixprofile"
 
-		#             for profile in "${LOCAL_GUIX_EXTRA_PROFILES[@]}"
-		#             do
-		#                 profile_container_path="${LOCAL_GUIX_EXTRA_PROFILE_CONTAINER_DIR}/${profile}"
-		#                 manifest_path="${profile_container_path}/manifest.scm"
-		#                 profile_path="${profile_container_path}/profiles.d/profile"
-		#                 broken_path="${profile_container_path}/broken"
-
-		#                 mkdir -p "${broken_path}"
-		#                 find "${profile_container_path}/profiles.d" -xtype l -exec mv {} "${broken_path}" \;
-
-		#                 if [ -f "${manifest_path}" -a -f "${profile_path}/etc/profile" ]
-		#                 then
-		#                     ignore-error running info guix package -p "${profile_path}" --delete-generations=${USER_GENERATION_CLEANUP_TIME}
-		#                     # pkgmgr_sync_sleep_sync 5s
-		#                 else
-		#                     warn file "${profile_path}"/etc/profile not exist, for "${profile_path}"
-		#                 fi
-		#                 unset profile_path
-		#                 unset profile
-		#             done
+#     sudo_run truncate -s 1k -c /var/log/messages
+#     sudo_run chmod og+rx  /var/log
 
 
-		#             ignore-error running info sudo_run -E guix system delete-generations ${SYSTEM_GENERATION_CLEANUP_TIME}
-		#             pkgmgr_sync_sleep_sync 5s
-		#             ignore-error running info guix gc -d ${SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME} -C  ${SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE}
+
+#             ignore-error running info guix package --delete-generations=${USER_GENERATION_CLEANUP_TIME} # for "01-guixprofile"
+
+#             for profile in "${LOCAL_GUIX_EXTRA_PROFILES[@]}"
+#             do
+#                 profile_container_path="${LOCAL_GUIX_EXTRA_PROFILE_CONTAINER_DIR}/${profile}"
+#                 manifest_path="${profile_container_path}/manifest.scm"
+#                 profile_path="${profile_container_path}/profiles.d/profile"
+#                 broken_path="${profile_container_path}/broken"
+
+#                 mkdir -p "${broken_path}"
+#                 find "${profile_container_path}/profiles.d" -xtype l -exec mv {} "${broken_path}" \;
+
+#                 if [ -f "${manifest_path}" -a -f "${profile_path}/etc/profile" ]
+#                 then
+#                     ignore-error running info guix package -p "${profile_path}" --delete-generations=${USER_GENERATION_CLEANUP_TIME}
+#                     # pkgmgr_sync_sleep_sync 5s
+#                 else
+#                     warn file "${profile_path}"/etc/profile not exist, for "${profile_path}"
+#                 fi
+#                 unset profile_path
+#                 unset profile
+#             done
+
+
+#             ignore-error running info sudo_run -E guix system delete-generations ${SYSTEM_GENERATION_CLEANUP_TIME}
+#             pkgmgr_sync_sleep_sync 5s
+#             ignore-error running info guix gc -d ${SYSTEM_ABONDONED_PKG_CLEANUP_MIN_TIME} -C  ${SYSTEM_ABONDONED_PKG_CLEANUP_MIN_SPACE}
