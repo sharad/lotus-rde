@@ -2,6 +2,7 @@
 
 (define-module (lotus-rde system install)
   #:use-module (ice-9 pretty-print)
+  #:use-module (ice-9 match)
   #:use-module (guix utils)
   #:use-module (guix gexp)
   #:use-module (guix channels)
@@ -51,8 +52,9 @@
   #:use-module (gnu packages terminals)
   #:use-module (gnu packages texinfo)
   #:use-module (gnu packages xorg)
-  #:use-module (ice-9 match)
 
+  #:use-module (nongnu packages linux)
+  #:use-module (nongnu system linux-initrd)
 
   #:use-module (rde features)
   #:use-module (rde features system)
@@ -108,6 +110,7 @@
   (operating-system
     (inherit inherit-os)
     (kernel kernel)
+    (initrd initrd)
     (services
      (cons*
       ;; Include the channel file so that it can be used during installation
@@ -143,7 +146,15 @@
                %lotus-installer-disk-utilities
                %base-packages))))
 
-(define %lotus-installation-os (make-installation-os))
+(define %lotus-installation-os (make-installation-os #:kernel linux
+                                                     #:firmware (list linux-firmware)
+                                                     #:initrd-modules (append (list "mptbase"
+                                                                                    "mptscsih"
+                                                                                    "mptspi"
+                                                                                    "virtio_net"
+                                                                                    "vmwgfx")
+                                                                              %base-initrd-modules)
+                                                     #:initrd microcode-initrd))
 
 
 (define guix-with-substitute-mirror
