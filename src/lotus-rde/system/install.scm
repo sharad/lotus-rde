@@ -1,8 +1,10 @@
 
 
 (define-module (lotus-rde system install)
+  #:use-module (ice-9 pretty-print)
   #:use-module (guix utils)
   #:use-module (guix gexp)
+  #:use-module (guix channels)
   #:use-module (gnu)
   #:use-module (gnu packages linux)
   #:use-module (gnu system)
@@ -86,6 +88,13 @@
                                (base-authorized-guix-keys %lotus-rde-authorized-guix-keys)
                                (channels %lotus-rde-channels)
                                (efi-only? #f))
+  (define channel->code
+    (@@ (gnu services) channel->code))
+
+  (define (object->pretty-string obj)
+    (call-with-output-string
+      (lambda (port)
+        (pretty-print obj port))))
   (define channels-file
     (plain-file
      "channels.scm"
@@ -109,7 +118,8 @@
         (guix-service-type
          config => (guix-configuration
                     (inherit config)
-                    (guix (guix-for-channels channels))
+                    (guix (guix-for-channels (append channels
+                                                     %default-channels)))
                     (authorized-keys
                      (append %default-authorized-guix-keys
                              authorized-guix-keys

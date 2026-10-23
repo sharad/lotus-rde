@@ -65,7 +65,7 @@ $(ARGS):
 	@:
 endif
 
-ifneq ($(filter rde/pkg/build rde/pkg/install rde/pkg/search,$(FIRST_GOAL)),)
+ifneq ($(filter target/install-image rde/pkg/build rde/pkg/install rde/pkg/search,$(FIRST_GOAL)),)
 ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 $(ARGS):
 	@:
@@ -267,7 +267,7 @@ target/rde-live.iso: guix  $(TARGET_DIR)
 
 target/install-image:  $(TARGET_DIR)
 	$(GUIX) system $(GUIX_SYSTEM_FLAGS) image -t iso9660 \
-			-e '(@ (lotus-rde system install) guix-with-substitute-mirror)' -r target/install.iso
+			-e '(@ (lotus-rde system install) guix-with-substitute-mirror)' -r target/install.iso  $(ARGS)
 
 
 

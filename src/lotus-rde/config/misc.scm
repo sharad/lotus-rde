@@ -55,13 +55,11 @@
   (list (channel
                  (name 'guix-more-lotus)
                  (url "https://github.com/sharad/guix-more.git")
-                 (branch "master")
-                 (commit "1371da910bb235178af53c20a5704a22d75c41d4"))
+                 (branch "master"))
         (channel
          (name 'nonguix)
          (url "https://gitlab.com/nonguix/nonguix")
          (branch "master")
-         (commit "47c20df59dd9f27c9154ef20a81d383a19d4ad7f")
          (introduction
           (make-channel-introduction
            "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
@@ -71,7 +69,6 @@
          (name 'rde)
          (url "https://git.sr.ht/~abcdw/rde")
          (branch "master")
-         (commit "6821d6f604caf3e2bb8ddd38ca55c0aa5756b0e1")
          (introduction
           (make-channel-introduction
            "257cebd587b66e4d865b3537a9a88cccd7107c95"
