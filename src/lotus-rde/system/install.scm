@@ -78,11 +78,11 @@
 (define* (make-installation-os #:key
                                (kernel (operating-system-kernel installation-os))
                                (inherit-os installation-os)
-                               (channels %lotus-rde-channels)
                                (substitute-urls '())
                                (authorized-guix-keys '())
                                (base-substitute-urls %lotus-rde-substitute-urls)
                                (base-authorized-guix-keys %lotus-rde-authorized-guix-keys)
+                               (channels %lotus-rde-channels)
                                (efi-only? #f))
   ;; The operating system used on installation images for USB sticks etc.
   (operating-system
@@ -93,7 +93,7 @@
       ;; Include the channel file so that it can be used during installation
       (simple-service 'channel-file etc-service-type
                       (list `("channels.scm" ,(local-file "channels.scm"))))
-      (modify-services (operating-system-user-services bootloaderinherit-os)
+      (modify-services (operating-system-user-services inherit-os)
         (guix-service-type
          config => (guix-configuration
                     (inherit config)
@@ -106,7 +106,7 @@
                      (append %default-substitute-urls
                              substitute-urls
                              base-substitute-urls))
-                    (channels %channels))))))
+                    (channels channels))))))
     (packages (append
                ;; (operating-system-packages installation-os)
                (list glibc             ; for 'tzselect' & co.
