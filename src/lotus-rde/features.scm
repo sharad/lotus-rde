@@ -189,12 +189,12 @@
 (define* (lotus-make-rde-config #:key
                                 (features '())
                                 (integrate-he-in-os? #f)
-                                (initail-os bare-bone-os))
+                                (initial-os bare-bone-os))
   (define (make-os-thunk f)
     (lambda (cfg)
       (f cfg)))
   (letrec ((cfg (rde-config
-                 (initail-os initail-os)
+                 (initial-os initial-os)
                  (integrate-he-in-os? integrate-he-in-os?)
                  (features features)
                  (operating-system
