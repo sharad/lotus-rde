@@ -363,12 +363,12 @@ rde/system/clear:
 
 
 
-obselete/update:
+obsolete/update:
 	~/.bin/lotus-update -p -k
 
 
-obselete/clear:
-	~/.bin/lotus-clear
+obsolete/clear:
+	~/.bin/lotus-clear -p
 
 
 obselete/run:
