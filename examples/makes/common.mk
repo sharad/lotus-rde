@@ -361,6 +361,21 @@ rde/system/clear:
 	$(GUIX) system delete-generations ${SYSTEM_GENERATION_CLEANUP_TIME}
 
 
+
+
+obselete/update:
+	~/.bin/lotus-update -p -k
+
+
+obselete/clear:
+	~/.bin/lotus-clear
+
+
+obselete/run:
+	$(MAKE) rde/system/reconfigure
+	$(MAKE) obselete/update
+	$(MAKE) obselete/clear
+
 # function pkgmgr_get_available_pcent_free_in_part()
 # {
 #     PART=$1
