@@ -145,12 +145,15 @@
     (if (and rde-host-features
              rde-user-features)
         (let ((config (match rde-target
-                        ( "install" (lotus-make-rde-config #:initial-os
-                                                   %lotus-installation-os
-                                                   #:features
-                                                   (append rde-host-features
-                                                           rde-user-features
-                                                           #:integrate-he-in-os? #f)))
+                        ("install" (lotus-make-rde-config #:initial-os
+                                                          %lotus-installation-os
+                                                          #:features
+                                                          (append rde-host-features
+                                                                  rde-user-features
+                                                                  #:integrate-he-in-os? #f)))
+                        ("home" (lotus-make-rde-config #:features
+                                                       (append rde-host-features
+                                                               rde-user-features)))
                         ("system" (lotus-make-rde-config #:features
                                                          (append rde-host-features
                                                                  rde-user-features))))))
