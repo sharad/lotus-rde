@@ -2525,11 +2525,11 @@
                                             rust-iana-time-zone-haiku-0.1.2
                                             rust-idna-1.1.0
                                             rust-idna-adapter-1.1.0
-                                            rust-idna-mapping-1.0.0
+                                            rust-idna-mapping-1.1.0
                                             rust-indexmap-2.13.0
                                             rust-is-terminal-polyfill-1.70.2
                                             rust-itoa-1.0.17
-                                            rust-js-sys-0.3.88
+                                            rust-js-sys-0.3.106
                                             rust-lazy-static-1.5.0
                                             rust-libc-0.2.182
                                             rust-libredox-0.1.9
@@ -2609,7 +2609,7 @@
                                             rust-unicase-2.9.0
                                             rust-unicode-bidi-0.3.18
                                             rust-unicode-ident-1.0.24
-                                            rust-unicode-joining-type-0.7.0
+                                            rust-unicode-joining-type-1.0.0
                                             rust-unicode-normalization-0.1.25
                                             rust-unicode-width-0.2.2
                                             rust-untrusted-0.9.0
@@ -2619,10 +2619,10 @@
                                             rust-version-check-0.9.5
                                             rust-want-0.3.1
                                             rust-wasi-0.11.1+wasi-snapshot-preview1
-                                            rust-wasm-bindgen-0.2.111
-                                            rust-wasm-bindgen-macro-0.2.111
-                                            rust-wasm-bindgen-macro-support-0.2.111
-                                            rust-wasm-bindgen-shared-0.2.111
+                                            rust-wasm-bindgen-0.2.129
+                                            rust-wasm-bindgen-macro-0.2.129
+                                            rust-wasm-bindgen-macro-support-0.2.129
+                                            rust-wasm-bindgen-shared-0.2.129
                                             rust-windows-core-0.62.2
                                             rust-windows-implement-0.60.2
                                             rust-windows-interface-0.59.3

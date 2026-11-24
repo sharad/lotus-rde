@@ -156,7 +156,8 @@
                                                                  rde-user-features)))
                         ("system" (lotus-make-rde-config #:features
                                                          (append rde-host-features
-                                                                 rde-user-features))))))
+                                                                 rde-user-features)))
+                        (_ #f))))
 
           ;; (format #t "Config features: ~a\n" (rde-config-features config))
           ;; (format #t "Config emacs: ~a\n" (get-value 'emacs config))
