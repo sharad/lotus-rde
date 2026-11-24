@@ -151,9 +151,9 @@
                                                           (append rde-host-features
                                                                   rde-user-features
                                                                   #:integrate-he-in-os? #f)))
-                        ("home" (lotus-make-rde-config #:features
-                                                       (append rde-host-features
-                                                               rde-user-features)))
+                        ("home"   (lotus-make-rde-config #:features
+                                                         (append rde-host-features
+                                                                 rde-user-features)))
                         ("system" (lotus-make-rde-config #:features
                                                          (append rde-host-features
                                                                  rde-user-features))))))
