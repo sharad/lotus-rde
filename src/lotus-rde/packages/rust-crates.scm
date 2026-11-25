@@ -2450,9 +2450,12 @@
 
 
 
-;; Updating or new rust packages can be done with the following command, which will update the rust-crates.scm file with the new dependencies.
-;; guix import  -i src/lotus-rde/packages/rust-crates.scm crate -f ../rust-usrhttpd/Cargo.lock   rust-usrhttpd 
-
+;; Updating or new rust packages can be done with the following command, which
+;; will update the rust-crates.scm file with the new dependencies.
+;; rm -f Cargo.lock
+;; cargo build
+;; guix import  -i src/lotus-rde/packages/rust-crates.scm crate -f ../rust-usrhttpd/Cargo.lock   rust-usrhttpd
+;;
 
 
 (define-cargo-inputs
