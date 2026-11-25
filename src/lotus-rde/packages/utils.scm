@@ -1724,7 +1724,7 @@ unavailable."
      (sha256
       (base32 "14jr4mrgfa4wwwi8d2mv2g26pp4s31biik7q4h5h1ijr3h0imp1g"))))
    (build-system cargo-build-system)
-   (inputs (append (lotus-cargo-inputs 'rust-usrhttpd-v0.1.0)
+   (inputs (append (lotus-cargo-inputs 'rust-usrhttpd)
                    (list python-3)))
    (home-page "https://github.com/sharad/rust-usrhttpd")
    (synopsis "Small Rust .htaccess web server")
