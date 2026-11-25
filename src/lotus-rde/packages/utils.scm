@@ -1722,7 +1722,7 @@ unavailable."
            (commit version)))
      (file-name (git-file-name name version))
      (sha256
-      (base32 "1cjy4f823wrwmzz9kj82rxrhrcgk7wa7ri3ps7jjl0dgy03bwvxh"))))
+      (base32 "14jr4mrgfa4wwwi8d2mv2g26pp4s31biik7q4h5h1ijr3h0imp1g"))))
    (build-system cargo-build-system)
    (inputs (append (lotus-cargo-inputs 'rust-usrhttpd-v0.1.0)
                    (list python-3)))
